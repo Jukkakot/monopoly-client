@@ -1,4 +1,4 @@
-export type SeatKind = 'HUMAN' | 'COMPUTER'
+export type SeatKind = 'HUMAN' | 'BOT'
 export type BotDifficulty = 'EASY' | 'NORMAL'
 export type SessionStatus = 'IN_PROGRESS' | 'GAME_OVER'
 export type TurnPhase =

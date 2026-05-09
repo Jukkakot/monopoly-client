@@ -117,11 +117,11 @@ export default function LobbyScreen() {
                 />
                 <button
                   className={`${styles.kindBtn} ${row.kind === 'HUMAN' ? styles.human : styles.bot}`}
-                  onClick={() => updateRow(i, { kind: row.kind === 'HUMAN' ? 'COMPUTER' : 'HUMAN' })}
+                  onClick={() => updateRow(i, { kind: row.kind === 'HUMAN' ? 'BOT' : 'HUMAN' })}
                 >
                   {row.kind === 'HUMAN' ? 'Ihminen' : 'Botti'}
                 </button>
-                {row.kind === 'COMPUTER' && (
+                {row.kind === 'BOT' && (
                   <select
                     className={styles.diffSelect}
                     value={row.difficulty}
