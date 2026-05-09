@@ -1,0 +1,38 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: min(60vh, 100%);
+  background: #c8e6c9;
+  border: 3px solid #2e7d32;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.center {
+  grid-column: 2 / 11;
+  grid-row: 2 / 11;
+  background: #c8e6c9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.centerLogo {
+  font-size: clamp(1rem, 3vw, 2rem);
+  font-weight: 900;
+  color: #1b5e20;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.centerSub {
+  font-size: clamp(0.5rem, 1.5vw, 0.9rem);
+  color: #2e7d32;
+  font-style: italic;
+}

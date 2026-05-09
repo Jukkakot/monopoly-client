@@ -1,0 +1,46 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #2e7d32;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.turnInfo {
+  flex: 1;
+  font-size: 0.9rem;
+  min-width: 0;
+}
+
+.playerName {
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.phase {
+  opacity: 0.85;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.live { background: #43a047; }
+.connecting { background: #f9a825; color: #333; }
+.reconnecting { background: #ef6c00; }
+.failed { background: #c62828; }

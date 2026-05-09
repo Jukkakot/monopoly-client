@@ -1,0 +1,86 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  letter-spacing: 0.3px;
+}
+
+.btn:hover { filter: brightness(1.1); }
+.btn:active { transform: scale(0.97); }
+
+.primary {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.secondary {
+  background: #f9a825;
+  color: #fff;
+}
+
+.danger {
+  background: #c62828;
+  color: #fff;
+}
+
+.neutral {
+  background: #546e7a;
+  color: #fff;
+}
+
+.info {
+  background: #1565c0;
+  color: #fff;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.infoBox {
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  color: #2e7d32;
+}
+
+.infoBox.debt {
+  background: #ffebee;
+  border-color: #ef9a9a;
+  color: #b71c1c;
+}
+
+.infoBox.auction {
+  background: #fff8e1;
+  border-color: #ffe082;
+  color: #f57f17;
+}
+
+.winner {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #f57f17;
+  padding: 16px;
+  background: #fff8e1;
+  border-radius: 12px;
+  border: 2px solid #ffe082;
+}

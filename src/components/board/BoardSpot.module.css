@@ -1,0 +1,106 @@
+.spot {
+  position: relative;
+  background: #f9f5e8;
+  border: 1px solid #bbb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 1px;
+  overflow: hidden;
+  font-size: clamp(4px, 1vw, 9px);
+  cursor: default;
+}
+
+.spot:hover {
+  background: #fffde7;
+  z-index: 2;
+}
+
+.colorBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 25%;
+  min-height: 4px;
+}
+
+.label {
+  width: 100%;
+  text-align: center;
+  font-size: inherit;
+  color: #222;
+  line-height: 1.1;
+  word-break: break-word;
+  hyphens: auto;
+  padding: 0 1px;
+  margin-top: auto;
+}
+
+.price {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.tokens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1px;
+  margin-bottom: 1px;
+}
+
+.buildings {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 1px;
+}
+
+.house {
+  width: clamp(4px, 1vw, 7px);
+  height: clamp(4px, 1vw, 7px);
+  background: #2e7d32;
+  border-radius: 1px;
+}
+
+.hotel {
+  width: clamp(5px, 1.2vw, 9px);
+  height: clamp(5px, 1.2vw, 9px);
+  background: #c62828;
+  border-radius: 1px;
+}
+
+.ownerBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+/* Corner spots */
+.corner {
+  grid-column: span 2;
+  grid-row: span 2;
+  background: #dcedc8;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(6px, 1.2vw, 11px);
+  font-weight: 700;
+  color: #1b5e20;
+  text-align: center;
+  padding: 4px;
+}
+
+.corner .label {
+  font-weight: 700;
+  color: #1b5e20;
+}
+
+/* Special types */
+.community { background: #e3f2fd; }
+.chance { background: #fff8e1; }
+.tax { background: #fce4ec; }
+.railroad { background: #eceff1; }
+.utility { background: #f3e5f5; }

@@ -1,0 +1,18 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  background: #f1f8e9;
+  color: #1b5e20;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1, h2, h3 { margin: 0; }
+p { margin: 0; }
+button { cursor: pointer; font-family: inherit; }
+input, select { font-family: inherit; }
