@@ -7,6 +7,7 @@ import Board from '../components/board/Board'
 import PlayerList from '../components/players/PlayerList'
 import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
+import FlashBanner from '../components/notification/FlashBanner'
 import styles from './GameScreen.module.css'
 
 export default function GameScreen() {
@@ -45,6 +46,8 @@ export default function GameScreen() {
   const myPlayerId = state.myPlayerId ?? ''
 
   return (
+    <>
+    <FlashBanner />
     <AppLayout
       header={
         <Header
@@ -57,5 +60,6 @@ export default function GameScreen() {
       log={<EventLog />}
       actions={<ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />}
     />
+    </>
   )
 }
