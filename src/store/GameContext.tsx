@@ -18,12 +18,16 @@ interface GameState {
   connectionStatus: ConnectionStatus
   events: GameEvent[]
   myPlayerId: string | null
+  lastDice: [number, number] | null
+  commandError: string | null
 }
 
 type Action =
   | { type: 'SET_SESSION'; sessionId: string }
+  | { type: 'LEAVE_SESSION' }
   | { type: 'SET_SNAPSHOT'; snapshot: ClientSessionSnapshot }
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
+  | { type: 'SET_COMMAND_ERROR'; message: string | null }
 
 function resolveMyPlayerId(snapshot: SessionState): string | null {
   const activeId = snapshot.turn?.activePlayerId
@@ -46,11 +50,41 @@ function reducer(state: GameState, action: Action): GameState {
         connectionStatus: 'CONNECTING',
         events: [],
         myPlayerId: null,
+        lastDice: null,
+        commandError: null,
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
       const newEvents = newSnapshot ? deriveEvents(state.snapshot, newSnapshot) : []
       const myPlayerId = state.myPlayerId ?? (newSnapshot ? resolveMyPlayerId(newSnapshot) : null)
+
+      // Derive dice from active player movement
+      let lastDice = state.lastDice
+      if (newSnapshot && state.snapshot) {
+        const prevTurn = state.snapshot.turn
+        const nextTurn = newSnapshot.turn
+        const activeId = prevTurn?.activePlayerId
+        if (activeId) {
+          const prevPlayer = state.snapshot.players.find(p => p.playerId === activeId)
+          const nextPlayer = newSnapshot.players.find(p => p.playerId === activeId)
+          if (prevPlayer && nextPlayer &&
+              prevPlayer.boardIndex !== nextPlayer.boardIndex &&
+              !(nextPlayer.inJail && !prevPlayer.inJail)) {
+            const steps = (nextPlayer.boardIndex - prevPlayer.boardIndex + 40) % 40
+            if (steps >= 2 && steps <= 12) {
+              const isDoubles = (nextTurn?.consecutiveDoubles ?? 0) === (prevTurn?.consecutiveDoubles ?? 0) + 1
+              if (isDoubles && steps % 2 === 0 && steps / 2 <= 6) {
+                lastDice = [steps / 2, steps / 2]
+              } else {
+                const d1 = Math.min(6, steps - 1)
+                const d2 = steps - d1
+                if (d2 >= 1 && d2 <= 6) lastDice = [d1, d2]
+              }
+            }
+          }
+        }
+      }
+
       // Play sounds for derived events
       for (const e of newEvents) {
         switch (e.icon) {
@@ -62,12 +96,11 @@ function reducer(state: GameState, action: Action): GameState {
           case '🃏': playDrawCard(); break
           case '💀': playBankruptcy(); break
           case '🎊': playGameOver(); break
-          case '🤝': if (e.message.includes('päättyi')) playTradeAccepted(); break
+          case '🤝': if (e.message.includes('hyväksytty')) playTradeAccepted(); break
           case '🏦': playMortgage(); break
           case '💳': playMortgage(); break
+          case '💰': playPassGo(); break
         }
-        // Pass GO bonus
-        if (e.icon === '🏃' && e.message.includes('GO')) playPassGo()
       }
       return {
         ...state,
@@ -76,10 +109,23 @@ function reducer(state: GameState, action: Action): GameState {
         connectionStatus: 'LIVE',
         events: newSnapshot ? [...state.events, ...newEvents].slice(-200) : state.events,
         myPlayerId,
+        lastDice,
       }
     }
+    case 'LEAVE_SESSION':
+      return {
+        ...state,
+        sessionId: null,
+        snapshot: null,
+        version: 0,
+        events: [],
+        myPlayerId: null,
+        lastDice: null,
+      }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
+    case 'SET_COMMAND_ERROR':
+      return { ...state, commandError: action.message }
     default:
       return state
   }
@@ -88,6 +134,7 @@ function reducer(state: GameState, action: Action): GameState {
 interface GameContextValue {
   state: GameState
   joinSession: (sessionId: string) => void
+  leaveSession: () => void
   sendCmd: (command: object) => Promise<void>
 }
 
@@ -101,6 +148,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     connectionStatus: 'CONNECTING',
     events: [],
     myPlayerId: null,
+    lastDice: null,
+    commandError: null,
   })
 
   const retryCount = useRef(0)
@@ -112,9 +161,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     retryCount.current = 0
   }, [])
 
+  const leaveSession = useCallback(() => {
+    dispatch({ type: 'LEAVE_SESSION' })
+    retryCount.current = 0
+    versionRef.current = 0
+  }, [])
+
   const sendCmd = useCallback(async (command: object) => {
     if (!state.sessionId) return
-    await sendCommand(state.sessionId, command)
+    try {
+      const result = await sendCommand(state.sessionId, command)
+      if (!result.accepted && result.rejections.length > 0) {
+        dispatch({ type: 'SET_COMMAND_ERROR', message: result.rejections.join(' · ') })
+        setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
+      }
+    } catch (err) {
+      dispatch({ type: 'SET_COMMAND_ERROR', message: 'Komento epäonnistui — tarkista yhteys' })
+      setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
+    }
   }, [state.sessionId])
 
   useEffect(() => {
@@ -167,7 +231,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.sessionId])
 
   return (
-    <GameContext.Provider value={{ state, joinSession, sendCmd }}>
+    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd }}>
       {children}
     </GameContext.Provider>
   )

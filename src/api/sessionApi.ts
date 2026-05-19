@@ -29,6 +29,15 @@ export async function sendCommand(sessionId: string, command: object): Promise<C
   return res.json()
 }
 
+export async function deleteSession(sessionId: string): Promise<void> {
+  await fetch(`${BASE}/sessions/${sessionId}`, { method: 'DELETE' })
+}
+
+export async function sessionExists(sessionId: string): Promise<boolean> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/snapshot`)
+  return res.ok
+}
+
 export function sseUrl(sessionId: string): string {
   return `${BASE}/sessions/${sessionId}/events`
 }

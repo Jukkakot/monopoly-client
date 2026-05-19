@@ -30,6 +30,9 @@
   height: 30%;
   min-height: 5px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  display: flex;
+  gap: 1px;
+  padding: 1px;
 }
 
 .icon {
@@ -77,24 +80,32 @@
   margin-bottom: 2px;
 }
 
-.buildings {
+.houseInBar {
+  flex: 1;
+  background: #4caf50;
+  border-radius: 1px;
+}
+
+.hotelInBar {
+  flex: 1;
+  background: #e53935;
+  border-radius: 1px;
+}
+
+.colorBarMortgaged {
+  opacity: 0.55;
+}
+
+.mortgagedLabel {
+  flex: 1;
   display: flex;
-  gap: 1px;
-  margin-bottom: 2px;
-}
-
-.house {
-  width: clamp(3px, 0.8vw, 7px);
-  height: clamp(3px, 0.8vw, 7px);
-  background: #1b5e20;
-  border-radius: 1px;
-}
-
-.hotel {
-  width: clamp(4px, 1vw, 9px);
-  height: clamp(4px, 1vw, 9px);
-  background: #b71c1c;
-  border-radius: 1px;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(4px, 0.9vw, 9px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  font-family: 'Arial Narrow', Arial, sans-serif;
 }
 
 .ownerBar {
@@ -209,6 +220,31 @@
   border-top: 1px solid #ddd;
   padding-top: 2px;
   margin-top: 1px;
+}
+
+.jailPrisoners {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+  border: 1px solid #e0c080;
+  border-radius: 3px;
+  padding: 1px 2px;
+  background: #fff8e1;
+}
+
+.jailPrisonerRow {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.jailRounds {
+  font-size: clamp(4px, 0.8vw, 8px);
+  font-weight: 800;
+  color: #7b3f00;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  line-height: 1;
 }
 
 .parkingCorner { background: #f0fff4; }

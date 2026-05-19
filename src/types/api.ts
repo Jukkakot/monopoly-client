@@ -15,7 +15,7 @@ export type DebtCreditorType = 'BANK' | 'PLAYER'
 
 export interface SeatState {
   seatId: string
-  index: number
+  seatIndex: number
   playerId: string
   seatKind: SeatKind
   displayName: string

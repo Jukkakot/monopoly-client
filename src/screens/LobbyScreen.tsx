@@ -4,6 +4,7 @@ import { useGame } from '../store/GameContext'
 import { createSession } from '../api/sessionApi'
 import type { SeatKind, BotDifficulty } from '../types/api'
 import { GEOMETRIC_SHAPES, EMOJI_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './LobbyScreen.module.css'
 
 const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
@@ -18,14 +19,18 @@ interface PlayerRow {
 }
 
 function defaultRows(count: number): PlayerRow[] {
-  const names = ['Pelaaja 1', 'Pelaaja 2', 'Pelaaja 3', 'Pelaaja 4']
-  return Array.from({ length: count }, (_, i) => ({
-    name: names[i],
-    kind: 'HUMAN' as SeatKind,
-    color: PRESET_COLORS[i],
-    difficulty: 'NORMAL' as BotDifficulty,
-    tokenShape: DEFAULT_SHAPES[i] ?? 'circle',
-  }))
+  const usedNames: string[] = []
+  return Array.from({ length: count }, (_, i) => {
+    const name = randomHumanName(usedNames)
+    usedNames.push(name)
+    return {
+      name,
+      kind: 'HUMAN' as SeatKind,
+      color: PRESET_COLORS[i],
+      difficulty: 'NORMAL' as BotDifficulty,
+      tokenShape: DEFAULT_SHAPES[i] ?? 'circle',
+    }
+  })
 }
 
 export default function LobbyScreen() {
@@ -40,7 +45,20 @@ export default function LobbyScreen() {
     setPlayerCount(n)
     setRows(prev => {
       if (n > prev.length) {
-        return [...prev, ...defaultRows(n).slice(prev.length)]
+        const usedNames = prev.map(r => r.name)
+        const extra = Array.from({ length: n - prev.length }, (_, j) => {
+          const idx = prev.length + j
+          const name = randomHumanName(usedNames)
+          usedNames.push(name)
+          return {
+            name,
+            kind: 'HUMAN' as SeatKind,
+            color: PRESET_COLORS[idx] ?? PRESET_COLORS[0],
+            difficulty: 'NORMAL' as BotDifficulty,
+            tokenShape: DEFAULT_SHAPES[idx] ?? 'circle',
+          }
+        })
+        return [...prev, ...extra]
       }
       return prev.slice(0, n)
     })
@@ -86,7 +104,7 @@ export default function LobbyScreen() {
         <div className={styles.countRow}>
           <label className={styles.label}>Pelaajia</label>
           <div className={styles.countBtns}>
-            {[2, 3, 4].map(n => (
+            {[2, 3, 4, 5, 6].map(n => (
               <button
                 key={n}
                 className={`${styles.countBtn} ${playerCount === n ? styles.active : ''}`}
@@ -152,7 +170,12 @@ export default function LobbyScreen() {
                 />
                 <button
                   className={`${styles.kindBtn} ${row.kind === 'HUMAN' ? styles.human : styles.bot}`}
-                  onClick={() => updateRow(i, { kind: row.kind === 'HUMAN' ? 'BOT' : 'HUMAN' })}
+                  onClick={() => {
+                    const newKind: SeatKind = row.kind === 'HUMAN' ? 'BOT' : 'HUMAN'
+                    const usedNames = rows.filter((_, j) => j !== i).map(r => r.name)
+                    const newName = newKind === 'BOT' ? randomBotName(usedNames) : randomHumanName(usedNames)
+                    updateRow(i, { kind: newKind, name: newName })
+                  }}
                 >
                   {row.kind === 'HUMAN' ? 'Ihminen' : 'Botti'}
                 </button>

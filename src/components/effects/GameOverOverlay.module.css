@@ -1,0 +1,170 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  background: #fffde7;
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: min(90vw, 400px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.trophy {
+  font-size: 4rem;
+  line-height: 1;
+  animation: bounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-8px); }
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #e65100;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.winnerRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1b5e20;
+  background: #e8f5e9;
+  border-radius: 12px;
+  padding: 10px 18px;
+  width: 100%;
+  justify-content: center;
+}
+
+.winnerName {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1b5e20;
+}
+
+.rankings {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rankRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  font-size: 0.9rem;
+}
+
+.rankRow.first {
+  background: #fff8e1;
+  border: 1.5px solid #ffe082;
+}
+
+.medal {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.rankName {
+  flex: 1;
+  font-weight: 600;
+  color: #333;
+}
+
+.rankCash {
+  font-weight: 800;
+  color: #1b5e20;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.bankrupt {
+  color: #c62828;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.btnPrimary,
+.btnSecondary {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  transition: filter 0.15s;
+}
+
+.btnPrimary {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btnSecondary {
+  background: transparent;
+  color: #666;
+  border: 1.5px solid #ccc;
+}
+
+.btnShare {
+  width: 100%;
+  padding: 12px 20px;
+  border: 1.5px solid #1565c0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  background: #e3f2fd;
+  color: #1565c0;
+  transition: filter 0.15s;
+}
+
+.btnPrimary:hover  { filter: brightness(1.1); }
+.btnSecondary:hover { filter: brightness(0.95); }
+.btnShare:hover { filter: brightness(0.93); }

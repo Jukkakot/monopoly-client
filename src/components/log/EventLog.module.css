@@ -24,12 +24,25 @@
   font-size: 12px;
   color: #333;
   line-height: 1.4;
+  border-left: 3px solid transparent;
 }
 
 .entry.mine {
   background: #e8f5e9;
-  border-left: 3px solid #2e7d32;
+  border-left-color: #2e7d32;
 }
+
+/* Event type color stripes */
+.entry.typeMove    { border-left-color: #90a4ae; }
+.entry.typeJail    { border-left-color: #4a148c; background: #f3e5f5; }
+.entry.typeCard    { border-left-color: #f57f17; background: #fff8e1; }
+.entry.typeBuy     { border-left-color: #1565c0; background: #e3f2fd; }
+.entry.typeBuild   { border-left-color: #2e7d32; background: #e8f5e9; }
+.entry.typeMortgage{ border-left-color: #795548; background: #efebe9; }
+.entry.typeAuction { border-left-color: #e65100; background: #fff3e0; }
+.entry.typeTrade   { border-left-color: #00695c; background: #e0f2f1; }
+.entry.typeBankrupt{ border-left-color: #b71c1c; background: #ffebee; }
+.entry.typeGameOver{ border-left-color: #f9a825; background: #fff8e1; }
 
 .icon {
   flex-shrink: 0;

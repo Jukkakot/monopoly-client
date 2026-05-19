@@ -57,3 +57,57 @@
   text-transform: uppercase;
   font-weight: 600;
 }
+
+.diceArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, 0.5vw, 8px);
+  margin-bottom: clamp(2px, 0.5vw, 6px);
+  animation: diceAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes diceAppear {
+  from { transform: scale(0.6) translateY(-4px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.diceSum {
+  font-size: clamp(0.6rem, 1.3vw, 1.2rem);
+  font-weight: 900;
+  color: #1a5c0a;
+  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+  line-height: 1;
+  margin-left: clamp(1px, 0.2vw, 4px);
+}
+
+.diceDoubles {
+  font-size: clamp(0.4rem, 0.8vw, 0.7rem);
+  font-weight: 800;
+  color: #fff;
+  background: #e65100;
+  border-radius: 8px;
+  padding: 1px clamp(3px, 0.4vw, 6px);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.centerTurn {
+  font-size: clamp(0.45rem, 1vw, 0.85rem);
+  font-weight: 800;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 0.85; }
+}

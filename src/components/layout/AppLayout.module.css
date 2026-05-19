@@ -124,8 +124,7 @@
   .sideCol {
     display: flex;
     flex-direction: column;
-    flex: 0 0 320px;
-    width: 320px;
+    flex: 0 0 clamp(300px, 28vw, 480px);
     border-left: 2px solid #c8e6c9;
     background: #f5f9f5;
     height: 100svh;
@@ -138,48 +137,17 @@
     display: none;
   }
 
-  /* ── Tab bar ── */
-  .tabBar {
-    display: flex;
-    border-bottom: 2px solid #c8e6c9;
-    flex-shrink: 0;
-  }
-
-  .tab {
-    flex: 1;
-    padding: 10px 4px;
-    border: none;
-    background: transparent;
-    font-size: 13px;
-    font-weight: 700;
-    color: #888;
-    cursor: pointer;
-    font-family: 'Arial Narrow', Arial, sans-serif;
-    letter-spacing: 0.3px;
-    transition: color 0.15s, border-bottom 0.15s;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-  }
-
-  .tabActive {
-    color: #2e7d32;
-    border-bottom: 3px solid #2e7d32;
-  }
-
-  /* ── Tab content area ── */
-  .tabContent {
+  /* ── Stacked sidebar sections ── */
+  .sideSection {
     flex: 1;
     overflow-y: auto;
     min-height: 0;
   }
 
-  .tabPane {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tabPaneHidden {
-    display: none;
+  .sideDivider {
+    height: 2px;
+    background: #c8e6c9;
+    flex-shrink: 0;
   }
 
   /* ── Actions section (always visible at bottom) ── */

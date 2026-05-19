@@ -61,6 +61,21 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
     onClose()
   }
 
+  function buildHouse() {
+    if (!myPlayerId) return
+    sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: spotId })
+    onClose()
+  }
+
+  const canBuild = isMyProp && isStreet && isMonopoly && !prop?.mortgaged && (prop?.hotelCount ?? 0) === 0
+
+  // Sellable: at max level in the group
+  const myLevelHere = (prop?.hotelCount ?? 0) > 0 ? 5 : (prop?.houseCount ?? 0)
+  const maxLevelInGroup = owner ? state.properties
+    .filter(p => SPOTS.find(s => s.id === p.propertyId)?.streetType === spot.streetType && p.ownerPlayerId === owner.playerId)
+    .reduce((max, p) => Math.max(max, p.hotelCount > 0 ? 5 : p.houseCount), 0) : 0
+  const canSell = isMyProp && isStreet && myLevelHere > 0 && myLevelHere >= maxLevelInGroup
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.card} onClick={e => e.stopPropagation()}>
@@ -117,35 +132,50 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           )}
 
           {/* Rent table */}
-          {isStreet && rents.length === 6 && (
-            <div className={styles.rentTable}>
-              <div className={styles.rentTitle}>Vuokrat</div>
-              <div className={styles.rentRow}><span>Tyhjä{isMonopoly ? ' (monopoli 2×)' : ''}</span><span>€{isMonopoly && !owner ? rents[0] * 2 : rents[0]}</span></div>
-              <div className={styles.rentRow}><span>🏠 1 talo</span><span>€{rents[1]}</span></div>
-              <div className={styles.rentRow}><span>🏠🏠 2 taloa</span><span>€{rents[2]}</span></div>
-              <div className={styles.rentRow}><span>🏠🏠🏠 3 taloa</span><span>€{rents[3]}</span></div>
-              <div className={styles.rentRow}><span>🏠×4</span><span>€{rents[4]}</span></div>
-              <div className={`${styles.rentRow} ${styles.hotelRow}`}><span>🏨 Hotelli</span><span>€{rents[5]}</span></div>
-            </div>
-          )}
+          {isStreet && rents.length === 6 && (() => {
+            const houses = prop?.houseCount ?? 0
+            const hotels = prop?.hotelCount ?? 0
+            const activeIdx = hotels > 0 ? 5 : houses  // 0=empty,1-4=houses,5=hotel
+            const r = (i: number) => `${styles.rentRow} ${activeIdx === i && owner ? styles.rentRowActive : ''}`
+            return (
+              <div className={styles.rentTable}>
+                <div className={styles.rentTitle}>Vuokrat</div>
+                <div className={r(0)}><span>Tyhjä{isMonopoly ? ' (monopoli 2×)' : ''}</span><span>€{isMonopoly ? rents[0] * 2 : rents[0]}</span></div>
+                <div className={r(1)}><span>🏠 1 talo</span><span>€{rents[1]}</span></div>
+                <div className={r(2)}><span>🏠🏠 2 taloa</span><span>€{rents[2]}</span></div>
+                <div className={r(3)}><span>🏠🏠🏠 3 taloa</span><span>€{rents[3]}</span></div>
+                <div className={r(4)}><span>🏠×4</span><span>€{rents[4]}</span></div>
+                <div className={`${r(5)} ${styles.hotelRow}`}><span>🏨 Hotelli</span><span>€{rents[5]}</span></div>
+              </div>
+            )
+          })()}
 
-          {isRailroad && rents.length === 4 && (
-            <div className={styles.rentTable}>
-              <div className={styles.rentTitle}>Vuokrat (asemien mukaan)</div>
-              <div className={styles.rentRow}><span>🚂 1 asema</span><span>€{rents[0]}</span></div>
-              <div className={styles.rentRow}><span>🚂🚂 2 asemaa</span><span>€{rents[1]}</span></div>
-              <div className={styles.rentRow}><span>🚂🚂🚂 3 asemaa</span><span>€{rents[2]}</span></div>
-              <div className={styles.rentRow}><span>🚂×4</span><span>€{rents[3]}</span></div>
-            </div>
-          )}
+          {isRailroad && rents.length === 4 && (() => {
+            const ar = (i: number) => `${styles.rentRow} ${ownerGroupCount === i + 1 && owner ? styles.rentRowActive : ''}`
+            return (
+              <div className={styles.rentTable}>
+                <div className={styles.rentTitle}>Vuokrat (asemien mukaan)</div>
+                <div className={ar(0)}><span>🚂 1 asema</span><span>€{rents[0]}</span></div>
+                <div className={ar(1)}><span>🚂🚂 2 asemaa</span><span>€{rents[1]}</span></div>
+                <div className={ar(2)}><span>🚂🚂🚂 3 asemaa</span><span>€{rents[2]}</span></div>
+                <div className={ar(3)}><span>🚂×4</span><span>€{rents[3]}</span></div>
+              </div>
+            )
+          })()}
 
-          {isUtility && (
-            <div className={styles.rentTable}>
-              <div className={styles.rentTitle}>Vuokra</div>
-              <div className={styles.rentRow}><span>1 laitos omistettu</span><span>4× nopat</span></div>
-              <div className={styles.rentRow}><span>2 laitosta omistettu</span><span>10× nopat</span></div>
-            </div>
-          )}
+          {isUtility && (() => {
+            const utilCount = owner
+              ? state.properties.filter(p => p.ownerPlayerId === owner.playerId && SPOTS.find(s => s.id === p.propertyId)?.streetType === 'UTILITY').length
+              : 0
+            const au = (i: number) => `${styles.rentRow} ${utilCount === i + 1 && owner ? styles.rentRowActive : ''}`
+            return (
+              <div className={styles.rentTable}>
+                <div className={styles.rentTitle}>Vuokra</div>
+                <div className={au(0)}><span>1 laitos omistettu</span><span>4× nopat</span></div>
+                <div className={au(1)}><span>2 laitosta omistettu</span><span>10× nopat</span></div>
+              </div>
+            )
+          })()}
 
           {/* Buildings */}
           {isStreet && prop && (prop.houseCount > 0 || prop.hotelCount > 0) && (
@@ -157,17 +187,36 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             </div>
           )}
 
-          {/* Mortgage value */}
-          {mortgageValue > 0 && (
+          {/* Mortgage / unmortgage info */}
+          {mortgageValue > 0 && !prop?.mortgaged && (
             <div className={styles.priceRow}>
               <span className={styles.priceLabel}>Panttausarvo</span>
               <span className={styles.priceVal}>€{mortgageValue}</span>
             </div>
           )}
+          {mortgageValue > 0 && prop?.mortgaged && (
+            <div className={styles.priceRow}>
+              <span className={styles.priceLabel}>Lunastushinta (+10%)</span>
+              <span className={styles.priceVal}>€{Math.ceil(mortgageValue * 1.1)}</span>
+            </div>
+          )}
 
           {/* Action buttons */}
           <div className={styles.actions}>
-            {isMyProp && canAct && (
+            {canBuild && (
+              <button className={`${styles.btn} ${styles.build}`} onClick={buildHouse}>
+                🏠 Rakenna talo
+              </button>
+            )}
+            {canSell && (
+              <button className={`${styles.btn} ${styles.secondary}`} onClick={() => {
+                sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: spotId })
+                onClose()
+              }}>
+                −🏠 Myy talo
+              </button>
+            )}
+            {isMyProp && canAct && !prop?.mortgaged && (
               <button className={`${styles.btn} ${styles.secondary}`} onClick={toggleMortgage}>
                 🏦 Panttaa
               </button>

@@ -3,13 +3,13 @@ import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
-import OverflowMenu from '../menu/OverflowMenu'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 
 interface Props {
   state: SessionState
   myPlayerId: string
 }
+
 
 function Btn({ label, onClick, variant = 'primary', disabled }: {
   label: string
@@ -25,8 +25,25 @@ function Btn({ label, onClick, variant = 'primary', disabled }: {
   )
 }
 
+function DiceDisplay({ dice }: { dice: [number, number] }) {
+  const FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
+  const total = dice[0] + dice[1]
+  const isDoubles = dice[0] === dice[1]
+  return (
+    <div className={styles.diceRow}>
+      <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{FACES[dice[0]]}</span>
+      <div className={styles.diceMeta}>
+        <div className={styles.diceTotal}>{total}</div>
+        {isDoubles && <div className={styles.doubles}>TUPLA!</div>}
+      </div>
+      <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{FACES[dice[1]]}</span>
+    </div>
+  )
+}
+
 export default function ActionPanel({ state, myPlayerId }: Props) {
-  const { sendCmd } = useGame()
+  const { sendCmd, state: ctxState } = useGame()
+  const lastDice = ctxState.lastDice
   const sid = state.sessionId
   const turn = state.turn
   const phase = turn?.phase
@@ -98,21 +115,44 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   if (!isMyTurn) {
     const activePlayer = state.players.find(p => p.playerId === activeId)
+    const activeSeat = state.seats.find(s => s.playerId === activeId)
     return (
       <div className={styles.panel}>
-        <div className={styles.infoBox}>
-          ⏳ {activePlayer?.name ?? '?'} pelaa…
+        <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+          ⏳ {activePlayer?.name ?? '?'} {phase === 'WAITING_FOR_ROLL' ? 'heittää nopat…' :
+            phase === 'WAITING_FOR_END_TURN' ? 'lopettaa vuoroa…' :
+            phase === 'WAITING_FOR_DECISION' ? 'harkitsee ostoa…' :
+            phase === 'WAITING_FOR_AUCTION' ? 'huutokaupassa…' :
+            phase === 'RESOLVING_DEBT' ? 'selvittää velkaa…' :
+            'pelaa…'}
         </div>
+        {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
+          <div className={styles.infoBox}>
+            📍 <strong>{state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
+          </div>
+        )}
+        {lastDice && phase === 'WAITING_FOR_END_TURN' && <DiceDisplay dice={lastDice} />}
+        {state.lastCardMessage && (
+          <div className={styles.cardMessage}>
+            <span className={styles.cardMessageIcon}>🃏</span>
+            <span>{state.lastCardMessage}</span>
+          </div>
+        )}
       </div>
     )
   }
 
-  const menu = <OverflowMenu />
-
   // WAITING_FOR_ROLL
   if (phase === 'WAITING_FOR_ROLL') {
+    const consecutiveDoubles = turn?.consecutiveDoubles ?? 0
     return (
       <div className={styles.panel}>
+        {consecutiveDoubles > 0 && (
+          <div className={`${styles.infoBox} ${styles.doubles}`}>
+            🎲 Tuplaheitto! Heitä uudelleen
+            {consecutiveDoubles >= 2 && <span> — varoitus: 3. tupla = vankila</span>}
+          </div>
+        )}
         {me?.inJail && (
           <>
             <div className={styles.infoBox}>⛓ Vankilassa — {me.jailRoundsRemaining ?? '?'} kierrosta jäljellä</div>
@@ -126,8 +166,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <Btn label="🎲 Heitä nopat" onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
-        {menu}
+        <Btn label="🎲 Heitä nopat  [välilyönti]" onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
       </div>
     )
   }
@@ -136,10 +175,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (phase === 'WAITING_FOR_END_TURN') {
     return (
       <div className={styles.panel}>
+        {lastDice && <DiceDisplay dice={lastDice} />}
+        {state.lastCardMessage && (
+          <div className={styles.cardMessage}>
+            <span className={styles.cardMessageIcon}>🃏</span>
+            <span>{state.lastCardMessage}</span>
+          </div>
+        )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <Btn label="✅ Lopeta vuoro" onClick={() => cmd('EndTurn')} variant="primary" />
-        {menu}
+        <Btn label="✅ Lopeta vuoro  [välilyönti]" onClick={() => cmd('EndTurn')} variant="primary" />
       </div>
     )
   }
@@ -193,6 +238,14 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
             const spot = SPOTS.find(s => s.id === prop.propertyId)
             if (!spot) return null
             const color = STREET_COLORS[spot.streetType]
+            // Sellable if this is the max level in the group
+            const groupProps = myProps.filter(p => {
+              const s = SPOTS.find(ss => ss.id === p.propertyId)
+              return s?.streetType === spot.streetType
+            })
+            const maxLevel = Math.max(...groupProps.map(p => p.hotelCount > 0 ? 5 : p.houseCount))
+            const myLevel = prop.hotelCount > 0 ? 5 : prop.houseCount
+            const canSell = myLevel > 0 && myLevel >= maxLevel
             return (
               <div key={prop.propertyId} className={styles.buildRow}>
                 <span className={styles.buildName} style={{ borderLeft: `3px solid ${color}`, paddingLeft: 4 }}>
@@ -202,6 +255,12 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                   {Array.from({ length: prop.houseCount }).map((_, i) => <div key={i} className={styles.houseBox} />)}
                   {Array.from({ length: 4 - prop.houseCount }).map((_, i) => <div key={i} className={styles.houseEmpty} />)}
                 </div>
+                {canSell && (
+                  <button className={`${styles.buildBtn} ${styles.sellBtn}`}
+                    onClick={() => sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
+                    −🏠
+                  </button>
+                )}
                 <button className={styles.buildBtn}
                   onClick={() => sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                   +🏠
@@ -279,12 +338,17 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   const leader = state.players.find(p => p.playerId === auction.leadingPlayerId)
   const minBid = auction.minimumNextBid > 0 ? auction.minimumNextBid : auction.currentBid + 10
   const isEligible = auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
+  const currentActor = state.players.find(p => p.playerId === auction.currentActorPlayerId)
 
   function placeBid(amount: number) {
     playAuctionBid()
-    sendCmd({ type: 'PlaceAuctionBid', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId, bid: amount })
+    sendCmd({ type: 'PlaceAuctionBid', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId, amount })
     setCustomBid('')
   }
+
+  const passedNames = auction.passedPlayerIds
+    .map(id => state.players.find(p => p.playerId === id)?.name ?? '?')
+  const remainingCount = auction.eligiblePlayerIds.length - auction.passedPlayerIds.length
 
   return (
     <div className={styles.panel}>
@@ -292,6 +356,31 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
         🔨 Huutokauppa: <strong>{spot?.name ?? auction.propertyId}</strong><br />
         Korkein: €{auction.currentBid}{leader ? ` — ${leader.name}` : ''}
       </div>
+      <div className={styles.auctionProgress}>
+        <div className={styles.auctionProgressBar}>
+          {auction.eligiblePlayerIds.map(id => {
+            const passed = auction.passedPlayerIds.includes(id)
+            const seat = state.seats.find(s => s.playerId === id)
+            return (
+              <div
+                key={id}
+                className={`${styles.auctionPip} ${passed ? styles.auctionPipPassed : ''}`}
+                style={{ background: passed ? '#ccc' : seat?.tokenColorHex ?? '#2e7d32' }}
+                title={state.players.find(p => p.playerId === id)?.name}
+              />
+            )
+          })}
+        </div>
+        <span className={styles.auctionProgressText}>
+          {remainingCount > 0 ? `${remainingCount} pelaajaa jäljellä` : ''}
+          {passedNames.length > 0 && ` · Passasi: ${passedNames.join(', ')}`}
+        </span>
+      </div>
+      {!isEligible && currentActor && auction.status === 'ACTIVE' && (
+        <div className={styles.infoBox}>
+          ⏳ {currentActor.name} tekee tarjouksen…
+        </div>
+      )}
       {auction.status === 'WON_PENDING_RESOLUTION' ? (
         <button className={`${styles.btn} ${styles.secondary}`}
           onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}>
@@ -349,6 +438,9 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
       <div className={`${styles.infoBox} ${styles.debt}`}>
         ⚠️ Velka €{debt.amountRemaining} → {creditorName}<br />
         Käteinen: €{debt.currentCash}
+        {debt.estimatedLiquidationValue > 0 && (
+          <><br />Likvidointiarvo: ~€{debt.estimatedLiquidationValue}</>
+        )}
       </div>
       {debt.allowedActions.includes('PAY_DEBT_NOW') && (
         <Btn label="💸 Maksa velka" onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />
@@ -363,17 +455,45 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           )
         })
       }
-      {debt.allowedActions.includes('SELL_BUILDING') &&
-        state.properties.filter(p => p.ownerPlayerId === debt.debtorPlayerId && (p.houseCount > 0 || p.hotelCount > 0)).map(prop => {
+      {debt.allowedActions.includes('SELL_BUILDING') && (() => {
+        const builtProps = state.properties.filter(p =>
+          p.ownerPlayerId === debt.debtorPlayerId && (p.houseCount > 0 || p.hotelCount > 0))
+
+        // Group by streetType for SellBuildingRoundsAcrossSetForDebt
+        const groups = new Map<string, typeof builtProps>()
+        for (const prop of builtProps) {
           const spot = SPOTS.find(s => s.id === prop.propertyId)
-          const type = prop.hotelCount > 0 ? 'hotelli' : 'talo'
-          return (
-            <Btn key={prop.propertyId} label={`🏠 Myy ${type}: ${spot?.name ?? prop.propertyId}`}
-              onClick={() => sendCmd({ type: 'SellBuildingForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 })}
-              variant="secondary" />
-          )
-        })
-      }
+          const key = spot?.streetType ?? 'OTHER'
+          const arr = groups.get(key) ?? []
+          arr.push(prop)
+          groups.set(key, arr)
+        }
+
+        return (
+          <>
+            {/* Sell one round from an entire color group */}
+            {Array.from(groups.entries()).filter(([, props]) => props.length > 1).map(([, props]) => {
+              const spot = SPOTS.find(s => s.id === props[0].propertyId)
+              return (
+                <Btn key={`set-${props[0].propertyId}`}
+                  label={`🏘 Myy kierros (${props.length} kiin.): ${spot?.streetType}`}
+                  onClick={() => sendCmd({ type: 'SellBuildingRoundsAcrossSetForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: props[0].propertyId, rounds: 1 })}
+                  variant="secondary" />
+              )
+            })}
+            {/* Sell from individual properties */}
+            {builtProps.map(prop => {
+              const spot = SPOTS.find(s => s.id === prop.propertyId)
+              const type = prop.hotelCount > 0 ? 'hotelli' : 'talo'
+              return (
+                <Btn key={prop.propertyId} label={`🏠 Myy ${type}: ${spot?.name ?? prop.propertyId}`}
+                  onClick={() => sendCmd({ type: 'SellBuildingForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 })}
+                  variant="secondary" />
+              )
+            })}
+          </>
+        )
+      })()}
       {debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
         <Btn label="☠ Julistaudu konkurssiin" onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" />
       )}

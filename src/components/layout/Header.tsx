@@ -1,11 +1,13 @@
 import styles from './Header.module.css'
 import type { SessionState } from '../../types/api'
+import OverflowMenu from '../menu/OverflowMenu'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
 interface Props {
   snapshot: SessionState | null
   connectionStatus: ConnectionStatus
+  isSpectator?: boolean
 }
 
 const PHASE_LABELS: Record<string, string> = {
@@ -24,18 +26,27 @@ const STATUS_LABEL: Record<ConnectionStatus, string> = {
   FAILED: 'Yhteys katkesi',
 }
 
-export default function Header({ snapshot, connectionStatus }: Props) {
+export default function Header({ snapshot, connectionStatus, isSpectator }: Props) {
   const turn = snapshot?.turn
-  const activeName = turn
-    ? snapshot?.players.find(p => p.playerId === turn.activePlayerId)?.name
+  const activePlayer = turn
+    ? snapshot?.players.find(p => p.playerId === turn.activePlayerId)
+    : null
+  const activeSeat = activePlayer
+    ? snapshot?.seats.find(s => s.playerId === activePlayer.playerId)
     : null
 
   return (
     <header className={styles.header}>
       <div className={styles.title}>Monopoly Helsinki</div>
-      {activeName && turn ? (
+      {activePlayer && turn ? (
         <div className={styles.turnInfo}>
-          <span className={styles.playerName}>{activeName}</span>
+          {activeSeat && (
+            <span
+              className={styles.playerDot}
+              style={{ background: activeSeat.tokenColorHex }}
+            />
+          )}
+          <span className={styles.playerName}>{activePlayer.name}</span>
           <span className={styles.phase}>{PHASE_LABELS[turn.phase] ?? turn.phase}</span>
         </div>
       ) : (
@@ -43,9 +54,12 @@ export default function Header({ snapshot, connectionStatus }: Props) {
           {snapshot ? 'Odottaa pelaajia…' : 'Ladataan…'}
         </div>
       )}
+      {isSpectator && <span className={styles.spectatorBadge}>👁 Katsoja</span>}
       <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
+        {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
         {STATUS_LABEL[connectionStatus]}
       </div>
+      <OverflowMenu />
     </header>
   )
 }

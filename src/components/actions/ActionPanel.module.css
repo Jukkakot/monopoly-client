@@ -55,6 +55,7 @@
 
 .infoBox.debt    { background: #ffebee; border-color: #ef9a9a; color: #b71c1c; }
 .infoBox.auction { background: #fff8e1; border-color: #ffe082; color: #f57f17; }
+.infoBox.doubles { background: #fff3e0; border-color: #ffb74d; color: #e65100; }
 
 .winner {
   text-align: center;
@@ -65,6 +66,36 @@
   background: #fff8e1;
   border-radius: 12px;
   border: 2px solid #ffe082;
+}
+
+/* ── Auction progress ── */
+.auctionProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.auctionProgressBar {
+  display: flex;
+  gap: 4px;
+}
+
+.auctionPip {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.auctionPipPassed {
+  opacity: 0.4;
+}
+
+.auctionProgressText {
+  font-size: 0.75rem;
+  color: #888;
+  font-style: italic;
 }
 
 /* ── Auction bid quick buttons ── */
@@ -283,3 +314,68 @@
 
 .buildBtn:hover:not(:disabled) { background: #f0f0f0; }
 .buildBtn:disabled { opacity: 0.35; cursor: default; }
+
+.sellBtn { border-color: #ef9a9a; color: #b71c1c; }
+.sellBtn:hover:not(:disabled) { background: #ffebee; }
+
+/* ── Card message ── */
+.cardMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff8e1;
+  border: 1.5px solid #ffe082;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  color: #5d4037;
+  line-height: 1.45;
+  font-style: italic;
+}
+
+.cardMessageIcon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  font-style: normal;
+}
+
+/* ── Dice display ── */
+.diceRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0 4px;
+}
+
+.diceMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.diceTotal {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1b5e20;
+  line-height: 1;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.doubles {
+  background: #ff6f00;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}

@@ -1,7 +1,6 @@
 import styles from './AppLayout.module.css'
 import { useState, useRef, type ReactNode } from 'react'
 
-type SideTab = 'players' | 'log'
 type MobileTab = 'board' | 'players' | 'log' | 'actions'
 
 const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log', 'actions']
@@ -21,7 +20,6 @@ interface Props {
 }
 
 export default function AppLayout({ header, board, players, log, actions }: Props) {
-  const [sideTab, setSideTab] = useState<SideTab>('players')
   const [mobileTab, setMobileTab] = useState<MobileTab>('board')
 
   const touchStartX = useRef(0)
@@ -48,31 +46,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       {/* ── Desktop: sidebar ── */}
       <div className={styles.sideCol}>
         {header}
-
-        <div className={styles.tabBar}>
-          <button
-            className={`${styles.tab} ${sideTab === 'players' ? styles.tabActive : ''}`}
-            onClick={() => setSideTab('players')}
-          >
-            Pelaajat
-          </button>
-          <button
-            className={`${styles.tab} ${sideTab === 'log' ? styles.tabActive : ''}`}
-            onClick={() => setSideTab('log')}
-          >
-            Loki
-          </button>
-        </div>
-
-        <div className={styles.tabContent}>
-          <div className={sideTab === 'players' ? styles.tabPane : styles.tabPaneHidden}>
-            {players}
-          </div>
-          <div className={sideTab === 'log' ? styles.tabPane : styles.tabPaneHidden}>
-            {log}
-          </div>
-        </div>
-
+        <div className={styles.sideSection}>{players}</div>
+        <div className={styles.sideDivider} />
+        <div className={styles.sideSection}>{log}</div>
         <div className={styles.actions}>{actions}</div>
       </div>
 
@@ -87,10 +63,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           </div>
         )}
         <div className={styles.mobileSection}>
-          {mobileTab === 'board' && <div className={styles.mobilePadded}>{actions}</div>}
+          {(mobileTab === 'board' || mobileTab === 'actions') && <div className={styles.mobilePadded}>{actions}</div>}
           {mobileTab === 'players' && players}
           {mobileTab === 'log' && log}
-          {mobileTab === 'actions' && <div className={styles.mobilePadded}>{actions}</div>}
         </div>
       </div>
 

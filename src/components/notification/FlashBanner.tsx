@@ -8,17 +8,42 @@ interface BannerItem {
   visible: boolean
 }
 
+let _localId = -1
+
 export default function FlashBanner() {
   const { state } = useGame()
   const [banners, setBanners] = useState<BannerItem[]>([])
   const seenIds = useRef(new Set<number>())
+  const prevActiveId = useRef<string | null>(null)
+
+  // Detect when it becomes my turn and show a special banner
+  useEffect(() => {
+    const activeId = state.snapshot?.turn?.activePlayerId ?? null
+    if (
+      activeId &&
+      activeId === state.myPlayerId &&
+      prevActiveId.current !== activeId
+    ) {
+      const syntheticEvent: GameEvent = {
+        id: _localId--,
+        timestamp: Date.now(),
+        icon: '⭐',
+        message: 'Sinun vuorosi!',
+        relatedPlayerIds: [activeId],
+      }
+      setBanners(prev => [...prev, { event: syntheticEvent, visible: true }])
+    }
+    prevActiveId.current = activeId
+  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId])
 
   useEffect(() => {
     if (!state.myPlayerId || state.events.length === 0) return
 
+    const NOTIFY_ICONS = new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰'])
     const newEvents = state.events.filter(e =>
       !seenIds.current.has(e.id) &&
-      e.relatedPlayerIds.includes(state.myPlayerId!)
+      NOTIFY_ICONS.has(e.icon) &&
+      (e.relatedPlayerIds.length === 0 || e.relatedPlayerIds.includes(state.myPlayerId!))
     )
 
     if (newEvents.length === 0) return
@@ -54,12 +79,26 @@ export default function FlashBanner() {
   }, [banners.length])
 
   const visible = banners.filter(b => b.visible)
-  if (visible.length === 0) return null
+  const hasContent = visible.length > 0 || !!state.commandError || state.connectionStatus === 'RECONNECTING'
+
+  if (!hasContent) return null
 
   return (
     <div className={styles.container}>
+      {state.connectionStatus === 'RECONNECTING' && (
+        <div className={`${styles.banner} ${styles.reconnecting}`}>
+          <span className={styles.icon}>📡</span>
+          <span className={styles.message}>Yhdistetään uudelleen…</span>
+        </div>
+      )}
+      {state.commandError && (
+        <div className={`${styles.banner} ${styles.error}`}>
+          <span className={styles.icon}>⚠️</span>
+          <span className={styles.message}>{state.commandError}</span>
+        </div>
+      )}
       {visible.map(b => (
-        <div key={b.event.id} className={styles.banner}>
+        <div key={b.event.id} className={`${styles.banner} ${b.event.icon === '⭐' ? styles.myTurn : ''}`}>
           <span className={styles.icon}>{b.event.icon}</span>
           <span className={styles.message}>{b.event.message}</span>
         </div>

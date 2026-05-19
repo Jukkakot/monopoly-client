@@ -2,7 +2,8 @@ import styles from './BoardSpot.module.css'
 import type { SpotDef } from '../../types/spots'
 import { STREET_COLORS, indexToGridPos } from '../../types/spots'
 import type { PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
-import { EMOJI_CHAR, type TokenShape } from '../../utils/tokenShapes'
+import { type TokenShape } from '../../utils/tokenShapes'
+import { TokenSvg } from './TokenSvg'
 
 interface Props {
   spot: SpotDef
@@ -42,63 +43,6 @@ const ROTATION: Record<string, string> = {
   right:  'rotate(-90deg)',
 }
 
-function TokenSvg({ color, shape, size }: { color: string; shape: TokenShape; size: number }) {
-  const emoji = EMOJI_CHAR[shape]
-  const s = size
-  const c = s / 2
-  const r = s / 2 - 0.5
-
-  if (emoji) {
-    return (
-      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-        <circle cx={c} cy={c} r={r} fill={color} stroke="#fff" strokeWidth="1" opacity="0.2" />
-        <text x={c} y={c + 1} textAnchor="middle" dominantBaseline="middle" fontSize={s * 0.7}>{emoji}</text>
-      </svg>
-    )
-  }
-
-  if (shape === 'star') {
-    const points = Array.from({ length: 5 }, (_, i) => {
-      const outerA = (i * 72 - 90) * Math.PI / 180
-      const innerA = outerA + 36 * Math.PI / 180
-      const ro = r, ri = r * 0.45
-      return [
-        `${c + ro * Math.cos(outerA)},${c + ro * Math.sin(outerA)}`,
-        `${c + ri * Math.cos(innerA)},${c + ri * Math.sin(innerA)}`,
-      ]
-    }).flat().join(' ')
-    return (
-      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-        <polygon points={points} fill={color} stroke="#fff" strokeWidth="0.8" />
-      </svg>
-    )
-  }
-
-  if (shape === 'square') {
-    const pad = 0.8
-    return (
-      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-        <rect x={pad} y={pad} width={s - pad * 2} height={s - pad * 2} rx="1.5" fill={color} stroke="#fff" strokeWidth="0.8" />
-      </svg>
-    )
-  }
-
-  if (shape === 'triangle') {
-    const points = `${c},${0.8} ${s - 0.8},${s - 0.8} ${0.8},${s - 0.8}`
-    return (
-      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-        <polygon points={points} fill={color} stroke="#fff" strokeWidth="0.8" />
-      </svg>
-    )
-  }
-
-  // Default: circle
-  return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-      <circle cx={c} cy={c} r={r} fill={color} stroke="#fff" strokeWidth="1" />
-    </svg>
-  )
-}
 
 function PlayerTokens({ players, seats, tokenShapes }: {
   players: PlayerSnapshot[]
@@ -116,7 +60,7 @@ function PlayerTokens({ players, seats, tokenShapes }: {
             key={p.playerId}
             color={seat?.tokenColorHex ?? '#888'}
             shape={shape}
-            size={10}
+            size={28}
           />
         )
       })}
@@ -136,12 +80,32 @@ function GoCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; 
 }
 
 function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
+  const jailed = players.filter(p => p.inJail)
+  const visiting = players.filter(p => !p.inJail)
   return (
     <div className={`${styles.corner} ${styles.jailCorner}`}>
       <div className={styles.jailTop}>⛓</div>
       <div className={styles.jailLabel}>Vankila</div>
-      <div className={styles.jailSub}>Vierailulla</div>
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
+      {jailed.length > 0 && (
+        <div className={styles.jailPrisoners}>
+          {jailed.map(p => {
+            const seat = seats.find(s => s.playerId === p.playerId)
+            const shape = tokenShapes?.get(p.playerId) ?? 'circle'
+            return (
+              <div key={p.playerId} className={styles.jailPrisonerRow}>
+                <TokenSvg color={seat?.tokenColorHex ?? '#888'} shape={shape} size={16} />
+                <span className={styles.jailRounds}>{p.jailRoundsRemaining}v</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {visiting.length > 0 && (
+        <>
+          <div className={styles.jailSub}>Vierailulla</div>
+          <PlayerTokens players={visiting} seats={seats} tokenShapes={tokenShapes} />
+        </>
+      )}
     </div>
   )
 }
@@ -214,21 +178,22 @@ export default function BoardSpot({ spot, index, property, players, seats, owner
       title={spot.name}
     >
       {colorBarColor && (
-        <div className={styles.colorBar} style={{ background: colorBarColor }} />
+        <div
+          className={`${styles.colorBar} ${property?.mortgaged ? styles.colorBarMortgaged : ''}`}
+          style={{ background: property?.mortgaged ? '#9e9e9e' : colorBarColor }}
+        >
+          {property?.mortgaged
+            ? <div className={styles.mortgagedLabel}>P</div>
+            : hotelCount > 0
+              ? <div className={styles.hotelInBar} />
+              : Array.from({ length: houseCount }).map((_, i) => <div key={i} className={styles.houseInBar} />)
+          }
+        </div>
       )}
 
       {icon && (
         <div className={spot.streetType === 'CHANCE' ? styles.chanceIcon : styles.icon}>
           {icon}
-        </div>
-      )}
-
-      {(hotelCount > 0 || houseCount > 0) && (
-        <div className={styles.buildings}>
-          {hotelCount > 0
-            ? <div className={styles.hotel} />
-            : Array.from({ length: houseCount }).map((_, i) => <div key={i} className={styles.house} />)
-          }
         </div>
       )}
 

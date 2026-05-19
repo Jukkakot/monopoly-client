@@ -27,6 +27,28 @@
   animation: slideIn 0.25s ease-out;
 }
 
+.banner.myTurn {
+  background: #e65100;
+  font-size: 16px;
+  padding: 12px 22px;
+  box-shadow: 0 4px 20px rgba(230, 81, 0, 0.5);
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.banner.error {
+  background: #b71c1c;
+}
+
+.banner.reconnecting {
+  background: #37474f;
+  font-size: 13px;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .icon {
   font-size: 18px;
   line-height: 1;

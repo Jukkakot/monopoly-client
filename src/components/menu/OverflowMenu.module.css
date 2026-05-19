@@ -2,17 +2,17 @@
   position: relative;
   display: flex;
   justify-content: flex-end;
-  margin-top: 4px;
+  flex-shrink: 0;
 }
 
 .trigger {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 1.5px solid #c8e6c9;
-  background: #f1f8f1;
-  font-size: 1.2rem;
-  color: #555;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.15);
+  font-size: 1.1rem;
+  color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -22,7 +22,7 @@
   padding-bottom: 2px;
 }
 
-.trigger:hover { background: #e8f5e9; }
+.trigger:hover { background: rgba(255,255,255,0.28); }
 
 .backdrop {
   position: fixed;
@@ -32,7 +32,7 @@
 
 .menu {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   right: 0;
   background: #fff;
   border: 1.5px solid #c8e6c9;
@@ -78,3 +78,140 @@
   background: #eee;
   margin: 4px 0;
 }
+
+.soundOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #555;
+  padding: 6px 14px 2px;
+}
+
+.tradeBtn {
+  padding-left: 22px !important;
+  font-size: 0.85rem !important;
+  color: #1b5e20 !important;
+}
+
+.tradeColor {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Build/mortgage modal */
+.buildModal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  padding: 0;
+  min-width: 300px;
+  max-width: 400px;
+  width: 90vw;
+  overflow: hidden;
+}
+
+.buildModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #2e7d32;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.closeBtn {
+  border: none;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.closeBtn:hover { background: rgba(255,255,255,0.35); }
+
+.buildSection {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.buildSectionTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.buildRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 0.85rem;
+}
+
+.buildDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.buildName {
+  flex: 1;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buildHouses {
+  display: flex;
+  gap: 2px;
+}
+
+.houseBox {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: #4caf50;
+}
+
+.houseEmpty {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: #e0e0e0;
+  border: 1px solid #ccc;
+}
+
+.buildBtn {
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1.5px solid #ccc;
+  background: #f5f5f5;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.buildBtn:hover { background: #e8e8e8; }
