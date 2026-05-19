@@ -3,6 +3,11 @@ import type { SessionState, ClientSessionSnapshot } from '../types/api'
 import { sendCommand, sseUrl } from '../api/sessionApi'
 import { useEffect, useRef } from 'react'
 import { deriveEvents, type GameEvent } from './events'
+import {
+  playTokenMove, playBuyProperty, playBuildHouse, playBuildHotel,
+  playGoToJail, playReleaseJail, playDrawCard, playBankruptcy,
+  playGameOver, playTradeAccepted, playMortgage, playPassGo,
+} from '../utils/sounds'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -41,6 +46,24 @@ function reducer(state: GameState, action: Action): GameState {
       const newSnapshot = action.snapshot.state
       const newEvents = newSnapshot ? deriveEvents(state.snapshot, newSnapshot) : []
       const myPlayerId = state.myPlayerId ?? (newSnapshot ? resolveMyPlayerId(newSnapshot) : null)
+      // Play sounds for derived events
+      for (const e of newEvents) {
+        switch (e.icon) {
+          case '🏃': playTokenMove(); break
+          case '🏠': playBuyProperty(); break
+          case '🏗': e.message.includes('hotelli') ? playBuildHotel() : playBuildHouse(); break
+          case '⛓': playGoToJail(); break
+          case '🔓': playReleaseJail(); break
+          case '🃏': playDrawCard(); break
+          case '💀': playBankruptcy(); break
+          case '🎊': playGameOver(); break
+          case '🤝': if (e.message.includes('päättyi')) playTradeAccepted(); break
+          case '🏦': playMortgage(); break
+          case '💳': playMortgage(); break
+        }
+        // Pass GO bonus
+        if (e.icon === '🏃' && e.message.includes('GO')) playPassGo()
+      }
       return {
         ...state,
         snapshot: newSnapshot,

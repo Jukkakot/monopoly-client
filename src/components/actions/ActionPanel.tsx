@@ -4,6 +4,7 @@ import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import OverflowMenu from '../menu/OverflowMenu'
+import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 
 interface Props {
   state: SessionState
@@ -17,7 +18,8 @@ function Btn({ label, onClick, variant = 'primary', disabled }: {
   disabled?: boolean
 }) {
   return (
-    <button className={`${styles.btn} ${styles[variant]}`} onClick={onClick} disabled={disabled}>
+    <button className={`${styles.btn} ${styles[variant]}`} disabled={disabled}
+      onClick={() => { playButtonClick(); onClick() }}>
       {label}
     </button>
   )
@@ -124,7 +126,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <Btn label="🎲 Heitä nopat" onClick={() => cmd('RollDiceCommand')} variant="primary" />
+        <Btn label="🎲 Heitä nopat" onClick={() => { playDiceRoll(); cmd('RollDiceCommand') }} variant="primary" />
         {menu}
       </div>
     )
@@ -279,6 +281,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   const isEligible = auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
 
   function placeBid(amount: number) {
+    playAuctionBid()
     sendCmd({ type: 'PlaceAuctionBidCommand', sessionId: sid, playerId: myPlayerId, auctionId: auction.auctionId, bid: amount })
     setCustomBid('')
   }

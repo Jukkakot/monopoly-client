@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useGame } from '../store/GameContext'
+import { playTokenMove } from '../utils/sounds'
 
 const STEP_MS = 130
 const BOARD_SIZE = 40
@@ -71,6 +72,7 @@ export function useTokenAnimation(): Map<string, number> {
       const next = queue[0]
       queueRef.current.set(pid, queue.slice(1))
       setDisplayPositions(prev => new Map(prev).set(pid, next))
+      playTokenMove()
       setTimeout(step, STEP_MS)
     }
 
