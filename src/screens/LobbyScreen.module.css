@@ -187,3 +187,49 @@
 }
 
 .backBtn:hover { background: #f5f5f5; }
+
+/* Token shape selection */
+.shapeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shapeLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shapeRow {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.shapeBtn {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.1s, background 0.1s;
+  padding: 0;
+  line-height: 1;
+}
+
+.shapeBtn:hover {
+  background: #f0f0f0;
+}
+
+.shapeSelected {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
+}

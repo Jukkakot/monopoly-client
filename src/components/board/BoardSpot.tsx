@@ -2,6 +2,7 @@ import styles from './BoardSpot.module.css'
 import type { SpotDef } from '../../types/spots'
 import { STREET_COLORS, indexToGridPos } from '../../types/spots'
 import type { PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
+import { EMOJI_CHAR, type TokenShape } from '../../utils/tokenShapes'
 
 interface Props {
   spot: SpotDef
@@ -11,6 +12,7 @@ interface Props {
   seats: SeatState[]
   ownerColor?: string
   onClick?: () => void
+  tokenShapes?: Map<string, TokenShape>
 }
 
 function getSide(idx: number): 'bottom' | 'left' | 'top' | 'right' | 'corner' {
@@ -40,67 +42,133 @@ const ROTATION: Record<string, string> = {
   right:  'rotate(-90deg)',
 }
 
-function PlayerTokens({ players, seats }: { players: PlayerSnapshot[]; seats: SeatState[] }) {
+function TokenSvg({ color, shape, size }: { color: string; shape: TokenShape; size: number }) {
+  const emoji = EMOJI_CHAR[shape]
+  const s = size
+  const c = s / 2
+  const r = s / 2 - 0.5
+
+  if (emoji) {
+    return (
+      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <circle cx={c} cy={c} r={r} fill={color} stroke="#fff" strokeWidth="1" opacity="0.2" />
+        <text x={c} y={c + 1} textAnchor="middle" dominantBaseline="middle" fontSize={s * 0.7}>{emoji}</text>
+      </svg>
+    )
+  }
+
+  if (shape === 'star') {
+    const points = Array.from({ length: 5 }, (_, i) => {
+      const outerA = (i * 72 - 90) * Math.PI / 180
+      const innerA = outerA + 36 * Math.PI / 180
+      const ro = r, ri = r * 0.45
+      return [
+        `${c + ro * Math.cos(outerA)},${c + ro * Math.sin(outerA)}`,
+        `${c + ri * Math.cos(innerA)},${c + ri * Math.sin(innerA)}`,
+      ]
+    }).flat().join(' ')
+    return (
+      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <polygon points={points} fill={color} stroke="#fff" strokeWidth="0.8" />
+      </svg>
+    )
+  }
+
+  if (shape === 'square') {
+    const pad = 0.8
+    return (
+      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <rect x={pad} y={pad} width={s - pad * 2} height={s - pad * 2} rx="1.5" fill={color} stroke="#fff" strokeWidth="0.8" />
+      </svg>
+    )
+  }
+
+  if (shape === 'triangle') {
+    const points = `${c},${0.8} ${s - 0.8},${s - 0.8} ${0.8},${s - 0.8}`
+    return (
+      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <polygon points={points} fill={color} stroke="#fff" strokeWidth="0.8" />
+      </svg>
+    )
+  }
+
+  // Default: circle
+  return (
+    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+      <circle cx={c} cy={c} r={r} fill={color} stroke="#fff" strokeWidth="1" />
+    </svg>
+  )
+}
+
+function PlayerTokens({ players, seats, tokenShapes }: {
+  players: PlayerSnapshot[]
+  seats: SeatState[]
+  tokenShapes?: Map<string, TokenShape>
+}) {
   if (!players.length) return null
   return (
     <div className={styles.tokens}>
       {players.map(p => {
         const seat = seats.find(s => s.playerId === p.playerId)
+        const shape = tokenShapes?.get(p.playerId) ?? 'circle'
         return (
-          <svg key={p.playerId} width="10" height="10" viewBox="0 0 10 10">
-            <circle cx="5" cy="5" r="4.5" fill={seat?.tokenColorHex ?? '#888'} stroke="#fff" strokeWidth="1" />
-          </svg>
+          <TokenSvg
+            key={p.playerId}
+            color={seat?.tokenColorHex ?? '#888'}
+            shape={shape}
+            size={10}
+          />
         )
       })}
     </div>
   )
 }
 
-function GoCorner({ players, seats }: { players: PlayerSnapshot[]; seats: SeatState[] }) {
+function GoCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
   return (
     <div className={`${styles.corner} ${styles.goCorner}`}>
       <div className={styles.goArrow}>→</div>
       <div className={styles.goText}>GO</div>
       <div className={styles.goSub}>Kerää €200</div>
-      <PlayerTokens players={players} seats={seats} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )
 }
 
-function JailCorner({ players, seats }: { players: PlayerSnapshot[]; seats: SeatState[] }) {
+function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
   return (
     <div className={`${styles.corner} ${styles.jailCorner}`}>
       <div className={styles.jailTop}>⛓</div>
       <div className={styles.jailLabel}>Vankila</div>
       <div className={styles.jailSub}>Vierailulla</div>
-      <PlayerTokens players={players} seats={seats} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )
 }
 
-function ParkingCorner({ players, seats }: { players: PlayerSnapshot[]; seats: SeatState[] }) {
+function ParkingCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
   return (
     <div className={`${styles.corner} ${styles.parkingCorner}`}>
       <div className={styles.cornerSymbol}>🅿</div>
       <div className={styles.cornerLabel}>Vapaa</div>
       <div className={styles.cornerLabel}>Pysäköinti</div>
-      <PlayerTokens players={players} seats={seats} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )
 }
 
-function GoJailCorner({ players, seats }: { players: PlayerSnapshot[]; seats: SeatState[] }) {
+function GoJailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
   return (
     <div className={`${styles.corner} ${styles.goJailCorner}`}>
       <div className={styles.cornerSymbol}>👮</div>
       <div className={styles.cornerLabel}>Mene</div>
       <div className={styles.cornerLabel}>Vankilaan!</div>
-      <PlayerTokens players={players} seats={seats} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )
 }
 
-export default function BoardSpot({ spot, index, property, players, seats, ownerColor, onClick }: Props) {
+export default function BoardSpot({ spot, index, property, players, seats, ownerColor, onClick, tokenShapes }: Props) {
   const { row, col } = indexToGridPos(index)
   const side = getSide(index)
 
@@ -111,10 +179,10 @@ export default function BoardSpot({ spot, index, property, players, seats, owner
 
   if (side === 'corner') {
     const inner =
-      spot.id === 'GO_SPOT'      ? <GoCorner players={players} seats={seats} /> :
-      spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} /> :
-      spot.id === 'FREE_PARKING' ? <ParkingCorner players={players} seats={seats} /> :
-                                   <GoJailCorner players={players} seats={seats} />
+      spot.id === 'GO_SPOT'      ? <GoCorner players={players} seats={seats} tokenShapes={tokenShapes} /> :
+      spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} tokenShapes={tokenShapes} /> :
+      spot.id === 'FREE_PARKING' ? <ParkingCorner players={players} seats={seats} tokenShapes={tokenShapes} /> :
+                                   <GoJailCorner players={players} seats={seats} tokenShapes={tokenShapes} />
     return <div className={styles.cornerWrapper} style={gridStyle}>{inner}</div>
   }
 
@@ -164,7 +232,7 @@ export default function BoardSpot({ spot, index, property, players, seats, owner
         </div>
       )}
 
-      <PlayerTokens players={players} seats={seats} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
 
       <div className={styles.label}>{spot.name}</div>
       {spot.price && <div className={styles.price}>€{spot.price}</div>}

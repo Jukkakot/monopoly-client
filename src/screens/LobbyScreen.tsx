@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { createSession } from '../api/sessionApi'
 import type { SeatKind, BotDifficulty } from '../types/api'
+import { GEOMETRIC_SHAPES, EMOJI_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import styles from './LobbyScreen.module.css'
 
 const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
+const DEFAULT_SHAPES: TokenShape[] = ['circle', 'star', 'square', 'triangle']
 
 interface PlayerRow {
   name: string
   kind: SeatKind
   color: string
   difficulty: BotDifficulty
+  tokenShape: TokenShape
 }
 
 function defaultRows(count: number): PlayerRow[] {
@@ -21,6 +24,7 @@ function defaultRows(count: number): PlayerRow[] {
     kind: 'HUMAN' as SeatKind,
     color: PRESET_COLORS[i],
     difficulty: 'NORMAL' as BotDifficulty,
+    tokenShape: DEFAULT_SHAPES[i] ?? 'circle',
   }))
 }
 
@@ -62,6 +66,7 @@ export default function LobbyScreen() {
         seatKinds: rows.map(r => r.kind),
         difficulties: rows.map(r => r.difficulty),
       })
+      saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
       joinSession(sessionId)
       navigate(`/game/${sessionId}`)
     } catch (e) {
@@ -107,6 +112,36 @@ export default function LobbyScreen() {
                   />
                 ))}
               </div>
+
+              {/* Token shape selection */}
+              <div className={styles.shapeSection}>
+                <div className={styles.shapeLabel}>Pelimerkki</div>
+                <div className={styles.shapeRow}>
+                  {GEOMETRIC_SHAPES.map(s => (
+                    <button
+                      key={s.key}
+                      className={`${styles.shapeBtn} ${row.tokenShape === s.key ? styles.shapeSelected : ''}`}
+                      style={row.tokenShape === s.key ? { color: row.color, borderColor: row.color } : {}}
+                      onClick={() => updateRow(i, { tokenShape: s.key })}
+                      title={s.key}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                  {EMOJI_SHAPES.map(s => (
+                    <button
+                      key={s.key}
+                      className={`${styles.shapeBtn} ${row.tokenShape === s.key ? styles.shapeSelected : ''}`}
+                      style={row.tokenShape === s.key ? { borderColor: row.color } : {}}
+                      onClick={() => updateRow(i, { tokenShape: s.key })}
+                      title={s.key}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className={styles.nameKindRow}>
                 <input
                   className={styles.nameInput}

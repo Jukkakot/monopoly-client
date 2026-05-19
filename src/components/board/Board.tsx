@@ -2,6 +2,7 @@ import styles from './Board.module.css'
 import BoardSpot from './BoardSpot'
 import { SPOTS } from '../../types/spots'
 import type { SessionState } from '../../types/api'
+import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 
 interface Props {
   state: SessionState
@@ -23,6 +24,14 @@ export default function Board({ state, onSpotClick }: Props) {
     ownerColors.set(seat.playerId, seat.tokenColorHex)
   }
 
+  // Build playerId → shape map from localStorage
+  const tokenShapes = new Map<string, TokenShape>()
+  const savedShapes = loadTokenShapes(state.sessionId)
+  for (const seat of state.seats) {
+    const shape = savedShapes[seat.index] ?? 'circle'
+    tokenShapes.set(seat.playerId, shape)
+  }
+
   return (
     <div className={styles.board}>
       {SPOTS.map((spot, idx) => {
@@ -38,6 +47,7 @@ export default function Board({ state, onSpotClick }: Props) {
             seats={state.seats}
             ownerColor={ownerColor}
             onClick={spot.isProperty ? () => onSpotClick?.(spot.id) : undefined}
+            tokenShapes={tokenShapes}
           />
         )
       })}
