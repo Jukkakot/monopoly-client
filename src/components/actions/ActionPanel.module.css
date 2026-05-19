@@ -6,46 +6,30 @@
 
 .btn {
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px 16px;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: filter 0.15s, transform 0.1s;
   letter-spacing: 0.3px;
+  font-family: 'Arial Narrow', Arial, sans-serif;
 }
 
 .btn:hover { filter: brightness(1.1); }
 .btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: default; filter: none; }
 
-.primary {
-  background: #2e7d32;
-  color: #fff;
-}
-
-.secondary {
-  background: #f9a825;
-  color: #fff;
-}
-
-.danger {
-  background: #c62828;
-  color: #fff;
-}
-
-.neutral {
-  background: #546e7a;
-  color: #fff;
-}
-
-.info {
-  background: #1565c0;
-  color: #fff;
-}
+.primary  { background: #2e7d32; color: #fff; }
+.secondary { background: #f9a825; color: #fff; }
+.danger   { background: #c62828; color: #fff; }
+.neutral  { background: #546e7a; color: #fff; }
+.info     { background: #1565c0; color: #fff; }
+.ghost    { background: transparent; color: #555; border: 1.5px solid #ccc; }
 
 .sectionTitle {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #777;
   text-transform: uppercase;
@@ -60,19 +44,11 @@
   padding: 10px 12px;
   font-size: 0.88rem;
   color: #2e7d32;
+  line-height: 1.4;
 }
 
-.infoBox.debt {
-  background: #ffebee;
-  border-color: #ef9a9a;
-  color: #b71c1c;
-}
-
-.infoBox.auction {
-  background: #fff8e1;
-  border-color: #ffe082;
-  color: #f57f17;
-}
+.infoBox.debt    { background: #ffebee; border-color: #ef9a9a; color: #b71c1c; }
+.infoBox.auction { background: #fff8e1; border-color: #ffe082; color: #f57f17; }
 
 .winner {
   text-align: center;
@@ -84,3 +60,220 @@
   border-radius: 12px;
   border: 2px solid #ffe082;
 }
+
+/* ── Auction bid quick buttons ── */
+.bidRow {
+  display: flex;
+  gap: 6px;
+}
+
+.bidQuick {
+  flex: 1;
+  padding: 8px 4px;
+  background: #e3f2fd;
+  border: 1.5px solid #90caf9;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1565c0;
+  cursor: pointer;
+}
+
+.bidQuick:hover { background: #bbdefb; }
+
+.bidInput {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.bidInput input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  min-width: 0;
+}
+
+/* ── Trade columns ── */
+.tradeColumns {
+  display: flex;
+  gap: 8px;
+}
+
+.tradeCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tradeColTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tradeMoney {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.moneyBtns {
+  display: flex;
+  gap: 3px;
+}
+
+.moneyBtns button {
+  flex: 1;
+  padding: 4px 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1.5px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  color: #333;
+}
+
+.moneyBtns button:hover { background: #f0f0f0; }
+.moneyBtns button:disabled { opacity: 0.35; cursor: default; }
+
+.propCheck {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 3px 2px;
+  border-radius: 4px;
+  color: #333;
+}
+
+.propCheck:hover { background: #f0f0f0; }
+
+.propCheck input { width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+
+/* ── Trade offer summary (receiver view) ── */
+.offerBlock {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.offerRow {
+  font-size: 0.83rem;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.offerLabel {
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+}
+
+.offerItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.offerItem {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ── Building UI ── */
+.buildSection {
+  background: #f0f8f0;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.buildGroup {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2e7d32;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.buildRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+.buildName {
+  flex: 1;
+  color: #333;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.buildHouses {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.houseBox {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: #1b5e20;
+}
+
+.houseEmpty {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: #e0e0e0;
+  border: 1px solid #ccc;
+}
+
+.buildBtn {
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #333;
+}
+
+.buildBtn:hover:not(:disabled) { background: #f0f0f0; }
+.buildBtn:disabled { opacity: 0.35; cursor: default; }
