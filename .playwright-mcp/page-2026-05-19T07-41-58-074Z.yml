@@ -1,0 +1,9 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - generic [ref=e6]: Monopoly
+    - generic [ref=e7]: Helsinki Edition
+  - button "+ Uusi peli" [ref=e8] [cursor=pointer]
+  - generic [ref=e9]:
+    - generic [ref=e10]: Käynnissä olevat pelit
+    - generic [ref=e11]: Ladataan…
+  - button "Päivitä lista" [ref=e12] [cursor=pointer]

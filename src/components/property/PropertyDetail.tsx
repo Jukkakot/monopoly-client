@@ -51,13 +51,13 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
 
   function openTrade() {
     if (!owner || !myPlayerId) return
-    sendCmd({ type: 'OpenTradeCommand', sessionId: sid, playerId: myPlayerId, targetPlayerId: owner.playerId })
+    sendCmd({ type: 'OpenTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, targetPlayerId: owner.playerId })
     onClose()
   }
 
   function toggleMortgage() {
     if (!myPlayerId) return
-    sendCmd({ type: 'ToggleMortgageCommand', sessionId: sid, playerId: myPlayerId, propertyId: spotId })
+    sendCmd({ type: 'ToggleMortgageCommand', sessionId: sid, actorPlayerId: myPlayerId, propertyId: spotId })
     onClose()
   }
 

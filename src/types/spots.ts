@@ -74,10 +74,12 @@ export const SPOT_INDEX: Record<string, number> = Object.fromEntries(
 )
 
 // Convert board index to CSS Grid row/col (1-based, 11x11)
+// Bottom row (idx 0-10): right→left  | Left col (idx 11-20): bottom→top
+// Top row (idx 21-30): left→right    | Right col (idx 31-39): top→bottom
 export function indexToGridPos(idx: number): { row: number; col: number; isCorner: boolean } {
   const isCorner = idx === 0 || idx === 10 || idx === 20 || idx === 30
   if (idx <= 10) return { row: 11, col: 11 - idx, isCorner }
-  if (idx <= 20) return { row: 20 - idx, col: 1, isCorner }
-  if (idx <= 30) return { row: 1, col: idx - 20, isCorner }
-  return { row: idx - 30 + 1, col: 11, isCorner }
+  if (idx <= 20) return { row: 21 - idx, col: 1, isCorner }
+  if (idx <= 30) return { row: 1, col: idx - 19, isCorner }
+  return { row: idx - 29, col: 11, isCorner }
 }

@@ -36,7 +36,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const me = state.players.find(p => p.playerId === myPlayerId)
 
   const cmd = (type: string, extra: object = {}) =>
-    sendCmd({ type, sessionId: sid, playerId: myPlayerId, ...extra })
+    sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
 
   // GAME OVER
   if (state.status === 'GAME_OVER' || phase === 'GAME_OVER') {
@@ -203,7 +203,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                   {Array.from({ length: 4 - prop.houseCount }).map((_, i) => <div key={i} className={styles.houseEmpty} />)}
                 </div>
                 <button className={styles.buildBtn}
-                  onClick={() => sendCmd({ type: 'BuyBuildingRoundCommand', sessionId: sid, playerId: myPlayerId, propertyId: prop.propertyId })}>
+                  onClick={() => sendCmd({ type: 'BuyBuildingRoundCommand', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                   +🏠
                 </button>
               </div>
@@ -221,7 +221,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
               <div key={prop.propertyId} className={styles.buildRow}>
                 <span className={styles.buildName}>{spot.name}</span>
                 <button className={styles.buildBtn}
-                  onClick={() => sendCmd({ type: 'ToggleMortgageCommand', sessionId: sid, playerId: myPlayerId, propertyId: prop.propertyId })}>
+                  onClick={() => sendCmd({ type: 'ToggleMortgageCommand', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                   {prop.mortgaged ? '💳 Lunasta' : '🏦 Panttaa'}
                 </button>
               </div>
@@ -250,7 +250,7 @@ function TradePartnerButtons({ state, myPlayerId, sendCmd }: {
         const seat = state.seats.find(s => s.playerId === p.playerId)
         return (
           <button key={p.playerId} className={`${styles.btn} ${styles.neutral}`}
-            onClick={() => sendCmd({ type: 'OpenTradeCommand', sessionId: sid, playerId: myPlayerId, targetPlayerId: p.playerId })}>
+            onClick={() => sendCmd({ type: 'OpenTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, targetPlayerId: p.playerId })}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <svg width="12" height="12" viewBox="0 0 12 12">
                 <circle cx="6" cy="6" r="5.5" fill={seat?.tokenColorHex ?? '#888'} />
@@ -282,7 +282,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
 
   function placeBid(amount: number) {
     playAuctionBid()
-    sendCmd({ type: 'PlaceAuctionBidCommand', sessionId: sid, playerId: myPlayerId, auctionId: auction.auctionId, bid: amount })
+    sendCmd({ type: 'PlaceAuctionBidCommand', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId, bid: amount })
     setCustomBid('')
   }
 
@@ -320,7 +320,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
             </button>
           </div>
           <button className={`${styles.btn} ${styles.ghost}`}
-            onClick={() => sendCmd({ type: 'PassAuctionCommand', sessionId: sid, playerId: myPlayerId, auctionId: auction.auctionId })}>
+            onClick={() => sendCmd({ type: 'PassAuctionCommand', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}>
             🚫 Passi
           </button>
         </>
@@ -351,14 +351,14 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         Käteinen: €{debt.currentCash}
       </div>
       {debt.allowedActions.includes('PAY_DEBT_NOW') && (
-        <Btn label="💸 Maksa velka" onClick={() => sendCmd({ type: 'PayDebtCommand', sessionId: sid, playerId: myPlayerId, debtId: debt.debtId })} variant="info" />
+        <Btn label="💸 Maksa velka" onClick={() => sendCmd({ type: 'PayDebtCommand', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />
       )}
       {debt.allowedActions.includes('MORTGAGE_PROPERTY') &&
         state.properties.filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged).map(prop => {
           const spot = SPOTS.find(s => s.id === prop.propertyId)
           return (
             <Btn key={prop.propertyId} label={`🏦 Panttaa ${spot?.name ?? prop.propertyId}`}
-              onClick={() => sendCmd({ type: 'MortgagePropertyForDebtCommand', sessionId: sid, playerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId })}
+              onClick={() => sendCmd({ type: 'MortgagePropertyForDebtCommand', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId })}
               variant="secondary" />
           )
         })
@@ -369,13 +369,13 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           const type = prop.hotelCount > 0 ? 'hotelli' : 'talo'
           return (
             <Btn key={prop.propertyId} label={`🏠 Myy ${type}: ${spot?.name ?? prop.propertyId}`}
-              onClick={() => sendCmd({ type: 'SellBuildingForDebtCommand', sessionId: sid, playerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 })}
+              onClick={() => sendCmd({ type: 'SellBuildingForDebtCommand', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 })}
               variant="secondary" />
           )
         })
       }
       {debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
-        <Btn label="☠ Julistaudu konkurssiin" onClick={() => sendCmd({ type: 'DeclareBankruptcyCommand', sessionId: sid, playerId: myPlayerId, debtId: debt.debtId })} variant="danger" />
+        <Btn label="☠ Julistaudu konkurssiin" onClick={() => sendCmd({ type: 'DeclareBankruptcyCommand', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" />
       )}
     </div>
   )
@@ -403,7 +403,7 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.panel}>
       <div className={styles.infoBox}>⏳ Odotetaan kaupan vastausta…</div>
-      <Btn label="❌ Peruuta tarjous" onClick={() => sendCmd({ type: 'CancelTradeCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
+      <Btn label="❌ Peruuta tarjous" onClick={() => sendCmd({ type: 'CancelTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
     </div>
   )
 }
@@ -430,13 +430,13 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   function editMoney(offeredSide: boolean, delta: number) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
     const newAmount = Math.max(0, side.moneyAmount + delta)
-    sendCmd({ type: 'EditTradeOfferCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId,
+    sendCmd({ type: 'EditTradeOfferCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
       patch: { offeredSide, moneyAmount: newAmount, addPropertyIds: [], removePropertyIds: [] } })
   }
 
   function toggleProp(offeredSide: boolean, propertyId: string, included: boolean) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
-    sendCmd({ type: 'EditTradeOfferCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId,
+    sendCmd({ type: 'EditTradeOfferCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
       patch: { offeredSide, moneyAmount: side.moneyAmount,
         addPropertyIds: included ? [] : [propertyId],
         removePropertyIds: included ? [propertyId] : [] } })
@@ -506,10 +506,10 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       </div>
 
       <Btn label="📤 Lähetä tarjous"
-        onClick={() => sendCmd({ type: 'SubmitTradeOfferCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId })}
+        onClick={() => sendCmd({ type: 'SubmitTradeOfferCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
         variant="primary" />
       <Btn label="❌ Peruuta"
-        onClick={() => sendCmd({ type: 'CancelTradeCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId })}
+        onClick={() => sendCmd({ type: 'CancelTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
         variant="danger" />
     </div>
   )
@@ -562,9 +562,9 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
         </div>
       </div>
 
-      <Btn label="✅ Hyväksy" onClick={() => sendCmd({ type: 'AcceptTradeCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" />
-      <Btn label="💬 Vastatarjous" onClick={() => sendCmd({ type: 'CounterTradeCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" />
-      <Btn label="❌ Hylkää" onClick={() => sendCmd({ type: 'DeclineTradeCommand', sessionId: sid, playerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
+      <Btn label="✅ Hyväksy" onClick={() => sendCmd({ type: 'AcceptTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" />
+      <Btn label="💬 Vastatarjous" onClick={() => sendCmd({ type: 'CounterTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" />
+      <Btn label="❌ Hylkää" onClick={() => sendCmd({ type: 'DeclineTradeCommand', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
     </div>
   )
 }

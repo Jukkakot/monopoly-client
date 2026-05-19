@@ -24,6 +24,8 @@ export default function GameScreen() {
     }
   }, [sessionId])
 
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
+
   if (state.connectionStatus === 'FAILED') {
     return (
       <div className={styles.center}>
@@ -46,8 +48,6 @@ export default function GameScreen() {
   }
 
   const myPlayerId = state.myPlayerId ?? ''
-  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
-
   const isGameOver = state.snapshot.status === 'GAME_OVER'
 
   return (

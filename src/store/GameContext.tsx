@@ -26,6 +26,11 @@ type Action =
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
 
 function resolveMyPlayerId(snapshot: SessionState): string | null {
+  const activeId = snapshot.turn?.activePlayerId
+  if (activeId) {
+    const activeSeat = snapshot.seats.find(s => s.playerId === activeId && s.seatKind === 'HUMAN')
+    if (activeSeat) return activeId
+  }
   const humanSeat = snapshot.seats.find(s => s.seatKind === 'HUMAN')
   return humanSeat?.playerId ?? null
 }

@@ -81,9 +81,10 @@ function SessionRow({ session, onJoin, label = 'Liity' }: {
   onJoin: () => void
   label?: string
 }) {
-  const date = new Date(session.createdAt).toLocaleString('fi-FI', {
-    day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
+  const ts = session.createdAt ? new Date(session.createdAt) : null
+  const date = ts && !isNaN(ts.getTime())
+    ? ts.toLocaleString('fi-FI', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '–'
   return (
     <div className={styles.sessionRow}>
       <div className={styles.sessionInfo}>

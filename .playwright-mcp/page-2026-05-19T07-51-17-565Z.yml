@@ -1,0 +1,65 @@
+- generic [ref=e14]:
+  - generic [ref=e15]:
+    - generic [ref=e16]: Monopoly
+    - generic [ref=e17]: Helsinki Edition
+  - generic [ref=e18]:
+    - generic [ref=e19]: Pelaajia
+    - generic [ref=e20]:
+      - button "2" [ref=e21] [cursor=pointer]
+      - button "3" [ref=e22] [cursor=pointer]
+      - button "4" [ref=e23] [cursor=pointer]
+  - generic [ref=e24]:
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - button "#e53935" [ref=e27] [cursor=pointer]
+        - button "#1e88e5" [ref=e28] [cursor=pointer]
+        - button "#43a047" [ref=e29] [cursor=pointer]
+        - button "#f9a825" [ref=e30] [cursor=pointer]
+        - button "#8e24aa" [ref=e31] [cursor=pointer]
+        - button "#ff7043" [ref=e32] [cursor=pointer]
+        - button "#00acc1" [ref=e33] [cursor=pointer]
+        - button "#6d4c41" [ref=e34] [cursor=pointer]
+      - generic [ref=e35]:
+        - generic [ref=e36]: Pelimerkki
+        - generic [ref=e37]:
+          - button "●" [ref=e38] [cursor=pointer]
+          - button "★" [ref=e39] [cursor=pointer]
+          - button "■" [ref=e40] [cursor=pointer]
+          - button "▲" [ref=e41] [cursor=pointer]
+          - button "🎩" [ref=e42] [cursor=pointer]
+          - button "🚗" [ref=e43] [cursor=pointer]
+          - button "🐕" [ref=e44] [cursor=pointer]
+          - button "⚓" [ref=e45] [cursor=pointer]
+          - button "👞" [ref=e46] [cursor=pointer]
+          - button "🎸" [ref=e47] [cursor=pointer]
+      - generic [ref=e48]:
+        - textbox "Pelaaja 1" [ref=e49]
+        - button "Ihminen" [ref=e50] [cursor=pointer]
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - button "#e53935" [ref=e53] [cursor=pointer]
+        - button "#1e88e5" [ref=e54] [cursor=pointer]
+        - button "#43a047" [ref=e55] [cursor=pointer]
+        - button "#f9a825" [ref=e56] [cursor=pointer]
+        - button "#8e24aa" [ref=e57] [cursor=pointer]
+        - button "#ff7043" [ref=e58] [cursor=pointer]
+        - button "#00acc1" [ref=e59] [cursor=pointer]
+        - button "#6d4c41" [ref=e60] [cursor=pointer]
+      - generic [ref=e61]:
+        - generic [ref=e62]: Pelimerkki
+        - generic [ref=e63]:
+          - button "●" [ref=e64] [cursor=pointer]
+          - button "★" [ref=e65] [cursor=pointer]
+          - button "■" [ref=e66] [cursor=pointer]
+          - button "▲" [ref=e67] [cursor=pointer]
+          - button "🎩" [ref=e68] [cursor=pointer]
+          - button "🚗" [ref=e69] [cursor=pointer]
+          - button "🐕" [ref=e70] [cursor=pointer]
+          - button "⚓" [ref=e71] [cursor=pointer]
+          - button "👞" [ref=e72] [cursor=pointer]
+          - button "🎸" [ref=e73] [cursor=pointer]
+      - generic [ref=e74]:
+        - textbox "Pelaaja 2" [ref=e75]
+        - button "Ihminen" [ref=e76] [cursor=pointer]
+  - button "Aloita peli" [ref=e77] [cursor=pointer]
+  - button "Takaisin" [ref=e78] [cursor=pointer]
