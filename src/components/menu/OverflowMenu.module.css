@@ -1,0 +1,80 @@
+.root {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.trigger {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #c8e6c9;
+  background: #f1f8f1;
+  font-size: 1.2rem;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+
+.trigger:hover { background: #e8f5e9; }
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+}
+
+.menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1.5px solid #c8e6c9;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  min-width: 200px;
+  z-index: 401;
+  overflow: hidden;
+  padding: 4px 0;
+}
+
+.menuTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 14px 4px;
+}
+
+.menuItem {
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  color: #222;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.1s;
+}
+
+.menuItem:hover { background: #f5f5f5; }
+
+.menuItem.danger { color: #c62828; }
+.menuItem.danger:hover { background: #ffebee; }
+
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 4px 0;
+}

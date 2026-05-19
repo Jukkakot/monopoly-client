@@ -3,6 +3,7 @@ import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
+import OverflowMenu from '../menu/OverflowMenu'
 
 interface Props {
   state: SessionState
@@ -104,6 +105,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     )
   }
 
+  const menu = <OverflowMenu />
+
   // WAITING_FOR_ROLL
   if (phase === 'WAITING_FOR_ROLL') {
     return (
@@ -122,6 +125,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="🎲 Heitä nopat" onClick={() => cmd('RollDiceCommand')} variant="primary" />
+        {menu}
       </div>
     )
   }
@@ -133,6 +137,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="✅ Lopeta vuoro" onClick={() => cmd('EndTurnCommand')} variant="primary" />
+        {menu}
       </div>
     )
   }
