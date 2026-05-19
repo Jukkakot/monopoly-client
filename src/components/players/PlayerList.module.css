@@ -54,6 +54,25 @@
   font-size: 1rem;
   color: #2e7d32;
   white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.cashUp {
+  animation: flashUp 0.5s ease-out;
+}
+
+.cashDown {
+  animation: flashDown 0.5s ease-out;
+}
+
+@keyframes flashUp {
+  0%   { color: #1b5e20; transform: scale(1.15); }
+  100% { color: #2e7d32; transform: scale(1); }
+}
+
+@keyframes flashDown {
+  0%   { color: #c62828; transform: scale(1.1); }
+  100% { color: #2e7d32; transform: scale(1); }
 }
 
 .badge {

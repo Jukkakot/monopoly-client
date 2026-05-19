@@ -2,6 +2,12 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  animation: panelIn 0.2s ease-out;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .btn {

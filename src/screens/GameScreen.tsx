@@ -9,6 +9,7 @@ import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
 import FlashBanner from '../components/notification/FlashBanner'
 import PropertyDetail from '../components/property/PropertyDetail'
+import Confetti from '../components/effects/Confetti'
 import styles from './GameScreen.module.css'
 
 export default function GameScreen() {
@@ -47,8 +48,11 @@ export default function GameScreen() {
   const myPlayerId = state.myPlayerId ?? ''
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
 
+  const isGameOver = state.snapshot.status === 'GAME_OVER'
+
   return (
     <>
+      {isGameOver && <Confetti />}
       <FlashBanner />
       {selectedSpotId && (
         <PropertyDetail
