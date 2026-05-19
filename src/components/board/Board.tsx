@@ -3,6 +3,7 @@ import BoardSpot from './BoardSpot'
 import { SPOTS } from '../../types/spots'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
+import { useTokenAnimation } from '../../hooks/useTokenAnimation'
 
 interface Props {
   state: SessionState
@@ -10,13 +11,16 @@ interface Props {
 }
 
 export default function Board({ state, onSpotClick }: Props) {
+  const animatedPositions = useTokenAnimation()
+
+  // Use animated positions for non-bankrupt players
   const playersBySpot = new Map<number, typeof state.players>()
   for (const p of state.players) {
-    if (!p.bankrupt && !p.eliminated) {
-      const list = playersBySpot.get(p.boardIndex) ?? []
-      list.push(p)
-      playersBySpot.set(p.boardIndex, list)
-    }
+    if (p.bankrupt || p.eliminated) continue
+    const displayIdx = animatedPositions.get(p.playerId) ?? p.boardIndex
+    const list = playersBySpot.get(displayIdx) ?? []
+    list.push(p)
+    playersBySpot.set(displayIdx, list)
   }
 
   const ownerColors = new Map<string, string>()
