@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import AppLayout from '../components/layout/AppLayout'
@@ -8,6 +8,7 @@ import PlayerList from '../components/players/PlayerList'
 import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
 import FlashBanner from '../components/notification/FlashBanner'
+import PropertyDetail from '../components/property/PropertyDetail'
 import styles from './GameScreen.module.css'
 
 export default function GameScreen() {
@@ -44,22 +45,30 @@ export default function GameScreen() {
   }
 
   const myPlayerId = state.myPlayerId ?? ''
+  const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
 
   return (
     <>
-    <FlashBanner />
-    <AppLayout
-      header={
-        <Header
-          snapshot={state.snapshot}
-          connectionStatus={state.connectionStatus}
+      <FlashBanner />
+      {selectedSpotId && (
+        <PropertyDetail
+          spotId={selectedSpotId}
+          state={state.snapshot}
+          onClose={() => setSelectedSpotId(null)}
         />
-      }
-      board={<Board state={state.snapshot} />}
-      players={<PlayerList state={state.snapshot} />}
-      log={<EventLog />}
-      actions={<ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />}
-    />
+      )}
+      <AppLayout
+        header={
+          <Header
+            snapshot={state.snapshot}
+            connectionStatus={state.connectionStatus}
+          />
+        }
+        board={<Board state={state.snapshot} onSpotClick={setSelectedSpotId} />}
+        players={<PlayerList state={state.snapshot} />}
+        log={<EventLog />}
+        actions={<ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />}
+      />
     </>
   )
 }

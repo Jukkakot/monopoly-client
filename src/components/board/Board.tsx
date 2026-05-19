@@ -5,9 +5,10 @@ import type { SessionState } from '../../types/api'
 
 interface Props {
   state: SessionState
+  onSpotClick?: (spotId: string) => void
 }
 
-export default function Board({ state }: Props) {
+export default function Board({ state, onSpotClick }: Props) {
   const playersBySpot = new Map<number, typeof state.players>()
   for (const p of state.players) {
     if (!p.bankrupt && !p.eliminated) {
@@ -36,6 +37,7 @@ export default function Board({ state }: Props) {
             players={playersBySpot.get(idx) ?? []}
             seats={state.seats}
             ownerColor={ownerColor}
+            onClick={spot.isProperty ? () => onSpotClick?.(spot.id) : undefined}
           />
         )
       })}

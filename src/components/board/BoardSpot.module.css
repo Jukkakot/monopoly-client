@@ -1,40 +1,48 @@
-.spot {
+.spotWrapper {
+  overflow: hidden;
   position: relative;
+  min-width: 0;
+  min-height: 0;
   background: #fefcf0;
-  border: 1px solid #2d4a1e;
+}
+
+.spot {
+  position: absolute;
+  inset: 0;
+  background: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding: 1px;
+  padding: 2px 1px;
   overflow: hidden;
-  font-size: clamp(4px, 0.85vw, 8px);
+  font-size: clamp(4px, 0.85vw, 8.5px);
   cursor: default;
+  transform-origin: center center;
 }
 
-/* Color bar — always at CSS-top (rotation moves it to the outer board edge) */
+/* Color band at CSS-top; rotation brings it to the outer board edge */
 .colorBar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 28%;
-  min-height: 4px;
+  height: 30%;
+  min-height: 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-/* Generic icon for community/railroad/utility/tax */
 .icon {
-  font-size: clamp(7px, 1.4vw, 13px);
+  font-size: clamp(7px, 1.6vw, 15px);
   margin: auto 0;
   line-height: 1;
 }
 
-/* Chance "?" gets special bold styling */
 .chanceIcon {
-  font-size: clamp(10px, 2.2vw, 20px);
+  font-size: clamp(11px, 2.4vw, 22px);
   font-weight: 900;
-  color: #e65100;
-  font-family: 'Georgia', serif;
+  color: #bf4000;
+  font-family: 'Georgia', 'Times New Roman', serif;
   font-style: italic;
   margin: auto 0;
   line-height: 1;
@@ -44,9 +52,9 @@
   width: 100%;
   text-align: center;
   font-size: inherit;
-  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
   font-weight: 700;
-  color: #111;
+  color: #000;
   line-height: 1.1;
   word-break: break-word;
   hyphens: auto;
@@ -55,8 +63,10 @@
 
 .price {
   font-size: 0.85em;
-  color: #333;
+  color: #222;
   font-weight: 500;
+  margin-top: 1px;
+  font-family: 'Arial Narrow', Arial, sans-serif;
 }
 
 .tokens {
@@ -64,25 +74,25 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 1px;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 
 .buildings {
   display: flex;
   gap: 1px;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 
 .house {
-  width: clamp(4px, 0.8vw, 7px);
-  height: clamp(4px, 0.8vw, 7px);
+  width: clamp(3px, 0.8vw, 7px);
+  height: clamp(3px, 0.8vw, 7px);
   background: #1b5e20;
   border-radius: 1px;
 }
 
 .hotel {
-  width: clamp(5px, 1vw, 9px);
-  height: clamp(5px, 1vw, 9px);
+  width: clamp(4px, 1vw, 9px);
+  height: clamp(4px, 1vw, 9px);
   background: #b71c1c;
   border-radius: 1px;
 }
@@ -92,45 +102,121 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
 }
 
-/* ---- Corner spots ---- */
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover .spot {
+  filter: brightness(0.93);
+}
+
+/* ---- Corner squares ---- */
+.cornerWrapper {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
 .corner {
+  flex: 1;
   background: #fefcf0;
-  border: 2px solid #2d4a1e;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 3px;
-  gap: 1px;
+  padding: 4px;
+  gap: 2px;
+  overflow: hidden;
 }
 
 .cornerSymbol {
-  font-size: clamp(10px, 2.2vw, 22px);
+  font-size: clamp(10px, 2.4vw, 24px);
   line-height: 1;
 }
 
 .cornerLabel {
   font-size: clamp(5px, 1vw, 10px);
   font-weight: 900;
-  color: #111;
+  color: #000;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: 'Arial Narrow', Arial, sans-serif;
+  line-height: 1.1;
 }
 
 .cornerSub {
-  font-size: clamp(3.5px, 0.7vw, 7px);
-  color: #555;
+  font-size: clamp(3px, 0.6vw, 6px);
+  color: #444;
   font-style: italic;
 }
 
+/* GO corner */
+.goCorner {
+  background: #fffaf0;
+}
+
+.goArrow {
+  font-size: clamp(14px, 2.8vw, 28px);
+  color: #cc0000;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.goText {
+  font-size: clamp(10px, 2.4vw, 24px);
+  font-weight: 900;
+  font-style: italic;
+  color: #cc0000;
+  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+  letter-spacing: 2px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #880000;
+}
+
+.goSub {
+  font-size: clamp(3px, 0.6vw, 6px);
+  color: #444;
+  font-style: italic;
+}
+
+/* Jail */
+.jailCorner {
+  background: #fffcf0;
+}
+
+.jailTop {
+  font-size: clamp(9px, 2vw, 20px);
+  line-height: 1;
+}
+
+.jailLabel {
+  font-size: clamp(5px, 1.1vw, 11px);
+  font-weight: 900;
+  color: #000;
+  text-transform: uppercase;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.jailSub {
+  font-size: clamp(3px, 0.6vw, 6px);
+  color: #666;
+  font-style: italic;
+  border-top: 1px solid #ddd;
+  padding-top: 2px;
+  margin-top: 1px;
+}
+
+.parkingCorner { background: #f0fff4; }
+.goJailCorner  { background: #fff0f0; }
+
 /* ---- Special type backgrounds ---- */
-.community { background: #ddeeff; }
-.chance    { background: #fff4cc; }
-.tax       { background: #ffeaea; }
-.railroad  { background: #eeeeee; }
-.utility   { background: #ede7f6; }
+.community { background: #e8f4ff; }
+.chance    { background: #fff6dd; }
+.tax       { background: #ffe8e8; }
+.railroad  { background: #f0f0f0; }
+.utility   { background: #f0eaff; }
