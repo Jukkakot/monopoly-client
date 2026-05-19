@@ -1,60 +1,192 @@
+/* ── Shared root ── */
 .root {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
 }
 
-.boardCol {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 8px;
-  background: #e8f5e9;
+/* ══════════════════════════════════════
+   MOBILE layout  (<768px)
+   Board + content area stacked vertically,
+   fixed bottom nav, desktop columns hidden.
+══════════════════════════════════════ */
+
+/* Hide desktop columns on mobile */
+.boardCol,
+.sideCol {
+  display: none;
 }
 
-.sideCol {
+.mobileContent {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow: hidden;
+  padding-bottom: 56px; /* bottom nav height */
 }
 
-.players {
-  padding: 8px 12px;
-  border-bottom: 1px solid #c8e6c9;
-}
-
-.actions {
-  padding: 12px;
+.mobileBoard {
+  background: #1a5c1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
   flex: 1;
 }
+
+.mobileBoardHidden {
+  display: none;
+}
+
+.mobileBoardCompact {
+  background: #1a5c1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  /* compact height – board inside will scale itself */
+  max-height: 45vw;
+  overflow: hidden;
+}
+
+.mobileSection {
+  flex: 1;
+  overflow-y: auto;
+  background: #f5f9f5;
+}
+
+.mobilePadded {
+  padding: 12px;
+}
+
+.mobileNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  background: #fff;
+  border-top: 1px solid #c8e6c9;
+  z-index: 100;
+}
+
+.navBtn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  padding: 4px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: color 0.15s;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.navActive {
+  color: #2e7d32;
+  border-top: 2px solid #2e7d32;
+}
+
+/* ══════════════════════════════════════
+   DESKTOP layout  (≥768px)
+   Two-column: board left, sidebar right.
+   Mobile elements hidden.
+══════════════════════════════════════ */
 
 @media (min-width: 768px) {
   .root {
     flex-direction: row;
     align-items: stretch;
+    height: 100svh;
+    overflow: hidden;
   }
 
+  /* Show desktop columns */
   .boardCol {
-    width: auto;
+    display: flex;
     flex: 1 1 0;
     align-items: center;
-    padding: 16px;
+    justify-content: center;
+    background: #1a5c1a;
+    padding: 12px;
     min-width: 0;
+    overflow: hidden;
+    height: 100svh;
   }
 
   .sideCol {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 320px;
     width: 320px;
-    flex-shrink: 0;
     border-left: 2px solid #c8e6c9;
+    background: #f5f9f5;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  /* Hide mobile UI */
+  .mobileContent,
+  .mobileNav {
+    display: none;
+  }
+
+  /* ── Tab bar ── */
+  .tabBar {
+    display: flex;
+    border-bottom: 2px solid #c8e6c9;
+    flex-shrink: 0;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 4px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: #888;
+    cursor: pointer;
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    letter-spacing: 0.3px;
+    transition: color 0.15s, border-bottom 0.15s;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+
+  .tabActive {
+    color: #2e7d32;
+    border-bottom: 3px solid #2e7d32;
+  }
+
+  /* ── Tab content area ── */
+  .tabContent {
+    flex: 1;
     overflow-y: auto;
+    min-height: 0;
   }
 
-  .players {
-    padding: 12px 16px;
+  .tabPane {
+    display: flex;
+    flex-direction: column;
   }
 
+  .tabPaneHidden {
+    display: none;
+  }
+
+  /* ── Actions section (always visible at bottom) ── */
   .actions {
-    padding: 16px;
+    padding: 12px 16px;
+    border-top: 1px solid #c8e6c9;
+    flex-shrink: 0;
+    background: #f5f9f5;
   }
 }

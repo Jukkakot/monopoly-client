@@ -6,12 +6,13 @@ import Header from '../components/layout/Header'
 import Board from '../components/board/Board'
 import PlayerList from '../components/players/PlayerList'
 import ActionPanel from '../components/actions/ActionPanel'
+import EventLog from '../components/log/EventLog'
 import styles from './GameScreen.module.css'
 
 export default function GameScreen() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
-  const { state, joinSession, sendCmd } = useGame()
+  const { state, joinSession } = useGame()
 
   useEffect(() => {
     if (!sessionId) { navigate('/'); return }
@@ -41,6 +42,8 @@ export default function GameScreen() {
     )
   }
 
+  const myPlayerId = state.myPlayerId ?? ''
+
   return (
     <AppLayout
       header={
@@ -51,7 +54,8 @@ export default function GameScreen() {
       }
       board={<Board state={state.snapshot} />}
       players={<PlayerList state={state.snapshot} />}
-      actions={<ActionPanel state={state.snapshot} sendCmd={sendCmd} />}
+      log={<EventLog />}
+      actions={<ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />}
     />
   )
 }

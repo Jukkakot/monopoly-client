@@ -2,6 +2,7 @@ import { createContext, useContext, useReducer, useCallback, type ReactNode } fr
 import type { SessionState, ClientSessionSnapshot } from '../types/api'
 import { sendCommand, sseUrl } from '../api/sessionApi'
 import { useEffect, useRef } from 'react'
+import { deriveEvents, type GameEvent } from './events'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -10,6 +11,8 @@ interface GameState {
   snapshot: SessionState | null
   version: number
   connectionStatus: ConnectionStatus
+  events: GameEvent[]
+  myPlayerId: string | null
 }
 
 type Action =
@@ -17,17 +20,36 @@ type Action =
   | { type: 'SET_SNAPSHOT'; snapshot: ClientSessionSnapshot }
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
 
+function resolveMyPlayerId(snapshot: SessionState): string | null {
+  const humanSeat = snapshot.seats.find(s => s.seatKind === 'HUMAN')
+  return humanSeat?.playerId ?? null
+}
+
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'SET_SESSION':
-      return { ...state, sessionId: action.sessionId, snapshot: null, connectionStatus: 'CONNECTING' }
-    case 'SET_SNAPSHOT':
       return {
         ...state,
-        snapshot: action.snapshot.state,
+        sessionId: action.sessionId,
+        snapshot: null,
+        version: 0,
+        connectionStatus: 'CONNECTING',
+        events: [],
+        myPlayerId: null,
+      }
+    case 'SET_SNAPSHOT': {
+      const newSnapshot = action.snapshot.state
+      const newEvents = newSnapshot ? deriveEvents(state.snapshot, newSnapshot) : []
+      const myPlayerId = state.myPlayerId ?? (newSnapshot ? resolveMyPlayerId(newSnapshot) : null)
+      return {
+        ...state,
+        snapshot: newSnapshot,
         version: action.snapshot.version,
         connectionStatus: 'LIVE',
+        events: newSnapshot ? [...state.events, ...newEvents].slice(-200) : state.events,
+        myPlayerId,
       }
+    }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
     default:
@@ -49,6 +71,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     snapshot: null,
     version: 0,
     connectionStatus: 'CONNECTING',
+    events: [],
+    myPlayerId: null,
   })
 
   const retryCount = useRef(0)
