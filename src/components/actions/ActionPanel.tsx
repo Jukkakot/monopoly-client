@@ -7,6 +7,8 @@ import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sound
 import { calcNetWorth, calcCurrentRentIncome } from '../../utils/netWorth'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+
 function useTurnTimer(activeId: string | undefined, phase: string | undefined): number {
   const [seconds, setSeconds] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -270,7 +272,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <Btn label="🎲 Heitä nopat  [välilyönti]" onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
+        <Btn label={isTouchDevice ? '🎲 Heitä nopat' : '🎲 Heitä nopat  [välilyönti]'} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
         {abortBtn}
       </div>
     )
@@ -289,7 +291,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <Btn label="✅ Lopeta vuoro  [välilyönti]" onClick={() => cmd('EndTurn')} variant="primary" />
+        <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
         {abortBtn}
       </div>
     )
