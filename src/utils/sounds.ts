@@ -65,8 +65,110 @@ export function playDiceRoll() {
 
 export function playTokenMove() {
   if (!canPlayGame()) return
-  // Light tap per step
-  beep(800 + Math.random() * 200, 0.04, 'triangle', 0.12)
+  // Smooth sliding sound - continuous glide
+  const c = getCtx()
+  const buf = c.createBuffer(1, c.sampleRate * 0.05, c.sampleRate)
+  const data = buf.getChannelData(0)
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * 0.4
+  }
+  const src = c.createBufferSource()
+  src.buffer = buf
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.08 * vol(), c.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05)
+  src.connect(g)
+  g.connect(c.destination)
+  src.start()
+  src.stop(c.currentTime + 0.05)
+}
+
+export function playTokenMoveCardboard() {
+  if (!canPlayGame()) return
+  // Smooth sliding sound - continuous glide (alias for playTokenMove)
+  playTokenMove()
+}
+
+export function playTokenMoveCardboardSoft() {
+  if (!canPlayGame()) return
+  // Whisper slide - very subtle, smooth
+  const c = getCtx()
+  const buf = c.createBuffer(1, c.sampleRate * 0.04, c.sampleRate)
+  const data = buf.getChannelData(0)
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * 0.2
+  }
+  const src = c.createBufferSource()
+  src.buffer = buf
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.05 * vol(), c.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.04)
+  src.connect(g)
+  g.connect(c.destination)
+  src.start()
+  src.stop(c.currentTime + 0.04)
+}
+
+export function playTokenMoveCardboardHarsh() {
+  if (!canPlayGame()) return
+  // Swish slide - like air whoosh
+  const c = getCtx()
+  const buf = c.createBuffer(1, c.sampleRate * 0.06, c.sampleRate)
+  const data = buf.getChannelData(0)
+  for (let i = 0; i < data.length; i++) {
+    const fadeIn = i / data.length
+    data[i] = (Math.random() * 2 - 1) * fadeIn * 0.5
+  }
+  const src = c.createBufferSource()
+  src.buffer = buf
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.08 * vol(), c.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.06)
+  src.connect(g)
+  g.connect(c.destination)
+  src.start()
+  src.stop(c.currentTime + 0.06)
+}
+
+export function playTokenMoveCardboardLong() {
+  if (!canPlayGame()) return
+  // Long glide - smooth continuous slide across board
+  const c = getCtx()
+  const buf = c.createBuffer(1, c.sampleRate * 0.1, c.sampleRate)
+  const data = buf.getChannelData(0)
+  for (let i = 0; i < data.length; i++) {
+    const fadeOut = 1 - (i / data.length)
+    data[i] = (Math.random() * 2 - 1) * 0.35 * fadeOut
+  }
+  const src = c.createBufferSource()
+  src.buffer = buf
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.1 * vol(), c.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1)
+  src.connect(g)
+  g.connect(c.destination)
+  src.start()
+  src.stop(c.currentTime + 0.1)
+}
+
+export function playTokenMoveCardboardCrunchy() {
+  if (!canPlayGame()) return
+  // Slick slide - smooth like on plastic
+  const c = getCtx()
+  const buf = c.createBuffer(1, c.sampleRate * 0.05, c.sampleRate)
+  const data = buf.getChannelData(0)
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * 0.3
+  }
+  const src = c.createBufferSource()
+  src.buffer = buf
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.07 * vol(), c.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.05)
+  src.connect(g)
+  g.connect(c.destination)
+  src.start()
+  src.stop(c.currentTime + 0.05)
 }
 
 export function playPassGo() {
