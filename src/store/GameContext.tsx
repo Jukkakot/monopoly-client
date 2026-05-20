@@ -6,8 +6,9 @@ import { deriveEvents, type GameEvent } from './events'
 import {
   playTokenMove, playBuyProperty, playBuildHouse, playBuildHotel,
   playGoToJail, playReleaseJail, playDrawCard, playBankruptcy,
-  playGameOver, playTradeAccepted, playMortgage, playPassGo,
+  playGameOver, playTradeAccepted, playMortgage, playPassGo, playPayRent, playAuctionWin,
 } from '../utils/sounds'
+import { calcNetWorth } from '../utils/netWorth'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -19,7 +20,10 @@ interface GameState {
   events: GameEvent[]
   myPlayerId: string | null
   lastDice: [number, number] | null
+  diceHistory: [number, number][]
   commandError: string | null
+  turnCount: number
+  netWorthHistory: Map<string, number[]>
 }
 
 type Action =
@@ -29,7 +33,13 @@ type Action =
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
   | { type: 'SET_COMMAND_ERROR'; message: string | null }
 
-function resolveMyPlayerId(snapshot: SessionState): string | null {
+function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null): string | null {
+  if (sessionId) {
+    try {
+      const stored = localStorage.getItem(`monopoly_player_${sessionId}`)
+      if (stored) return stored
+    } catch {}
+  }
   const activeId = snapshot.turn?.activePlayerId
   if (activeId) {
     const activeSeat = snapshot.seats.find(s => s.playerId === activeId && s.seatKind === 'HUMAN')
@@ -51,12 +61,15 @@ function reducer(state: GameState, action: Action): GameState {
         events: [],
         myPlayerId: null,
         lastDice: null,
+        diceHistory: [],
         commandError: null,
+        turnCount: 0,
+        netWorthHistory: new Map(),
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
       const newEvents = newSnapshot ? deriveEvents(state.snapshot, newSnapshot) : []
-      const myPlayerId = state.myPlayerId ?? (newSnapshot ? resolveMyPlayerId(newSnapshot) : null)
+      const myPlayerId = state.myPlayerId ?? (newSnapshot ? resolveMyPlayerId(newSnapshot, state.sessionId) : null)
 
       // Derive dice from active player movement
       let lastDice = state.lastDice
@@ -100,8 +113,37 @@ function reducer(state: GameState, action: Action): GameState {
           case '🏦': playMortgage(); break
           case '💳': playMortgage(); break
           case '💰': playPassGo(); break
+          case '💸': playPayRent(); break
+          case '🏆': playAuctionWin(); break
         }
       }
+      const diceHistory = lastDice && lastDice !== state.lastDice
+        ? [...state.diceHistory, lastDice].slice(-10)
+        : state.diceHistory
+
+      // Count turns: a turn completes when consecutiveDoubles resets to 0 and the active player changes
+      let turnCount = state.turnCount
+      if (newSnapshot && state.snapshot) {
+        const prevActiveId = state.snapshot.turn?.activePlayerId
+        const nextActiveId = newSnapshot.turn?.activePlayerId
+        if (prevActiveId && nextActiveId && prevActiveId !== nextActiveId) {
+          turnCount++
+        }
+      }
+
+      // Track net worth history per player (sample every turn change)
+      let netWorthHistory = state.netWorthHistory
+      if (newSnapshot && state.snapshot && turnCount !== state.turnCount) {
+        const newHistory = new Map(netWorthHistory)
+        for (const player of newSnapshot.players) {
+          if (player.bankrupt || player.eliminated) continue
+          const worth = calcNetWorth(player, newSnapshot)
+          const prev = newHistory.get(player.playerId) ?? []
+          newHistory.set(player.playerId, [...prev, worth].slice(-30))
+        }
+        netWorthHistory = newHistory
+      }
+
       return {
         ...state,
         snapshot: newSnapshot,
@@ -110,6 +152,9 @@ function reducer(state: GameState, action: Action): GameState {
         events: newSnapshot ? [...state.events, ...newEvents].slice(-200) : state.events,
         myPlayerId,
         lastDice,
+        diceHistory,
+        turnCount,
+        netWorthHistory,
       }
     }
     case 'LEAVE_SESSION':
@@ -121,6 +166,9 @@ function reducer(state: GameState, action: Action): GameState {
         events: [],
         myPlayerId: null,
         lastDice: null,
+        diceHistory: [],
+        turnCount: 0,
+        netWorthHistory: new Map(),
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
@@ -149,7 +197,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     events: [],
     myPlayerId: null,
     lastDice: null,
+    diceHistory: [],
     commandError: null,
+    turnCount: 0,
+    netWorthHistory: new Map(),
   })
 
   const retryCount = useRef(0)
@@ -159,6 +210,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const joinSession = useCallback((sessionId: string) => {
     dispatch({ type: 'SET_SESSION', sessionId })
     retryCount.current = 0
+    try { localStorage.setItem('monopoly_last_session', sessionId) } catch { /* ignore */ }
   }, [])
 
   const leaveSession = useCallback(() => {

@@ -239,3 +239,51 @@
   color: #c62828;
   margin-top: 2px;
 }
+
+.rejoinBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #e3f2fd;
+  border: 1.5px solid #90caf9;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #1565c0;
+  flex-wrap: wrap;
+}
+
+.rejoinBtn {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 12px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: ui-monospace, monospace;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: filter 0.15s;
+}
+
+.rejoinBtn:hover { filter: brightness(1.12); }
+
+.rejoinDismiss {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  color: #90caf9;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.rejoinDismiss:hover { color: #1565c0; border-color: #1565c0; }

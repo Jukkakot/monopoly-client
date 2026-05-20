@@ -4,15 +4,55 @@ import type { SessionState, PlayerSnapshot } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
+import { calcNetWorth } from '../../utils/netWorth'
+import { useGame } from '../../store/GameContext'
+
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  if (values.length < 2) return null
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  const W = 48
+  const H = 16
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * W
+    const y = H - ((v - min) / range) * H
+    return `${x},${y}`
+  }).join(' ')
+  const trend = values[values.length - 1] >= values[0]
+  return (
+    <svg width={W} height={H} className={styles.sparkline} viewBox={`0 0 ${W} ${H}`}>
+      <polyline points={pts} fill="none" stroke={trend ? color : '#e53935'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+    </svg>
+  )
+}
 
 interface Props {
   state: SessionState
   onSpotClick?: (spotId: string) => void
+  onTradeWith?: (playerId: string) => void
 }
 
-function PropertyExpanded({ player, state, onSpotClick }: { player: PlayerSnapshot; state: SessionState; onSpotClick?: (spotId: string) => void }) {
+function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player: PlayerSnapshot; state: SessionState; onSpotClick?: (spotId: string) => void; onTradeWith?: (playerId: string) => void }) {
   const ownedProps = state.properties.filter(p => p.ownerPlayerId === player.playerId)
-  if (ownedProps.length === 0) return <div className={styles.noProps}>Ei kiinteistöjä</div>
+
+  // Compute summary stats
+  const totalHouses = ownedProps.reduce((s, p) => s + p.houseCount, 0)
+  const totalHotels = ownedProps.reduce((s, p) => s + p.hotelCount, 0)
+  const mortgagedCount = ownedProps.filter(p => p.mortgaged).length
+
+  // Count monopolies
+  const groupCounts = new Map<string, number>()
+  const totalGroupCounts = new Map<string, number>()
+  const NON_STREETS = new Set(['RAILROAD', 'UTILITY', 'CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
+  for (const prop of state.properties) {
+    const spot = SPOTS.find(s => s.id === prop.propertyId)
+    if (!spot || NON_STREETS.has(spot.streetType)) continue
+    totalGroupCounts.set(spot.streetType, (totalGroupCounts.get(spot.streetType) ?? 0) + 1)
+    if (prop.ownerPlayerId === player.playerId)
+      groupCounts.set(spot.streetType, (groupCounts.get(spot.streetType) ?? 0) + 1)
+  }
+  const monopolyCount = [...groupCounts.entries()].filter(([t, c]) => c === totalGroupCounts.get(t)).length
 
   // Group by streetType
   const groups = new Map<string, typeof ownedProps>()
@@ -26,6 +66,24 @@ function PropertyExpanded({ player, state, onSpotClick }: { player: PlayerSnapsh
 
   return (
     <div className={styles.expanded}>
+      {onTradeWith && (
+        <button
+          className={styles.tradeBtn}
+          onClick={e => { e.stopPropagation(); onTradeWith(player.playerId) }}
+        >
+          🤝 Käy kauppaa {player.name.split(' ')[0]}:n kanssa
+        </button>
+      )}
+      {ownedProps.length === 0 ? (
+        <div className={styles.noProps}>Ei kiinteistöjä</div>
+      ) : (
+        <>
+          <div className={styles.propSummary}>
+            {monopolyCount > 0 && <span className={styles.propStat}>🏆{monopolyCount} monopoli</span>}
+            {totalHotels > 0 && <span className={styles.propStat}>🏨{totalHotels}</span>}
+            {totalHouses > 0 && <span className={styles.propStat}>🏠{totalHouses}</span>}
+            {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>🏦{mortgagedCount} pantattu</span>}
+          </div>
       {Array.from(groups.entries()).map(([type, props]) => {
         const color = STREET_COLORS[type]
         return (
@@ -53,18 +111,59 @@ function PropertyExpanded({ player, state, onSpotClick }: { player: PlayerSnapsh
           </div>
         )
       })}
+        </>
+      )}
     </div>
   )
 }
 
-export default function PlayerList({ state, onSpotClick }: Props) {
+const NON_STREET_TYPES = new Set(['CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
+
+function GroupDots({ player, state }: { player: PlayerSnapshot; state: SessionState }) {
+  const myGroupCounts = new Map<string, number>()
+  const totalGroupCounts = new Map<string, number>()
+  for (const prop of state.properties) {
+    const spot = SPOTS.find(s => s.id === prop.propertyId)
+    if (!spot || NON_STREET_TYPES.has(spot.streetType)) continue
+    totalGroupCounts.set(spot.streetType, (totalGroupCounts.get(spot.streetType) ?? 0) + 1)
+    if (prop.ownerPlayerId === player.playerId)
+      myGroupCounts.set(spot.streetType, (myGroupCounts.get(spot.streetType) ?? 0) + 1)
+  }
+  if (myGroupCounts.size === 0) return null
+  return (
+    <div className={styles.groupDots}>
+      {Array.from(myGroupCounts.entries()).map(([type, count]) => {
+        const color = STREET_COLORS[type] ?? '#aaa'
+        const total = totalGroupCounts.get(type) ?? 1
+        const isMonopoly = count === total
+        return (
+          <span
+            key={type}
+            className={`${styles.groupDot} ${isMonopoly ? styles.groupDotMonopoly : ''}`}
+            style={{ background: color, boxShadow: isMonopoly ? `0 0 0 2px ${color}` : undefined }}
+            title={`${type}: ${count}/${total}`}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
   const activeId = state.turn?.activePlayerId
   const prevCash = useRef<Map<string, number>>(new Map())
   const [flashMap, setFlashMap] = useState<Map<string, 'up' | 'down'>>(new Map())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const tokenShapes = loadTokenShapes(state.sessionId)
+  const { state: gs } = useGame()
+  const netWorthHistory = gs.netWorthHistory
 
-  const maxCash = Math.max(...state.players.map(p => p.cash), 1)
+  const maxNetWorth = Math.max(...state.players.map(p => calcNetWorth(p, state)), 1)
+
+  // Wealth rank by net worth (excluding bankrupt)
+  const activePlayers = state.players.filter(p => !p.bankrupt && !p.eliminated)
+  const rankedByWealth = [...activePlayers].sort((a, b) => calcNetWorth(b, state) - calcNetWorth(a, state))
+  const wealthRank = new Map(rankedByWealth.map((p, i) => [p.playerId, i]))
 
   useEffect(() => {
     const newFlash = new Map<string, 'up' | 'down'>()
@@ -99,11 +198,15 @@ export default function PlayerList({ state, onSpotClick }: Props) {
         const flash = flashMap.get(player.playerId)
 
         const isExpanded = expandedId === player.playerId
+        const isMe = player.playerId === gs.myPlayerId
+        const netWorth = isBankrupt ? 0 : calcNetWorth(player, state)
+        const rank = wealthRank.get(player.playerId) ?? -1
+        const rankEmoji = rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : null
 
         return (
           <div
             key={player.playerId}
-            className={`${styles.card} ${isActive ? styles.active : ''} ${isBankrupt ? styles.bankrupt : ''}`}
+            className={`${styles.card} ${isActive ? styles.active : ''} ${isBankrupt ? styles.bankrupt : ''} ${isMe ? styles.me : ''}`}
             onClick={() => setExpandedId(isExpanded ? null : player.playerId)}
           >
             <div className={styles.cardHeader}>
@@ -118,6 +221,7 @@ export default function PlayerList({ state, onSpotClick }: Props) {
                 <div className={styles.name}>
                   <span className={styles.turnNum}>{turnIdx + 1}.</span>
                   {player.name}
+                  {isMe && <span className={styles.meBadge}>sinä</span>}
                   {isBankrupt && <span className={styles.badge}>konkurssi</span>}
                   {player.inJail && !isBankrupt && (
                     <span className={styles.badge}>🔒{player.jailRoundsRemaining > 0 ? `${player.jailRoundsRemaining}v` : ''}</span>
@@ -129,9 +233,28 @@ export default function PlayerList({ state, onSpotClick }: Props) {
                 <div className={styles.details}>
                   {spotName} · {player.ownedPropertyIds.length} kiin.
                 </div>
+                {!isBankrupt && player.ownedPropertyIds.length > 0 && (
+                  <GroupDots player={player} state={state} />
+                )}
               </div>
-              <div className={`${styles.cash} ${flash === 'up' ? styles.cashUp : flash === 'down' ? styles.cashDown : ''}`}>
-                €{player.cash}
+              <div className={styles.cashCol}>
+                <div className={styles.cashRow}>
+                  {rankEmoji && activePlayers.length > 1 && (
+                    <span className={styles.rankEmoji}>{rankEmoji}</span>
+                  )}
+                  <div className={`${styles.cash} ${flash === 'up' ? styles.cashUp : flash === 'down' ? styles.cashDown : ''}`}>
+                    €{player.cash}
+                  </div>
+                </div>
+                {!isBankrupt && netWorth !== player.cash && (
+                  <div className={styles.netWorth}>~€{netWorth}</div>
+                )}
+                {!isBankrupt && (() => {
+                  const history = netWorthHistory.get(player.playerId) ?? []
+                  return history.length >= 2
+                    ? <Sparkline values={history} color={seat?.tokenColorHex ?? '#2e7d32'} />
+                    : null
+                })()}
               </div>
               <span className={styles.chevron}>{isExpanded ? '▴' : '▾'}</span>
             </div>
@@ -140,13 +263,20 @@ export default function PlayerList({ state, onSpotClick }: Props) {
                 <div
                   className={styles.wealthBarFill}
                   style={{
-                    width: `${Math.round((player.cash / maxCash) * 100)}%`,
+                    width: `${Math.round((netWorth / maxNetWorth) * 100)}%`,
+                    background: seat?.tokenColorHex ?? '#2e7d32',
+                  }}
+                />
+                <div
+                  className={styles.wealthBarCash}
+                  style={{
+                    width: `${Math.round((player.cash / maxNetWorth) * 100)}%`,
                     background: seat?.tokenColorHex ?? '#2e7d32',
                   }}
                 />
               </div>
             )}
-            {isExpanded && <PropertyExpanded player={player} state={state} onSpotClick={onSpotClick} />}
+            {isExpanded && <PropertyExpanded player={player} state={state} onSpotClick={onSpotClick} onTradeWith={!isBankrupt && player.playerId !== gs.myPlayerId ? onTradeWith : undefined} />}
           </div>
         )
       })}

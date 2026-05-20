@@ -70,6 +70,9 @@ export default function GameOverOverlay({ state }: Props) {
         <div className={styles.rankings}>
           {sorted.map((p, i) => {
             const seat = state.seats.find(s => s.playerId === p.playerId)
+            const propCount = p.ownedPropertyIds.length
+            const hotels = state.properties.filter(pr => pr.ownerPlayerId === p.playerId && pr.hotelCount > 0).length
+            const houses = state.properties.filter(pr => pr.ownerPlayerId === p.playerId && pr.houseCount > 0).reduce((s, pr) => s + pr.houseCount, 0)
             return (
               <div key={p.playerId} className={`${styles.rankRow} ${i === 0 ? styles.first : ''}`}>
                 <span className={styles.medal}>{MEDALS[i] ?? `${i + 1}.`}</span>
@@ -81,6 +84,13 @@ export default function GameOverOverlay({ state }: Props) {
                   />
                 )}
                 <span className={styles.rankName}>{p.name}</span>
+                <div className={styles.rankStats}>
+                  {!p.bankrupt && propCount > 0 && (
+                    <span className={styles.rankStat}>{propCount} kiin.</span>
+                  )}
+                  {hotels > 0 && <span className={styles.rankStat}>🏨{hotels}</span>}
+                  {houses > 0 && <span className={styles.rankStat}>🏠{houses}</span>}
+                </div>
                 <span className={styles.rankCash}>
                   {p.bankrupt ? <span className={styles.bankrupt}>KONKURSSI</span> : `€${p.cash}`}
                 </span>

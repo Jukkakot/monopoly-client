@@ -47,6 +47,19 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
   const mortgageValue = spot.price ? Math.floor(spot.price / 2) : 0
   const color = STREET_COLORS[spot.streetType]
 
+  // Compute current effective rent
+  let currentRent: number | string | null = null
+  if (owner && !prop?.mortgaged) {
+    if (isStreet && rents.length >= 6) {
+      const level = (prop?.hotelCount ?? 0) > 0 ? 5 : (prop?.houseCount ?? 0)
+      currentRent = level === 0 && isMonopoly ? rents[0] * 2 : rents[level]
+    } else if (isRailroad && rents.length >= 1) {
+      currentRent = rents[Math.min(ownerGroupCount - 1, rents.length - 1)]
+    } else if (isUtility) {
+      currentRent = ownerGroupCount >= 2 ? '10× nopat' : '4× nopat'
+    }
+  }
+
   const sid = state.sessionId
 
   function openTrade() {
@@ -121,6 +134,19 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             <div className={styles.groupLabel}>
               Omistajallla {ownerGroupCount}/4 asemaa
             </div>
+          )}
+
+          {/* Current effective rent */}
+          {currentRent !== null && (
+            <div className={styles.currentRentBox}>
+              <span className={styles.currentRentLabel}>Nykyinen vuokra</span>
+              <span className={styles.currentRentVal}>
+                {typeof currentRent === 'number' ? `€${currentRent}` : currentRent}
+              </span>
+            </div>
+          )}
+          {prop?.mortgaged && owner && (
+            <div className={styles.mortgagedRentBox}>Ei vuokraa — pantattu</div>
           )}
 
           {/* Price */}
@@ -198,6 +224,14 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             <div className={styles.priceRow}>
               <span className={styles.priceLabel}>Lunastushinta (+10%)</span>
               <span className={styles.priceVal}>€{Math.ceil(mortgageValue * 1.1)}</span>
+            </div>
+          )}
+
+          {/* ROI for unowned properties */}
+          {!owner && spot.price && rents.length > 0 && isStreet && (
+            <div className={styles.roiRow}>
+              <span className={styles.priceLabel}>Takaisinmaksu (tyhjä)</span>
+              <span className={styles.priceVal}>~{Math.ceil(spot.price / (rents[0] * 2 || 1))}× kierros</span>
             </div>
           )}
 

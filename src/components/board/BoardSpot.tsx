@@ -11,9 +11,9 @@ interface Props {
   property?: PropertyStateSnapshot
   players: PlayerSnapshot[]
   seats: SeatState[]
-  ownerColor?: string
   onClick?: () => void
   tokenShapes?: Map<string, TokenShape>
+  highlighted?: 'selected' | 'group'
 }
 
 function getSide(idx: number): 'bottom' | 'left' | 'top' | 'right' | 'corner' {
@@ -60,7 +60,6 @@ function PlayerTokens({ players, seats, tokenShapes }: {
             key={p.playerId}
             color={seat?.tokenColorHex ?? '#888'}
             shape={shape}
-            size={28}
           />
         )
       })}
@@ -93,7 +92,7 @@ function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]
             const shape = tokenShapes?.get(p.playerId) ?? 'circle'
             return (
               <div key={p.playerId} className={styles.jailPrisonerRow}>
-                <TokenSvg color={seat?.tokenColorHex ?? '#888'} shape={shape} size={16} />
+                <TokenSvg color={seat?.tokenColorHex ?? '#888'} shape={shape} />
                 <span className={styles.jailRounds}>{p.jailRoundsRemaining}v</span>
               </div>
             )
@@ -132,7 +131,7 @@ function GoJailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot
   )
 }
 
-export default function BoardSpot({ spot, index, property, players, seats, ownerColor, onClick, tokenShapes }: Props) {
+export default function BoardSpot({ spot, index, property, players, seats, onClick, tokenShapes, highlighted }: Props) {
   const { row, col } = indexToGridPos(index)
   const side = getSide(index)
 
@@ -150,7 +149,10 @@ export default function BoardSpot({ spot, index, property, players, seats, owner
     return <div className={styles.cornerWrapper} style={gridStyle}>{inner}</div>
   }
 
-  const colorBarColor = STREET_COLORS[spot.streetType]
+  const isStreet = spot.streetType !== 'RAILROAD' && spot.streetType !== 'UTILITY'
+    && spot.streetType !== 'CORNER' && spot.streetType !== 'COMMUNITY'
+    && spot.streetType !== 'CHANCE' && spot.streetType !== 'TAX'
+  const colorBarColor = isStreet ? STREET_COLORS[spot.streetType] : undefined
   const icon = getSpotIcon(spot)
   const houseCount = property?.houseCount ?? 0
   const hotelCount = property?.hotelCount ?? 0
@@ -166,9 +168,11 @@ export default function BoardSpot({ spot, index, property, players, seats, owner
     }
   })()
 
+  const highlightClass = highlighted === 'selected' ? styles.highlightSelected : highlighted === 'group' ? styles.highlightGroup : ''
+
   return (
     <div
-      className={`${styles.spotWrapper} ${typeClass} ${onClick ? styles.clickable : ''}`}
+      className={`${styles.spotWrapper} ${typeClass} ${onClick ? styles.clickable : ''} ${highlightClass}`}
       style={gridStyle}
       onClick={onClick}
     >
@@ -197,14 +201,11 @@ export default function BoardSpot({ spot, index, property, players, seats, owner
         </div>
       )}
 
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
-
       <div className={styles.label}>{spot.name}</div>
       {spot.price && <div className={styles.price}>€{spot.price}</div>}
 
-      {ownerColor && (
-        <div className={styles.ownerBar} style={{ background: ownerColor }} />
-      )}
+      {/* Tokens rendered last so they're always on top */}
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
     </div>
   )

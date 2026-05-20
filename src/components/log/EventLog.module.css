@@ -1,3 +1,48 @@
+.logWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.filterRow {
+  display: flex;
+  gap: 3px;
+  padding: 6px 8px 4px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  padding: 2px 8px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  background: #f9f9f9;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.1s, border-color 0.1s;
+  line-height: 1.6;
+}
+
+.filterBtn:hover { background: #f0f0f0; }
+
+.filterActive {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #1b5e20;
+  font-weight: 700;
+}
+
+.filterMine {
+  background: #fff8e1;
+  border-color: #f9a825;
+  color: #e65100;
+  font-weight: 700;
+}
+
 .log {
   display: flex;
   flex-direction: column;
@@ -43,6 +88,7 @@
 .entry.typeTrade   { border-left-color: #00695c; background: #e0f2f1; }
 .entry.typeBankrupt{ border-left-color: #b71c1c; background: #ffebee; }
 .entry.typeGameOver{ border-left-color: #f9a825; background: #fff8e1; }
+.entry.typeRent    { border-left-color: #e57373; background: #fff3f3; }
 
 .icon {
   flex-shrink: 0;

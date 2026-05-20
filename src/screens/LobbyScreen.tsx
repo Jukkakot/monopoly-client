@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { createSession } from '../api/sessionApi'
+import { createSession, joinLobby } from '../api/sessionApi'
 import type { SeatKind, BotDifficulty } from '../types/api'
 import { GEOMETRIC_SHAPES, EMOJI_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './LobbyScreen.module.css'
 
 const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
-const DEFAULT_SHAPES: TokenShape[] = ['circle', 'star', 'square', 'triangle']
+const DEFAULT_SHAPES: TokenShape[] = ['circle', 'star', 'square', 'triangle', 'hat', 'car']
 
 interface PlayerRow {
   name: string
@@ -39,6 +39,7 @@ export default function LobbyScreen() {
   const [playerCount, setPlayerCount] = useState(2)
   const [rows, setRows] = useState<PlayerRow[]>(defaultRows(2))
   const [loading, setLoading] = useState(false)
+  const [lobbyLoading, setLobbyLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function changeCount(n: number) {
@@ -66,6 +67,51 @@ export default function LobbyScreen() {
 
   function updateRow(i: number, patch: Partial<PlayerRow>) {
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r))
+  }
+
+  function randomizeAll() {
+    const usedNames: string[] = []
+    setRows(prev => prev.map(r => {
+      const name = r.kind === 'BOT' ? randomBotName(usedNames) : randomHumanName(usedNames)
+      usedNames.push(name)
+      return { ...r, name }
+    }))
+  }
+
+  async function handleCreateLobby() {
+    setError(null)
+    const usedColors = new Set<string>()
+    for (const r of rows) {
+      if (!r.name.trim()) { setError('Kaikilla pelaajilla pitää olla nimi.'); return }
+      if (usedColors.has(r.color)) { setError('Jokaisella pelaajalla pitää olla eri väri.'); return }
+      usedColors.add(r.color)
+    }
+    setLobbyLoading(true)
+    try {
+      const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
+      const res = await fetch(`${BASE}/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lobbyMode: true,
+          seatCount: playerCount,
+          colors: rows.map(r => r.color),
+        }),
+      })
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+      const { sessionId } = await res.json()
+      saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
+      // Auto-join as the first player
+      const firstHuman = rows[0]
+      const joined = await joinLobby(sessionId, firstHuman.name.trim(), firstHuman.color)
+      try { localStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
+      try { localStorage.setItem('monopoly_last_name', firstHuman.name.trim()) } catch {}
+      joinSession(sessionId)
+      navigate(`/lobby-wait/${sessionId}`)
+    } catch (e) {
+      setError('Odotushuoneen luonti epäonnistui: ' + String(e))
+      setLobbyLoading(false)
+    }
   }
 
   async function handleCreate() {
@@ -196,9 +242,17 @@ export default function LobbyScreen() {
 
         {error && <div className={styles.errorMsg}>{error}</div>}
 
-        <button className={styles.createBtn} onClick={handleCreate} disabled={loading}>
-          {loading ? 'Luodaan…' : 'Aloita peli'}
-        </button>
+        <div className={styles.actionRow}>
+          <button className={styles.randomBtn} onClick={randomizeAll} disabled={loading || lobbyLoading} title="Arvo uudet nimet">
+            🎲 Arvo nimet
+          </button>
+          <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
+            {lobbyLoading ? 'Luodaan…' : 'Luo odotushuone'}
+          </button>
+          <button className={styles.createBtn} onClick={handleCreate} disabled={loading || lobbyLoading}>
+            {loading ? 'Luodaan…' : 'Aloita peli'}
+          </button>
+        </div>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
           Takaisin

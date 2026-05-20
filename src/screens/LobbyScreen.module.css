@@ -163,7 +163,29 @@
   font-size: 0.9rem;
 }
 
+.actionRow {
+  display: flex;
+  gap: 8px;
+}
+
+.randomBtn {
+  padding: 14px 16px;
+  background: #f1f8e9;
+  color: #2e7d32;
+  border: 1.5px solid #a5d6a7;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.randomBtn:hover:not(:disabled) { background: #dcedc8; }
+.randomBtn:disabled { opacity: 0.5; cursor: default; }
+
 .createBtn {
+  flex: 1;
   padding: 14px;
   background: #2e7d32;
   color: #fff;
@@ -172,10 +194,27 @@
   font-size: 1.1rem;
   font-weight: 700;
   transition: filter 0.15s;
+  cursor: pointer;
 }
 
 .createBtn:hover:not(:disabled) { filter: brightness(1.1); }
 .createBtn:disabled { opacity: 0.6; cursor: default; }
+
+.lobbyBtn {
+  flex: 1;
+  padding: 14px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.lobbyBtn:hover:not(:disabled) { filter: brightness(1.1); }
+.lobbyBtn:disabled { opacity: 0.6; cursor: default; }
 
 .backBtn {
   padding: 10px;

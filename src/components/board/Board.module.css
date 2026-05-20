@@ -29,7 +29,41 @@
   flex-direction: column;
   gap: 4px;
   overflow: hidden;
+  position: relative;
 }
+
+/* Ownership strips rendered inside the center area at each edge */
+.ownerBars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ownerBarBottom,
+.ownerBarTop {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  display: flex;
+}
+
+.ownerBarBottom { bottom: 0; }
+.ownerBarTop    { top: 0; }
+
+.ownerBarLeft,
+.ownerBarRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ownerBarLeft  { left: 0; }
+.ownerBarRight { right: 0; }
 
 .centerLogo {
   font-size: clamp(1.2rem, 4vw, 4.5rem);
@@ -110,4 +144,78 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 0.85; }
+}
+
+.centerStats {
+  display: flex;
+  align-items: center;
+  gap: clamp(3px, 0.5vw, 8px);
+  font-size: clamp(0.38rem, 0.85vw, 0.75rem);
+  color: #1a5c0a;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 700;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.centerTurnCount {
+  font-size: clamp(0.32rem, 0.7vw, 0.62rem);
+  color: #1a5c0a;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 600;
+  opacity: 0.5;
+  letter-spacing: 0.5px;
+}
+
+/* ── Group ownership bar ── */
+.groupBar {
+  display: flex;
+  gap: clamp(2px, 0.4vw, 5px);
+  align-items: flex-end;
+  margin-top: clamp(2px, 0.4vw, 5px);
+}
+
+.groupBarGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  align-items: center;
+}
+
+.groupBarHeader {
+  width: clamp(6px, 1.2vw, 14px);
+  height: clamp(2px, 0.4vw, 4px);
+  border-radius: 1px;
+}
+
+.groupBarSlots {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.groupBarSlot {
+  width: clamp(6px, 1.2vw, 14px);
+  height: clamp(3px, 0.6vw, 7px);
+  border-radius: 1px;
+  transition: background 0.4s;
+}
+
+.groupBarClickable {
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 1px;
+  margin: -1px;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.groupBarClickable:hover {
+  transform: scale(1.1);
+  opacity: 1 !important;
+}
+
+.groupBarActive {
+  outline: 2px solid rgba(255,255,255,0.8);
+  outline-offset: 1px;
+  transform: scale(1.08);
 }

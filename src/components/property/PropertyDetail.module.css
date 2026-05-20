@@ -243,3 +243,38 @@
   color: #fff;
   font-weight: 800;
 }
+
+.currentRentBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e8f5e9;
+  border: 2px solid #2e7d32;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.currentRentLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2e7d32;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.currentRentVal {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1b5e20;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.mortgagedRentBox {
+  font-size: 12px;
+  color: #888;
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-align: center;
+  font-style: italic;
+}

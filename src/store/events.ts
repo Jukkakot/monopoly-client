@@ -44,6 +44,16 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
       if (np.boardIndex !== 0 && np.boardIndex < pp.boardIndex && !np.inJail) {
         events.push(ev('💰', `${np.name} ohitti GO — +€200!`, [np.playerId]))
       }
+
+      // Rent paid: player moved and cash decreased, and the spot is owned by another player
+      if (np.cash < pp.cash) {
+        const landedProp = next.properties.find(p => p.propertyId === spot?.id)
+        if (landedProp?.ownerPlayerId && landedProp.ownerPlayerId !== np.playerId) {
+          const rentPaid = pp.cash - np.cash
+          const owner = next.players.find(p => p.playerId === landedProp.ownerPlayerId)
+          events.push(ev('💸', `${np.name} maksoi vuokraa €${rentPaid} → ${owner?.name ?? '?'}`, [np.playerId, landedProp.ownerPlayerId]))
+        }
+      }
     }
 
     if (np.inJail && !pp.inJail) {
@@ -68,6 +78,18 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
     if (np.ownerPlayerId && !pp.ownerPlayerId) {
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
       events.push(ev('🏠', `${owner?.name ?? '?'} osti ${name}`, np.ownerPlayerId ? [np.ownerPlayerId] : []))
+
+      // Check if this acquisition completed a color monopoly
+      if (spot && owner && !['RAILROAD', 'UTILITY', 'CORNER', 'COMMUNITY', 'CHANCE', 'TAX'].includes(spot.streetType)) {
+        const groupProps = next.properties.filter(p => {
+          const s = SPOTS.find(ss => ss.id === p.propertyId)
+          return s?.streetType === spot.streetType
+        })
+        const ownerGroupCount = groupProps.filter(p => p.ownerPlayerId === owner.playerId).length
+        if (ownerGroupCount === groupProps.length) {
+          events.push(ev('🏆', `${owner.name} sai monopolin: ${spot.streetType}!`, [owner.playerId]))
+        }
+      }
     }
     // Property transferred via trade
     if (np.ownerPlayerId && pp.ownerPlayerId && np.ownerPlayerId !== pp.ownerPlayerId) {

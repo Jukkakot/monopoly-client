@@ -39,7 +39,7 @@ export default function FlashBanner() {
   useEffect(() => {
     if (!state.myPlayerId || state.events.length === 0) return
 
-    const NOTIFY_ICONS = new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰'])
+    const NOTIFY_ICONS = new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰', '💸', '🏆'])
     const newEvents = state.events.filter(e =>
       !seenIds.current.has(e.id) &&
       NOTIFY_ICONS.has(e.icon) &&
@@ -97,12 +97,17 @@ export default function FlashBanner() {
           <span className={styles.message}>{state.commandError}</span>
         </div>
       )}
-      {visible.map(b => (
-        <div key={b.event.id} className={`${styles.banner} ${b.event.icon === '⭐' ? styles.myTurn : ''}`}>
-          <span className={styles.icon}>{b.event.icon}</span>
-          <span className={styles.message}>{b.event.message}</span>
-        </div>
-      ))}
+      {visible.map(b => {
+        const isRentReceived = b.event.icon === '💸' && state.myPlayerId &&
+          b.event.relatedPlayerIds.length >= 2 &&
+          b.event.relatedPlayerIds[1] === state.myPlayerId
+        return (
+          <div key={b.event.id} className={`${styles.banner} ${b.event.icon === '⭐' ? styles.myTurn : ''} ${isRentReceived ? styles.rentReceived : ''}`}>
+            <span className={styles.icon}>{b.event.icon}</span>
+            <span className={styles.message}>{b.event.message}</span>
+          </div>
+        )
+      })}
     </div>
   )
 }

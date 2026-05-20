@@ -87,11 +87,46 @@
   gap: 2px;
   transition: color 0.15s;
   font-family: 'Arial Narrow', Arial, sans-serif;
+  position: relative;
 }
 
 .navActive {
   color: #2e7d32;
   border-top: 2px solid #2e7d32;
+}
+
+.navAlert {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 16px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e53935;
+  animation: alertPulse 1s ease-in-out infinite alternate;
+}
+
+.navBadge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 18px);
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #1565c0;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+@keyframes alertPulse {
+  from { opacity: 0.7; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1.1); }
 }
 
 /* ══════════════════════════════════════
@@ -121,11 +156,38 @@
     height: 100svh;
   }
 
+  .resizeHandle {
+    width: 5px;
+    cursor: col-resize;
+    background: #c8e6c9;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    position: relative;
+    z-index: 10;
+  }
+
+  .resizeHandle:hover,
+  .resizeHandle:active {
+    background: #81c784;
+  }
+
+  .resizeHandle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 40px;
+    border-radius: 2px;
+    background: rgba(0,0,0,0.15);
+  }
+
   .sideCol {
     display: flex;
     flex-direction: column;
-    flex: 0 0 clamp(300px, 28vw, 480px);
-    border-left: 2px solid #c8e6c9;
+    flex-shrink: 0;
+    border-left: none;
     background: #f5f9f5;
     height: 100svh;
     overflow: hidden;

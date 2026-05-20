@@ -5,6 +5,18 @@
   animation: panelIn 0.2s ease-out;
 }
 
+.myTurnPanel {
+  border-radius: 8px;
+  outline: 2px solid #2e7d32;
+  outline-offset: 2px;
+  animation: panelIn 0.2s ease-out, myTurnPulse 2s ease-in-out infinite;
+}
+
+@keyframes myTurnPulse {
+  0%, 100% { outline-color: #2e7d32; }
+  50%       { outline-color: #66bb6a; }
+}
+
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -53,6 +65,39 @@
   line-height: 1.4;
 }
 
+.infoBox.moving {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f3f8ff;
+  border-color: #90caf9;
+  color: #1565c0;
+  font-style: italic;
+}
+
+.movingDots {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.movingDots span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1565c0;
+  animation: dotBounce 0.9s ease-in-out infinite;
+}
+
+.movingDots span:nth-child(2) { animation-delay: 0.15s; }
+.movingDots span:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40%           { transform: translateY(-5px); opacity: 1; }
+}
+
 .infoBox.debt    { background: #ffebee; border-color: #ef9a9a; color: #b71c1c; }
 .infoBox.auction { background: #fff8e1; border-color: #ffe082; color: #f57f17; }
 .infoBox.doubles { background: #fff3e0; border-color: #ffb74d; color: #e65100; }
@@ -96,6 +141,18 @@
   font-size: 0.75rem;
   color: #888;
   font-style: italic;
+}
+
+.auctionHint {
+  font-size: 0.78rem;
+  color: #5d4037;
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ── Auction bid quick buttons ── */
@@ -378,4 +435,58 @@
 @keyframes popIn {
   from { transform: scale(0.6); opacity: 0; }
   to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Turn timer ── */
+.turnWaiting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.turnTimer {
+  font-size: 0.72rem;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  font-weight: 700;
+  color: #81c784;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.turnTimerAfk {
+  color: #e65100;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.4; }
+}
+
+/* ── My Stats mini panel ── */
+.myStats {
+  background: rgba(0,0,0,0.03);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.myStatRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.myStatLabel {
+  color: #888;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.myStatVal {
+  font-weight: 700;
+  color: #2e7d32;
 }

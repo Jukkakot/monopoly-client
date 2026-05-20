@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react'
 import styles from './Header.module.css'
 import type { SessionState } from '../../types/api'
 import OverflowMenu from '../menu/OverflowMenu'
+import { loadSoundConfig, saveSoundConfig } from '../menu/SoundSettings'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -35,6 +37,29 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
     ? snapshot?.seats.find(s => s.playerId === activePlayer.playerId)
     : null
 
+  const [muted, setMuted] = useState(() => loadSoundConfig().volume === 0)
+  const [idCopied, setIdCopied] = useState(false)
+
+  useEffect(() => {
+    const cfg = loadSoundConfig()
+    setMuted(cfg.volume === 0)
+  }, [])
+
+  function toggleMute() {
+    const cfg = loadSoundConfig()
+    const newVol = cfg.volume > 0 ? 0 : 80
+    saveSoundConfig({ ...cfg, volume: newVol })
+    setMuted(newVol === 0)
+  }
+
+  function copySessionId() {
+    if (!snapshot?.sessionId) return
+    navigator.clipboard.writeText(snapshot.sessionId).then(() => {
+      setIdCopied(true)
+      setTimeout(() => setIdCopied(false), 1500)
+    })
+  }
+
   return (
     <header className={styles.header}>
       <div className={styles.title}>Monopoly Helsinki</div>
@@ -55,6 +80,18 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
         </div>
       )}
       {isSpectator && <span className={styles.spectatorBadge}>👁 Katsoja</span>}
+      {snapshot && (
+        <button
+          className={styles.sessionIdBtn}
+          onClick={copySessionId}
+          title={`Kopioi pelin koodi: ${snapshot.sessionId}`}
+        >
+          {idCopied ? '✓' : snapshot.sessionId}
+        </button>
+      )}
+      <button className={styles.muteBtn} onClick={toggleMute} title={muted ? 'Äänet pois päältä (paina M)' : 'Äänet päällä (paina M)'}>
+        {muted ? '🔇' : '🔊'}
+      </button>
       <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
         {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
         {STATUS_LABEL[connectionStatus]}

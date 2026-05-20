@@ -1,9 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
+import { calcNetWorth, calcCurrentRentIncome } from '../../utils/netWorth'
+import { useIsAnimating } from '../../hooks/useTokenAnimation'
+
+function useTurnTimer(activeId: string | undefined, phase: string | undefined): number {
+  const [seconds, setSeconds] = useState(0)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prevKey = useRef('')
+
+  useEffect(() => {
+    const key = `${activeId}:${phase}`
+    if (key !== prevKey.current) {
+      prevKey.current = key
+      setSeconds(0)
+    }
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [activeId, phase])
+
+  return seconds
+}
 
 interface Props {
   state: SessionState
@@ -49,6 +70,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const phase = turn?.phase
   const activeId = turn?.activePlayerId
   const isMyTurn = activeId === myPlayerId
+  const turnSeconds = useTurnTimer(activeId, phase)
+  const tokenAnimating = useIsAnimating()
 
   const me = state.players.find(p => p.playerId === myPlayerId)
 
@@ -102,6 +125,22 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return <AuctionSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
+  // While token is moving — don't reveal destination yet
+  if (tokenAnimating && (phase === 'WAITING_FOR_DECISION' || phase === 'WAITING_FOR_END_TURN')) {
+    return (
+      <div className={styles.panel}>
+        <div className={`${styles.infoBox} ${styles.moving}`}>
+          <div className={styles.movingDots}>
+            <span />
+            <span />
+            <span />
+          </div>
+          Siirretään pelimerkki…
+        </div>
+      </div>
+    )
+  }
+
   // Buy decision
   if (state.pendingDecision && phase === 'WAITING_FOR_DECISION' && isMyTurn) {
     const dec = state.pendingDecision
@@ -123,15 +162,51 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (!isMyTurn) {
     const activePlayer = state.players.find(p => p.playerId === activeId)
     const activeSeat = state.seats.find(s => s.playerId === activeId)
+    const isAfk = turnSeconds >= 30
+
+    if (tokenAnimating) {
+      return (
+        <div className={styles.panel}>
+          <div className={`${styles.infoBox} ${styles.moving}`} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+            <div className={styles.movingDots}>
+              <span />
+              <span />
+              <span />
+            </div>
+            {activePlayer?.name ?? '?'} siirtyy…
+          </div>
+        </div>
+      )
+    }
+
+    // Compute turns until my turn
+    const sortedSeats = [...state.seats].sort((a, b) => a.seatIndex - b.seatIndex)
+    const activeIdx = sortedSeats.findIndex(s => s.playerId === activeId)
+    const myIdx = sortedSeats.findIndex(s => s.playerId === myPlayerId)
+    const activePlayers = state.players.filter(p => !p.bankrupt && !p.eliminated)
+    let turnsUntilMine = 0
+    if (activeIdx !== -1 && myIdx !== -1 && activePlayers.length > 1) {
+      turnsUntilMine = (myIdx - activeIdx + sortedSeats.length) % sortedSeats.length
+    }
+
+    const myPlayer = state.players.find(p => p.playerId === myPlayerId)
+    const myIncome = myPlayer ? calcCurrentRentIncome(myPlayer, state) : 0
+    const myNetWorth = myPlayer ? calcNetWorth(myPlayer, state) : 0
+
     return (
       <div className={styles.panel}>
         <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
-          ⏳ {activePlayer?.name ?? '?'} {phase === 'WAITING_FOR_ROLL' ? 'heittää nopat…' :
-            phase === 'WAITING_FOR_END_TURN' ? 'lopettaa vuoroa…' :
-            phase === 'WAITING_FOR_DECISION' ? 'harkitsee ostoa…' :
-            phase === 'WAITING_FOR_AUCTION' ? 'huutokaupassa…' :
-            phase === 'RESOLVING_DEBT' ? 'selvittää velkaa…' :
-            'pelaa…'}
+          <div className={styles.turnWaiting}>
+            <span>⏳ {activePlayer?.name ?? '?'} {phase === 'WAITING_FOR_ROLL' ? 'heittää nopat…' :
+              phase === 'WAITING_FOR_END_TURN' ? 'lopettaa vuoroa…' :
+              phase === 'WAITING_FOR_DECISION' ? 'harkitsee ostoa…' :
+              phase === 'WAITING_FOR_AUCTION' ? 'huutokaupassa…' :
+              phase === 'RESOLVING_DEBT' ? 'selvittää velkaa…' :
+              'pelaa…'}</span>
+            <span className={`${styles.turnTimer} ${isAfk ? styles.turnTimerAfk : ''}`}>
+              {turnSeconds}s{isAfk ? ' ⚠️' : ''}
+            </span>
+          </div>
         </div>
         {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
           <div className={styles.infoBox}>
@@ -145,8 +220,27 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             <span>{state.lastCardMessage}</span>
           </div>
         )}
+        {myPlayer && (
+          <div className={styles.myStats}>
+            <div className={styles.myStatRow}>
+              <span className={styles.myStatLabel}>Nettovarallisuus</span>
+              <span className={styles.myStatVal}>~€{myNetWorth}</span>
+            </div>
+            {myIncome > 0 && (
+              <div className={styles.myStatRow}>
+                <span className={styles.myStatLabel}>Vuokratulot/kierros</span>
+                <span className={styles.myStatVal}>~€{myIncome}</span>
+              </div>
+            )}
+            {turnsUntilMine > 0 && (
+              <div className={styles.myStatRow}>
+                <span className={styles.myStatLabel}>Vuorosi</span>
+                <span className={styles.myStatVal}>{turnsUntilMine} pelaajan jälkeen</span>
+              </div>
+            )}
+          </div>
+        )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         {abortBtn}
       </div>
     )
@@ -156,7 +250,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (phase === 'WAITING_FOR_ROLL') {
     const consecutiveDoubles = turn?.consecutiveDoubles ?? 0
     return (
-      <div className={styles.panel}>
+      <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         {consecutiveDoubles > 0 && (
           <div className={`${styles.infoBox} ${styles.doubles}`}>
             🎲 Tuplaheitto! Heitä uudelleen
@@ -175,7 +269,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </>
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="🎲 Heitä nopat  [välilyönti]" onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
         {abortBtn}
       </div>
@@ -185,7 +278,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
     return (
-      <div className={styles.panel}>
+      <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         {lastDice && <DiceDisplay dice={lastDice} />}
         {state.lastCardMessage && (
           <div className={styles.cardMessage}>
@@ -194,7 +287,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="✅ Lopeta vuoro  [välilyönti]" onClick={() => cmd('EndTurn')} variant="primary" />
         {abortBtn}
       </div>
@@ -305,37 +397,6 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Trade partner buttons
-// ─────────────────────────────────────────────────────────────────────────────
-
-function TradePartnerButtons({ state, myPlayerId, sendCmd }: {
-  state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
-}) {
-  const sid = state.sessionId
-  const others = state.players.filter(p => p.playerId !== myPlayerId && !p.bankrupt && !p.eliminated)
-  if (others.length === 0) return null
-  return (
-    <>
-      <div className={styles.sectionTitle}>Kaupankäynti</div>
-      {others.map(p => {
-        const seat = state.seats.find(s => s.playerId === p.playerId)
-        return (
-          <button key={p.playerId} className={`${styles.btn} ${styles.neutral}`}
-            onClick={() => sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, targetPlayerId: p.playerId })}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <circle cx="6" cy="6" r="5.5" fill={seat?.tokenColorHex ?? '#888'} />
-              </svg>
-              🤝 Kauppa: {p.name}
-            </span>
-          </button>
-        )
-      })}
-    </>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Auction
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -351,6 +412,9 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   const minBid = auction.minimumNextBid > 0 ? auction.minimumNextBid : auction.currentBid + 10
   const isEligible = auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
   const currentActor = state.players.find(p => p.playerId === auction.currentActorPlayerId)
+  const spotPrice = spot ? (SPOTS.find(s => s.id === spot.id)?.price ?? 0) : 0
+  const fairBid = spotPrice > 0 ? Math.round(spotPrice * 0.85 / 10) * 10 : 0
+  const isBelowFair = fairBid > 0 && auction.currentBid < fairBid
 
   function placeBid(amount: number) {
     playAuctionBid()
@@ -388,6 +452,11 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           {passedNames.length > 0 && ` · Passasi: ${passedNames.join(', ')}`}
         </span>
       </div>
+      {isBelowFair && isEligible && (
+        <div className={styles.auctionHint}>
+          💡 Markkina-arvo ~€{fairBid} (85% listahinnasta)
+        </div>
+      )}
       {!isEligible && currentActor && auction.status === 'ACTIVE' && (
         <div className={styles.infoBox}>
           ⏳ {currentActor.name} tekee tarjouksen…

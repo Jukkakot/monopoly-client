@@ -82,3 +82,38 @@
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
 }
+
+.muteBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.85;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.muteBtn:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+
+.sessionIdBtn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.3px;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sessionIdBtn:hover { background: rgba(255,255,255,0.22); color: #fff; }

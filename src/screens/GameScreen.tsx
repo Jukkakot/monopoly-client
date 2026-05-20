@@ -37,7 +37,18 @@ export default function GameScreen() {
   }, [])
 
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
+  const [highlightGroupType, setHighlightGroupType] = useState<string | null>(null)
   const { sendCmd } = useGame()
+
+  function handleSpotClick(spotId: string) {
+    setSelectedSpotId(spotId)
+    setHighlightGroupType(null)
+  }
+
+  function handleGroupHighlight(groupType: string | null) {
+    setHighlightGroupType(groupType)
+    setSelectedSpotId(null)
+  }
 
   // Update browser tab title to indicate whose turn it is
   useEffect(() => {
@@ -75,15 +86,16 @@ export default function GameScreen() {
         sendCmd({ type: 'EndTurn', sessionId: snap.sessionId, actorPlayerId: myId })
       }
     }
-    if (e.key === 'Escape' && selectedSpotId) {
+    if (e.key === 'Escape') {
       setSelectedSpotId(null)
+      setHighlightGroupType(null)
     }
     if (e.key === 'm' || e.key === 'M') {
       const cfg = loadSoundConfig()
       const newVol = cfg.volume > 0 ? 0 : 80
       saveSoundConfig({ ...cfg, volume: newVol })
     }
-  }, [state.snapshot, state.myPlayerId, selectedSpotId, sendCmd])
+  }, [state.snapshot, state.myPlayerId, selectedSpotId, highlightGroupType, sendCmd])
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
@@ -96,6 +108,9 @@ export default function GameScreen() {
         <div className={styles.error}>
           <h2>Yhteys katkesi</h2>
           <p>Tarkista verkko tai lataa sivu uudelleen.</p>
+          {sessionId && (
+            <p className={styles.sessionIdHint}>Pelin koodi: <code>{sessionId}</code></p>
+          )}
           <button onClick={() => window.location.reload()} className={styles.btn}>Yritä uudelleen</button>
           <button onClick={() => navigate('/')} className={`${styles.btn} ${styles.btnSecondary}`}>Takaisin</button>
         </div>
@@ -132,6 +147,7 @@ export default function GameScreen() {
         />
       )}
       <AppLayout
+        actionAlert={state.snapshot.turn?.activePlayerId === state.myPlayerId && state.snapshot.turn?.phase !== 'GAME_OVER'}
         header={
           <Header
             snapshot={state.snapshot}
@@ -139,8 +155,12 @@ export default function GameScreen() {
             isSpectator={!state.myPlayerId}
           />
         }
-        board={<Board state={state.snapshot} onSpotClick={setSelectedSpotId} />}
-        players={<PlayerList state={state.snapshot} onSpotClick={setSelectedSpotId} />}
+        board={<Board state={state.snapshot} onSpotClick={handleSpotClick} selectedSpotId={selectedSpotId ?? undefined} highlightGroupType={highlightGroupType ?? undefined} onGroupHighlight={handleGroupHighlight} />}
+        players={<PlayerList state={state.snapshot} onSpotClick={setSelectedSpotId} onTradeWith={(targetId) => {
+          if (state.myPlayerId && state.snapshot) {
+            sendCmd({ type: 'OpenTrade', sessionId: state.snapshot.sessionId, actorPlayerId: state.myPlayerId, targetPlayerId: targetId })
+          }
+        }} />}
         log={<EventLog />}
         actions={<ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />}
       />

@@ -38,6 +38,21 @@ export async function sessionExists(sessionId: string): Promise<boolean> {
   return res.ok
 }
 
+export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{ playerId: string; seatId: string; tokenColorHex: string }> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/join`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, color }),
+  })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  return res.json()
+}
+
+export async function startLobby(sessionId: string): Promise<void> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+}
+
 export function sseUrl(sessionId: string): string {
   return `${BASE}/sessions/${sessionId}/events`
 }

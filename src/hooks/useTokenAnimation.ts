@@ -5,17 +5,40 @@ import { playTokenMove } from '../utils/sounds'
 const STEP_MS = 130
 const BOARD_SIZE = 40
 
+// Module-level animation state so any component can subscribe
+const _animatingPlayers = new Set<string>()
+const _listeners = new Set<() => void>()
+
+function notifyListeners() {
+  for (const fn of _listeners) fn()
+}
+
+function setPlayerAnimating(pid: string, animating: boolean) {
+  const changed = animating ? !_animatingPlayers.has(pid) : _animatingPlayers.has(pid)
+  if (!changed) return
+  if (animating) _animatingPlayers.add(pid)
+  else _animatingPlayers.delete(pid)
+  notifyListeners()
+}
+
+// Hook: returns true while any token is mid-animation
+export function useIsAnimating(): boolean {
+  const [animating, setAnimating] = useState(_animatingPlayers.size > 0)
+  useEffect(() => {
+    const update = () => setAnimating(_animatingPlayers.size > 0)
+    _listeners.add(update)
+    return () => { _listeners.delete(update) }
+  }, [])
+  return animating
+}
+
 // Returns animated positions: Map<playerId, displayIndex>
 export function useTokenAnimation(): Map<string, number> {
   const { state } = useGame()
   const snapshot = state.snapshot
-  // Track last known board indices (settled positions)
   const settledRef = useRef<Map<string, number>>(new Map())
-  // Animated display positions
   const [displayPositions, setDisplayPositions] = useState<Map<string, number>>(new Map())
-  // Queue of pending animations
   const queueRef = useRef<Map<string, number[]>>(new Map())
-  const animatingRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     if (!snapshot) return
@@ -27,7 +50,6 @@ export function useTokenAnimation(): Map<string, number> {
       const settledIdx = settledRef.current.get(pid)
 
       if (settledIdx === undefined) {
-        // First time seeing this player
         settledRef.current.set(pid, currentIdx)
         setDisplayPositions(prev => new Map(prev).set(pid, currentIdx))
         continue
@@ -35,38 +57,32 @@ export function useTokenAnimation(): Map<string, number> {
 
       if (settledIdx === currentIdx) continue
 
-      // Build step-by-step path from settled to current
       const steps: number[] = []
       let pos = settledIdx
-      // Always move forward (clockwise) on the board
       while (pos !== currentIdx) {
         pos = (pos + 1) % BOARD_SIZE
         steps.push(pos)
       }
 
-      // Update settled position immediately
       settledRef.current.set(pid, currentIdx)
-
       if (steps.length === 0) continue
 
-      // Queue steps for animation
       const existing = queueRef.current.get(pid) ?? []
       queueRef.current.set(pid, [...existing, ...steps])
 
-      // Start animating if not already
-      if (!animatingRef.current.has(pid)) {
+      if (!_animatingPlayers.has(pid)) {
         animatePlayer(pid)
       }
     }
   }, [snapshot])
 
   function animatePlayer(pid: string) {
-    animatingRef.current.add(pid)
+    setPlayerAnimating(pid, true)
 
     function step() {
       const queue = queueRef.current.get(pid) ?? []
       if (queue.length === 0) {
-        animatingRef.current.delete(pid)
+        setPlayerAnimating(pid, false)
         return
       }
       const next = queue[0]

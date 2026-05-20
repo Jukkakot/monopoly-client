@@ -16,6 +16,15 @@ export default function SessionListScreen() {
   const [joinCode, setJoinCode] = useState('')
   const [joinError, setJoinError] = useState<string | null>(null)
   const [joinChecking, setJoinChecking] = useState(false)
+  const [lastSession, setLastSession] = useState<string | null>(() => {
+    try { return localStorage.getItem('monopoly_last_session') } catch { return null }
+  })
+  const [lastSessionExists, setLastSessionExists] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!lastSession) return
+    sessionExists(lastSession).then(exists => setLastSessionExists(exists)).catch(() => setLastSessionExists(false))
+  }, [lastSession])
 
   async function load() {
     setLoading(true)
@@ -47,13 +56,18 @@ export default function SessionListScreen() {
     setJoinError(null)
     setJoinChecking(true)
     try {
-      const exists = await sessionExists(code)
-      if (!exists) {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'}/sessions/${code}/snapshot`)
+      if (!res.ok) {
         setJoinError('Peliä ei löydy. Tarkista koodi.')
         return
       }
-      joinSession(code)
-      navigate(`/game/${code}`)
+      const snap = await res.json() as { status: string }
+      if (snap.status === 'LOBBY') {
+        navigate(`/lobby-wait/${code}`)
+      } else {
+        joinSession(code)
+        navigate(`/game/${code}`)
+      }
     } catch {
       setJoinError('Yhteysongelma. Yritä uudelleen.')
     } finally {
@@ -88,6 +102,7 @@ export default function SessionListScreen() {
     }
   }
 
+  const lobby = sessions.filter(s => s.status === 'LOBBY')
   const active = sessions.filter(s => s.status === 'IN_PROGRESS')
   const finished = sessions.filter(s => s.status === 'GAME_OVER')
 
@@ -98,6 +113,23 @@ export default function SessionListScreen() {
           <div className={styles.logo}>Monopoly</div>
           <div className={styles.sub}>Helsinki Edition</div>
         </div>
+
+        {lastSession && lastSessionExists === true && (
+          <div className={styles.rejoinBanner}>
+            <span>↩ Jatkasitko viime peliä?</span>
+            <button
+              className={styles.rejoinBtn}
+              onClick={() => { joinSession(lastSession); navigate(`/game/${lastSession}`) }}
+            >
+              Liity: {lastSession}
+            </button>
+            <button
+              className={styles.rejoinDismiss}
+              onClick={() => { setLastSession(null); try { localStorage.removeItem('monopoly_last_session') } catch {} }}
+              title="Poista"
+            >✕</button>
+          </div>
+        )}
 
         <div className={styles.quickSection}>
           <button className={styles.newBtn} onClick={() => navigate('/lobby')}>
@@ -134,6 +166,18 @@ export default function SessionListScreen() {
           </div>
           {joinError && <div className={styles.joinError}>{joinError}</div>}
         </div>
+
+        {lobby.length > 0 && (
+          <div className={styles.listSection}>
+            <div className={styles.sectionTitle}>Odotushuoneet</div>
+            {lobby.map(s => (
+              <SessionRow key={s.sessionId} session={s}
+                onJoin={() => navigate(`/lobby-wait/${s.sessionId}`)}
+                onDelete={() => handleDelete(s.sessionId)}
+                label="Liity odotushuoneeseen" />
+            ))}
+          </div>
+        )}
 
         <div className={styles.listSection}>
           <div className={styles.sectionTitle}>Käynnissä olevat pelit</div>

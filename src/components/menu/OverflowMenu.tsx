@@ -11,6 +11,7 @@ export default function OverflowMenu() {
   const [open, setOpen] = useState(false)
   const [showSound, setShowSound] = useState(false)
   const [showBuild, setShowBuild] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
 
   function copyInviteLink() {
@@ -152,6 +153,22 @@ export default function OverflowMenu() {
         </div>
       )}
 
+      {showHelp && (
+        <div className={styles.soundOverlay} onClick={() => setShowHelp(false)}>
+          <div className={styles.helpModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.buildModalHeader}>
+              <span>⌨ Pikanäppäimet</span>
+              <button className={styles.closeBtn} onClick={() => setShowHelp(false)}>✕</button>
+            </div>
+            <div className={styles.helpTable}>
+              <div className={styles.helpRow}><kbd>Välilyönti</kbd><span>Heitä nopat / Lopeta vuoro</span></div>
+              <div className={styles.helpRow}><kbd>Esc</kbd><span>Sulje modaali / kiinteistö</span></div>
+              <div className={styles.helpRow}><kbd>M</kbd><span>Mykistä / Ota äänet käyttöön</span></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {open && (
         <>
           <div className={styles.backdrop} onClick={() => setOpen(false)} />
@@ -188,6 +205,9 @@ export default function OverflowMenu() {
             )}
             <button className={styles.menuItem} onClick={() => { setOpen(false); setShowSound(true) }}>
               ⚙️ Ääniasetukset
+            </button>
+            <button className={styles.menuItem} onClick={() => { setOpen(false); setShowHelp(true) }}>
+              ⌨ Pikanäppäimet
             </button>
             <div className={styles.divider} />
             <button className={`${styles.menuItem} ${styles.danger}`}

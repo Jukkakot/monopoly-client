@@ -34,6 +34,26 @@
   background: #f5f5f5;
 }
 
+.card.me {
+  border-left: 4px solid #1565c0;
+}
+
+.card.me.active {
+  border-left-color: #2e7d32;
+}
+
+.meBadge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: #1565c0;
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
 .token {
   flex-shrink: 0;
 }
@@ -69,12 +89,60 @@
   margin-top: 2px;
 }
 
+.cashCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.cashRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rankEmoji {
+  font-size: 0.85rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
 .cash {
   font-weight: 700;
   font-size: 1rem;
   color: #2e7d32;
   white-space: nowrap;
   transition: color 0.3s;
+}
+
+.netWorth {
+  font-size: 0.68rem;
+  color: #999;
+  white-space: nowrap;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+}
+
+.groupDots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.groupDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  opacity: 0.75;
+}
+
+.groupDotMonopoly {
+  opacity: 1;
+  border-radius: 3px;
+  outline: 2px solid rgba(255,255,255,0.7);
+  outline-offset: 1px;
 }
 
 .cashUp {
@@ -118,18 +186,32 @@
 
 /* ── Wealth bar ── */
 .wealthBar {
-  height: 3px;
+  height: 4px;
   background: #e8f5e9;
   border-radius: 2px;
   margin-top: 4px;
   overflow: hidden;
+  position: relative;
 }
 
 .wealthBarFill {
   height: 100%;
   border-radius: 2px;
   transition: width 0.5s ease-out;
-  opacity: 0.7;
+  opacity: 0.3;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.wealthBarCash {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease-out;
+  opacity: 0.8;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 /* ── Expanded property view ── */
@@ -227,10 +309,57 @@
   text-decoration: line-through;
 }
 
+.propSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.propStat {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.propStatMuted {
+  background: #f5f5f5;
+  color: #888;
+}
+
 .noProps {
   font-size: 0.78rem;
   color: #aaa;
   padding: 4px 0;
   text-align: center;
   font-style: italic;
+}
+
+.sparkline {
+  display: block;
+  margin-top: 1px;
+}
+
+.tradeBtn {
+  width: 100%;
+  background: #e8f5e9;
+  border: 1.5px solid #a5d6a7;
+  color: #2e7d32;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.tradeBtn:hover {
+  background: #c8e6c9;
+  border-color: #81c784;
 }

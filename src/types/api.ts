@@ -1,6 +1,6 @@
 export type SeatKind = 'HUMAN' | 'BOT'
 export type BotDifficulty = 'EASY' | 'NORMAL'
-export type SessionStatus = 'IN_PROGRESS' | 'GAME_OVER'
+export type SessionStatus = 'LOBBY' | 'IN_PROGRESS' | 'GAME_OVER'
 export type TurnPhase =
   | 'WAITING_FOR_ROLL'
   | 'WAITING_FOR_END_TURN'
@@ -18,8 +18,9 @@ export interface SeatState {
   seatIndex: number
   playerId: string
   seatKind: SeatKind
-  displayName: string
+  displayName: string | null
   tokenColorHex: string
+  joined: boolean
 }
 
 export interface PlayerSnapshot {

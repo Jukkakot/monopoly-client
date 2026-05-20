@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GameProvider } from './store/GameContext'
 import SessionListScreen from './screens/SessionListScreen'
 import LobbyScreen from './screens/LobbyScreen'
+import LobbyWaitingScreen from './screens/LobbyWaitingScreen'
 import GameScreen from './screens/GameScreen'
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<SessionListScreen />} />
           <Route path="/lobby" element={<LobbyScreen />} />
+          <Route path="/lobby-wait/:sessionId" element={<LobbyWaitingScreen />} />
           <Route path="/game/:sessionId" element={<GameScreen />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
