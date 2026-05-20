@@ -149,8 +149,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           📍 <strong>{p.propertyDisplayName}</strong><br />
           Hinta: €{p.price}
         </div>
-        <Btn label={`💰 Osta €${p.price}`} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
-        <Btn label="🏷 Ohita → huutokauppa" onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
+        <Btn label={isTouchDevice ? `💰 Osta €${p.price}` : `💰 Osta €${p.price}  [B]`} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
+        <Btn label={isTouchDevice ? '🏷 Ohita → huutokauppa' : '🏷 Ohita → huutokauppa  [D]'} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
     )
@@ -507,7 +507,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
             {[10, 50, 100].map(delta => (
               <button key={delta} className={styles.bidQuick}
                 onClick={() => placeBid(auction.currentBid + delta)}>
-                +{delta}
+                {!isTouchDevice && delta === 10 ? '+10  [↑]' : `+${delta}`}
               </button>
             ))}
           </div>
@@ -525,7 +525,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           </div>
           <button className={`${styles.btn} ${styles.ghost}`}
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}>
-            🚫 Passi
+            {isTouchDevice ? '🚫 Passi' : '🚫 Passi  [P]'}
           </button>
         </>
       ) : (

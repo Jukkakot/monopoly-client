@@ -12,6 +12,7 @@ import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
 import FlashBanner from '../components/notification/FlashBanner'
 import PropertyDetail from '../components/property/PropertyDetail'
+import KeyboardHelp from '../components/menu/KeyboardHelp'
 import Confetti from '../components/effects/Confetti'
 import GameOverOverlay from '../components/effects/GameOverOverlay'
 import styles from './GameScreen.module.css'
@@ -38,6 +39,7 @@ export default function GameScreen() {
 
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [highlightGroupType, setHighlightGroupType] = useState<string | null>(null)
+  const [showHelp, setShowHelp] = useState(false)
   const { sendCmd } = useGame()
 
   function handleSpotClick(spotId: string) {
@@ -86,9 +88,48 @@ export default function GameScreen() {
         sendCmd({ type: 'EndTurn', sessionId: snap.sessionId, actorPlayerId: myId })
       }
     }
+    if (e.key === 'b' || e.key === 'B') {
+      if (isMyTurn && turn?.phase === 'WAITING_FOR_DECISION' && snap.pendingDecision) {
+        playButtonClick()
+        const dec = snap.pendingDecision
+        sendCmd({ type: 'BuyProperty', sessionId: snap.sessionId, actorPlayerId: myId, decisionId: dec.decisionId, propertyId: dec.payload.propertyId })
+      }
+    }
+    if (e.key === 'd' || e.key === 'D') {
+      if (isMyTurn && turn?.phase === 'WAITING_FOR_DECISION' && snap.pendingDecision) {
+        playButtonClick()
+        const dec = snap.pendingDecision
+        sendCmd({ type: 'DeclineProperty', sessionId: snap.sessionId, actorPlayerId: myId, decisionId: dec.decisionId, propertyId: dec.payload.propertyId })
+      }
+    }
+    if (e.key === 'p' || e.key === 'P') {
+      if (turn?.phase === 'WAITING_FOR_AUCTION' && snap.auctionState) {
+        const auction = snap.auctionState
+        const eligible = auction.eligiblePlayerIds.includes(myId) && !auction.passedPlayerIds.includes(myId)
+        if (eligible) {
+          playButtonClick()
+          sendCmd({ type: 'PassAuction', sessionId: snap.sessionId, actorPlayerId: myId, auctionId: auction.auctionId })
+        }
+      }
+    }
+    if ((e.key === '+' || e.key === 'ArrowUp') && !e.shiftKey) {
+      if (turn?.phase === 'WAITING_FOR_AUCTION' && snap.auctionState) {
+        const auction = snap.auctionState
+        const eligible = auction.eligiblePlayerIds.includes(myId) && !auction.passedPlayerIds.includes(myId)
+        if (eligible) {
+          e.preventDefault()
+          playButtonClick()
+          sendCmd({ type: 'PlaceAuctionBid', sessionId: snap.sessionId, actorPlayerId: myId, auctionId: auction.auctionId, amount: auction.currentBid + 10 })
+        }
+      }
+    }
     if (e.key === 'Escape') {
       setSelectedSpotId(null)
       setHighlightGroupType(null)
+      setShowHelp(false)
+    }
+    if (e.key === '?') {
+      setShowHelp(v => !v)
     }
     if (e.key === 'm' || e.key === 'M') {
       const cfg = loadSoundConfig()
@@ -146,6 +187,7 @@ export default function GameScreen() {
           onClose={() => setSelectedSpotId(null)}
         />
       )}
+      {showHelp && <KeyboardHelp onClose={() => setShowHelp(false)} />}
       <AppLayout
         actionAlert={state.snapshot.turn?.activePlayerId === state.myPlayerId && state.snapshot.turn?.phase !== 'GAME_OVER'}
         header={
