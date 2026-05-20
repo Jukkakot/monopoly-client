@@ -281,9 +281,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             <span>{state.lastCardMessage}</span>
           </div>
         )}
-        <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
       </div>
     )
   }
