@@ -1,4 +1,5 @@
 import type { SessionState } from '../types/api'
+import { getCardText } from '../i18n/cards'
 import { SPOTS } from '../types/spots'
 
 export interface GameEvent {
@@ -27,9 +28,10 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
   }
 
   // Card message
-  if (next.lastCardMessage && next.lastCardMessage !== prev.lastCardMessage) {
+  if (next.lastCardKey && next.lastCardKey !== prev.lastCardKey) {
     const actorId = next.turn?.activePlayerId ?? ''
-    events.push(ev('🃏', next.lastCardMessage, actorId ? [actorId] : []))
+    const text = getCardText(next.lastCardKey, next.lastCardMessage)
+    if (text) events.push(ev('🃏', text, actorId ? [actorId] : []))
   }
 
   // Per-player changes

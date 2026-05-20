@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
+import { getCardText } from '../../i18n/cards'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { calcNetWorth, calcCurrentRentIncome } from '../../utils/netWorth'
@@ -211,10 +212,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
         )}
         {lastDice && phase === 'WAITING_FOR_END_TURN' && <DiceDisplay dice={lastDice} />}
-        {state.lastCardMessage && (
+        {getCardText(state.lastCardKey, state.lastCardMessage) && (
           <div className={styles.cardMessage}>
             <span className={styles.cardMessageIcon}>🃏</span>
-            <span>{state.lastCardMessage}</span>
+            <span>{getCardText(state.lastCardKey, state.lastCardMessage)}</span>
           </div>
         )}
         {myPlayer && (
@@ -277,10 +278,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
         {lastDice && <DiceDisplay dice={lastDice} />}
-        {state.lastCardMessage && (
+        {getCardText(state.lastCardKey, state.lastCardMessage) && (
           <div className={styles.cardMessage}>
             <span className={styles.cardMessageIcon}>🃏</span>
-            <span>{state.lastCardMessage}</span>
+            <span>{getCardText(state.lastCardKey, state.lastCardMessage)}</span>
           </div>
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />

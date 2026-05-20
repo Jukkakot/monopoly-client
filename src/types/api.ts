@@ -125,6 +125,7 @@ export interface SessionState {
   tradeState: TradeState | null
   winnerPlayerId: string | null
   lastCardMessage: string | null
+  lastCardKey: string | null
 }
 
 export interface ClientSessionSnapshot {
