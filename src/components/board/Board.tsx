@@ -7,11 +7,13 @@ import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { useTokenAnimation } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
+import { useT } from '../../i18n/LanguageContext'
 
 const MAX_HOUSES = 32
 const MAX_HOTELS = 12
 
 function BoardStats({ state }: { state: SessionState }) {
+  const t = useT()
   const totalProps = state.properties.length
   const soldProps = state.properties.filter(p => p.ownerPlayerId !== null).length
   const houses = state.properties.reduce((s, p) => s + p.houseCount, 0)
@@ -21,14 +23,14 @@ function BoardStats({ state }: { state: SessionState }) {
   if (soldProps === 0 && houses === 0) return null
   return (
     <div className={styles.centerStats}>
-      <span title="Myytyjen kiinteistöjen määrä">{soldProps}/{totalProps} kiin.</span>
+      <span title={t.soldPropsTitle}>{soldProps}/{totalProps} kiin.</span>
       {houses > 0 && (
-        <span title={`${houses} taloa pystyssä, ${housesLeft} pankissa`} className={housesLeft <= 4 ? styles.centerStatWarn : undefined}>
+        <span title={t.housesStockTitle(houses, housesLeft)} className={housesLeft <= 4 ? styles.centerStatWarn : undefined}>
           🏠{housesLeft}
         </span>
       )}
       {hotels > 0 && (
-        <span title={`${hotels} hotellia pystyssä, ${hotelsLeft} pankissa`} className={hotelsLeft <= 2 ? styles.centerStatWarn : undefined}>
+        <span title={t.hotelsStockTitle(hotels, hotelsLeft)} className={hotelsLeft <= 2 ? styles.centerStatWarn : undefined}>
           🏨{hotelsLeft}
         </span>
       )}
@@ -37,6 +39,7 @@ function BoardStats({ state }: { state: SessionState }) {
 }
 
 function SpotTooltip({ spotId, state, pos }: { spotId: string; state: SessionState; pos: { x: number; y: number } }) {
+  const t = useT()
   const spot = SPOTS.find(s => s.id === spotId)
   if (!spot || !spot.isProperty) return null
 
@@ -73,7 +76,7 @@ function SpotTooltip({ spotId, state, pos }: { spotId: string; state: SessionSta
         p.ownerPlayerId === owner.playerId &&
         SPOTS.find(s => s.id === p.propertyId)?.streetType === 'UTILITY'
       ).length
-      currentRent = utilCount >= 2 ? '10× nopat' : '4× nopat'
+      currentRent = utilCount >= 2 ? t.utilityDiceLarge : t.utilityDiceSmall
     }
   }
 
@@ -105,9 +108,9 @@ function SpotTooltip({ spotId, state, pos }: { spotId: string; state: SessionSta
           {prop?.mortgaged && <span className={styles.tooltipMortgaged}>P</span>}
         </div>
       ) : (
-        <div className={styles.tooltipFree}>Vapaa</div>
+        <div className={styles.tooltipFree}>{t.freeLabel}</div>
       )}
-      {currentRent && <div className={styles.tooltipRent}>Vuokra {currentRent}</div>}
+      {currentRent && <div className={styles.tooltipRent}>{t.rentTooltip(currentRent)}</div>}
       {buildings && <div className={styles.tooltipBuildings}>{buildings}</div>}
     </div>
   )
@@ -217,6 +220,7 @@ function DieFace({ value, size }: { value: number; size: number }) {
 }
 
 function BoardDice({ dice }: { dice: [number, number] | null }) {
+  const t = useT()
   if (!dice) return null
   const isDoubles = dice[0] === dice[1]
   const sum = dice[0] + dice[1]
@@ -225,7 +229,7 @@ function BoardDice({ dice }: { dice: [number, number] | null }) {
       <DieFace value={dice[0]} size={36} />
       <span className={styles.diceSum}>{sum}</span>
       <DieFace value={dice[1]} size={36} />
-      {isDoubles && <span className={styles.diceDoubles}>tupla</span>}
+      {isDoubles && <span className={styles.diceDoubles}>{t.doublesLabel}</span>}
     </div>
   )
 }
@@ -239,6 +243,7 @@ interface Props {
 }
 
 export default function Board({ state, onSpotClick, selectedSpotId, highlightGroupType, onGroupHighlight }: Props) {
+  const t = useT()
   const animatedPositions = useTokenAnimation()
   const { state: gameState } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
@@ -321,7 +326,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         <BoardStats state={state} />
         <GroupOwnershipBar state={state} activeGroup={highlightGroupType} onGroupClick={onGroupHighlight} />
         {gameState.turnCount > 0 && (
-          <div className={styles.centerTurnCount}>Kierros {gameState.turnCount}</div>
+          <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
       </div>
     </div>

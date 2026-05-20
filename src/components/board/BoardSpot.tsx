@@ -4,6 +4,7 @@ import { STREET_COLORS, indexToGridPos } from '../../types/spots'
 import type { PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
 import { type TokenShape } from '../../utils/tokenShapes'
 import { TokenSvg } from './TokenSvg'
+import { useT } from '../../i18n/LanguageContext'
 
 interface Props {
   spot: SpotDef
@@ -68,23 +69,25 @@ function PlayerTokens({ players, seats, tokenShapes }: {
 }
 
 function GoCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
+  const t = useT()
   return (
     <div className={`${styles.corner} ${styles.goCorner}`}>
       <div className={styles.goArrow}>→</div>
       <div className={styles.goText}>GO</div>
-      <div className={styles.goSub}>Kerää €200</div>
+      <div className={styles.goSub}>{t.goCollect}</div>
       <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )
 }
 
 function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
+  const t = useT()
   const jailed = players.filter(p => p.inJail)
   const visiting = players.filter(p => !p.inJail)
   return (
     <div className={`${styles.corner} ${styles.jailCorner}`}>
       <div className={styles.jailTop}>⛓</div>
-      <div className={styles.jailLabel}>Vankila</div>
+      <div className={styles.jailLabel}>{t.jailLabel}</div>
       {jailed.length > 0 && (
         <div className={styles.jailPrisoners}>
           {jailed.map(p => {
@@ -101,7 +104,7 @@ function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]
       )}
       {visiting.length > 0 && (
         <>
-          <div className={styles.jailSub}>Vierailulla</div>
+          <div className={styles.jailSub}>{t.visitingLabel}</div>
           <PlayerTokens players={visiting} seats={seats} tokenShapes={tokenShapes} />
         </>
       )}
@@ -110,22 +113,24 @@ function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]
 }
 
 function ParkingCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
+  const t = useT()
   return (
     <div className={`${styles.corner} ${styles.parkingCorner}`}>
       <div className={styles.cornerSymbol}>🅿</div>
-      <div className={styles.cornerLabel}>Vapaa</div>
-      <div className={styles.cornerLabel}>Pysäköinti</div>
+      <div className={styles.cornerLabel}>{t.freeParkingLine1}</div>
+      <div className={styles.cornerLabel}>{t.freeParkingLine2}</div>
       <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )
 }
 
 function GoJailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
+  const t = useT()
   return (
     <div className={`${styles.corner} ${styles.goJailCorner}`}>
       <div className={styles.cornerSymbol}>👮</div>
-      <div className={styles.cornerLabel}>Mene</div>
-      <div className={styles.cornerLabel}>Vankilaan!</div>
+      <div className={styles.cornerLabel}>{t.goToJailLine1}</div>
+      <div className={styles.cornerLabel}>{t.goToJailLine2}</div>
       <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
     </div>
   )

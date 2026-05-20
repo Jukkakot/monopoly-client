@@ -19,6 +19,14 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 767px) {
+  .board {
+    /* Cap board size on mobile so action panel gets room below */
+    max-width: min(95vw, 44vh);
+    max-height: min(95vw, 44vh);
+  }
+}
+
 .center {
   grid-column: 2 / 11;
   grid-row: 2 / 11;

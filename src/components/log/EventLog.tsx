@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import styles from './EventLog.module.css'
 import { useGame } from '../../store/GameContext'
 import DiceStats from '../stats/DiceStats'
+import { useT } from '../../i18n/LanguageContext'
 
 const ICON_CLASS: Record<string, string> = {
   '🏃': styles.typeMove,
@@ -43,26 +44,9 @@ const FILTER_LABELS: Record<FilterGroup, string> = {
   jail:     '⛓',
 }
 
-const FILTER_TITLES: Record<FilterGroup, string> = {
-  moves:    'Siirtymät',
-  money:    'Raha & vuokrat',
-  property: 'Kiinteistöt & huutokaupat',
-  build:    'Rakentaminen & panttaus',
-  trade:    'Kaupat',
-  jail:     'Vankila & erikoistapahtumat',
-}
-
-function relativeTime(timestamp: number): string {
-  const diff = Math.floor((Date.now() - timestamp) / 1000)
-  if (diff < 10) return 'juuri nyt'
-  if (diff < 60) return `${diff}s sitten`
-  const mins = Math.floor(diff / 60)
-  if (mins < 60) return `${mins}m sitten`
-  return new Date(timestamp).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
-}
-
 export default function EventLog() {
   const { state } = useGame()
+  const t = useT()
   const [activeFilters, setActiveFilters] = useState<Set<FilterGroup>>(new Set())
   const [mineOnly, setMineOnly] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
@@ -78,6 +62,15 @@ export default function EventLog() {
       else next.add(f)
       return next
     })
+  }
+
+  function relativeTime(timestamp: number): string {
+    const diff = Math.floor((Date.now() - timestamp) / 1000)
+    if (diff < 10) return t.justNow
+    if (diff < 60) return t.secondsAgo(diff)
+    const mins = Math.floor(diff / 60)
+    if (mins < 60) return t.minutesAgo(mins)
+    return new Date(timestamp).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
   }
 
   const filtered = [...state.events]
@@ -98,14 +91,14 @@ export default function EventLog() {
           className={`${styles.filterBtn} ${activeFilters.size === 0 ? styles.filterActive : ''}`}
           onClick={() => setActiveFilters(new Set())}
         >
-          Kaikki
+          {t.filterAll}
         </button>
         {(Object.keys(FILTER_LABELS) as FilterGroup[]).map(f => (
           <button
             key={f}
             className={`${styles.filterBtn} ${activeFilters.has(f) ? styles.filterActive : ''}`}
             onClick={() => toggleFilter(f)}
-            title={FILTER_TITLES[f]}
+            title={t.filterTitles[f]}
           >
             {FILTER_LABELS[f]}
           </button>
@@ -114,7 +107,7 @@ export default function EventLog() {
           <button
             className={`${styles.filterBtn} ${mineOnly ? styles.filterMine : ''}`}
             onClick={() => setMineOnly(v => !v)}
-            title="Näytä vain omat tapahtumat"
+            title={t.showMineOnly}
           >
             ⭐
           </button>
@@ -124,7 +117,7 @@ export default function EventLog() {
       <div className={styles.log}>
         <div ref={topRef} />
         {filtered.length === 0 && (
-          <div className={styles.empty}>Ei tapahtumia vielä.</div>
+          <div className={styles.empty}>{t.noEventsYet}</div>
         )}
         {filtered.map(event => {
           const isRelated = state.myPlayerId && event.relatedPlayerIds.includes(state.myPlayerId)

@@ -1,6 +1,7 @@
 import styles from './AppLayout.module.css'
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import { useGame } from '../../store/GameContext'
+import { useT } from '../../i18n/LanguageContext'
 
 const SIDEBAR_MIN = 280
 const SIDEBAR_MAX = 700
@@ -14,15 +15,9 @@ function loadSidebarWidth(): number {
   return SIDEBAR_DEFAULT
 }
 
-type MobileTab = 'board' | 'players' | 'log' | 'actions'
+type MobileTab = 'board' | 'players' | 'log'
 
-const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log', 'actions']
-const MOBILE_LABELS: Record<MobileTab, string> = {
-  board: '🎲 Lauta',
-  players: '👥 Pelaajat',
-  log: '📋 Loki',
-  actions: '⚡ Toiminnot',
-}
+const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log']
 
 interface Props {
   header: ReactNode
@@ -30,12 +25,12 @@ interface Props {
   players: ReactNode
   log: ReactNode
   actions: ReactNode
-  actionAlert?: boolean
 }
 
-export default function AppLayout({ header, board, players, log, actions, actionAlert }: Props) {
+export default function AppLayout({ header, board, players, log, actions }: Props) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('board')
   const { state } = useGame()
+  const t = useT()
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)
@@ -81,16 +76,6 @@ export default function AppLayout({ header, board, players, log, actions, action
     }
   }, [state.events.length, mobileTab])
 
-  // Auto-switch to actions tab when it becomes my turn on mobile
-  const prevActiveId = useRef<string | null>(null)
-  useEffect(() => {
-    const activeId = state.snapshot?.turn?.activePlayerId ?? null
-    if (activeId && activeId === state.myPlayerId && prevActiveId.current !== activeId) {
-      setMobileTab('actions')
-    }
-    prevActiveId.current = activeId
-  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId])
-
   const touchStartX = useRef(0)
   const tabIdx = MOBILE_TABS.indexOf(mobileTab)
 
@@ -113,7 +98,7 @@ export default function AppLayout({ header, board, players, log, actions, action
       </div>
 
       {/* ── Desktop: resize handle ── */}
-      <div className={styles.resizeHandle} onMouseDown={onDragStart} title="Vedä muuttaaksesi leveyttä" />
+      <div className={styles.resizeHandle} onMouseDown={onDragStart} title={t.resizeHandleTitle} />
 
       {/* ── Desktop: sidebar ── */}
       <div className={styles.sideCol} style={{ flexBasis: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}>
@@ -129,13 +114,8 @@ export default function AppLayout({ header, board, players, log, actions, action
         <div className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}>
           {board}
         </div>
-        {mobileTab !== 'board' && (
-          <div className={styles.mobileBoardCompact}>
-            {board}
-          </div>
-        )}
         <div className={styles.mobileSection}>
-          {(mobileTab === 'board' || mobileTab === 'actions') && <div className={styles.mobilePadded}>{actions}</div>}
+          {mobileTab === 'board' && <div className={styles.mobilePadded}>{actions}</div>}
           {mobileTab === 'players' && players}
           {mobileTab === 'log' && log}
         </div>
@@ -149,10 +129,7 @@ export default function AppLayout({ header, board, players, log, actions, action
             className={`${styles.navBtn} ${mobileTab === tab ? styles.navActive : ''}`}
             onClick={() => setMobileTab(tab)}
           >
-            {MOBILE_LABELS[tab]}
-            {tab === 'actions' && actionAlert && mobileTab !== 'actions' && (
-              <span className={styles.navAlert} />
-            )}
+            {t.mobileTabs[tab]}
             {tab === 'log' && unreadLog > 0 && mobileTab !== 'log' && (
               <span className={styles.navBadge}>{unreadLog > 9 ? '9+' : unreadLog}</span>
             )}

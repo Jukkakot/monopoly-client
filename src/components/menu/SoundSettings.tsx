@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import styles from './SoundSettings.module.css'
+import { useT } from '../../i18n/LanguageContext'
 
 const LS_KEY = 'sound-settings'
 
@@ -28,14 +29,21 @@ interface Props {
 }
 
 export default function SoundSettings({ onClose }: Props) {
+  const t = useT()
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
 
+  const soundCategories = [
+    { key: 'uiSounds',           label: t.uiSoundsLabel,    desc: t.uiSoundsDesc },
+    { key: 'notificationSounds', label: t.notifSoundsLabel, desc: t.notifSoundsDesc },
+    { key: 'gameSounds',         label: t.gameSoundsLabel,  desc: t.gameSoundsDesc },
+  ]
+
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <span>⚙️ Ääniasetukset</span>
+        <span>{t.soundSettingsTitle}</span>
         <button className={styles.close} onClick={onClose}>✕</button>
       </div>
 
@@ -53,11 +61,7 @@ export default function SoundSettings({ onClose }: Props) {
 
       <div className={styles.divider} />
 
-      {[
-        { key: 'uiSounds',            label: 'UI-äänet',          desc: 'Napit, siirtymät' },
-        { key: 'notificationSounds',  label: 'Ilmoitusäänet',     desc: 'Vuoro, vuokra' },
-        { key: 'gameSounds',          label: 'Pelitapahtumat',     desc: 'Noppa, osto' },
-      ].map(({ key, label, desc }) => (
+      {soundCategories.map(({ key, label, desc }) => (
         <label key={key} className={styles.toggleRow}>
           <div className={styles.toggleInfo}>
             <span className={styles.label}>{label}</span>
@@ -71,7 +75,7 @@ export default function SoundSettings({ onClose }: Props) {
         </label>
       ))}
 
-      <button className={styles.saveBtn} onClick={onClose}>Tallenna</button>
+      <button className={styles.saveBtn} onClick={onClose}>{t.saveBtn}</button>
     </div>
   )
 }

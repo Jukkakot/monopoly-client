@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import styles from './DiceStats.module.css'
 import { useGame } from '../../store/GameContext'
+import { useT } from '../../i18n/LanguageContext'
 
 function buildDistribution(history: [number, number][]): Map<number, number> {
   const dist = new Map<number, number>()
@@ -15,6 +16,7 @@ const THEORETICAL: Record<number, number> = {
 
 export default function DiceStats() {
   const { state } = useGame()
+  const t = useT()
   const [open, setOpen] = useState(false)
   const history = state.diceHistory
 
@@ -32,8 +34,8 @@ export default function DiceStats() {
   return (
     <div className={styles.wrapper}>
       <button className={styles.toggle} onClick={() => setOpen(v => !v)}>
-        <span>🎲 Noppätilasto</span>
-        <span className={styles.toggleMeta}>{total} heittoa{open ? ' ▴' : ' ▾'}</span>
+        <span>{t.diceStatsTitle}</span>
+        <span className={styles.toggleMeta}>{t.rollCount(total)}{open ? ' ▴' : ' ▾'}</span>
       </button>
       {open && (
         <div className={styles.chart}>
@@ -62,11 +64,11 @@ export default function DiceStats() {
             })}
           </div>
           <div className={styles.meta}>
-            <span>Yleisin: <strong>{mostCommon[1] > 0 ? mostCommon[0] : '—'}</strong></span>
-            <span>Tuplat: <strong>{doublesPercent}%</strong></span>
+            <span>{t.mostCommonLabel} <strong>{mostCommon[1] > 0 ? mostCommon[0] : '—'}</strong></span>
+            <span>{t.doublesStatLabel} <strong>{doublesPercent}%</strong></span>
             <span className={styles.legend}>
-              <span className={styles.legendDot} style={{ background: '#2e7d32' }} /> Heitetty
-              <span className={styles.legendDot} style={{ background: 'rgba(0,0,0,0.12)', border: '1px dashed #aaa' }} /> Teoria
+              <span className={styles.legendDot} style={{ background: '#2e7d32' }} /> {t.rolledLegend}
+              <span className={styles.legendDot} style={{ background: 'rgba(0,0,0,0.12)', border: '1px dashed #aaa' }} /> {t.theoryLegend}
             </span>
           </div>
         </div>

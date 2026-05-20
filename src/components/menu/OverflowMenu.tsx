@@ -3,9 +3,11 @@ import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
 import { useGame } from '../../store/GameContext'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { useT } from '../../i18n/LanguageContext'
 
 export default function OverflowMenu() {
   const { state, sendCmd } = useGame()
+  const t = useT()
   const { snapshot, myPlayerId } = state
 
   const [open, setOpen] = useState(false)
@@ -70,7 +72,7 @@ export default function OverflowMenu() {
 
   return (
     <div className={styles.root}>
-      <button className={styles.trigger} onClick={() => setOpen(v => !v)} title="Lisätoiminnot">
+      <button className={styles.trigger} onClick={() => setOpen(v => !v)} title={t.moreActionsTitle}>
         ⋯
       </button>
 
@@ -86,13 +88,13 @@ export default function OverflowMenu() {
         <div className={styles.soundOverlay} onClick={() => setShowBuild(false)}>
           <div className={styles.buildModal} onClick={e => e.stopPropagation()}>
             <div className={styles.buildModalHeader}>
-              <span>Rakenna / Panttaa</span>
+              <span>{t.buildModalTitle}</span>
               <button className={styles.closeBtn} onClick={() => setShowBuild(false)}>✕</button>
             </div>
 
             {buildable.length > 0 && (
               <div className={styles.buildSection}>
-                <div className={styles.buildSectionTitle}>🏠 Rakenna taloja</div>
+                <div className={styles.buildSectionTitle}>{t.buildSectionTitle}</div>
                 {buildable.map(prop => {
                   const spot = SPOTS.find(s => s.id === prop.propertyId)
                   const color = STREET_COLORS[spot?.streetType ?? '']
@@ -116,7 +118,7 @@ export default function OverflowMenu() {
 
             {mortgageable.length > 0 && (
               <div className={styles.buildSection}>
-                <div className={styles.buildSectionTitle}>🏦 Panttaa</div>
+                <div className={styles.buildSectionTitle}>{t.mortgageSectionMenuTitle}</div>
                 {mortgageable.map(prop => {
                   const spot = SPOTS.find(s => s.id === prop.propertyId)
                   return (
@@ -124,7 +126,7 @@ export default function OverflowMenu() {
                       <span className={styles.buildName}>{spot?.name ?? prop.propertyId}</span>
                       <button className={styles.buildBtn}
                         onClick={() => cmd('ToggleMortgage', { propertyId: prop.propertyId })}>
-                        Panttaa
+                        {t.mortgageBtnMenu}
                       </button>
                     </div>
                   )
@@ -134,7 +136,7 @@ export default function OverflowMenu() {
 
             {redeemable.length > 0 && (
               <div className={styles.buildSection}>
-                <div className={styles.buildSectionTitle}>💳 Lunasta pantit</div>
+                <div className={styles.buildSectionTitle}>{t.redeemSectionMenuTitle}</div>
                 {redeemable.map(prop => {
                   const spot = SPOTS.find(s => s.id === prop.propertyId)
                   return (
@@ -142,7 +144,7 @@ export default function OverflowMenu() {
                       <span className={styles.buildName}>{spot?.name ?? prop.propertyId}</span>
                       <button className={styles.buildBtn}
                         onClick={() => cmd('ToggleMortgage', { propertyId: prop.propertyId })}>
-                        Lunasta
+                        {t.redeemBtnMenu}
                       </button>
                     </div>
                   )
@@ -157,7 +159,7 @@ export default function OverflowMenu() {
         <div className={styles.soundOverlay} onClick={() => setShowHelp(false)}>
           <div className={styles.helpModal} onClick={e => e.stopPropagation()}>
             <div className={styles.buildModalHeader}>
-              <span>⌨ Pikanäppäimet</span>
+              <span>{t.keyboardShortcutsBtn}</span>
               <button className={styles.closeBtn} onClick={() => setShowHelp(false)}>✕</button>
             </div>
             <div className={styles.helpTable}>
@@ -173,11 +175,11 @@ export default function OverflowMenu() {
         <>
           <div className={styles.backdrop} onClick={() => setOpen(false)} />
           <div className={styles.menu}>
-            <div className={styles.menuTitle}>Lisätoiminnot</div>
+            <div className={styles.menuTitle}>{t.moreActionsTitle}</div>
 
             {canAct && others.length > 0 && (
               <>
-                <div className={styles.menuLabel}>🤝 Tee kauppa</div>
+                <div className={styles.menuLabel}>{t.startTradeSection}</div>
                 {others.map(p => {
                   const seat = snapshot?.seats.find(s => s.playerId === p.playerId)
                   return (
@@ -194,34 +196,34 @@ export default function OverflowMenu() {
 
             {canAct && hasBuildActions && (
               <button className={styles.menuItem} onClick={() => { setOpen(false); setShowBuild(true) }}>
-                🏠 Rakenna / Panttaa
+                {t.buildAndMortgageBtn}
               </button>
             )}
 
             {snapshot && (
               <button className={styles.menuItem} onClick={copyInviteLink}>
-                {linkCopied ? '✓ Linkki kopioitu!' : '🔗 Kopioi kutsulink'}
+                {linkCopied ? t.linkCopied : t.copyInviteLink}
               </button>
             )}
             <button className={styles.menuItem} onClick={() => { setOpen(false); setShowSound(true) }}>
-              ⚙️ Ääniasetukset
+              {t.soundSettingsBtn}
             </button>
             <button className={styles.menuItem} onClick={() => { setOpen(false); setShowHelp(true) }}>
-              ⌨ Pikanäppäimet
+              {t.keyboardShortcutsBtn}
             </button>
             <div className={styles.divider} />
             <button className={`${styles.menuItem} ${styles.danger}`}
               onClick={() => { setOpen(false); window.location.href = '/' }}>
-              🚪 Poistu pelistä
+              {t.leaveGameBtn}
             </button>
             {snapshot && myPlayerId && snapshot.status === 'IN_PROGRESS' && (
               <button className={`${styles.menuItem} ${styles.danger}`}
                 onClick={() => {
                   setOpen(false)
-                  if (confirm('Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.'))
+                  if (confirm(t.endGameConfirmMsg))
                     sendCmd({ type: 'AbortGame', sessionId: sid, actorPlayerId: myPlayerId })
                 }}>
-                🛑 Lopeta peli kaikille
+                {t.endGameForAllBtn}
               </button>
             )}
           </div>

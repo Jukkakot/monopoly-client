@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useGame } from '../../store/GameContext'
 import type { GameEvent } from '../../store/events'
 import styles from './FlashBanner.module.css'
+import { useT } from '../../i18n/LanguageContext'
 
 interface BannerItem {
   event: GameEvent
@@ -12,6 +13,7 @@ let _localId = -1
 
 export default function FlashBanner() {
   const { state } = useGame()
+  const t = useT()
   const [banners, setBanners] = useState<BannerItem[]>([])
   const seenIds = useRef(new Set<number>())
   const prevActiveId = useRef<string | null>(null)
@@ -28,13 +30,13 @@ export default function FlashBanner() {
         id: _localId--,
         timestamp: Date.now(),
         icon: '⭐',
-        message: 'Sinun vuorosi!',
+        message: t.yourTurnMsg,
         relatedPlayerIds: [activeId],
       }
       setBanners(prev => [...prev, { event: syntheticEvent, visible: true }])
     }
     prevActiveId.current = activeId
-  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId])
+  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, t.yourTurnMsg])
 
   useEffect(() => {
     if (!state.myPlayerId || state.events.length === 0) return
@@ -88,7 +90,7 @@ export default function FlashBanner() {
       {state.connectionStatus === 'RECONNECTING' && (
         <div className={`${styles.banner} ${styles.reconnecting}`}>
           <span className={styles.icon}>📡</span>
-          <span className={styles.message}>Yhdistetään uudelleen…</span>
+          <span className={styles.message}>{t.reconnectingMsg}</span>
         </div>
       )}
       {state.commandError && (
