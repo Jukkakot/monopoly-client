@@ -43,6 +43,15 @@ const FILTER_LABELS: Record<FilterGroup, string> = {
   jail:     '⛓',
 }
 
+const FILTER_TITLES: Record<FilterGroup, string> = {
+  moves:    'Siirtymät',
+  money:    'Raha & vuokrat',
+  property: 'Kiinteistöt & huutokaupat',
+  build:    'Rakentaminen & panttaus',
+  trade:    'Kaupat',
+  jail:     'Vankila & erikoistapahtumat',
+}
+
 function relativeTime(timestamp: number): string {
   const diff = Math.floor((Date.now() - timestamp) / 1000)
   if (diff < 10) return 'juuri nyt'
@@ -96,7 +105,7 @@ export default function EventLog() {
             key={f}
             className={`${styles.filterBtn} ${activeFilters.has(f) ? styles.filterActive : ''}`}
             onClick={() => toggleFilter(f)}
-            title={f}
+            title={FILTER_TITLES[f]}
           >
             {FILTER_LABELS[f]}
           </button>
