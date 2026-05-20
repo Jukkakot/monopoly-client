@@ -151,6 +151,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         </div>
         <Btn label={`💰 Osta €${p.price}`} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
         <Btn label="🏷 Ohita → huutokauppa" onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
+        <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
     )
   }
