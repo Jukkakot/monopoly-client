@@ -269,6 +269,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </>
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="🎲 Heitä nopat  [välilyönti]" onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
         {abortBtn}
       </div>
@@ -287,6 +288,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="✅ Lopeta vuoro  [välilyönti]" onClick={() => cmd('EndTurn')} variant="primary" />
         {abortBtn}
       </div>
@@ -294,6 +296,44 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   }
 
   return <div className={styles.panel}><div className={styles.infoBox}>Tila: {phase}</div></div>
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Trade buttons — initiate trade with another active player
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TradeButtons({ state, myPlayerId, sendCmd }: {
+  state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const sid = state.sessionId
+  const others = state.players.filter(p => p.playerId !== myPlayerId && !p.bankrupt && !p.eliminated)
+  if (others.length === 0) return null
+
+  return (
+    <div className={styles.tradeSection}>
+      <button className={`${styles.btn} ${styles.neutral}`} onClick={() => setOpen(v => !v)}>
+        🤝 Aloita kauppa {open ? '▴' : '▾'}
+      </button>
+      {open && (
+        <div className={styles.tradePicker}>
+          {others.map(p => {
+            const seat = state.seats.find(s => s.playerId === p.playerId)
+            return (
+              <button
+                key={p.playerId}
+                className={styles.tradePickerBtn}
+                onClick={() => { setOpen(false); sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, targetPlayerId: p.playerId }) }}
+              >
+                {seat && <span className={styles.tradePickerDot} style={{ background: seat.tokenColorHex }} />}
+                {p.name}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
