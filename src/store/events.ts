@@ -34,8 +34,10 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
   // Card message
   if (next.lastCardKey && next.lastCardKey !== prev.lastCardKey) {
     const actorId = next.turn?.activePlayerId ?? ''
+    const actor = next.players.find(p => p.playerId === actorId)
     const text = getCardText(next.lastCardKey, next.lastCardMessage)
-    if (text) events.push(ev('🃏', text, actorId ? [actorId] : []))
+    if (text && actor) events.push(ev('🃏', t.drewCard(actor.name, text), actorId ? [actorId] : []))
+    else if (text) events.push(ev('🃏', text, []))
   }
 
   // Per-player changes

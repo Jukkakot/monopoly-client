@@ -274,6 +274,7 @@ export interface T {
 
   // ── Events (deriveEvents, non-React) ─────────────────────────────────────────
   ev: {
+    drewCard: (name: string, text: string) => string
     gameOver: (winner: string) => string
     passedGo: (name: string) => string
     paidRent: (name: string, amount: number, owner: string) => string
@@ -597,6 +598,7 @@ const fi: T = {
 
   // Events
   ev: {
+    drewCard: (name, text) => `${name} nosti: ${text}`,
     gameOver: (winner) => `Peli päättyi! Voittaja: ${winner}`,
     passedGo: (name) => `${name} ohitti GO — +€200!`,
     paidRent: (name, amount, owner) => `${name} maksoi vuokraa €${amount} → ${owner}`,
@@ -920,6 +922,7 @@ const en: T = {
 
   // Events
   ev: {
+    drewCard: (name, text) => `${name} drew: ${text}`,
     gameOver: (winner) => `Game over! Winner: ${winner}`,
     passedGo: (name) => `${name} passed GO — +€200!`,
     paidRent: (name, amount, owner) => `${name} paid rent €${amount} → ${owner}`,
