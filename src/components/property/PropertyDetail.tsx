@@ -1,5 +1,18 @@
 import styles from './PropertyDetail.module.css'
-import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { SPOTS, STREET_COLORS, type StreetType } from '../../types/spots'
+
+const STREET_TYPE_FI: Partial<Record<StreetType, string>> = {
+  BROWN:      'Ruskea',
+  LIGHT_BLUE: 'Vaaleansininen',
+  PURPLE:     'Violetti',
+  ORANGE:     'Oranssi',
+  RED:        'Punainen',
+  YELLOW:     'Keltainen',
+  GREEN:      'Vihreä',
+  DARK_BLUE:  'Tummansininen',
+  RAILROAD:   'Rautatieasema',
+  UTILITY:    'Laitos',
+}
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { useGame } from '../../store/GameContext'
@@ -96,7 +109,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
         <div className={styles.header} style={{ background: color ?? '#888' }}>
           <div className={styles.headerName}>{spot.name}</div>
           {spot.streetType !== 'CORNER' && spot.streetType !== 'COMMUNITY' && spot.streetType !== 'CHANCE' && spot.streetType !== 'TAX' && (
-            <div className={styles.headerType}>{spot.streetType.replace('_', ' ')}</div>
+            <div className={styles.headerType}>{STREET_TYPE_FI[spot.streetType] ?? spot.streetType}</div>
           )}
         </div>
 
