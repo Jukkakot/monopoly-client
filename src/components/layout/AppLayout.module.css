@@ -190,7 +190,7 @@
     border-left: none;
     background: #f5f9f5;
     height: 100svh;
-    overflow: hidden;
+    overflow: visible;
   }
 
   /* Hide mobile UI */
