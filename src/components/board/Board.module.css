@@ -167,6 +167,101 @@
   letter-spacing: 0.5px;
 }
 
+.centerStatWarn {
+  color: #c62828;
+  font-weight: 900;
+}
+
+/* ── Spot hover tooltip ── */
+.tooltip {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.12);
+  overflow: hidden;
+  min-width: 120px;
+  max-width: 170px;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  animation: tooltipIn 0.12s ease-out;
+}
+
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.tooltipBar {
+  height: 5px;
+  width: 100%;
+}
+
+.tooltipName {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #111;
+  padding: 5px 8px 2px;
+  line-height: 1.2;
+}
+
+.tooltipPrice {
+  font-size: 0.7rem;
+  color: #444;
+  padding: 0 8px 3px;
+  font-weight: 600;
+}
+
+.tooltipOwner {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  color: #333;
+  padding: 2px 8px 3px;
+  font-weight: 600;
+}
+
+.tooltipOwnerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tooltipMortgaged {
+  font-size: 0.6rem;
+  background: #9e9e9e;
+  color: #fff;
+  border-radius: 3px;
+  padding: 0 3px;
+  font-weight: 800;
+}
+
+.tooltipFree {
+  font-size: 0.68rem;
+  color: #888;
+  padding: 2px 8px 3px;
+  font-style: italic;
+}
+
+.tooltipRent {
+  font-size: 0.68rem;
+  color: #1b5e20;
+  font-weight: 700;
+  padding: 2px 8px 4px;
+}
+
+.tooltipBuildings {
+  font-size: 0.7rem;
+  padding: 0 8px 5px;
+}
+
+/* Hide tooltip on touch devices */
+@media (hover: none) {
+  .tooltip { display: none; }
+}
+
 /* ── Group ownership bar ── */
 .groupBar {
   display: flex;

@@ -1,22 +1,114 @@
+import { useState } from 'react'
 import styles from './Board.module.css'
 import BoardSpot from './BoardSpot'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { useTokenAnimation } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
+
+const MAX_HOUSES = 32
+const MAX_HOTELS = 12
 
 function BoardStats({ state }: { state: SessionState }) {
   const totalProps = state.properties.length
   const soldProps = state.properties.filter(p => p.ownerPlayerId !== null).length
   const houses = state.properties.reduce((s, p) => s + p.houseCount, 0)
   const hotels = state.properties.reduce((s, p) => s + p.hotelCount, 0)
+  const housesLeft = MAX_HOUSES - houses
+  const hotelsLeft = MAX_HOTELS - hotels
   if (soldProps === 0 && houses === 0) return null
   return (
     <div className={styles.centerStats}>
-      <span title="Myytyjen kiinteistöjen määrä">{soldProps}/{totalProps}</span>
-      {houses > 0 && <span title={`${houses} taloa`}>🏠{houses}</span>}
-      {hotels > 0 && <span title={`${hotels} hotellia`}>🏨{hotels}</span>}
+      <span title="Myytyjen kiinteistöjen määrä">{soldProps}/{totalProps} kiin.</span>
+      {houses > 0 && (
+        <span title={`${houses} taloa pystyssä, ${housesLeft} pankissa`} className={housesLeft <= 4 ? styles.centerStatWarn : undefined}>
+          🏠{housesLeft}
+        </span>
+      )}
+      {hotels > 0 && (
+        <span title={`${hotels} hotellia pystyssä, ${hotelsLeft} pankissa`} className={hotelsLeft <= 2 ? styles.centerStatWarn : undefined}>
+          🏨{hotelsLeft}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function SpotTooltip({ spotId, state, pos }: { spotId: string; state: SessionState; pos: { x: number; y: number } }) {
+  const spot = SPOTS.find(s => s.id === spotId)
+  if (!spot || !spot.isProperty) return null
+
+  const prop = state.properties.find(p => p.propertyId === spotId)
+  const owner = prop?.ownerPlayerId ? state.players.find(p => p.playerId === prop.ownerPlayerId) : null
+  const ownerSeat = owner ? state.seats.find(s => s.playerId === owner.playerId) : null
+  const color = STREET_COLORS[spot.streetType]
+
+  const isStreet = !['RAILROAD', 'UTILITY', 'CORNER', 'COMMUNITY', 'CHANCE', 'TAX'].includes(spot.streetType)
+  const isRailroad = spot.streetType === 'RAILROAD'
+  const isUtility = spot.streetType === 'UTILITY'
+
+  let currentRent: string | null = null
+  if (owner && !prop?.mortgaged) {
+    const rents = RENT_TABLE[spot.id] ?? []
+    if (isStreet && rents.length >= 6) {
+      const groupTotal = GROUP_SIZE[spot.streetType] ?? 0
+      const ownerGroupCount = state.properties.filter(p =>
+        p.ownerPlayerId === owner.playerId &&
+        SPOTS.find(s => s.id === p.propertyId)?.streetType === spot.streetType
+      ).length
+      const isMonopoly = ownerGroupCount === groupTotal
+      const level = (prop?.hotelCount ?? 0) > 0 ? 5 : (prop?.houseCount ?? 0)
+      const rent = level === 0 && isMonopoly ? rents[0] * 2 : rents[level]
+      currentRent = `€${rent}`
+    } else if (isRailroad && rents.length >= 1) {
+      const rrCount = state.properties.filter(p =>
+        p.ownerPlayerId === owner.playerId &&
+        SPOTS.find(s => s.id === p.propertyId)?.streetType === 'RAILROAD'
+      ).length
+      currentRent = `€${rents[Math.min(rrCount - 1, rents.length - 1)]}`
+    } else if (isUtility) {
+      const utilCount = state.properties.filter(p =>
+        p.ownerPlayerId === owner.playerId &&
+        SPOTS.find(s => s.id === p.propertyId)?.streetType === 'UTILITY'
+      ).length
+      currentRent = utilCount >= 2 ? '10× nopat' : '4× nopat'
+    }
+  }
+
+  const buildings = (() => {
+    if (!prop || !isStreet) return null
+    if ((prop.hotelCount ?? 0) > 0) return '🏨 Hotelli'
+    if ((prop.houseCount ?? 0) > 0) return `🏠`.repeat(prop.houseCount)
+    return null
+  })()
+
+  // Flip tooltip if too close to right/bottom edge
+  const flipX = pos.x > window.innerWidth - 180
+  const flipY = pos.y > window.innerHeight - 160
+  return (
+    <div
+      className={styles.tooltip}
+      style={{
+        left: flipX ? pos.x - 160 : pos.x + 14,
+        top:  flipY ? pos.y - 140 : pos.y + 4,
+      }}
+    >
+      {color && <div className={styles.tooltipBar} style={{ background: color }} />}
+      <div className={styles.tooltipName}>{spot.name}</div>
+      {spot.price && !owner && <div className={styles.tooltipPrice}>€{spot.price}</div>}
+      {owner ? (
+        <div className={styles.tooltipOwner}>
+          <span className={styles.tooltipOwnerDot} style={{ background: ownerSeat?.tokenColorHex ?? '#888' }} />
+          <span>{owner.name}</span>
+          {prop?.mortgaged && <span className={styles.tooltipMortgaged}>P</span>}
+        </div>
+      ) : (
+        <div className={styles.tooltipFree}>Vapaa</div>
+      )}
+      {currentRent && <div className={styles.tooltipRent}>Vuokra {currentRent}</div>}
+      {buildings && <div className={styles.tooltipBuildings}>{buildings}</div>}
     </div>
   )
 }
@@ -149,6 +241,15 @@ interface Props {
 export default function Board({ state, onSpotClick, selectedSpotId, highlightGroupType, onGroupHighlight }: Props) {
   const animatedPositions = useTokenAnimation()
   const { state: gameState } = useGame()
+  const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
+
+  function handleBoardMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const el = (e.target as HTMLElement).closest('[data-spot-id]') as HTMLElement | null
+    const spotId = el?.dataset.spotId ?? null
+    if (spotId !== hoveredSpotId) setHoveredSpotId(spotId)
+    setHoverPos({ x: e.clientX, y: e.clientY })
+  }
 
   // Use animated positions for non-bankrupt players
   const playersBySpot = new Map<number, typeof state.players>()
@@ -180,7 +281,12 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const NON_HIGHLIGHTABLE = new Set(['CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
 
   return (
-    <div className={styles.board}>
+    <>
+    <div
+      className={styles.board}
+      onMouseMove={handleBoardMouseMove}
+      onMouseLeave={() => setHoveredSpotId(null)}
+    >
       {SPOTS.map((spot, idx) => {
         const property = state.properties.find(p => p.propertyId === spot.id)
         const isSelected = spot.id === selectedSpotId
@@ -219,5 +325,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         )}
       </div>
     </div>
+    {hoveredSpotId && (
+      <SpotTooltip spotId={hoveredSpotId} state={state} pos={hoverPos} />
+    )}
+    </>
   )
 }
