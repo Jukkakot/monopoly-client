@@ -50,26 +50,10 @@ function Btn({ label, onClick, variant = 'primary', disabled }: {
   )
 }
 
-function DiceDisplay({ dice }: { dice: [number, number] }) {
-  const FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
-  const total = dice[0] + dice[1]
-  const isDoubles = dice[0] === dice[1]
-  return (
-    <div className={styles.diceRow}>
-      <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{FACES[dice[0]]}</span>
-      <div className={styles.diceMeta}>
-        <div className={styles.diceTotal}>{total}</div>
-        {isDoubles && <div className={styles.doubles}>TUPLA!</div>}
-      </div>
-      <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{FACES[dice[1]]}</span>
-    </div>
-  )
-}
 
 export default function ActionPanel({ state, myPlayerId }: Props) {
   const { sendCmd, state: ctxState } = useGame()
   const t = useT()
-  const lastDice = ctxState.lastDice
   const sid = state.sessionId
   const turn = state.turn
   const phase = turn?.phase
@@ -208,7 +192,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
           </div>
         )}
-        {lastDice && phase === 'WAITING_FOR_END_TURN' && <DiceDisplay dice={lastDice} />}
+
         {getCardText(state.lastCardKey, state.lastCardMessage) && (
           <div className={styles.cardMessage}>
             <span className={styles.cardMessageIcon}>🃏</span>
@@ -273,7 +257,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
-        {lastDice && <DiceDisplay dice={lastDice} />}
+
         {getCardText(state.lastCardKey, state.lastCardMessage) && (
           <div className={styles.cardMessage}>
             <span className={styles.cardMessageIcon}>🃏</span>
@@ -525,6 +509,8 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           <div className={styles.bidInput}>
             <input
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder={`min €${minBid}`}
               value={customBid}
               onChange={e => setCustomBid(e.target.value)}

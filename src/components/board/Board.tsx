@@ -223,11 +223,9 @@ function BoardDice({ dice }: { dice: [number, number] | null }) {
   const t = useT()
   if (!dice) return null
   const isDoubles = dice[0] === dice[1]
-  const sum = dice[0] + dice[1]
   return (
     <div className={styles.diceArea}>
       <DieFace value={dice[0]} size={36} />
-      <span className={styles.diceSum}>{sum}</span>
       <DieFace value={dice[1]} size={36} />
       {isDoubles && <span className={styles.diceDoubles}>{t.doublesLabel}</span>}
     </div>
