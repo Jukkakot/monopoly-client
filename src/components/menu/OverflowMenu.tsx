@@ -182,7 +182,7 @@ export default function OverflowMenu() {
                   const seat = snapshot?.seats.find(s => s.playerId === p.playerId)
                   return (
                     <button key={p.playerId} className={`${styles.menuItem} ${styles.tradeBtn}`}
-                      onClick={() => { setOpen(false); cmd('OpenTrade', { targetPlayerId: p.playerId }) }}>
+                      onClick={() => { setOpen(false); cmd('OpenTrade', { recipientPlayerId: p.playerId }) }}>
                       <span className={styles.tradeColor} style={{ background: seat?.tokenColorHex ?? '#888' }} />
                       {p.name}
                     </button>

@@ -77,7 +77,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
 
   function openTrade() {
     if (!owner || !myPlayerId) return
-    sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, targetPlayerId: owner.playerId })
+    sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, recipientPlayerId: owner.playerId })
     onClose()
   }
 

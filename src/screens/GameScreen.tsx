@@ -200,7 +200,7 @@ export default function GameScreen() {
         board={<Board state={state.snapshot} onSpotClick={handleSpotClick} selectedSpotId={selectedSpotId ?? undefined} highlightGroupType={highlightGroupType ?? undefined} onGroupHighlight={handleGroupHighlight} />}
         players={<PlayerList state={state.snapshot} onSpotClick={setSelectedSpotId} onTradeWith={(targetId) => {
           if (state.myPlayerId && state.snapshot) {
-            sendCmd({ type: 'OpenTrade', sessionId: state.snapshot.sessionId, actorPlayerId: state.myPlayerId, targetPlayerId: targetId })
+            sendCmd({ type: 'OpenTrade', sessionId: state.snapshot.sessionId, actorPlayerId: state.myPlayerId, recipientPlayerId: targetId })
           }
         }} />}
         log={<EventLog />}

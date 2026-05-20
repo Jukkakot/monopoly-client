@@ -317,7 +317,7 @@ function TradeButtons({ state, myPlayerId, sendCmd }: {
               <button
                 key={p.playerId}
                 className={styles.tradePickerBtn}
-                onClick={() => { setOpen(false); sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, targetPlayerId: p.playerId }) }}
+                onClick={() => { setOpen(false); sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, recipientPlayerId: p.playerId }) }}
               >
                 {seat && <span className={styles.tradePickerDot} style={{ background: seat.tokenColorHex }} />}
                 {p.name}
