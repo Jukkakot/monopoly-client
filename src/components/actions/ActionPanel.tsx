@@ -146,7 +146,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return (
       <div className={styles.panel}>
         <div className={styles.infoBox} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
-          📍 <strong>{p.propertyDisplayName}</strong><br />
+          📍 <strong>{spot?.name ?? p.propertyDisplayName}</strong><br />
           Hinta: €{p.price}
         </div>
         <Btn label={isTouchDevice ? `💰 Osta €${p.price}` : `💰 Osta €${p.price}  [B]`} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
@@ -207,7 +207,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         </div>
         {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
           <div className={styles.infoBox}>
-            📍 <strong>{state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
+            📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
           </div>
         )}
         {lastDice && phase === 'WAITING_FOR_END_TURN' && <DiceDisplay dice={lastDice} />}
