@@ -153,9 +153,18 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
   const activeId = state.turn?.activePlayerId
   const prevCash = useRef<Map<string, number>>(new Map())
   const [flashMap, setFlashMap] = useState<Map<string, 'up' | 'down'>>(new Map())
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const tokenShapes = loadTokenShapes(state.sessionId)
   const { state: gs } = useGame()
+  const [expandedId, setExpandedId] = useState<string | null>(() => gs.myPlayerId ?? null)
+  const tokenShapes = loadTokenShapes(state.sessionId)
+
+  // Auto-expand own card when myPlayerId becomes known (e.g. after SSE connect)
+  const autoExpanded = useRef(gs.myPlayerId != null)
+  useEffect(() => {
+    if (!autoExpanded.current && gs.myPlayerId) {
+      autoExpanded.current = true
+      setExpandedId(id => id ?? gs.myPlayerId)
+    }
+  }, [gs.myPlayerId])
   const netWorthHistory = gs.netWorthHistory
 
   const maxNetWorth = Math.max(...state.players.map(p => calcNetWorth(p, state)), 1)
