@@ -259,6 +259,26 @@
 
 .propCheck input { width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
 
+.propCheckDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.propCheckName {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.propCheckPrice {
+  font-size: 0.73rem;
+  color: #888;
+  flex-shrink: 0;
+}
+
 /* ── Trade offer summary (receiver view) ── */
 .offerBlock {
   background: #f9f9f9;

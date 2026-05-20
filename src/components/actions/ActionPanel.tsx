@@ -275,6 +275,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (phase === 'WAITING_FOR_END_TURN') {
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+        <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
         {lastDice && <DiceDisplay dice={lastDice} />}
         {state.lastCardMessage && (
           <div className={styles.cardMessage}>
@@ -284,7 +285,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
       </div>
     )
   }
@@ -704,11 +704,14 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           {myProps.map(prop => {
             const spot = SPOTS.find(s => s.id === prop.propertyId)
             const included = myOffer.propertyIds.includes(prop.propertyId)
+            const color = spot ? STREET_COLORS[spot.streetType] : undefined
             return (
               <label key={prop.propertyId} className={styles.propCheck}>
                 <input type="checkbox" checked={included}
                   onChange={() => toggleProp(myOfferSide, prop.propertyId, included)} />
-                {spot?.name ?? prop.propertyId}
+                {color && <span className={styles.propCheckDot} style={{ background: color }} />}
+                <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
+                {spot?.price && <span className={styles.propCheckPrice}>€{spot.price}</span>}
               </label>
             )
           })}
@@ -729,11 +732,14 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           {partnerProps.map(prop => {
             const spot = SPOTS.find(s => s.id === prop.propertyId)
             const included = myRequest.propertyIds.includes(prop.propertyId)
+            const color = spot ? STREET_COLORS[spot.streetType] : undefined
             return (
               <label key={prop.propertyId} className={styles.propCheck}>
                 <input type="checkbox" checked={included}
                   onChange={() => toggleProp(myRequestSide, prop.propertyId, included)} />
-                {spot?.name ?? prop.propertyId}
+                {color && <span className={styles.propCheckDot} style={{ background: color }} />}
+                <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
+                {spot?.price && <span className={styles.propCheckPrice}>€{spot.price}</span>}
               </label>
             )
           })}
