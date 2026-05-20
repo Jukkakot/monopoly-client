@@ -166,6 +166,27 @@
 .actionRow {
   display: flex;
   gap: 8px;
+  align-items: flex-start;
+}
+
+.mainBtns {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btnGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btnHint {
+  font-size: 0.75rem;
+  color: #888;
+  padding: 0 4px;
+  line-height: 1.3;
 }
 
 .randomBtn {

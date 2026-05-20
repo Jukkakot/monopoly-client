@@ -246,12 +246,20 @@ export default function LobbyScreen() {
           <button className={styles.randomBtn} onClick={randomizeAll} disabled={loading || lobbyLoading} title="Arvo uudet nimet">
             🎲 Arvo nimet
           </button>
-          <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
-            {lobbyLoading ? 'Luodaan…' : 'Luo odotushuone'}
-          </button>
-          <button className={styles.createBtn} onClick={handleCreate} disabled={loading || lobbyLoading}>
-            {loading ? 'Luodaan…' : 'Aloita peli'}
-          </button>
+          <div className={styles.mainBtns}>
+            <div className={styles.btnGroup}>
+              <button className={styles.createBtn} onClick={handleCreate} disabled={loading || lobbyLoading}>
+                {loading ? 'Luodaan…' : 'Aloita peli'}
+              </button>
+              <div className={styles.btnHint}>Peli alkaa heti — voit pelata botteja tai toisia vastaan</div>
+            </div>
+            <div className={styles.btnGroup}>
+              <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
+                {lobbyLoading ? 'Luodaan…' : 'Luo odotushuone'}
+              </button>
+              <div className={styles.btnHint}>Muut voivat liittyä jaettavalla koodilla</div>
+            </div>
+          </div>
         </div>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
