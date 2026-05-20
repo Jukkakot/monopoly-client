@@ -55,6 +55,13 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
 
+  const abortBtn = (
+    <button className={`${styles.btn} ${styles.danger}`} style={{ opacity: 0.65, fontSize: '0.8rem' }}
+      onClick={() => { if (confirm('Lopeta peli? Toiminto on peruuttamaton.')) cmd('AbortGame') }}>
+      ✕ Lopeta peli
+    </button>
+  )
+
   // GAME OVER
   if (state.status === 'GAME_OVER' || phase === 'GAME_OVER') {
     const sorted = [...state.players].sort((a, b) => {
@@ -138,6 +145,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             <span>{state.lastCardMessage}</span>
           </div>
         )}
+        <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        {abortBtn}
       </div>
     )
   }
@@ -167,6 +177,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="🎲 Heitä nopat  [välilyönti]" onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
+        {abortBtn}
       </div>
     )
   }
@@ -185,6 +196,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradePartnerButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <Btn label="✅ Lopeta vuoro  [välilyönti]" onClick={() => cmd('EndTurn')} variant="primary" />
+        {abortBtn}
       </div>
     )
   }
