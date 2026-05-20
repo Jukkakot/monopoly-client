@@ -4,6 +4,7 @@ import styles from './GameOverOverlay.module.css'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
+import { useT } from '../../i18n/LanguageContext'
 
 interface Props {
   state: SessionState
@@ -13,6 +14,7 @@ const MEDALS = ['🥇', '🥈', '🥉']
 
 export default function GameOverOverlay({ state }: Props) {
   const navigate = useNavigate()
+  const t = useT()
   const [dismissed, setDismissed] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -27,14 +29,14 @@ export default function GameOverOverlay({ state }: Props) {
       '',
       ...sorted.map((p, i) => {
         const medal = ['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`
-        return `${medal} ${p.name}: ${p.bankrupt ? 'KONKURSSI' : '€' + p.cash}`
+        return `${medal} ${p.name}: ${p.bankrupt ? t.bankruptLabel : '€' + p.cash}`
       }),
     ].join('\n')
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
-  }, [state.players])
+  }, [state.players, t.bankruptLabel])
 
   if (dismissed) return null
 
@@ -53,7 +55,7 @@ export default function GameOverOverlay({ state }: Props) {
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <div className={styles.trophy}>🏆</div>
-        <div className={styles.title}>Peli päättyi!</div>
+        <div className={styles.title}>{t.gameOverScreenTitle}</div>
         {winner && (
           <div className={styles.winnerRow}>
             {winnerSeat && (
@@ -63,7 +65,7 @@ export default function GameOverOverlay({ state }: Props) {
                 size={40}
               />
             )}
-            <span className={styles.winnerName}>{winner.name} voitti!</span>
+            <span className={styles.winnerName}>{t.wonLabel(winner.name)}</span>
           </div>
         )}
 
@@ -86,13 +88,13 @@ export default function GameOverOverlay({ state }: Props) {
                 <span className={styles.rankName}>{p.name}</span>
                 <div className={styles.rankStats}>
                   {!p.bankrupt && propCount > 0 && (
-                    <span className={styles.rankStat}>{propCount} kiin.</span>
+                    <span className={styles.rankStat}>{t.propAbbr(propCount)}</span>
                   )}
                   {hotels > 0 && <span className={styles.rankStat}>🏨{hotels}</span>}
                   {houses > 0 && <span className={styles.rankStat}>🏠{houses}</span>}
                 </div>
                 <span className={styles.rankCash}>
-                  {p.bankrupt ? <span className={styles.bankrupt}>KONKURSSI</span> : `€${p.cash}`}
+                  {p.bankrupt ? <span className={styles.bankrupt}>{t.bankruptLabel}</span> : `€${p.cash}`}
                 </span>
               </div>
             )
@@ -101,13 +103,13 @@ export default function GameOverOverlay({ state }: Props) {
 
         <div className={styles.buttons}>
           <button className={styles.btnShare} onClick={shareResults}>
-            {copied ? '✓ Kopioitu!' : '📋 Jaa tulokset'}
+            {copied ? t.copiedBtn : t.shareResultsBtn}
           </button>
           <button className={styles.btnSecondary} onClick={() => setDismissed(true)}>
-            Jatka katselemaan
+            {t.continueWatchingBtn}
           </button>
           <button className={styles.btnPrimary} onClick={() => navigate('/')}>
-            Takaisin etusivulle
+            {t.backToHomeBtn}
           </button>
         </div>
       </div>

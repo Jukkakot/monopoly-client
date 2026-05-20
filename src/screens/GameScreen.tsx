@@ -16,8 +16,10 @@ import KeyboardHelp from '../components/menu/KeyboardHelp'
 import Confetti from '../components/effects/Confetti'
 import GameOverOverlay from '../components/effects/GameOverOverlay'
 import styles from './GameScreen.module.css'
+import { useT } from '../i18n/LanguageContext'
 
 export default function GameScreen() {
+  const t = useT()
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { state, joinSession, leaveSession } = useGame()
@@ -66,7 +68,7 @@ export default function GameScreen() {
     }
     const isMyTurn = turn.activePlayerId === state.myPlayerId
     const activeName = snap.players.find(p => p.playerId === turn.activePlayerId)?.name ?? '?'
-    document.title = isMyTurn ? `⭐ Sinun vuorosi! — Monopoly Helsinki` : `${activeName} pelaa… — Monopoly Helsinki`
+    document.title = isMyTurn ? `⭐ ${t.yourTurnMsg} — Monopoly Helsinki` : `${activeName}… — Monopoly Helsinki`
     return () => { document.title = 'Monopoly Helsinki' }
   }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, state.snapshot?.status])
 
@@ -147,13 +149,13 @@ export default function GameScreen() {
     return (
       <div className={styles.center}>
         <div className={styles.error}>
-          <h2>Yhteys katkesi</h2>
-          <p>Tarkista verkko tai lataa sivu uudelleen.</p>
+          <h2>{t.connectionLostTitle}</h2>
+          <p>{t.checkNetworkMsg}</p>
           {sessionId && (
-            <p className={styles.sessionIdHint}>Pelin koodi: <code>{sessionId}</code></p>
+            <p className={styles.sessionIdHint}>{t.gamePinLabel} <code>{sessionId}</code></p>
           )}
-          <button onClick={() => window.location.reload()} className={styles.btn}>Yritä uudelleen</button>
-          <button onClick={() => navigate('/')} className={`${styles.btn} ${styles.btnSecondary}`}>Takaisin</button>
+          <button onClick={() => window.location.reload()} className={styles.btn}>{t.retryBtn}</button>
+          <button onClick={() => navigate('/')} className={`${styles.btn} ${styles.btnSecondary}`}>{t.backBtn}</button>
         </div>
       </div>
     )
@@ -163,7 +165,7 @@ export default function GameScreen() {
     return (
       <div className={styles.center}>
         <div className={styles.skeleton}>
-          <div className={styles.skeletonLabel}>Ladataan peliä…</div>
+          <div className={styles.skeletonLabel}>{t.loadingGame}</div>
           <div className={styles.skeletonBoard} />
           <div className={styles.skeletonBar} />
           <div className={styles.skeletonBar} />
@@ -189,7 +191,6 @@ export default function GameScreen() {
       )}
       {showHelp && <KeyboardHelp onClose={() => setShowHelp(false)} />}
       <AppLayout
-        actionAlert={state.snapshot.turn?.activePlayerId === state.myPlayerId && state.snapshot.turn?.phase !== 'GAME_OVER'}
         header={
           <Header
             snapshot={state.snapshot}

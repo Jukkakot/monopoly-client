@@ -6,6 +6,7 @@ import type { SeatKind, BotDifficulty } from '../types/api'
 import { GEOMETRIC_SHAPES, EMOJI_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './LobbyScreen.module.css'
+import { useT } from '../i18n/LanguageContext'
 
 const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
 const DEFAULT_SHAPES: TokenShape[] = ['circle', 'star', 'square', 'triangle', 'hat', 'car']
@@ -36,6 +37,7 @@ function defaultRows(count: number): PlayerRow[] {
 export default function LobbyScreen() {
   const navigate = useNavigate()
   const { joinSession } = useGame()
+  const t = useT()
   const [playerCount, setPlayerCount] = useState(2)
   const [rows, setRows] = useState<PlayerRow[]>(defaultRows(2))
   const [loading, setLoading] = useState(false)
@@ -82,8 +84,8 @@ export default function LobbyScreen() {
     setError(null)
     const usedColors = new Set<string>()
     for (const r of rows) {
-      if (!r.name.trim()) { setError('Kaikilla pelaajilla pitää olla nimi.'); return }
-      if (usedColors.has(r.color)) { setError('Jokaisella pelaajalla pitää olla eri väri.'); return }
+      if (!r.name.trim()) { setError(t.nameRequiredErr); return }
+      if (usedColors.has(r.color)) { setError(t.colorsUniqueErr); return }
       usedColors.add(r.color)
     }
     setLobbyLoading(true)
@@ -109,7 +111,7 @@ export default function LobbyScreen() {
       joinSession(sessionId)
       navigate(`/lobby-wait/${sessionId}`)
     } catch (e) {
-      setError('Odotushuoneen luonti epäonnistui: ' + String(e))
+      setError(t.lobbyFailedErr(String(e)))
       setLobbyLoading(false)
     }
   }
@@ -118,8 +120,8 @@ export default function LobbyScreen() {
     setError(null)
     const usedColors = new Set<string>()
     for (const r of rows) {
-      if (!r.name.trim()) { setError('Kaikilla pelaajilla pitää olla nimi.'); return }
-      if (usedColors.has(r.color)) { setError('Jokaisella pelaajalla pitää olla eri väri.'); return }
+      if (!r.name.trim()) { setError(t.nameRequiredErr); return }
+      if (usedColors.has(r.color)) { setError(t.colorsUniqueErr); return }
       usedColors.add(r.color)
     }
     setLoading(true)
@@ -134,7 +136,7 @@ export default function LobbyScreen() {
       joinSession(sessionId)
       navigate(`/game/${sessionId}`)
     } catch (e) {
-      setError('Sessio ei onnistunut: ' + String(e))
+      setError(t.sessionFailedErr(String(e)))
       setLoading(false)
     }
   }
@@ -148,7 +150,7 @@ export default function LobbyScreen() {
         </div>
 
         <div className={styles.countRow}>
-          <label className={styles.label}>Pelaajia</label>
+          <label className={styles.label}>{t.playerCountLabel}</label>
           <div className={styles.countBtns}>
             {[2, 3, 4, 5, 6].map(n => (
               <button
@@ -179,7 +181,7 @@ export default function LobbyScreen() {
 
               {/* Token shape selection */}
               <div className={styles.shapeSection}>
-                <div className={styles.shapeLabel}>Pelimerkki</div>
+                <div className={styles.shapeLabel}>{t.tokenLabel}</div>
                 <div className={styles.shapeRow}>
                   {GEOMETRIC_SHAPES.map(s => (
                     <button
@@ -212,7 +214,7 @@ export default function LobbyScreen() {
                   value={row.name}
                   onChange={e => updateRow(i, { name: e.target.value })}
                   maxLength={20}
-                  placeholder={`Pelaaja ${i + 1}`}
+                  placeholder={t.playerPlaceholder(i)}
                 />
                 <button
                   className={`${styles.kindBtn} ${row.kind === 'HUMAN' ? styles.human : styles.bot}`}
@@ -223,7 +225,7 @@ export default function LobbyScreen() {
                     updateRow(i, { kind: newKind, name: newName })
                   }}
                 >
-                  {row.kind === 'HUMAN' ? 'Ihminen' : 'Botti'}
+                  {row.kind === 'HUMAN' ? t.humanLabel : t.botLabel}
                 </button>
                 {row.kind === 'BOT' && (
                   <select
@@ -231,8 +233,8 @@ export default function LobbyScreen() {
                     value={row.difficulty}
                     onChange={e => updateRow(i, { difficulty: e.target.value as BotDifficulty })}
                   >
-                    <option value="EASY">Helppo</option>
-                    <option value="NORMAL">Normaali</option>
+                    <option value="EASY">{t.easyLabel}</option>
+                    <option value="NORMAL">{t.normalLabel}</option>
                   </select>
                 )}
               </div>
@@ -243,27 +245,27 @@ export default function LobbyScreen() {
         {error && <div className={styles.errorMsg}>{error}</div>}
 
         <div className={styles.actionRow}>
-          <button className={styles.randomBtn} onClick={randomizeAll} disabled={loading || lobbyLoading} title="Arvo uudet nimet">
-            🎲 Arvo nimet
+          <button className={styles.randomBtn} onClick={randomizeAll} disabled={loading || lobbyLoading} title={t.randomizeNamesBtn}>
+            {t.randomizeNamesBtn}
           </button>
           <div className={styles.mainBtns}>
             <div className={styles.btnGroup}>
               <button className={styles.createBtn} onClick={handleCreate} disabled={loading || lobbyLoading}>
-                {loading ? 'Luodaan…' : 'Aloita peli'}
+                {loading ? t.startingLabel : t.startGameBtn}
               </button>
-              <div className={styles.btnHint}>Peli alkaa heti — voit pelata botteja tai toisia vastaan</div>
+              <div className={styles.btnHint}>{t.immediateHint}</div>
             </div>
             <div className={styles.btnGroup}>
               <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
-                {lobbyLoading ? 'Luodaan…' : 'Luo odotushuone'}
+                {lobbyLoading ? t.creatingLabel : t.createLobbyBtn}
               </button>
-              <div className={styles.btnHint}>Muut voivat liittyä jaettavalla koodilla</div>
+              <div className={styles.btnHint}>{t.lobbyHint}</div>
             </div>
           </div>
         </div>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
-          Takaisin
+          {t.backBtn}
         </button>
       </div>
     </div>

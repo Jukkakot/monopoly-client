@@ -3,6 +3,7 @@ import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
 import { getCardText } from '../../i18n/cards'
+import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { calcNetWorth, calcCurrentRentIncome } from '../../utils/netWorth'
@@ -67,6 +68,7 @@ function DiceDisplay({ dice }: { dice: [number, number] }) {
 
 export default function ActionPanel({ state, myPlayerId }: Props) {
   const { sendCmd, state: ctxState } = useGame()
+  const t = useT()
   const lastDice = ctxState.lastDice
   const sid = state.sessionId
   const turn = state.turn
@@ -91,7 +93,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     })
     return (
       <div className={styles.panel}>
-        <div className={styles.winner}>🏆 Peli päättyi!</div>
+        <div className={styles.winner}>{t.gameOverTitle}</div>
         {sorted.map((p, i) => {
           const seat = state.seats.find(s => s.playerId === p.playerId)
           return (
@@ -99,7 +101,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <span>{['🥇','🥈','🥉'][i] ?? `${i+1}.`}</span>
               <span style={{ width: 12, height: 12, borderRadius: '50%', background: seat?.tokenColorHex ?? '#888', display: 'inline-block', flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{p.name}</span>
-              <span style={{ fontWeight: 700 }}>{p.bankrupt ? 'KONKURSSI' : `€${p.cash}`}</span>
+              <span style={{ fontWeight: 700 }}>{p.bankrupt ? t.bankruptLabel : `€${p.cash}`}</span>
             </div>
           )
         })}
@@ -132,7 +134,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             <span />
             <span />
           </div>
-          Siirretään pelimerkki…
+          {t.movingToken}
         </div>
       </div>
     )
@@ -148,10 +150,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={styles.panel}>
         <div className={styles.infoBox} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
           📍 <strong>{spot?.name ?? p.propertyDisplayName}</strong><br />
-          Hinta: €{p.price}
+          {t.priceLabel(p.price)}
         </div>
-        <Btn label={isTouchDevice ? `💰 Osta €${p.price}` : `💰 Osta €${p.price}  [B]`} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
-        <Btn label={isTouchDevice ? '🏷 Ohita → huutokauppa' : '🏷 Ohita → huutokauppa  [D]'} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
+        <Btn label={isTouchDevice ? t.buyBtn(p.price) : t.buyBtnKbd(p.price)} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
+        <Btn label={isTouchDevice ? t.skipToAuction : t.skipToAuctionKbd} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
     )
@@ -171,7 +173,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <span />
               <span />
             </div>
-            {activePlayer?.name ?? '?'} siirtyy…
+            {activePlayer?.name ?? '?'} …
           </div>
         </div>
       )
@@ -195,12 +197,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={styles.panel}>
         <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
           <div className={styles.turnWaiting}>
-            <span>⏳ {activePlayer?.name ?? '?'} {phase === 'WAITING_FOR_ROLL' ? 'heittää nopat…' :
-              phase === 'WAITING_FOR_END_TURN' ? 'lopettaa vuoroa…' :
-              phase === 'WAITING_FOR_DECISION' ? 'harkitsee ostoa…' :
-              phase === 'WAITING_FOR_AUCTION' ? 'huutokaupassa…' :
-              phase === 'RESOLVING_DEBT' ? 'selvittää velkaa…' :
-              'pelaa…'}</span>
+            <span>⏳ {activePlayer?.name ?? '?'} — {t.phases[phase ?? ''] ?? phase}</span>
             <span className={`${styles.turnTimer} ${isAfk ? styles.turnTimerAfk : ''}`}>
               {turnSeconds}s{isAfk ? ' ⚠️' : ''}
             </span>
@@ -221,19 +218,18 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         {myPlayer && (
           <div className={styles.myStats}>
             <div className={styles.myStatRow}>
-              <span className={styles.myStatLabel}>Nettovarallisuus</span>
+              <span className={styles.myStatLabel}>{t.netWorthLabel}</span>
               <span className={styles.myStatVal}>~€{myNetWorth}</span>
             </div>
             {myIncome > 0 && (
               <div className={styles.myStatRow}>
-                <span className={styles.myStatLabel}>Vuokratulot/kierros</span>
+                <span className={styles.myStatLabel}>{t.rentalIncomeLabel}</span>
                 <span className={styles.myStatVal}>~€{myIncome}</span>
               </div>
             )}
             {turnsUntilMine > 0 && (
               <div className={styles.myStatRow}>
-                <span className={styles.myStatLabel}>Vuorosi</span>
-                <span className={styles.myStatVal}>{turnsUntilMine} pelaajan jälkeen</span>
+                <span className={styles.myStatLabel}>{t.yourTurnIn(turnsUntilMine)}</span>
               </div>
             )}
           </div>
@@ -250,22 +246,22 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         {consecutiveDoubles > 0 && (
           <div className={`${styles.infoBox} ${styles.doubles}`}>
-            🎲 Tuplaheitto! Heitä uudelleen
-            {consecutiveDoubles >= 2 && <span> — varoitus: 3. tupla = vankila</span>}
+            {t.doublesRoll}
+            {consecutiveDoubles >= 2 && <span>{t.doublesWarning}</span>}
           </div>
         )}
         {me?.inJail && (
           <>
-            <div className={styles.infoBox}>⛓ Vankilassa — {me.jailRoundsRemaining ?? '?'} kierrosta jäljellä</div>
+            <div className={styles.infoBox}>{t.inJail(me.jailRoundsRemaining ?? 0)}</div>
             {me.getOutOfJailCards > 0 && (
-              <Btn label={`🃏 Käytä vapautuskortti (${me.getOutOfJailCards})`} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+              <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
             )}
             {me.cash >= 50 && (
-              <Btn label="💸 Maksa €50 ja vapaudu" onClick={() => cmd('PayJailFine')} variant="secondary" />
+              <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
             )}
           </>
         )}
-        <Btn label={isTouchDevice ? '🎲 Heitä nopat' : '🎲 Heitä nopat  [välilyönti]'} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
+        <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
@@ -276,7 +272,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (phase === 'WAITING_FOR_END_TURN') {
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
-        <Btn label={isTouchDevice ? '✅ Lopeta vuoro' : '✅ Lopeta vuoro  [välilyönti]'} onClick={() => cmd('EndTurn')} variant="primary" />
+        <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
         {lastDice && <DiceDisplay dice={lastDice} />}
         {getCardText(state.lastCardKey, state.lastCardMessage) && (
           <div className={styles.cardMessage}>
@@ -290,7 +286,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     )
   }
 
-  return <div className={styles.panel}><div className={styles.infoBox}>Tila: {phase}</div></div>
+  return <div className={styles.panel}><div className={styles.infoBox}>{t.unknownPhase(phase ?? '')}</div></div>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -300,6 +296,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 function TradeButtons({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const sid = state.sessionId
   const others = state.players.filter(p => p.playerId !== myPlayerId && !p.bankrupt && !p.eliminated)
@@ -308,7 +305,7 @@ function TradeButtons({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.tradeSection}>
       <button className={`${styles.btn} ${styles.neutral}`} onClick={() => setOpen(v => !v)}>
-        🤝 Aloita kauppa {open ? '▴' : '▾'}
+        {t.startTrade(open)}
       </button>
       {open && (
         <div className={styles.tradePicker}>
@@ -338,8 +335,10 @@ function TradeButtons({ state, myPlayerId, sendCmd }: {
 function BuildingButtons({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const sid = state.sessionId
   const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId)
+  const [mortgageOpen, setMortgageOpen] = useState(false)
   if (myProps.length === 0) return null
 
   // Find completed color groups
@@ -372,7 +371,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
     <div className={styles.buildSection}>
       {buildableProps.length > 0 && (
         <>
-          <div className={styles.sectionTitle}>Rakenna taloja</div>
+          <div className={styles.sectionTitle}>{t.buildHousesSectionTitle}</div>
           {buildableProps.map(prop => {
             const spot = SPOTS.find(s => s.id === prop.propertyId)
             if (!spot) return null
@@ -409,25 +408,34 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
           })}
         </>
       )}
-      {myProps.length > 0 && (
-        <>
-          <div className={styles.sectionTitle}>Kiinnitys</div>
-          {myProps.filter(p => p.houseCount === 0 && p.hotelCount === 0).map(prop => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            if (!spot) return null
-            const color = STREET_COLORS[spot.streetType]
-            return (
-              <div key={prop.propertyId} className={styles.buildRow}>
-                <span className={styles.buildName} style={color ? { borderLeft: `3px solid ${color}`, paddingLeft: 4 } : {}}>{spot.name}</span>
-                <button className={styles.buildBtn}
-                  onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                  {prop.mortgaged ? '💳 Lunasta' : '🏦 Panttaa'}
-                </button>
-              </div>
-            )
-          })}
-        </>
-      )}
+      {myProps.length > 0 && (() => {
+        const mortgageProps = myProps.filter(p => p.houseCount === 0 && p.hotelCount === 0)
+        if (mortgageProps.length === 0) return null
+        const mortgagedCount = mortgageProps.filter(p => p.mortgaged).length
+        return (
+          <>
+            <button className={styles.sectionToggle} onClick={() => setMortgageOpen(v => !v)}>
+              {t.mortgageSectionTitle}
+              {mortgagedCount > 0 && <span className={styles.sectionBadge}>{mortgagedCount} pantattu</span>}
+              <span className={styles.sectionChevron}>{mortgageOpen ? '▴' : '▾'}</span>
+            </button>
+            {mortgageOpen && mortgageProps.map(prop => {
+              const spot = SPOTS.find(s => s.id === prop.propertyId)
+              if (!spot) return null
+              const color = STREET_COLORS[spot.streetType]
+              return (
+                <div key={prop.propertyId} className={styles.buildRow}>
+                  <span className={styles.buildName} style={color ? { borderLeft: `3px solid ${color}`, paddingLeft: 4 } : {}}>{spot.name}</span>
+                  <button className={styles.buildBtn}
+                    onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
+                    {prop.mortgaged ? t.redeemBtn : t.mortgageBtn}
+                  </button>
+                </div>
+              )
+            })}
+          </>
+        )
+      })()}
     </div>
   )
 }
@@ -439,6 +447,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
 function AuctionSection({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const sid = state.sessionId
   const auction = state.auctionState!
   const [customBid, setCustomBid] = useState('')
@@ -465,8 +474,8 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.panel}>
       <div className={`${styles.infoBox} ${styles.auction}`}>
-        🔨 Huutokauppa: <strong>{spot?.name ?? auction.propertyId}</strong><br />
-        Korkein: €{auction.currentBid}{leader ? ` — ${leader.name}` : ''}
+        {t.auctionTitle(spot?.name ?? auction.propertyId)}<br />
+        {t.auctionHighest(auction.currentBid, leader?.name ?? null)}
       </div>
       <div className={styles.auctionProgress}>
         <div className={styles.auctionProgressBar}>
@@ -484,24 +493,24 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           })}
         </div>
         <span className={styles.auctionProgressText}>
-          {remainingCount > 0 ? `${remainingCount} pelaajaa jäljellä` : ''}
-          {passedNames.length > 0 && ` · Passasi: ${passedNames.join(', ')}`}
+          {remainingCount > 0 ? t.auctionRemaining(remainingCount) : ''}
+          {passedNames.length > 0 && t.auctionPassed(passedNames.join(', '))}
         </span>
       </div>
       {isBelowFair && isEligible && (
         <div className={styles.auctionHint}>
-          💡 Markkina-arvo ~€{fairBid} (85% listahinnasta)
+          {t.auctionFairValue(fairBid)}
         </div>
       )}
       {!isEligible && currentActor && auction.status === 'ACTIVE' && (
         <div className={styles.infoBox}>
-          ⏳ {currentActor.name} tekee tarjouksen…
+          {t.auctionActorWaiting(currentActor.name)}
         </div>
       )}
       {auction.status === 'WON_PENDING_RESOLUTION' ? (
         <button className={`${styles.btn} ${styles.secondary}`}
           onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}>
-          🏆 Vahvista voitto
+          {t.auctionConfirmWin}
         </button>
       ) : isEligible ? (
         <>
@@ -522,16 +531,16 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
             />
             <button className={`${styles.btn} ${styles.info}`} style={{ width: 'auto', padding: '8px 14px' }}
               onClick={() => { const b = parseInt(customBid); if (b >= minBid) placeBid(b) }}>
-              Tarjoa
+              {t.placeBidBtn}
             </button>
           </div>
           <button className={`${styles.btn} ${styles.ghost}`}
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}>
-            {isTouchDevice ? '🚫 Passi' : '🚫 Passi  [P]'}
+            {isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd}
           </button>
         </>
       ) : (
-        <div className={styles.infoBox}>⏳ Odotetaan muita pelaajia…</div>
+        <div className={styles.infoBox}>{t.waitingForOthers}</div>
       )}
     </div>
   )
@@ -544,29 +553,30 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
 function DebtSection({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const sid = state.sessionId
   const debt = state.activeDebt!
   const creditorName = debt.creditorType === 'PLAYER'
-    ? state.players.find(p => p.playerId === debt.creditorPlayerId)?.name ?? 'pelaaja'
-    : 'Pankki'
+    ? state.players.find(p => p.playerId === debt.creditorPlayerId)?.name ?? t.playerCreditorLabel
+    : t.bankLabel
 
   return (
     <div className={styles.panel}>
       <div className={`${styles.infoBox} ${styles.debt}`}>
-        ⚠️ Velka €{debt.amountRemaining} → {creditorName}<br />
-        Käteinen: €{debt.currentCash}
+        {t.debtTitle(debt.amountRemaining, creditorName)}<br />
+        {t.debtCash(debt.currentCash)}
         {debt.estimatedLiquidationValue > 0 && (
-          <><br />Likvidointiarvo: ~€{debt.estimatedLiquidationValue}</>
+          <><br />{t.debtLiquidation(debt.estimatedLiquidationValue)}</>
         )}
       </div>
       {debt.allowedActions.includes('PAY_DEBT_NOW') && (
-        <Btn label="💸 Maksa velka" onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />
+        <Btn label={t.payDebtBtn} onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />
       )}
       {debt.allowedActions.includes('MORTGAGE_PROPERTY') &&
         state.properties.filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged).map(prop => {
           const spot = SPOTS.find(s => s.id === prop.propertyId)
           return (
-            <Btn key={prop.propertyId} label={`🏦 Panttaa ${spot?.name ?? prop.propertyId}`}
+            <Btn key={prop.propertyId} label={t.mortgagePropBtn(spot?.name ?? prop.propertyId)}
               onClick={() => sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId })}
               variant="secondary" />
           )
@@ -593,7 +603,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
               const spot = SPOTS.find(s => s.id === props[0].propertyId)
               return (
                 <Btn key={`set-${props[0].propertyId}`}
-                  label={`🏘 Myy kierros (${props.length} kiin.): ${spot?.streetType}`}
+                  label={t.sellRoundBtn(props.length, spot?.streetType ?? '')}
                   onClick={() => sendCmd({ type: 'SellBuildingRoundsAcrossSetForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: props[0].propertyId, rounds: 1 })}
                   variant="secondary" />
               )
@@ -601,9 +611,9 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
             {/* Sell from individual properties */}
             {builtProps.map(prop => {
               const spot = SPOTS.find(s => s.id === prop.propertyId)
-              const type = prop.hotelCount > 0 ? 'hotelli' : 'talo'
+              const type = prop.hotelCount > 0 ? t.hotelLabel : t.houseLabel
               return (
-                <Btn key={prop.propertyId} label={`🏠 Myy ${type}: ${spot?.name ?? prop.propertyId}`}
+                <Btn key={prop.propertyId} label={t.sellBuildingBtn(type, spot?.name ?? prop.propertyId)}
                   onClick={() => sendCmd({ type: 'SellBuildingForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 })}
                   variant="secondary" />
               )
@@ -612,7 +622,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         )
       })()}
       {debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
-        <Btn label="☠ Julistaudu konkurssiin" onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" />
+        <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" />
       )}
     </div>
   )
@@ -625,6 +635,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
 function TradeSection({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const sid = state.sessionId
   const trade = state.tradeState!
   const { status } = trade
@@ -639,8 +650,8 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.infoBox}>⏳ Odotetaan kaupan vastausta…</div>
-      <Btn label="❌ Peruuta tarjous" onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
+      <div className={styles.infoBox}>{t.tradeWaiting}</div>
+      <Btn label={t.cancelOfferBtn} onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
     </div>
   )
 }
@@ -648,6 +659,7 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
 function TradeEditor({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const sid = state.sessionId
   const trade = state.tradeState!
   const isProposer = myPlayerId === trade.initiatorPlayerId
@@ -684,7 +696,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.panel}>
       <div className={styles.infoBox}>
-        🤝 Kauppa: {partner?.name}
+        {t.tradeTitle(partner?.name ?? '?')}
         {partnerSeat && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 6 }}>
           <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill={partnerSeat.tokenColorHex} /></svg>
         </span>}
@@ -693,7 +705,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       <div className={styles.tradeColumns}>
         {/* Left: what I give */}
         <div className={styles.tradeCol}>
-          <div className={styles.tradeColTitle}>Sinä tarjoat</div>
+          <div className={styles.tradeColTitle}>{t.youOfferLabel}</div>
           <div className={styles.tradeMoney}>
             <span>€{myOffer.moneyAmount}</span>
             <div className={styles.moneyBtns}>
@@ -721,7 +733,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
         {/* Right: what I request */}
         <div className={styles.tradeCol}>
-          <div className={styles.tradeColTitle}>Sinä pyydät</div>
+          <div className={styles.tradeColTitle}>{t.youRequestLabel}</div>
           <div className={styles.tradeMoney}>
             <span>€{myRequest.moneyAmount}</span>
             <div className={styles.moneyBtns}>
@@ -748,10 +760,10 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         </div>
       </div>
 
-      <Btn label="📤 Lähetä tarjous"
+      <Btn label={t.sendOfferBtn}
         onClick={() => sendCmd({ type: 'SubmitTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
         variant="primary" />
-      <Btn label="❌ Peruuta"
+      <Btn label={t.cancelBtn}
         onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
         variant="danger" />
     </div>
@@ -761,6 +773,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 function TradeReceiver({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
+  const t = useT()
   const sid = state.sessionId
   const trade = state.tradeState!
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
@@ -772,11 +785,11 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.infoBox}>🤝 Kauppatarjous — {initiator?.name}</div>
+      <div className={styles.infoBox}>{t.tradeOfferFrom(initiator?.name ?? '?')}</div>
 
       <div className={styles.offerBlock}>
         <div className={styles.offerRow}>
-          <span className={styles.offerLabel}>He tarjoavat</span>
+          <span className={styles.offerLabel}>{t.theyOfferLabel}</span>
           <div className={styles.offerItems}>
             {offer.offeredToRecipient.moneyAmount > 0 && (
               <span className={styles.offerItem}>€{offer.offeredToRecipient.moneyAmount}</span>
@@ -790,7 +803,7 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
           </div>
         </div>
         <div className={styles.offerRow}>
-          <span className={styles.offerLabel}>He pyytävät</span>
+          <span className={styles.offerLabel}>{t.theyRequestLabel}</span>
           <div className={styles.offerItems}>
             {offer.requestedFromRecipient.moneyAmount > 0 && (
               <span className={styles.offerItem}>€{offer.requestedFromRecipient.moneyAmount}</span>
@@ -805,9 +818,9 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
         </div>
       </div>
 
-      <Btn label="✅ Hyväksy" onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" />
-      <Btn label="💬 Vastatarjous" onClick={() => sendCmd({ type: 'CounterTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" />
-      <Btn label="❌ Hylkää" onClick={() => sendCmd({ type: 'DeclineTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
+      <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" />
+      <Btn label={t.counterOfferBtn} onClick={() => sendCmd({ type: 'CounterTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" />
+      <Btn label={t.declineBtn} onClick={() => sendCmd({ type: 'DeclineTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
     </div>
   )
 }

@@ -4,11 +4,13 @@ import { useGame } from '../store/GameContext'
 import { joinLobby, startLobby, sseUrl } from '../api/sessionApi'
 import type { ClientSessionSnapshot, SeatState } from '../types/api'
 import styles from './LobbyWaitingScreen.module.css'
+import { useT } from '../i18n/LanguageContext'
 
 export default function LobbyWaitingScreen() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { joinSession } = useGame()
+  const t = useT()
 
   const [seats, setSeats] = useState<SeatState[]>([])
   const [status, setStatus] = useState<string>('LOBBY')
@@ -55,7 +57,7 @@ export default function LobbyWaitingScreen() {
       try { localStorage.setItem('monopoly_last_name', name.trim()) } catch {}
       setMyPlayerId(res.playerId)
     } catch {
-      setError('Liittyminen epäonnistui — odotushuone täynnä tai peli jo aloitettu.')
+      setError(t.joinFailedErr)
     } finally {
       setJoining(false)
     }
@@ -68,7 +70,7 @@ export default function LobbyWaitingScreen() {
     try {
       await startLobby(sessionId)
     } catch {
-      setError('Pelin aloitus epäonnistui.')
+      setError(t.startFailedErr)
       setStarting(false)
     }
   }
@@ -91,11 +93,11 @@ export default function LobbyWaitingScreen() {
       <div className={styles.card}>
         <div className={styles.logoBox}>
           <div className={styles.logo}>Monopoly</div>
-          <div className={styles.sub}>Helsinki Edition — Odotushuone</div>
+          <div className={styles.sub}>{t.waitingRoomSubtitle}</div>
         </div>
 
         <div className={styles.idRow}>
-          <span className={styles.idLabel}>Pelin koodi:</span>
+          <span className={styles.idLabel}>{t.gamePinLabel2}</span>
           <span className={styles.idCode}>{sessionId}</span>
           <button className={styles.copyBtn} onClick={copyId} title="Kopioi koodi">
             {copied ? '✓' : '⎘'}
@@ -103,7 +105,7 @@ export default function LobbyWaitingScreen() {
         </div>
 
         <div className={styles.seatSection}>
-          <div className={styles.sectionTitle}>Pelaajat ({joinedSeats.length}/{seats.length})</div>
+          <div className={styles.sectionTitle}>{t.seatsLabel(joinedSeats.length, seats.length)}</div>
           {joinedSeats.map(s => (
             <div key={s.seatId} className={styles.seatRow}>
               <span
@@ -111,25 +113,25 @@ export default function LobbyWaitingScreen() {
                 style={{ background: s.tokenColorHex }}
               />
               <span className={styles.seatName}>{s.displayName ?? '–'}</span>
-              {s.playerId === myPlayerId && <span className={styles.meTag}>sinä</span>}
+              {s.playerId === myPlayerId && <span className={styles.meTag}>{t.youBadge}</span>}
             </div>
           ))}
           {freeSeats.map(s => (
             <div key={s.seatId} className={`${styles.seatRow} ${styles.freeSeat}`}>
               <span className={styles.seatDot} style={{ background: s.tokenColorHex, opacity: 0.3 }} />
-              <span className={styles.seatNameFree}>Vapaa paikka</span>
+              <span className={styles.seatNameFree}>{t.freeSeatLabel}</span>
             </div>
           ))}
         </div>
 
         {!alreadyJoined && (
           <div className={styles.joinSection}>
-            <div className={styles.sectionTitle}>Liity peliin</div>
+            <div className={styles.sectionTitle}>{t.joinGameTitle}</div>
             <div className={styles.joinRow}>
               <input
                 className={styles.nameInput}
                 type="text"
-                placeholder="Nimesi"
+                placeholder={t.yourNamePlaceholder}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleJoin()}
@@ -141,18 +143,18 @@ export default function LobbyWaitingScreen() {
                 onClick={handleJoin}
                 disabled={joining || !name.trim() || freeSeats.length === 0}
               >
-                {joining ? '…' : 'Liity'}
+                {joining ? '…' : t.joinBtnLabel}
               </button>
             </div>
             {freeSeats.length === 0 && (
-              <div className={styles.hint}>Odotushuone on täynnä.</div>
+              <div className={styles.hint}>{t.lobbyFullMsg}</div>
             )}
           </div>
         )}
 
         {alreadyJoined && (
           <div className={styles.joinedBanner}>
-            Olet liittynyt peliin. Odota että host aloittaa pelin.
+            {t.joinedMsg}
           </div>
         )}
 
@@ -163,11 +165,11 @@ export default function LobbyWaitingScreen() {
           onClick={handleStart}
           disabled={starting || !canStart || status !== 'LOBBY'}
         >
-          {starting ? 'Aloitetaan…' : canStart ? 'Aloita peli' : `Tarvitaan vähintään 2 pelaajaa (${joinedSeats.length}/${seats.length})`}
+          {starting ? t.startingBtn : canStart ? t.startBtn : t.needMorePlayers(joinedSeats.length, seats.length)}
         </button>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
-          Takaisin
+          {t.backBtn}
         </button>
       </div>
     </div>

@@ -6,10 +6,12 @@ import type { SessionSummary } from '../types/api'
 import { saveTokenShapes } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './SessionListScreen.module.css'
+import { useT } from '../i18n/LanguageContext'
 
 export default function SessionListScreen() {
   const navigate = useNavigate()
   const { joinSession } = useGame()
+  const t = useT()
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +35,7 @@ export default function SessionListScreen() {
       const list = await listSessions()
       setSessions(list)
     } catch {
-      setError('Sessioiden lataus epäonnistui.')
+      setError(t.sessionsLoadFailed)
     } finally {
       setLoading(false)
     }
@@ -58,7 +60,7 @@ export default function SessionListScreen() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'}/sessions/${code}/snapshot`)
       if (!res.ok) {
-        setJoinError('Peliä ei löydy. Tarkista koodi.')
+        setJoinError(t.gameNotFoundErr)
         return
       }
       const snap = await res.json() as { status: string }
@@ -69,14 +71,14 @@ export default function SessionListScreen() {
         navigate(`/game/${code}`)
       }
     } catch {
-      setJoinError('Yhteysongelma. Yritä uudelleen.')
+      setJoinError(t.connectionErr)
     } finally {
       setJoinChecking(false)
     }
   }
 
   async function handleDelete(sessionId: string) {
-    if (!confirm(`Poistetaanko peli ${sessionId}?`)) return
+    if (!confirm(t.deleteGameConfirm(sessionId))) return
     await deleteSession(sessionId)
     await load()
   }
@@ -97,9 +99,21 @@ export default function SessionListScreen() {
       joinSession(sessionId)
       navigate(`/game/${sessionId}`)
     } catch {
-      setError('Pikapelin luonti epäonnistui.')
+      setError(t.quickStartFailed)
       setLoading(false)
     }
+  }
+
+  function sessionAge(createdAt: string): string {
+    const ts = new Date(createdAt)
+    if (isNaN(ts.getTime())) return '–'
+    const diffMs = Date.now() - ts.getTime()
+    const diffMin = Math.floor(diffMs / 60000)
+    if (diffMin < 1) return t.timeJustNow
+    if (diffMin < 60) return t.timeMinAgo(diffMin)
+    const diffH = Math.floor(diffMin / 60)
+    if (diffH < 24) return t.timeHourAgo(diffH)
+    return t.timeDayAgo(diffH / 24)
   }
 
   const lobby = sessions.filter(s => s.status === 'LOBBY')
@@ -116,12 +130,12 @@ export default function SessionListScreen() {
 
         {lastSession && lastSessionExists === true && (
           <div className={styles.rejoinBanner}>
-            <span>↩ Jatkasitko viime peliä?</span>
+            <span>{t.rejoinBanner}</span>
             <button
               className={styles.rejoinBtn}
               onClick={() => { joinSession(lastSession); navigate(`/game/${lastSession}`) }}
             >
-              Liity: {lastSession}
+              {t.joinLabel}: {lastSession}
             </button>
             <button
               className={styles.rejoinDismiss}
@@ -133,7 +147,7 @@ export default function SessionListScreen() {
 
         <div className={styles.quickSection}>
           <button className={styles.newBtn} onClick={() => navigate('/lobby')}>
-            + Uusi peli
+            {t.newGameBtn}
           </button>
           <div className={styles.quickRow}>
             <button className={styles.quickBtn} onClick={() => handleQuickStart(1)} disabled={loading}>
@@ -149,19 +163,19 @@ export default function SessionListScreen() {
         </div>
 
         <div className={styles.joinCodeSection}>
-          <div className={styles.sectionTitle}>Liity koodilla</div>
+          <div className={styles.sectionTitle}>{t.joinByCodeTitle}</div>
           <div className={styles.joinCodeRow}>
             <input
               className={styles.joinCodeInput}
               type="text"
-              placeholder="esim. rohkea-karhu-47"
+              placeholder={t.joinCodePlaceholder}
               value={joinCode}
               onChange={e => { setJoinCode(e.target.value); setJoinError(null) }}
               onKeyDown={e => e.key === 'Enter' && handleJoinByCode()}
               disabled={joinChecking}
             />
             <button className={styles.joinCodeBtn} onClick={handleJoinByCode} disabled={joinChecking}>
-              {joinChecking ? '…' : 'Liity'}
+              {joinChecking ? t.joiningLabel : t.joinBtnLabel}
             </button>
           </div>
           {joinError && <div className={styles.joinError}>{joinError}</div>}
@@ -169,62 +183,56 @@ export default function SessionListScreen() {
 
         {lobby.length > 0 && (
           <div className={styles.listSection}>
-            <div className={styles.sectionTitle}>Odotushuoneet</div>
+            <div className={styles.sectionTitle}>{t.waitingRoomsTitle}</div>
             {lobby.map(s => (
               <SessionRow key={s.sessionId} session={s}
                 onJoin={() => navigate(`/lobby-wait/${s.sessionId}`)}
                 onDelete={() => handleDelete(s.sessionId)}
-                label="Liity odotushuoneeseen" />
+                label={t.joinLobbyLabel}
+                playerCountMeta={t.playerCountMeta}
+                sessionAge={sessionAge} />
             ))}
           </div>
         )}
 
         <div className={styles.listSection}>
-          <div className={styles.sectionTitle}>Käynnissä olevat pelit</div>
-          {loading && <div className={styles.hint}>Ladataan…</div>}
+          <div className={styles.sectionTitle}>{t.activeGamesTitle}</div>
+          {loading && <div className={styles.hint}>{t.loading}</div>}
           {error && <div className={styles.errorMsg}>{error}</div>}
           {!loading && !error && active.length === 0 && (
-            <div className={styles.hint}>Ei aktiivisia pelejä.</div>
+            <div className={styles.hint}>{t.noActiveGames}</div>
           )}
           {active.map(s => (
-            <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)} />
+            <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
+              label={t.joinLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
           ))}
         </div>
 
         {finished.length > 0 && (
           <div className={styles.listSection}>
-            <div className={styles.sectionTitle}>Päättyneet pelit</div>
+            <div className={styles.sectionTitle}>{t.finishedGamesTitle}</div>
             {finished.map(s => (
-              <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)} label="Katso" />
+              <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
+                label={t.watchLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
             ))}
           </div>
         )}
 
         <button className={styles.refreshBtn} onClick={load}>
-          Päivitä lista
+          {t.refreshBtn}
         </button>
       </div>
     </div>
   )
 }
 
-function sessionAge(createdAt: string): string {
-  const ts = new Date(createdAt)
-  if (isNaN(ts.getTime())) return '–'
-  const diffMs = Date.now() - ts.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
-  if (diffMin < 1) return 'juuri nyt'
-  if (diffMin < 60) return `${diffMin}min sitten`
-  const diffH = Math.floor(diffMin / 60)
-  if (diffH < 24) return `${diffH}h sitten`
-  return `${Math.floor(diffH / 24)}pv sitten`
-}
-
-function SessionRow({ session, onJoin, onDelete, label = 'Liity' }: {
+function SessionRow({ session, onJoin, onDelete, label, playerCountMeta, sessionAge }: {
   session: SessionSummary
   onJoin: () => void
   onDelete: () => void
-  label?: string
+  label: string
+  playerCountMeta: (n: number) => string
+  sessionAge: (createdAt: string) => string
 }) {
   const [copied, setCopied] = useState(false)
   const age = session.createdAt ? sessionAge(session.createdAt) : '–'
@@ -245,7 +253,7 @@ function SessionRow({ session, onJoin, onDelete, label = 'Liity' }: {
             {copied ? '✓' : '⎘'}
           </button>
         </div>
-        <div className={styles.sessionMeta}>{session.playerCount} pelaajaa · {age}</div>
+        <div className={styles.sessionMeta}>{playerCountMeta(session.playerCount)} · {age}</div>
       </div>
       <button className={styles.joinBtn} onClick={onJoin}>{label}</button>
       <button className={styles.deleteBtn} onClick={onDelete} title="Poista peli">✕</button>

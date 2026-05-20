@@ -1,21 +1,9 @@
 import styles from './PropertyDetail.module.css'
-import { SPOTS, STREET_COLORS, type StreetType } from '../../types/spots'
-
-const STREET_TYPE_FI: Partial<Record<StreetType, string>> = {
-  BROWN:      'Ruskea',
-  LIGHT_BLUE: 'Vaaleansininen',
-  PURPLE:     'Violetti',
-  ORANGE:     'Oranssi',
-  RED:        'Punainen',
-  YELLOW:     'Keltainen',
-  GREEN:      'Vihreä',
-  DARK_BLUE:  'Tummansininen',
-  RAILROAD:   'Rautatieasema',
-  UTILITY:    'Laitos',
-}
+import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { useGame } from '../../store/GameContext'
+import { useT } from '../../i18n/LanguageContext'
 
 interface Props {
   spotId: string
@@ -24,6 +12,7 @@ interface Props {
 }
 
 export default function PropertyDetail({ spotId, state, onClose }: Props) {
+  const t = useT()
   const { sendCmd, state: gs } = useGame()
   const myPlayerId = gs.myPlayerId ?? ''
 
@@ -69,7 +58,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
     } else if (isRailroad && rents.length >= 1) {
       currentRent = rents[Math.min(ownerGroupCount - 1, rents.length - 1)]
     } else if (isUtility) {
-      currentRent = ownerGroupCount >= 2 ? '10× nopat' : '4× nopat'
+      currentRent = ownerGroupCount >= 2 ? t.utilityDiceLarge : t.utilityDiceSmall
     }
   }
 
@@ -109,7 +98,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
         <div className={styles.header} style={{ background: color ?? '#888' }}>
           <div className={styles.headerName}>{spot.name}</div>
           {spot.streetType !== 'CORNER' && spot.streetType !== 'COMMUNITY' && spot.streetType !== 'CHANCE' && spot.streetType !== 'TAX' && (
-            <div className={styles.headerType}>{STREET_TYPE_FI[spot.streetType] ?? spot.streetType}</div>
+            <div className={styles.headerType}>{t.streetTypeNames[spot.streetType] ?? spot.streetType}</div>
           )}
         </div>
 
@@ -119,10 +108,10 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             <div className={styles.ownerRow}>
               <span className={styles.ownerDot} style={{ background: ownerSeat?.tokenColorHex ?? '#888' }} />
               <span>{owner.name}</span>
-              {prop?.mortgaged && <span className={styles.mortgagedBadge}>PANTATTU</span>}
+              {prop?.mortgaged && <span className={styles.mortgagedBadge}>{t.mortgagedBadge}</span>}
             </div>
           ) : (
-            <div className={styles.unowned}>Ei omistajaa</div>
+            <div className={styles.unowned}>{t.noOwnerMsg}</div>
           )}
 
           {/* Group info */}
@@ -137,7 +126,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
               ))}
               <span className={styles.groupLabel}>
                 {ownerGroupCount}/{groupTotal}
-                {isMonopoly && <span className={styles.monopolyBadge}>MONOPOLI</span>}
+                {isMonopoly && <span className={styles.monopolyBadge}>{t.monopolyBadge}</span>}
               </span>
             </div>
           )}
@@ -145,27 +134,27 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           {/* Railroads owned info */}
           {isRailroad && owner && (
             <div className={styles.groupLabel}>
-              Omistajallla {ownerGroupCount}/4 asemaa
+              {t.stationsOwned(ownerGroupCount, groupTotal)}
             </div>
           )}
 
           {/* Current effective rent */}
           {currentRent !== null && (
             <div className={styles.currentRentBox}>
-              <span className={styles.currentRentLabel}>Nykyinen vuokra</span>
+              <span className={styles.currentRentLabel}>{t.currentRentLabel}</span>
               <span className={styles.currentRentVal}>
                 {typeof currentRent === 'number' ? `€${currentRent}` : currentRent}
               </span>
             </div>
           )}
           {prop?.mortgaged && owner && (
-            <div className={styles.mortgagedRentBox}>Ei vuokraa — pantattu</div>
+            <div className={styles.mortgagedRentBox}>{t.noRentMsg}</div>
           )}
 
           {/* Price */}
           {spot.price && (
             <div className={styles.priceRow}>
-              <span className={styles.priceLabel}>Hinta</span>
+              <span className={styles.priceLabel}>{t.priceLabelPD}</span>
               <span className={styles.priceVal}>€{spot.price}</span>
             </div>
           )}
@@ -178,13 +167,13 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             const r = (i: number) => `${styles.rentRow} ${activeIdx === i && owner ? styles.rentRowActive : ''}`
             return (
               <div className={styles.rentTable}>
-                <div className={styles.rentTitle}>Vuokrat</div>
-                <div className={r(0)}><span>Tyhjä{isMonopoly ? ' (monopoli 2×)' : ''}</span><span>€{isMonopoly ? rents[0] * 2 : rents[0]}</span></div>
-                <div className={r(1)}><span>🏠 1 talo</span><span>€{rents[1]}</span></div>
-                <div className={r(2)}><span>🏠🏠 2 taloa</span><span>€{rents[2]}</span></div>
-                <div className={r(3)}><span>🏠🏠🏠 3 taloa</span><span>€{rents[3]}</span></div>
+                <div className={styles.rentTitle}>{t.rentsTitle}</div>
+                <div className={r(0)}><span>{t.emptyRentRow(isMonopoly)}</span><span>€{isMonopoly ? rents[0] * 2 : rents[0]}</span></div>
+                <div className={r(1)}><span>🏠 1 {t.houseLabel}</span><span>€{rents[1]}</span></div>
+                <div className={r(2)}><span>🏠🏠 2 {t.houseLabel}</span><span>€{rents[2]}</span></div>
+                <div className={r(3)}><span>🏠🏠🏠 3 {t.houseLabel}</span><span>€{rents[3]}</span></div>
                 <div className={r(4)}><span>🏠×4</span><span>€{rents[4]}</span></div>
-                <div className={`${r(5)} ${styles.hotelRow}`}><span>🏨 Hotelli</span><span>€{rents[5]}</span></div>
+                <div className={`${r(5)} ${styles.hotelRow}`}><span>{t.hotelOwnedLabel}</span><span>€{rents[5]}</span></div>
               </div>
             )
           })()}
@@ -193,10 +182,10 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             const ar = (i: number) => `${styles.rentRow} ${ownerGroupCount === i + 1 && owner ? styles.rentRowActive : ''}`
             return (
               <div className={styles.rentTable}>
-                <div className={styles.rentTitle}>Vuokrat (asemien mukaan)</div>
-                <div className={ar(0)}><span>🚂 1 asema</span><span>€{rents[0]}</span></div>
-                <div className={ar(1)}><span>🚂🚂 2 asemaa</span><span>€{rents[1]}</span></div>
-                <div className={ar(2)}><span>🚂🚂🚂 3 asemaa</span><span>€{rents[2]}</span></div>
+                <div className={styles.rentTitle}>{t.railroadRentsTitle}</div>
+                <div className={ar(0)}><span>🚂×1</span><span>€{rents[0]}</span></div>
+                <div className={ar(1)}><span>🚂×2</span><span>€{rents[1]}</span></div>
+                <div className={ar(2)}><span>🚂×3</span><span>€{rents[2]}</span></div>
                 <div className={ar(3)}><span>🚂×4</span><span>€{rents[3]}</span></div>
               </div>
             )
@@ -209,9 +198,9 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             const au = (i: number) => `${styles.rentRow} ${utilCount === i + 1 && owner ? styles.rentRowActive : ''}`
             return (
               <div className={styles.rentTable}>
-                <div className={styles.rentTitle}>Vuokra</div>
-                <div className={au(0)}><span>1 laitos omistettu</span><span>4× nopat</span></div>
-                <div className={au(1)}><span>2 laitosta omistettu</span><span>10× nopat</span></div>
+                <div className={styles.rentTitle}>{t.utilityRentTitle}</div>
+                <div className={au(0)}><span>{t.utilityOwned1}</span><span>{t.utilityDiceSmall}</span></div>
+                <div className={au(1)}><span>{t.utilityOwned2}</span><span>{t.utilityDiceLarge}</span></div>
               </div>
             )
           })()}
@@ -220,8 +209,8 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           {isStreet && prop && (prop.houseCount > 0 || prop.hotelCount > 0) && (
             <div className={styles.buildingsRow}>
               {prop.hotelCount > 0
-                ? <span>🏨 Hotelli</span>
-                : <span>{'🏠'.repeat(prop.houseCount)} {prop.houseCount} talo{prop.houseCount !== 1 ? 'a' : ''}</span>
+                ? <span>{t.hotelOwnedLabel}</span>
+                : <span>{t.houseCountLabel(prop.houseCount)}</span>
               }
             </div>
           )}
@@ -229,13 +218,13 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           {/* Mortgage / unmortgage info */}
           {mortgageValue > 0 && !prop?.mortgaged && (
             <div className={styles.priceRow}>
-              <span className={styles.priceLabel}>Panttausarvo</span>
+              <span className={styles.priceLabel}>{t.mortgageValueLabel}</span>
               <span className={styles.priceVal}>€{mortgageValue}</span>
             </div>
           )}
           {mortgageValue > 0 && prop?.mortgaged && (
             <div className={styles.priceRow}>
-              <span className={styles.priceLabel}>Lunastushinta (+10%)</span>
+              <span className={styles.priceLabel}>{t.redemptionLabel}</span>
               <span className={styles.priceVal}>€{Math.ceil(mortgageValue * 1.1)}</span>
             </div>
           )}
@@ -243,8 +232,8 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           {/* ROI for unowned properties */}
           {!owner && spot.price && rents.length > 0 && isStreet && (
             <div className={styles.roiRow}>
-              <span className={styles.priceLabel}>Takaisinmaksu (tyhjä)</span>
-              <span className={styles.priceVal}>~{Math.ceil(spot.price / (rents[0] * 2 || 1))}× kierros</span>
+              <span className={styles.priceLabel}>{t.roiLabel}</span>
+              <span className={styles.priceVal}>{t.roiVal(Math.ceil(spot.price / (rents[0] * 2 || 1)))}</span>
             </div>
           )}
 
@@ -252,7 +241,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           <div className={styles.actions}>
             {canBuild && (
               <button className={`${styles.btn} ${styles.build}`} onClick={buildHouse}>
-                🏠 Rakenna talo
+                {t.buildHouseBtn}
               </button>
             )}
             {canSell && (
@@ -260,26 +249,26 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
                 sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: spotId })
                 onClose()
               }}>
-                −🏠 Myy talo
+                {t.sellHouseBtn}
               </button>
             )}
             {isMyProp && canAct && !prop?.mortgaged && (
               <button className={`${styles.btn} ${styles.secondary}`} onClick={toggleMortgage}>
-                🏦 Panttaa
+                {t.mortgageBtn}
               </button>
             )}
             {isMyProp && prop?.mortgaged && (
               <button className={`${styles.btn} ${styles.secondary}`} onClick={toggleMortgage}>
-                💳 Lunasta pantit
+                {t.redeemBtn}
               </button>
             )}
             {isOthersProp && (
               <button className={`${styles.btn} ${styles.primary}`} onClick={openTrade}>
-                🤝 Tee kauppa
+                {t.tradeBtnPD}
               </button>
             )}
             <button className={`${styles.btn} ${styles.ghost}`} onClick={onClose}>
-              Sulje
+              {t.closeBtnPD}
             </button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
 import { useGame } from '../../store/GameContext'
+import { useT } from '../../i18n/LanguageContext'
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) return null
@@ -34,6 +35,7 @@ interface Props {
 }
 
 function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player: PlayerSnapshot; state: SessionState; onSpotClick?: (spotId: string) => void; onTradeWith?: (playerId: string) => void }) {
+  const t = useT()
   const ownedProps = state.properties.filter(p => p.ownerPlayerId === player.playerId)
 
   // Compute summary stats
@@ -71,18 +73,18 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
           className={styles.tradeBtn}
           onClick={e => { e.stopPropagation(); onTradeWith(player.playerId) }}
         >
-          🤝 Käy kauppaa {player.name.split(' ')[0]}:n kanssa
+          {t.tradeWithBtn(player.name)}
         </button>
       )}
       {ownedProps.length === 0 ? (
-        <div className={styles.noProps}>Ei kiinteistöjä</div>
+        <div className={styles.noProps}>{t.noPropertiesMsg}</div>
       ) : (
         <>
           <div className={styles.propSummary}>
             {monopolyCount > 0 && <span className={styles.propStat}>🏆{monopolyCount} monopoli</span>}
             {totalHotels > 0 && <span className={styles.propStat}>🏨{totalHotels}</span>}
             {totalHouses > 0 && <span className={styles.propStat}>🏠{totalHouses}</span>}
-            {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>🏦{mortgagedCount} pantattu</span>}
+            {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>{t.mortgagedStat(mortgagedCount)}</span>}
           </div>
       {Array.from(groups.entries()).map(([type, props]) => {
         const color = STREET_COLORS[type]
@@ -150,6 +152,7 @@ function GroupDots({ player, state }: { player: PlayerSnapshot; state: SessionSt
 }
 
 export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
+  const t = useT()
   const activeId = state.turn?.activePlayerId
   const prevCash = useRef<Map<string, number>>(new Map())
   const [flashMap, setFlashMap] = useState<Map<string, 'up' | 'down'>>(new Map())
@@ -230,8 +233,8 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                 <div className={styles.name}>
                   <span className={styles.turnNum}>{turnIdx + 1}.</span>
                   {player.name}
-                  {isMe && <span className={styles.meBadge}>sinä</span>}
-                  {isBankrupt && <span className={styles.badge}>konkurssi</span>}
+                  {isMe && <span className={styles.meBadge}>{t.youBadge}</span>}
+                  {isBankrupt && <span className={styles.badge}>{t.bankruptBadge}</span>}
                   {player.inJail && !isBankrupt && (
                     <span className={styles.badge}>🔒{player.jailRoundsRemaining > 0 ? `${player.jailRoundsRemaining}v` : ''}</span>
                   )}
@@ -240,7 +243,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                   )}
                 </div>
                 <div className={styles.details}>
-                  {spotName} · {player.ownedPropertyIds.length} kiin.
+                  {spotName} · {t.propAbbr(player.ownedPropertyIds.length)}
                 </div>
                 {!isBankrupt && player.ownedPropertyIds.length > 0 && (
                   <GroupDots player={player} state={state} />
