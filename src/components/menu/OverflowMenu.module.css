@@ -31,9 +31,9 @@
 }
 
 .menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  position: fixed;
+  top: 48px;
+  right: 8px;
   background: #fff;
   border: 1.5px solid #c8e6c9;
   border-radius: 10px;

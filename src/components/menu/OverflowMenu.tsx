@@ -214,6 +214,16 @@ export default function OverflowMenu() {
               onClick={() => { setOpen(false); window.location.href = '/' }}>
               🚪 Poistu pelistä
             </button>
+            {snapshot && myPlayerId && snapshot.status === 'IN_PROGRESS' && (
+              <button className={`${styles.menuItem} ${styles.danger}`}
+                onClick={() => {
+                  setOpen(false)
+                  if (confirm('Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.'))
+                    sendCmd({ type: 'AbortGame', sessionId: sid, actorPlayerId: myPlayerId })
+                }}>
+                🛑 Lopeta peli kaikille
+              </button>
+            )}
           </div>
         </>
       )}
