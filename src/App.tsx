@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GameProvider } from './store/GameContext'
+import { LanguageProvider } from './i18n/LanguageContext'
 import SessionListScreen from './screens/SessionListScreen'
 import LobbyScreen from './screens/LobbyScreen'
 import LobbyWaitingScreen from './screens/LobbyWaitingScreen'
@@ -7,6 +8,7 @@ import GameScreen from './screens/GameScreen'
 
 export default function App() {
   return (
+    <LanguageProvider>
     <GameProvider>
       <HashRouter>
         <Routes>
@@ -18,5 +20,6 @@ export default function App() {
         </Routes>
       </HashRouter>
     </GameProvider>
+    </LanguageProvider>
   )
 }

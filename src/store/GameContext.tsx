@@ -9,6 +9,8 @@ import {
   playGameOver, playTradeAccepted, playMortgage, playPassGo, playPayRent, playAuctionWin,
 } from '../utils/sounds'
 import { calcNetWorth } from '../utils/netWorth'
+import { getLang } from '../i18n/lang'
+import { translations } from '../i18n/translations'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -112,13 +114,13 @@ function reducer(state: GameState, action: Action): GameState {
         switch (e.icon) {
           case '🏃': playTokenMove(); break
           case '🏠': playBuyProperty(); break
-          case '🏗': e.message.includes('hotelli') ? playBuildHotel() : playBuildHouse(); break
+          case '🏗': e.kind === 'hotel' ? playBuildHotel() : playBuildHouse(); break
           case '⛓': playGoToJail(); break
           case '🔓': playReleaseJail(); break
           case '🃏': playDrawCard(); break
           case '💀': playBankruptcy(); break
           case '🎊': playGameOver(); break
-          case '🤝': if (e.message.includes('hyväksytty')) playTradeAccepted(); break
+          case '🤝': if (e.kind === 'accepted') playTradeAccepted(); break
           case '🏦': playMortgage(); break
           case '💳': playMortgage(); break
           case '💰': playPassGo(); break
@@ -237,7 +239,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
       }
     } catch (err) {
-      dispatch({ type: 'SET_COMMAND_ERROR', message: 'Komento epäonnistui — tarkista yhteys' })
+      dispatch({ type: 'SET_COMMAND_ERROR', message: translations[getLang()].commandErrorMsg })
       setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
     }
   }, [state.sessionId])
