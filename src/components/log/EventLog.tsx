@@ -23,22 +23,24 @@ const ICON_CLASS: Record<string, string> = {
   '🏆': styles.typeGameOver,
 }
 
-type FilterGroup = 'moves' | 'money' | 'build' | 'trade' | 'jail'
+type FilterGroup = 'moves' | 'money' | 'property' | 'build' | 'trade' | 'jail'
 
 const FILTER_ICONS: Record<FilterGroup, Set<string>> = {
-  moves: new Set(['🏃', '💰', '💸']),
-  money: new Set(['🏠', '🔨', '🏦', '💳']),
-  build: new Set(['🏗', '🏚']),
-  trade: new Set(['🤝', '🚫']),
-  jail:  new Set(['⛓', '🔓', '💀', '🃏', '🎊']),
+  moves:    new Set(['🏃']),
+  money:    new Set(['💰', '💸']),
+  property: new Set(['🏠', '🔨']),
+  build:    new Set(['🏗', '🏚', '🏦', '💳']),
+  trade:    new Set(['🤝', '🚫']),
+  jail:     new Set(['⛓', '🔓', '💀', '🃏', '🎊', '🏆']),
 }
 
 const FILTER_LABELS: Record<FilterGroup, string> = {
-  moves: '🏃',
-  money: '💰',
-  build: '🏗',
-  trade: '🤝',
-  jail:  '⛓',
+  moves:    '🏃',
+  money:    '💸',
+  property: '🏠',
+  build:    '🏗',
+  trade:    '🤝',
+  jail:     '⛓',
 }
 
 function relativeTime(timestamp: number): string {
