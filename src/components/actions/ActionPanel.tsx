@@ -414,9 +414,10 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
           {myProps.filter(p => p.houseCount === 0 && p.hotelCount === 0).map(prop => {
             const spot = SPOTS.find(s => s.id === prop.propertyId)
             if (!spot) return null
+            const color = STREET_COLORS[spot.streetType]
             return (
               <div key={prop.propertyId} className={styles.buildRow}>
-                <span className={styles.buildName}>{spot.name}</span>
+                <span className={styles.buildName} style={color ? { borderLeft: `3px solid ${color}`, paddingLeft: 4 } : {}}>{spot.name}</span>
                 <button className={styles.buildBtn}
                   onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                   {prop.mortgaged ? '💳 Lunasta' : '🏦 Panttaa'}
