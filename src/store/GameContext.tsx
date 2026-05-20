@@ -33,20 +33,21 @@ type Action =
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
   | { type: 'SET_COMMAND_ERROR'; message: string | null }
 
-function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null): string | null {
+function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, existing: string | null = null): string | null {
   if (sessionId) {
     try {
       const stored = localStorage.getItem(`monopoly_player_${sessionId}`)
-      if (stored) return stored
+      if (stored) return stored  // Stable identity: always honour an explicit localStorage entry
     } catch {}
   }
+  // No localStorage entry → dynamic mode: follow whoever is the active human player.
+  // This lets solo testers control all players when starting via "Aloita peli".
   const activeId = snapshot.turn?.activePlayerId
   if (activeId) {
     const activeSeat = snapshot.seats.find(s => s.playerId === activeId && s.seatKind === 'HUMAN')
     if (activeSeat) return activeId
   }
-  const humanSeat = snapshot.seats.find(s => s.seatKind === 'HUMAN')
-  return humanSeat?.playerId ?? null
+  return existing ?? (snapshot.seats.find(s => s.seatKind === 'HUMAN')?.playerId ?? null)
 }
 
 function reducer(state: GameState, action: Action): GameState {
@@ -69,7 +70,7 @@ function reducer(state: GameState, action: Action): GameState {
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
       const newEvents = newSnapshot ? deriveEvents(state.snapshot, newSnapshot) : []
-      const myPlayerId = state.myPlayerId ?? (newSnapshot ? resolveMyPlayerId(newSnapshot, state.sessionId) : null)
+      const myPlayerId = newSnapshot ? resolveMyPlayerId(newSnapshot, state.sessionId, state.myPlayerId) : state.myPlayerId
 
       // Derive dice from active player movement
       let lastDice = state.lastDice
