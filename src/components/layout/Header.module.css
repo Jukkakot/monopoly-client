@@ -126,3 +126,7 @@
 }
 
 .sessionIdBtn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+@media (max-width: 767px) {
+  .title { display: none; }
+}

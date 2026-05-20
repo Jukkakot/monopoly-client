@@ -76,6 +76,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     }
   }, [state.events.length, mobileTab])
 
+  const snap = state.snapshot
+  const isMyTurn = !!(snap && snap.turn &&
+    snap.turn.activePlayerId === state.myPlayerId &&
+    snap.status !== 'GAME_OVER')
+
   const touchStartX = useRef(0)
   const tabIdx = MOBILE_TABS.indexOf(mobileTab)
 
@@ -111,6 +116,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
       {/* ── Mobile: content area (above bottom nav) ── */}
       <div className={styles.mobileContent}>
+        <div className={styles.mobileHeader}>{header}</div>
         <div className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}>
           {board}
         </div>
@@ -130,6 +136,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
             onClick={() => setMobileTab(tab)}
           >
             {t.mobileTabs[tab]}
+            {tab === 'board' && isMyTurn && mobileTab !== 'board' && (
+              <span className={styles.navAlert} />
+            )}
             {tab === 'log' && unreadLog > 0 && mobileTab !== 'log' && (
               <span className={styles.navBadge}>{unreadLog > 9 ? '9+' : unreadLog}</span>
             )}

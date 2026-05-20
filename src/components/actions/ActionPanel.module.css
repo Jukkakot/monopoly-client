@@ -602,3 +602,48 @@
 
   .myStats { display: none; }
 }
+
+/* ── Small phone (<480px): stack trade columns vertically ── */
+@media (max-width: 479px) {
+  .tradeColumns {
+    flex-direction: column;
+  }
+
+  .buildRow {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* ── Touch devices: minimum 44px tap targets ── */
+@media (hover: none) {
+  .propCheck {
+    min-height: 44px;
+    padding: 6px 4px;
+    gap: 8px;
+  }
+
+  .propCheck input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .buildBtn {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
+
+  .bidQuick {
+    min-height: 44px;
+    padding: 10px 4px;
+  }
+
+  .tradePickerBtn {
+    min-height: 48px;
+    padding: 12px 14px;
+  }
+
+  .sectionToggle {
+    min-height: 40px;
+  }
+}

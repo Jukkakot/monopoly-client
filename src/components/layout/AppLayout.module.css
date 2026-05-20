@@ -27,6 +27,10 @@
   padding-bottom: 56px; /* bottom nav height */
 }
 
+.mobileHeader {
+  flex-shrink: 0;
+}
+
 .mobileBoard {
   background: #1a5c1a;
   display: flex;

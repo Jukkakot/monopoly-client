@@ -41,7 +41,11 @@ export default function FlashBanner() {
   useEffect(() => {
     if (!state.myPlayerId || state.events.length === 0) return
 
-    const NOTIFY_ICONS = new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰', '💸', '🏆'])
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+    // On mobile: skip card-drawn (shown in action panel), bought-property (user-initiated), trade-declined (minor)
+    const NOTIFY_ICONS = isTouchDevice
+      ? new Set(['🎊', '⛓', '🔓', '💀', '🔨', '🤝', '💰', '💸', '🏆'])
+      : new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰', '💸', '🏆'])
     const newEvents = state.events.filter(e =>
       !seenIds.current.has(e.id) &&
       NOTIFY_ICONS.has(e.icon) &&

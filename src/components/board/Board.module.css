@@ -22,8 +22,8 @@
 @media (max-width: 767px) {
   .board {
     /* Cap board size on mobile so action panel gets room below */
-    max-width: min(95vw, 44vh);
-    max-height: min(95vw, 44vh);
+    max-width: min(92vw, 42vh);
+    max-height: min(92vw, 42vh);
   }
 }
 
