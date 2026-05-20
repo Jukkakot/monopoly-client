@@ -52,7 +52,7 @@ function Btn({ label, onClick, variant = 'primary', disabled }: {
 
 
 export default function ActionPanel({ state, myPlayerId }: Props) {
-  const { sendCmd, state: ctxState } = useGame()
+  const { sendCmd } = useGame()
   const t = useT()
   const sid = state.sessionId
   const turn = state.turn
