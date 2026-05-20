@@ -82,7 +82,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           const seat = state.seats.find(s => s.playerId === p.playerId)
           return (
             <div key={p.playerId} style={{ fontSize: '0.85rem', display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <span>{['🥇','🥈','🥉'][i] ?? `${i+1}.`}</span>
+              <span>{['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`}</span>
               <span style={{ width: 12, height: 12, borderRadius: '50%', background: seat?.tokenColorHex ?? '#888', display: 'inline-block', flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{p.name}</span>
               <span style={{ fontWeight: 700 }}>{p.bankrupt ? t.bankruptLabel : `€${p.cash}`}</span>
@@ -331,8 +331,8 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
   for (const prop of state.properties) {
     const spot = SPOTS.find(s => s.id === prop.propertyId)
     if (!spot || spot.streetType === 'RAILROAD' || spot.streetType === 'UTILITY'
-        || spot.streetType === 'CORNER' || spot.streetType === 'COMMUNITY'
-        || spot.streetType === 'CHANCE' || spot.streetType === 'TAX') continue
+      || spot.streetType === 'CORNER' || spot.streetType === 'COMMUNITY'
+      || spot.streetType === 'CHANCE' || spot.streetType === 'TAX') continue
     totalCounts.set(spot.streetType, (totalCounts.get(spot.streetType) ?? 0) + 1)
     if (prop.ownerPlayerId === myPlayerId)
       groupCounts.set(spot.streetType, (groupCounts.get(spot.streetType) ?? 0) + 1)
@@ -654,27 +654,33 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const offer = trade.currentOffer
 
   // From editor's perspective:
-  const myOffer   = isProposer ? offer.offeredToRecipient    : offer.requestedFromRecipient
+  const myOffer = isProposer ? offer.offeredToRecipient : offer.requestedFromRecipient
   const myRequest = isProposer ? offer.requestedFromRecipient : offer.offeredToRecipient
-  const myOfferSide   = isProposer  // true = offeredToRecipient
+  const myOfferSide = isProposer  // true = offeredToRecipient
   const myRequestSide = !isProposer
 
-  const myProps      = state.properties.filter(p => p.ownerPlayerId === myPlayerId && !p.mortgaged)
+  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && !p.mortgaged)
   const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && !p.mortgaged)
 
   function editMoney(offeredSide: boolean, delta: number) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
     const newAmount = Math.max(0, side.moneyAmount + delta)
-    sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
-      patch: { offeredSide, moneyAmount: newAmount, addPropertyIds: [], removePropertyIds: [] } })
+    sendCmd({
+      type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+      patch: { offeredSide, moneyAmount: newAmount, addPropertyIds: [], removePropertyIds: [] }
+    })
   }
 
   function toggleProp(offeredSide: boolean, propertyId: string, included: boolean) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
-    sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
-      patch: { offeredSide, moneyAmount: side.moneyAmount,
+    sendCmd({
+      type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+      patch: {
+        offeredSide, moneyAmount: side.moneyAmount,
         addPropertyIds: included ? [] : [propertyId],
-        removePropertyIds: included ? [propertyId] : [] } })
+        removePropertyIds: included ? [propertyId] : []
+      }
+    })
   }
 
   const partnerSeat = state.seats.find(s => s.playerId === partnerId)
