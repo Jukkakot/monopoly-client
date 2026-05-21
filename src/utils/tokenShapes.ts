@@ -1,35 +1,20 @@
 export type TokenShape =
-  | 'hat' | 'car' | 'dog' | 'shoe' | 'guitar'
-  | 'tram' | 'reindeer' | 'bear' | 'bicycle' | 'coffee'
-  | 'crown' | 'rocket' | 'boat' | 'cat' | 'mushroom'
+  | 'circle' | 'star' | 'square' | 'triangle'
+  | 'diamond' | 'hexagon'
 
 export const ALL_SHAPES: { key: TokenShape; label: string }[] = [
-  { key: 'hat',      label: '🎩' },
-  { key: 'car',      label: '🚗' },
-  { key: 'dog',      label: '🐕' },
-  { key: 'shoe',     label: '👟' },
-  { key: 'guitar',   label: '🎸' },
-  { key: 'tram',     label: '🚊' },
-  { key: 'reindeer', label: '🦌' },
-  { key: 'bear',     label: '🐻' },
-  { key: 'bicycle',  label: '🚲' },
-  { key: 'coffee',   label: '☕' },
-  { key: 'crown',    label: '👑' },
-  { key: 'rocket',   label: '🚀' },
-  { key: 'boat',     label: '⛵' },
-  { key: 'cat',      label: '🐱' },
-  { key: 'mushroom', label: '🍄' },
+  { key: 'circle',   label: '●' },
+  { key: 'square',   label: '■' },
+  { key: 'diamond',  label: '◆' },
+  { key: 'triangle', label: '▲' },
+  { key: 'star',     label: '★' },
+  { key: 'hexagon',  label: '⬡' },
 ]
 
-export const EMOJI_CHAR: Record<TokenShape, string> = {
-  hat: '🎩', car: '🚗', dog: '🐕', shoe: '👟', guitar: '🎸',
-  tram: '🚊', reindeer: '🦌', bear: '🐻', bicycle: '🚲', coffee: '☕',
-  crown: '👑', rocket: '🚀', boat: '⛵', cat: '🐱', mushroom: '🍄',
-}
-
-// Keep these for backward compat with LobbyScreen import
-export const GEOMETRIC_SHAPES: { key: TokenShape; label: string }[] = []
-export const EMOJI_SHAPES = ALL_SHAPES
+// Keep for backward compat with any imports
+export const GEOMETRIC_SHAPES = ALL_SHAPES
+export const EMOJI_SHAPES: { key: TokenShape; label: string }[] = []
+export const EMOJI_CHAR: Partial<Record<TokenShape, string>> = {}
 
 const LS_KEY = (sessionId: string) => `token-shapes-${sessionId}`
 
