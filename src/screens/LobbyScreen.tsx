@@ -226,12 +226,14 @@ export default function LobbyScreen() {
               </button>
               <div className={styles.btnHint}>{t.immediateHint}</div>
             </div>
-            <div className={styles.btnGroup}>
-              <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
-                {lobbyLoading ? t.creatingLabel : t.createLobbyBtn}
-              </button>
-              <div className={styles.btnHint}>{t.lobbyHint}</div>
-            </div>
+            {rows.filter(r => r.kind === 'HUMAN').length >= 2 && (
+              <div className={styles.btnGroup}>
+                <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
+                  {lobbyLoading ? t.creatingLabel : t.createLobbyBtn}
+                </button>
+                <div className={styles.btnHint}>{t.lobbyHint}</div>
+              </div>
+            )}
           </div>
         </div>
 
