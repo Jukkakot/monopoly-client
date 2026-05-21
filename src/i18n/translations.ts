@@ -87,6 +87,8 @@ export interface T {
   declineBtn: string
   // Card popup
   cardOkBtn: string
+  actionTabLabel: string
+  propertiesTabLabel: string
   tradeCashLabel: (amount: number) => string
   mortgagedInTrade: string
 
@@ -395,6 +397,8 @@ const fi: T = {
   counterOfferBtn: '💬 Vastatarjous',
   declineBtn: '❌ Hylkää',
   cardOkBtn: '✓ Selvä',
+  actionTabLabel: '🎲 Vuoro',
+  propertiesTabLabel: '🏠 Kiinteistöt',
   tradeCashLabel: (amount) => `Kassa: €${amount}`,
   mortgagedInTrade: 'pantattu',
 
@@ -724,6 +728,8 @@ const en: T = {
   counterOfferBtn: '💬 Counter offer',
   declineBtn: '❌ Decline',
   cardOkBtn: '✓ Got it',
+  actionTabLabel: '🎲 Turn',
+  propertiesTabLabel: '🏠 Properties',
   tradeCashLabel: (amount) => `Cash: €${amount}`,
   mortgagedInTrade: 'mortgaged',
 

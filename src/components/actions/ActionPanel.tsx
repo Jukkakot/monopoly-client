@@ -63,6 +63,15 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const tokenAnimating = useIsAnimating()
 
   const me = state.players.find(p => p.playerId === myPlayerId)
+  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId)
+  const hasPropActions = myProps.length > 0
+
+  const [activeTab, setActiveTab] = useState<'action' | 'properties'>('action')
+
+  // Auto-switch to action tab when it becomes my turn
+  useEffect(() => {
+    if (isMyTurn) setActiveTab('action')
+  }, [isMyTurn])
 
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
@@ -84,6 +93,24 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevCardKeyRef.current = state.lastCardKey
     prevActiveRef.current = activeId
   }, [state.lastCardKey, state.lastCardMessage, activeId, myPlayerId])
+
+  function TabBar() {
+    if (!hasPropActions) return null
+    const mortgagedCount = myProps.filter(p => p.mortgaged).length
+    return (
+      <div className={styles.tabBar}>
+        <button className={`${styles.tab} ${activeTab === 'action' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('action')}>
+          {t.actionTabLabel}
+        </button>
+        <button className={`${styles.tab} ${activeTab === 'properties' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('properties')}>
+          {t.propertiesTabLabel}
+          {mortgagedCount > 0 && <span className={styles.tabBadge}>{mortgagedCount}</span>}
+        </button>
+      </div>
+    )
+  }
 
 
   // GAME OVER
@@ -150,13 +177,19 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const color = spot ? STREET_COLORS[spot.streetType] : undefined
     return (
       <div className={styles.panel}>
-        <div className={styles.infoBox} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
-          📍 <strong>{spot?.name ?? p.propertyDisplayName}</strong><br />
-          {t.priceLabel(p.price)}
-        </div>
-        <Btn label={isTouchDevice ? t.buyBtn(p.price) : t.buyBtnKbd(p.price)} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
-        <Btn label={isTouchDevice ? t.skipToAuction : t.skipToAuctionKbd} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
-        <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        <TabBar />
+        {activeTab === 'action' ? (
+          <>
+            <div className={styles.infoBox} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
+              📍 <strong>{spot?.name ?? p.propertyDisplayName}</strong><br />
+              {t.priceLabel(p.price)}
+            </div>
+            <Btn label={isTouchDevice ? t.buyBtn(p.price) : t.buyBtnKbd(p.price)} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
+            <Btn label={isTouchDevice ? t.skipToAuction : t.skipToAuctionKbd} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
+          </>
+        ) : (
+          <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        )}
       </div>
     )
   }
@@ -197,40 +230,45 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
     return (
       <div className={styles.panel}>
-        <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
-          <div className={styles.turnWaiting}>
-            <span>⏳ {activePlayer?.name ?? '?'} — {t.phases[phase ?? ''] ?? phase}</span>
-            <span className={`${styles.turnTimer} ${isAfk ? styles.turnTimerAfk : ''}`}>
-              {turnSeconds}s{isAfk ? ' ⚠️' : ''}
-            </span>
-          </div>
-        </div>
-        {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
-          <div className={styles.infoBox}>
-            📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
-          </div>
-        )}
-
-        {myPlayer && (
-          <div className={styles.myStats}>
-            <div className={styles.myStatRow}>
-              <span className={styles.myStatLabel}>{t.netWorthLabel}</span>
-              <span className={styles.myStatVal}>~€{myNetWorth}</span>
+        <TabBar />
+        {activeTab === 'action' ? (
+          <>
+            <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+              <div className={styles.turnWaiting}>
+                <span>⏳ {activePlayer?.name ?? '?'} — {t.phases[phase ?? ''] ?? phase}</span>
+                <span className={`${styles.turnTimer} ${isAfk ? styles.turnTimerAfk : ''}`}>
+                  {turnSeconds}s{isAfk ? ' ⚠️' : ''}
+                </span>
+              </div>
             </div>
-            {myIncome > 0 && (
-              <div className={styles.myStatRow}>
-                <span className={styles.myStatLabel}>{t.rentalIncomeLabel}</span>
-                <span className={styles.myStatVal}>~€{myIncome}</span>
+            {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
+              <div className={styles.infoBox}>
+                📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
               </div>
             )}
-            {turnsUntilMine > 0 && (
-              <div className={styles.myStatRow}>
-                <span className={styles.myStatLabel}>{t.yourTurnIn(turnsUntilMine)}</span>
+            {myPlayer && (
+              <div className={styles.myStats}>
+                <div className={styles.myStatRow}>
+                  <span className={styles.myStatLabel}>{t.netWorthLabel}</span>
+                  <span className={styles.myStatVal}>~€{myNetWorth}</span>
+                </div>
+                {myIncome > 0 && (
+                  <div className={styles.myStatRow}>
+                    <span className={styles.myStatLabel}>{t.rentalIncomeLabel}</span>
+                    <span className={styles.myStatVal}>~€{myIncome}</span>
+                  </div>
+                )}
+                {turnsUntilMine > 0 && (
+                  <div className={styles.myStatRow}>
+                    <span className={styles.myStatLabel}>{t.yourTurnIn(turnsUntilMine)}</span>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
+        ) : (
+          <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         )}
-        <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
     )
   }
@@ -241,33 +279,39 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
-        {cardText && !cardDismissed && (
-          <div className={styles.cardPopup}>
-            <span className={styles.cardPopupIcon}>🃏</span>
-            <span className={styles.cardPopupText}>{cardText}</span>
-            <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
-          </div>
-        )}
-        {consecutiveDoubles > 0 && (
-          <div className={`${styles.infoBox} ${styles.doubles}`}>
-            {t.doublesRoll}
-            {consecutiveDoubles >= 2 && <span>{t.doublesWarning}</span>}
-          </div>
-        )}
-        {me?.inJail && (
+        <TabBar />
+        {activeTab === 'action' ? (
           <>
-            <div className={styles.infoBox}>{t.inJail(me.jailRoundsRemaining ?? 0)}</div>
-            {me.getOutOfJailCards > 0 && (
-              <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+            {cardText && !cardDismissed && (
+              <div className={styles.cardPopup}>
+                <span className={styles.cardPopupIcon}>🃏</span>
+                <span className={styles.cardPopupText}>{cardText}</span>
+                <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
+              </div>
             )}
-            {me.cash >= 50 && (
-              <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
+            {consecutiveDoubles > 0 && (
+              <div className={`${styles.infoBox} ${styles.doubles}`}>
+                {t.doublesRoll}
+                {consecutiveDoubles >= 2 && <span>{t.doublesWarning}</span>}
+              </div>
             )}
+            {me?.inJail && (
+              <>
+                <div className={styles.infoBox}>{t.inJail(me.jailRoundsRemaining ?? 0)}</div>
+                {me.getOutOfJailCards > 0 && (
+                  <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+                )}
+                {me.cash >= 50 && (
+                  <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
+                )}
+              </>
+            )}
+            <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
+            <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
           </>
+        ) : (
+          <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         )}
-        <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
-        <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
     )
   }
@@ -277,16 +321,22 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
-        {cardText && !cardDismissed && (
-          <div className={styles.cardPopup}>
-            <span className={styles.cardPopupIcon}>🃏</span>
-            <span className={styles.cardPopupText}>{cardText}</span>
-            <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
-          </div>
+        <TabBar />
+        {activeTab === 'action' ? (
+          <>
+            {cardText && !cardDismissed && (
+              <div className={styles.cardPopup}>
+                <span className={styles.cardPopupIcon}>🃏</span>
+                <span className={styles.cardPopupText}>{cardText}</span>
+                <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
+              </div>
+            )}
+            <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
+            <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+          </>
+        ) : (
+          <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         )}
-        <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
-        <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-        <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
     )
   }
