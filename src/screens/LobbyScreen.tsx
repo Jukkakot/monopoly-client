@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { createSession, joinLobby } from '../api/sessionApi'
-import type { SeatKind } from '../types/api'
+import { joinLobby } from '../api/sessionApi'
 import { GEOMETRIC_SHAPES, EMOJI_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './LobbyScreen.module.css'
@@ -13,40 +12,37 @@ const DEFAULT_SHAPES: TokenShape[] = ['circle', 'star', 'square', 'triangle', 'h
 
 interface PlayerRow {
   name: string
-  kind: SeatKind
+  isBot: boolean
   color: string
   tokenShape: TokenShape
 }
 
-function makeRow(index: number, usedNames: string[], kind: SeatKind = 'HUMAN'): PlayerRow {
-  const name = kind === 'BOT' ? randomBotName(usedNames) : randomHumanName(usedNames)
-  return {
-    name,
-    kind,
-    color: PRESET_COLORS[index % PRESET_COLORS.length],
-    tokenShape: DEFAULT_SHAPES[index] ?? 'circle',
-  }
+function makeHumanRow(index: number, usedNames: string[]): PlayerRow {
+  return { name: randomHumanName(usedNames), isBot: false, color: PRESET_COLORS[index % PRESET_COLORS.length], tokenShape: DEFAULT_SHAPES[index] ?? 'circle' }
+}
+
+function makeBotRow(index: number, usedNames: string[]): PlayerRow {
+  return { name: randomBotName(usedNames), isBot: true, color: PRESET_COLORS[index % PRESET_COLORS.length], tokenShape: DEFAULT_SHAPES[index] ?? 'circle' }
 }
 
 export default function LobbyScreen() {
   const navigate = useNavigate()
   const { joinSession } = useGame()
   const t = useT()
-  const [rows, setRows] = useState<PlayerRow[]>([makeRow(0, [])])
+  const [rows, setRows] = useState<PlayerRow[]>([makeHumanRow(0, [])])
   const [loading, setLoading] = useState(false)
-  const [lobbyLoading, setLobbyLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function addPlayer() {
+  function addBot() {
     if (rows.length >= 6) return
     setRows(prev => {
       const usedNames = prev.map(r => r.name)
-      return [...prev, makeRow(prev.length, usedNames)]
+      return [...prev, makeBotRow(prev.length, usedNames)]
     })
   }
 
-  function removePlayer(i: number) {
-    if (rows.length <= 1) return
+  function removeRow(i: number) {
+    if (i === 0) return
     setRows(prev => prev.filter((_, idx) => idx !== i))
   }
 
@@ -54,51 +50,13 @@ export default function LobbyScreen() {
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r))
   }
 
-  function randomizeAll() {
+  function randomizeNames() {
     const usedNames: string[] = []
     setRows(prev => prev.map(r => {
-      const name = r.kind === 'BOT' ? randomBotName(usedNames) : randomHumanName(usedNames)
+      const name = r.isBot ? randomBotName(usedNames) : randomHumanName(usedNames)
       usedNames.push(name)
       return { ...r, name }
     }))
-  }
-
-  async function handleCreateLobby() {
-    setError(null)
-    const usedColors = new Set<string>()
-    for (const r of rows) {
-      if (!r.name.trim()) { setError(t.nameRequiredErr); return }
-      if (usedColors.has(r.color)) { setError(t.colorsUniqueErr); return }
-      usedColors.add(r.color)
-    }
-    setLobbyLoading(true)
-    try {
-      const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
-      const res = await fetch(`${BASE}/sessions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lobbyMode: true,
-          seatCount: rows.length,
-          colors: rows.map(r => r.color),
-        }),
-      })
-      if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-      const { sessionId, hostToken } = await res.json()
-      try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}
-      saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
-      const firstHuman = rows[0]
-      const joined = await joinLobby(sessionId, firstHuman.name.trim(), firstHuman.color)
-      try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
-      try { sessionStorage.setItem(`monopoly_token_${sessionId}`, joined.playerToken) } catch {}
-      try { localStorage.setItem(`monopoly_token_${sessionId}_${joined.playerId}`, joined.playerToken) } catch {}
-      try { localStorage.setItem('monopoly_last_name', firstHuman.name.trim()) } catch {}
-      joinSession(sessionId)
-      navigate(`/lobby-wait/${sessionId}`)
-    } catch (e) {
-      setError(t.lobbyFailedErr(String(e)))
-      setLobbyLoading(false)
-    }
   }
 
   async function handleCreate() {
@@ -111,18 +69,31 @@ export default function LobbyScreen() {
     }
     setLoading(true)
     try {
-      const { sessionId, hostToken } = await createSession({
-        names: rows.map(r => r.name.trim()),
-        colors: rows.map(r => r.color),
-        seatKinds: rows.map(r => r.kind),
-        difficulties: rows.map(() => 'STRONG'),
+      const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
+      const res = await fetch(`${BASE}/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lobbyMode: true,
+          names: rows.map(r => r.name.trim()),
+          colors: rows.map(r => r.color),
+          seatKinds: rows.map(r => r.isBot ? 'BOT' : 'HUMAN'),
+        }),
       })
+      if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+      const { sessionId, hostToken } = await res.json()
       try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}
       saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
+      const me = rows[0]
+      const joined = await joinLobby(sessionId, me.name.trim(), me.color)
+      try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
+      try { sessionStorage.setItem(`monopoly_token_${sessionId}`, joined.playerToken) } catch {}
+      try { localStorage.setItem(`monopoly_token_${sessionId}_${joined.playerId}`, joined.playerToken) } catch {}
+      try { localStorage.setItem('monopoly_last_name', me.name.trim()) } catch {}
       joinSession(sessionId)
-      navigate(`/game/${sessionId}`)
+      navigate(`/lobby-wait/${sessionId}`)
     } catch (e) {
-      setError(t.sessionFailedErr(String(e)))
+      setError(t.lobbyFailedErr(String(e)))
       setLoading(false)
     }
   }
@@ -179,6 +150,9 @@ export default function LobbyScreen() {
               </div>
 
               <div className={styles.nameKindRow}>
+                <span className={`${styles.kindLabel} ${row.isBot ? styles.bot : styles.human}`}>
+                  {row.isBot ? t.botLabel : t.humanLabel}
+                </span>
                 <input
                   className={styles.nameInput}
                   value={row.name}
@@ -186,19 +160,8 @@ export default function LobbyScreen() {
                   maxLength={20}
                   placeholder={t.playerPlaceholder(i)}
                 />
-                <button
-                  className={`${styles.kindBtn} ${row.kind === 'HUMAN' ? styles.human : styles.bot}`}
-                  onClick={() => {
-                    const newKind: SeatKind = row.kind === 'HUMAN' ? 'BOT' : 'HUMAN'
-                    const usedNames = rows.filter((_, j) => j !== i).map(r => r.name)
-                    const newName = newKind === 'BOT' ? randomBotName(usedNames) : randomHumanName(usedNames)
-                    updateRow(i, { kind: newKind, name: newName })
-                  }}
-                >
-                  {row.kind === 'HUMAN' ? t.humanLabel : t.botLabel}
-                </button>
-                {rows.length > 1 && (
-                  <button className={styles.removeBtn} onClick={() => removePlayer(i)} title={t.removePlayerBtn}>
+                {i > 0 && (
+                  <button className={styles.removeBtn} onClick={() => removeRow(i)} title={t.removePlayerBtn}>
                     ✕
                   </button>
                 )}
@@ -208,32 +171,24 @@ export default function LobbyScreen() {
         </div>
 
         {rows.length < 6 && (
-          <button className={styles.addPlayerBtn} onClick={addPlayer} disabled={loading || lobbyLoading}>
-            + {t.addPlayerBtn}
+          <button className={styles.addPlayerBtn} onClick={addBot} disabled={loading}>
+            + {t.addBotBtn}
           </button>
         )}
 
         {error && <div className={styles.errorMsg}>{error}</div>}
 
         <div className={styles.actionRow}>
-          <button className={styles.randomBtn} onClick={randomizeAll} disabled={loading || lobbyLoading} title={t.randomizeNamesBtn}>
+          <button className={styles.randomBtn} onClick={randomizeNames} disabled={loading} title={t.randomizeNamesBtn}>
             {t.randomizeNamesBtn}
           </button>
           <div className={styles.mainBtns}>
             <div className={styles.btnGroup}>
-              <button className={styles.createBtn} onClick={handleCreate} disabled={loading || lobbyLoading}>
-                {loading ? t.startingLabel : t.startGameBtn}
+              <button className={styles.createBtn} onClick={handleCreate} disabled={loading}>
+                {loading ? t.creatingLabel : t.createLobbyBtn}
               </button>
-              <div className={styles.btnHint}>{t.immediateHint}</div>
+              <div className={styles.btnHint}>{t.lobbyHint}</div>
             </div>
-            {rows.filter(r => r.kind === 'HUMAN').length >= 2 && (
-              <div className={styles.btnGroup}>
-                <button className={styles.lobbyBtn} onClick={handleCreateLobby} disabled={loading || lobbyLoading}>
-                  {lobbyLoading ? t.creatingLabel : t.createLobbyBtn}
-                </button>
-                <div className={styles.btnHint}>{t.lobbyHint}</div>
-              </div>
-            )}
           </div>
         </div>
 

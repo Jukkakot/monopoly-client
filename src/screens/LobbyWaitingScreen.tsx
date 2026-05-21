@@ -85,10 +85,12 @@ export default function LobbyWaitingScreen() {
     })
   }
 
-  const joinedSeats = seats.filter(s => s.joined)
-  const freeSeats = seats.filter(s => !s.joined)
+  const botSeats = seats.filter(s => s.seatKind === 'BOT')
+  const humanSeats = seats.filter(s => s.seatKind === 'HUMAN')
+  const joinedHumanSeats = humanSeats.filter(s => s.joined)
+  const freeHumanSeats = humanSeats.filter(s => !s.joined)
   const alreadyJoined = !!myPlayerId
-  const canStart = joinedSeats.length >= 2
+  const canStart = joinedHumanSeats.length >= 1
 
   return (
     <div className={styles.page}>
@@ -107,18 +109,21 @@ export default function LobbyWaitingScreen() {
         </div>
 
         <div className={styles.seatSection}>
-          <div className={styles.sectionTitle}>{t.seatsLabel(joinedSeats.length, seats.length)}</div>
-          {joinedSeats.map(s => (
+          <div className={styles.sectionTitle}>{t.seatsLabel(joinedHumanSeats.length + botSeats.length, seats.length)}</div>
+          {joinedHumanSeats.map(s => (
             <div key={s.seatId} className={styles.seatRow}>
-              <span
-                className={styles.seatDot}
-                style={{ background: s.tokenColorHex }}
-              />
+              <span className={styles.seatDot} style={{ background: s.tokenColorHex }} />
               <span className={styles.seatName}>{s.displayName ?? '–'}</span>
               {s.playerId === myPlayerId && <span className={styles.meTag}>{t.youBadge}</span>}
             </div>
           ))}
-          {freeSeats.map(s => (
+          {botSeats.map(s => (
+            <div key={s.seatId} className={styles.seatRow}>
+              <span className={styles.seatDot} style={{ background: s.tokenColorHex }} />
+              <span className={styles.seatName}>🤖 {s.displayName ?? '–'}</span>
+            </div>
+          ))}
+          {freeHumanSeats.map(s => (
             <div key={s.seatId} className={`${styles.seatRow} ${styles.freeSeat}`}>
               <span className={styles.seatDot} style={{ background: s.tokenColorHex, opacity: 0.3 }} />
               <span className={styles.seatNameFree}>{t.freeSeatLabel}</span>
@@ -126,7 +131,7 @@ export default function LobbyWaitingScreen() {
           ))}
         </div>
 
-        {!alreadyJoined && (
+        {!alreadyJoined && freeHumanSeats.length > 0 && (
           <div className={styles.joinSection}>
             <div className={styles.sectionTitle}>{t.joinGameTitle}</div>
             <div className={styles.joinRow}>
@@ -143,14 +148,11 @@ export default function LobbyWaitingScreen() {
               <button
                 className={styles.joinBtn}
                 onClick={handleJoin}
-                disabled={joining || !name.trim() || freeSeats.length === 0}
+                disabled={joining || !name.trim()}
               >
                 {joining ? '…' : t.joinBtnLabel}
               </button>
             </div>
-            {freeSeats.length === 0 && (
-              <div className={styles.hint}>{t.lobbyFullMsg}</div>
-            )}
           </div>
         )}
 
@@ -167,7 +169,7 @@ export default function LobbyWaitingScreen() {
           onClick={handleStart}
           disabled={starting || !canStart || status !== 'LOBBY'}
         >
-          {starting ? t.startingBtn : canStart ? t.startBtn : t.needMorePlayers(joinedSeats.length, seats.length)}
+          {starting ? t.startingBtn : canStart ? t.startBtn : t.needMorePlayers(joinedHumanSeats.length, humanSeats.length)}
         </button>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
