@@ -71,6 +71,8 @@ export interface T {
   playerCreditorLabel: string
   // Trade
   tradeWaiting: string
+  tradeCounterEditing: string
+  tradeApplying: string
   cancelOfferBtn: string
   tradeTitle: (partner: string) => string
   youOfferLabel: string
@@ -374,6 +376,8 @@ const fi: T = {
   playerCreditorLabel: 'pelaaja',
 
   tradeWaiting: '⏳ Odotetaan kaupan vastausta…',
+  tradeCounterEditing: '⏳ Vastapuoli muokkaa vastatarjousta…',
+  tradeApplying: '✅ Kauppa hyväksytty, käsitellään…',
   cancelOfferBtn: '❌ Peruuta tarjous',
   tradeTitle: (partner) => `🤝 Kauppa: ${partner}`,
   youOfferLabel: 'Sinä tarjoat',
@@ -698,6 +702,8 @@ const en: T = {
   playerCreditorLabel: 'player',
 
   tradeWaiting: '⏳ Waiting for trade response…',
+  tradeCounterEditing: '⏳ Other player is editing their counter-offer…',
+  tradeApplying: '✅ Trade accepted, applying…',
   cancelOfferBtn: '❌ Cancel offer',
   tradeTitle: (partner) => `🤝 Trade: ${partner}`,
   youOfferLabel: 'You offer',

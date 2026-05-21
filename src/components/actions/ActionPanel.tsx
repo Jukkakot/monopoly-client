@@ -634,10 +634,22 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
     return <TradeReceiver state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
+  if (status === 'ACCEPTED_PENDING_APPLY') {
+    return (
+      <div className={styles.panel}>
+        <div className={`${styles.infoBox}`}>{t.tradeApplying}</div>
+      </div>
+    )
+  }
+
+  const isCounterEditPhase = status === 'COUNTERED' && trade.editingPlayerId !== null && trade.editingPlayerId !== myPlayerId
+  const waitingMsg = isCounterEditPhase ? t.tradeCounterEditing : t.tradeWaiting
+  const canCancel = myPlayerId === trade.initiatorPlayerId
+
   return (
     <div className={styles.panel}>
-      <div className={styles.infoBox}>{t.tradeWaiting}</div>
-      <Btn label={t.cancelOfferBtn} onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
+      <div className={styles.infoBox}>{waitingMsg}</div>
+      {canCancel && <Btn label={t.cancelOfferBtn} onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />}
     </div>
   )
 }
@@ -659,8 +671,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const myOfferSide = isProposer  // true = offeredToRecipient
   const myRequestSide = !isProposer
 
-  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && !p.mortgaged)
-  const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && !p.mortgaged)
+  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
+  const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
 
   function editMoney(offeredSide: boolean, delta: number) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
