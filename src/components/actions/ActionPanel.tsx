@@ -853,17 +853,22 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       const color = STREET_COLORS[type]
       return (
         <div key={type} className={styles.tradePropGroup}>
-          {color && <div className={styles.tradePropGroupBar} style={{ background: color }} />}
           <div className={styles.tradePropGroupItems}>
             {groupProps.map(prop => {
               const spot = SPOTS.find(s => s.id === prop.propertyId)
               const included = offerData.propertyIds.includes(prop.propertyId)
               return (
-                <label key={prop.propertyId} className={`${styles.propCheck} ${prop.mortgaged ? styles.propCheckMortgaged : ''}`}>
+                <label key={prop.propertyId}
+                  className={`${styles.propCheck} ${prop.mortgaged ? styles.propCheckMortgaged : ''}`}
+                  style={color ? { background: color + '28' } : undefined}>
                   <input type="checkbox" checked={included}
                     onChange={() => toggleProp(offerSide, prop.propertyId, included)} />
                   <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
-                  {prop.mortgaged && <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>}
+                  {prop.mortgaged
+                    ? <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>
+                    : spot?.price
+                      ? <span className={styles.propCheckPrice}>€{spot.price}</span>
+                      : null}
                 </label>
               )
             })}

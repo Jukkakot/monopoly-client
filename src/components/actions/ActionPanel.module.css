@@ -403,12 +403,12 @@
   gap: 5px;
   font-size: 0.8rem;
   cursor: pointer;
-  padding: 3px 2px;
+  padding: 3px 5px;
   border-radius: 4px;
   color: #333;
 }
 
-.propCheck:hover { background: #f0f0f0; }
+.propCheck:hover { filter: brightness(0.93); }
 
 .propCheck input { width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
 
