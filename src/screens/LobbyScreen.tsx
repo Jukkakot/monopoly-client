@@ -4,6 +4,8 @@ import { useGame } from '../store/GameContext'
 import { joinLobby } from '../api/sessionApi'
 import { GEOMETRIC_SHAPES, EMOJI_SHAPES, ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
+import { playButtonClick } from '../utils/sounds'
+import Header from '../components/layout/Header'
 import styles from './LobbyScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 
@@ -35,6 +37,7 @@ export default function LobbyScreen() {
 
   function addBot() {
     if (rows.length >= 6) return
+    playButtonClick()
     setRows(prev => {
       const usedNames = prev.map(r => r.name)
       return [...prev, makeBotRow(prev.length, usedNames)]
@@ -43,6 +46,7 @@ export default function LobbyScreen() {
 
   function removeRow(i: number) {
     if (i === 0) return
+    playButtonClick()
     setRows(prev => prev.filter((_, idx) => idx !== i))
   }
 
@@ -51,6 +55,7 @@ export default function LobbyScreen() {
   }
 
   function randomizeAll() {
+    playButtonClick()
     const usedNames: string[] = []
     const usedColors = new Set<string>()
     const usedShapes = new Set<TokenShape>()
@@ -80,6 +85,7 @@ export default function LobbyScreen() {
       if (usedColors.has(r.color)) { setError(t.colorsUniqueErr); return }
       usedColors.add(r.color)
     }
+    playButtonClick()
     setLoading(true)
     try {
       const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
@@ -113,6 +119,7 @@ export default function LobbyScreen() {
 
   return (
     <div className={styles.page}>
+      <Header snapshot={null} connectionStatus="LIVE" />
       <div className={styles.card}>
         <div className={styles.logoBox}>
           <div className={styles.logo}>Monopoly</div>
@@ -128,7 +135,7 @@ export default function LobbyScreen() {
                     key={c}
                     className={`${styles.colorDot} ${row.color === c ? styles.selected : ''}`}
                     style={{ background: c }}
-                    onClick={() => updateRow(i, { color: c })}
+                    onClick={() => { playButtonClick(); updateRow(i, { color: c }) }}
                     title={c}
                   />
                 ))}
@@ -142,7 +149,7 @@ export default function LobbyScreen() {
                       key={s.key}
                       className={`${styles.shapeBtn} ${row.tokenShape === s.key ? styles.shapeSelected : ''}`}
                       style={row.tokenShape === s.key ? { color: row.color, borderColor: row.color } : {}}
-                      onClick={() => updateRow(i, { tokenShape: s.key })}
+                      onClick={() => { playButtonClick(); updateRow(i, { tokenShape: s.key }) }}
                       title={s.key}
                     >
                       {s.label}
@@ -153,7 +160,7 @@ export default function LobbyScreen() {
                       key={s.key}
                       className={`${styles.shapeBtn} ${row.tokenShape === s.key ? styles.shapeSelected : ''}`}
                       style={row.tokenShape === s.key ? { borderColor: row.color } : {}}
-                      onClick={() => updateRow(i, { tokenShape: s.key })}
+                      onClick={() => { playButtonClick(); updateRow(i, { tokenShape: s.key }) }}
                       title={s.key}
                     >
                       {s.label}

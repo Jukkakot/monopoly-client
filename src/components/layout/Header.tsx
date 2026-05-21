@@ -72,10 +72,12 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
           style={{ display: 'block', borderRadius: 2 }}
         />
       </button>
-      <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
-        {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
-        {statusLabel[connectionStatus]}
-      </div>
+      {snapshot !== null && (
+        <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
+          {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
+          {statusLabel[connectionStatus]}
+        </div>
+      )}
       <OverflowMenu />
     </header>
   )
