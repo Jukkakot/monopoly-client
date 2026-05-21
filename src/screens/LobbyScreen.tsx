@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { joinLobby } from '../api/sessionApi'
-import { GEOMETRIC_SHAPES, EMOJI_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+import { GEOMETRIC_SHAPES, EMOJI_SHAPES, ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './LobbyScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
@@ -50,12 +50,25 @@ export default function LobbyScreen() {
     setRows(prev => prev.map((r, idx) => idx === i ? { ...r, ...patch } : r))
   }
 
-  function randomizeNames() {
+  function randomizeAll() {
     const usedNames: string[] = []
-    setRows(prev => prev.map(r => {
-      const name = r.isBot ? randomBotName(usedNames) : randomHumanName(usedNames)
+    const usedColors = new Set<string>()
+    const usedShapes = new Set<TokenShape>()
+
+    const availableColors = [...PRESET_COLORS].sort(() => Math.random() - 0.5)
+    const availableShapes = [...ALL_SHAPES].sort(() => Math.random() - 0.5)
+
+    setRows(prev => prev.map((r) => {
+      const name = r.isBot ? randomBotName(usedNames) : r.name
       usedNames.push(name)
-      return { ...r, name }
+
+      let color = availableColors.find(c => !usedColors.has(c)) ?? r.color
+      usedColors.add(color)
+
+      let shape = availableShapes.find(s => !usedShapes.has(s.key))?.key ?? r.tokenShape
+      usedShapes.add(shape)
+
+      return { ...r, name, color, tokenShape: shape }
     }))
   }
 
@@ -179,8 +192,8 @@ export default function LobbyScreen() {
         {error && <div className={styles.errorMsg}>{error}</div>}
 
         <div className={styles.actionRow}>
-          <button className={styles.randomBtn} onClick={randomizeNames} disabled={loading} title={t.randomizeNamesBtn}>
-            {t.randomizeNamesBtn}
+          <button className={styles.randomBtn} onClick={randomizeAll} disabled={loading} title={t.randomizeBtn}>
+            {t.randomizeBtn}
           </button>
           <div className={styles.mainBtns}>
             <div className={styles.btnGroup}>

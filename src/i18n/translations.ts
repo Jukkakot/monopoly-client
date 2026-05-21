@@ -166,6 +166,7 @@ export interface T {
   addBotBtn: string
   removePlayerBtn: string
   randomizeNamesBtn: string
+  randomizeBtn: string
   startGameBtn: string
   startingLabel: string
   createLobbyBtn: string
@@ -484,6 +485,7 @@ const fi: T = {
   addBotBtn: 'Lisää botti',
   removePlayerBtn: 'Poista',
   randomizeNamesBtn: '🎲 Arvo nimet',
+  randomizeBtn: '🎲 Arvo',
   startGameBtn: 'Aloita peli',
   startingLabel: 'Luodaan…',
   createLobbyBtn: 'Luo odotushuone',
@@ -818,6 +820,7 @@ const en: T = {
   addBotBtn: 'Add bot',
   removePlayerBtn: 'Remove',
   randomizeNamesBtn: '🎲 Random names',
+  randomizeBtn: '🎲 Randomize',
   startGameBtn: 'Start game',
   startingLabel: 'Creating…',
   createLobbyBtn: 'Create waiting room',
