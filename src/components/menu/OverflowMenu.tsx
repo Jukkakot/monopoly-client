@@ -190,11 +190,15 @@ export default function OverflowMenu() {
             <button className={`${styles.menuItem} ${styles.desktopOnly}`} onClick={() => { setOpen(false); setShowHelp(true) }}>
               {t.keyboardShortcutsBtn}
             </button>
-            <div className={styles.divider} />
-            <button className={`${styles.menuItem} ${styles.danger}`}
-              onClick={() => { setOpen(false); window.location.href = '/' }}>
-              {t.leaveGameBtn}
-            </button>
+            {snapshot && (
+              <>
+                <div className={styles.divider} />
+                <button className={`${styles.menuItem} ${styles.danger}`}
+                  onClick={() => { setOpen(false); window.location.href = '/' }}>
+                  {t.leaveGameBtn}
+                </button>
+              </>
+            )}
             {snapshot && myPlayerId && snapshot.status === 'IN_PROGRESS' && (
               <button className={`${styles.menuItem} ${styles.danger}`}
                 onClick={() => {
