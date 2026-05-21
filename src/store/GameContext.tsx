@@ -38,7 +38,7 @@ type Action =
 function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, existing: string | null = null): string | null {
   if (sessionId) {
     try {
-      const stored = localStorage.getItem(`monopoly_player_${sessionId}`)
+      const stored = sessionStorage.getItem(`monopoly_player_${sessionId}`)
       if (stored) return stored  // Stable identity: always honour an explicit localStorage entry
     } catch {}
   }

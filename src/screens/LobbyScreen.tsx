@@ -106,7 +106,7 @@ export default function LobbyScreen() {
       // Auto-join as the first player
       const firstHuman = rows[0]
       const joined = await joinLobby(sessionId, firstHuman.name.trim(), firstHuman.color)
-      try { localStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
+      try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
       try { localStorage.setItem('monopoly_last_name', firstHuman.name.trim()) } catch {}
       joinSession(sessionId)
       navigate(`/lobby-wait/${sessionId}`)

@@ -18,7 +18,7 @@ export default function LobbyWaitingScreen() {
     try { return localStorage.getItem('monopoly_last_name') ?? '' } catch { return '' }
   })
   const [myPlayerId, setMyPlayerId] = useState<string | null>(() => {
-    try { return localStorage.getItem(`monopoly_player_${sessionId}`) } catch { return null }
+    try { return sessionStorage.getItem(`monopoly_player_${sessionId}`) } catch { return null }
   })
   const [joining, setJoining] = useState(false)
   const [starting, setStarting] = useState(false)
@@ -53,7 +53,7 @@ export default function LobbyWaitingScreen() {
     setJoining(true)
     try {
       const res = await joinLobby(sessionId, name.trim())
-      try { localStorage.setItem(`monopoly_player_${sessionId}`, res.playerId) } catch {}
+      try { sessionStorage.setItem(`monopoly_player_${sessionId}`, res.playerId) } catch {}
       try { localStorage.setItem('monopoly_last_name', name.trim()) } catch {}
       setMyPlayerId(res.playerId)
     } catch {
