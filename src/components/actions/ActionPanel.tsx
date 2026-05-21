@@ -94,8 +94,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevActiveRef.current = activeId
   }, [state.lastCardKey, state.lastCardMessage, activeId, myPlayerId])
 
-  const mySeat = state.seats.find(s => s.playerId === myPlayerId)
-
   function TabBar() {
     if (!hasPropActions) return null
     const mortgagedCount = myProps.filter(p => p.mortgaged).length
