@@ -64,7 +64,7 @@ export default function LobbyScreen() {
     const availableShapes = [...ALL_SHAPES].sort(() => Math.random() - 0.5)
 
     setRows(prev => prev.map((r) => {
-      const name = r.isBot ? randomBotName(usedNames) : r.name
+      const name = r.isBot ? randomBotName(usedNames) : randomHumanName(usedNames)
       usedNames.push(name)
 
       let color = availableColors.find(c => !usedColors.has(c)) ?? r.color
