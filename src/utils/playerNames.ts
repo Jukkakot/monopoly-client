@@ -6,7 +6,7 @@ const HUMAN_NAMES = [
   // Linnut
   'Kotka', 'Haukka', 'Pöllö', 'Kurki', 'Joutsen', 'Varis', 'Harakka',
   'Satakieli', 'Tavi', 'Peippo', 'Tikka', 'Pyy', 'Teeri', 'Metso', 'Kuikka',
-  'Kajakki', 'Tiira', 'Kiuru', 'Västäräkki', 'Punarinta', 'Talitiainen',
+  'Tiira', 'Kiuru', 'Västäräkki', 'Punarinta', 'Talitiainen', 'Laulujoutsen',
   // Kalat & vesiötökät
   'Hauki', 'Lohi', 'Ahven', 'Kuha', 'Siika', 'Muikku', 'Särki', 'Lahna',
   'Ankerias', 'Taimen', 'Kirjolohi', 'Made', 'Kampela', 'Turska',
@@ -22,7 +22,7 @@ const BOT_NAMES = [
   'Kybori', 'Datanikkari', 'Synapsi', 'Digilätkä', 'Pistoke',
   'Algorytmi', 'Matriixi', 'Verkko-Otto', 'Bitti-Pekka', 'Servo-Matti',
   'HAL-9001', 'R2-F2', 'C-3PÖ', 'Terminator-Jr', 'Robotti-Riku',
-  'Kone-Kaija', 'Tekoäly-Timo', 'Silmä-6000', 'Hapero-Bot', 'Mega-Manu',
+  'Kone-Kaija', 'Tekoäly-Timo', 'Laser-6000', 'Turbo-Bot', 'Mega-Manu',
   'CPU-Seppo', 'RAM-Ritva', 'GPU-Gunnar', 'SSD-Sirpa', 'Wifi-Väinö',
 ]
 
