@@ -16,14 +16,6 @@ interface Props {
 export default function Header({ snapshot, connectionStatus, isSpectator }: Props) {
   const t = useT()
   const toggleLang = useLangToggle()
-  const turn = snapshot?.turn
-  const activePlayer = turn
-    ? snapshot?.players.find(p => p.playerId === turn.activePlayerId)
-    : null
-  const activeSeat = activePlayer
-    ? snapshot?.seats.find(s => s.playerId === activePlayer.playerId)
-    : null
-
   const [muted, setMuted] = useState(() => loadSoundConfig().volume === 0)
   const [idCopied, setIdCopied] = useState(false)
 
@@ -57,22 +49,7 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
   return (
     <header className={styles.header}>
       <div className={styles.title}>Monopoly Helsinki</div>
-      {activePlayer && turn ? (
-        <div className={styles.turnInfo}>
-          {activeSeat && (
-            <span
-              className={styles.playerDot}
-              style={{ background: activeSeat.tokenColorHex }}
-            />
-          )}
-          <span className={styles.playerName}>{activePlayer.name}</span>
-          <span className={styles.phase}>{t.phases[turn.phase] ?? turn.phase}</span>
-        </div>
-      ) : (
-        <div className={styles.turnInfo}>
-          {snapshot ? t.waitingForPlayers : t.loading}
-        </div>
-      )}
+      <div className={styles.turnInfo} />
       {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
       {snapshot && (
         <button
