@@ -1,13 +1,29 @@
 const HUMAN_NAMES = [
+  // Metsäeläimet
   'Karhu', 'Kettu', 'Susi', 'Hirvi', 'Jänis', 'Orava', 'Peura', 'Ilves',
-  'Majava', 'Ahma', 'Poro', 'Kotka', 'Haukka', 'Pöllö', 'Hauki', 'Lohi',
-  'Siili', 'Mäyrä', 'Tavi', 'Kurki', 'Joutsen', 'Varis', 'Harakka', 'Satakieli',
+  'Majava', 'Ahma', 'Poro', 'Siili', 'Mäyrä', 'Näätä', 'Saukko', 'Kärppä',
+  'Minkki', 'Hilleri', 'Sopuli', 'Myyrä', 'Lepakko', 'Piisami', 'Villisika',
+  // Linnut
+  'Kotka', 'Haukka', 'Pöllö', 'Kurki', 'Joutsen', 'Varis', 'Harakka',
+  'Satakieli', 'Tavi', 'Peippo', 'Tikka', 'Pyy', 'Teeri', 'Metso', 'Kuikka',
+  'Kajakki', 'Tiira', 'Kiuru', 'Västäräkki', 'Punarinta', 'Talitiainen',
+  // Kalat & vesiötökät
+  'Hauki', 'Lohi', 'Ahven', 'Kuha', 'Siika', 'Muikku', 'Särki', 'Lahna',
+  'Ankerias', 'Taimen', 'Kirjolohi', 'Made', 'Kampela', 'Turska',
+  // Kotieläimet & eksoottisemmat
+  'Koira', 'Kissa', 'Hevonen', 'Lammas', 'Vuohi', 'Possu', 'Kana', 'Kukko',
+  'Lehmä', 'Härkä', 'Aasi', 'Kani', 'Marsu', 'Hamstari',
 ]
 
 const BOT_NAMES = [
-  'Robo-3000', 'Kipinä', 'Teräs-Ville', 'Algorytmi', 'Binääri', 'Prosessori',
-  'Sirkuitti', 'Megabitti', 'Automaatti', 'Laskuri', 'Pistoke', 'Kilotavu',
-  'Kybori', 'Datanikkari', 'Synapsi', 'Digilätkä',
+  // Suomenkieliset robotti-nimet
+  'Robo-3000', 'Teräs-Ville', 'Kipinä-9', 'Automaatti', 'Laskuri-X',
+  'Binääri', 'Prosessori', 'Sirkuitti', 'Megabitti', 'Kilotavu',
+  'Kybori', 'Datanikkari', 'Synapsi', 'Digilätkä', 'Pistoke',
+  'Algorytmi', 'Matriixi', 'Verkko-Otto', 'Bitti-Pekka', 'Servo-Matti',
+  'HAL-9001', 'R2-F2', 'C-3PÖ', 'Terminator-Jr', 'Robotti-Riku',
+  'Kone-Kaija', 'Tekoäly-Timo', 'Silmä-6000', 'Hapero-Bot', 'Mega-Manu',
+  'CPU-Seppo', 'RAM-Ritva', 'GPU-Gunnar', 'SSD-Sirpa', 'Wifi-Väinö',
 ]
 
 function pickRandom<T>(arr: T[], exclude: T[] = []): T {
