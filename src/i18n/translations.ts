@@ -61,6 +61,13 @@ export interface T {
   waitingForOthers: string
   // Debt
   debtTitle: (amount: number, creditor: string) => string
+  debtReasonLabel: string
+  debtReasonRent: (propName: string) => string
+  debtReasonTax: string
+  debtReasonCard: string
+  debtReasonRepairs: string
+  debtCashLabel: string
+  debtLiquidationLabel: string
   debtCash: (n: number) => string
   debtLiquidation: (n: number) => string
   payDebtBtn: string
@@ -375,6 +382,13 @@ const fi: T = {
   waitingForOthers: '⏳ Odotetaan muita pelaajia…',
 
   debtTitle: (amount, creditor) => `⚠️ Velka €${amount} → ${creditor}`,
+  debtReasonLabel: 'Syy',
+  debtReasonRent: (p) => `Vuokra: ${p}`,
+  debtReasonTax: 'Veromaksu',
+  debtReasonCard: 'Korttimaksu',
+  debtReasonRepairs: 'Korttimaksu (korjaukset)',
+  debtCashLabel: 'Kassassasi',
+  debtLiquidationLabel: 'Realisoitavissa',
   debtCash: (n) => `Käteinen: €${n}`,
   debtLiquidation: (n) => `Likvidointiarvo: ~€${n}`,
   payDebtBtn: '💸 Maksa velka',
@@ -710,6 +724,13 @@ const en: T = {
   waitingForOthers: '⏳ Waiting for others…',
 
   debtTitle: (amount, creditor) => `⚠️ Debt €${amount} → ${creditor}`,
+  debtReasonLabel: 'Reason',
+  debtReasonRent: (p) => `Rent: ${p}`,
+  debtReasonTax: 'Tax',
+  debtReasonCard: 'Card payment',
+  debtReasonRepairs: 'Card payment (repairs)',
+  debtCashLabel: 'Your cash',
+  debtLiquidationLabel: 'Liquidatable',
   debtCash: (n) => `Cash: €${n}`,
   debtLiquidation: (n) => `Liquidation value: ~€${n}`,
   payDebtBtn: '💸 Pay debt',

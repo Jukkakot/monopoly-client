@@ -652,6 +652,14 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
 // Debt
 // ─────────────────────────────────────────────────────────────────────────────
 
+function formatDebtReason(reason: string, creditorType: string, t: ReturnType<typeof useT>): string {
+  if (creditorType === 'PLAYER') return t.debtReasonRent(reason)
+  if (reason === 'Tax') return t.debtReasonTax
+  if (reason === 'Card repairs') return t.debtReasonRepairs
+  if (reason === 'Card payment') return t.debtReasonCard
+  return reason
+}
+
 function DebtSection({ state, myPlayerId, sendCmd }: {
   state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
 }) {
@@ -661,15 +669,30 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
   const creditorName = debt.creditorType === 'PLAYER'
     ? state.players.find(p => p.playerId === debt.creditorPlayerId)?.name ?? t.playerCreditorLabel
     : t.bankLabel
+  const reason = formatDebtReason(debt.reason, debt.creditorType, t)
+  const canPay = debt.allowedActions.includes('PAY_DEBT_NOW')
 
   return (
     <div className={styles.panel}>
-      <div className={`${styles.infoBox} ${styles.debt}`}>
-        {t.debtTitle(debt.amountRemaining, creditorName)}<br />
-        {t.debtCash(debt.currentCash)}
-        {debt.estimatedLiquidationValue > 0 && (
-          <><br />{t.debtLiquidation(debt.estimatedLiquidationValue)}</>
-        )}
+      <div className={styles.debtCard}>
+        <div className={styles.debtCardHeader}>
+          <span className={styles.debtCardHeaderIcon}>⚠️</span>
+          <span className={styles.debtCardHeaderTitle}>{creditorName}</span>
+          <span className={styles.debtCardAmount}>€{debt.amountRemaining}</span>
+        </div>
+        <div className={styles.debtCardBody}>
+          <div className={styles.debtCardReason}>{reason}</div>
+          <div className={styles.debtCardRow}>
+            <span className={styles.debtCardRowLabel}>{t.debtCashLabel}</span>
+            <span className={canPay ? styles.debtCardRowVal : styles.debtCardRowValRed}>€{debt.currentCash}</span>
+          </div>
+          {debt.estimatedLiquidationValue > 0 && (
+            <div className={styles.debtCardRow}>
+              <span className={styles.debtCardRowLabel}>{t.debtLiquidationLabel}</span>
+              <span className={styles.debtCardRowVal}>~€{debt.estimatedLiquidationValue}</span>
+            </div>
+          )}
+        </div>
       </div>
       {debt.allowedActions.includes('PAY_DEBT_NOW') && (
         <Btn label={t.payDebtBtn} onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />

@@ -167,19 +167,23 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
     }
     if (np.houseCount > pp.houseCount) {
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      events.push(ev('🏗', t.builtHouse(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], 'house'))
+      const streetType = spot?.streetType ?? ''
+      events.push(ev('🏗', t.builtHouse(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `house:${streetType}`))
     }
     if (np.houseCount < pp.houseCount && pp.hotelCount === 0) {
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      events.push(ev('🏚', t.soldHouse(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : []))
+      const streetType = spot?.streetType ?? ''
+      events.push(ev('🏚', t.soldHouse(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `sell:${streetType}`))
     }
     if (np.hotelCount > pp.hotelCount) {
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      events.push(ev('🏗', t.builtHotel(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], 'hotel'))
+      const streetType = spot?.streetType ?? ''
+      events.push(ev('🏗', t.builtHotel(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `hotel:${streetType}`))
     }
     if (np.hotelCount < pp.hotelCount) {
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      events.push(ev('🏚', t.soldHotel(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : []))
+      const streetType = spot?.streetType ?? ''
+      events.push(ev('🏚', t.soldHotel(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `sellhotel:${streetType}`))
     }
   }
 

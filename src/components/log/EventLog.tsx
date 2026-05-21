@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import styles from './EventLog.module.css'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+import { STREET_COLORS } from '../../types/spots'
 
 const ICON_CLASS: Record<string, string> = {
   '🎲': styles.typeDice,
@@ -143,9 +144,15 @@ export default function EventLog() {
         {filtered.map(event => {
           const isRelated = state.myPlayerId && event.relatedPlayerIds.includes(state.myPlayerId)
           const typeClass = ICON_CLASS[event.icon] ?? ''
+          // Build/sell events carry kind like 'house:BROWN' — extract group color
+          const buildColor = event.kind?.includes(':')
+            ? STREET_COLORS[event.kind.split(':')[1]] ?? null
+            : null
+          const entryStyle = buildColor ? { borderLeftColor: buildColor } : undefined
           return (
-            <div key={event.id} className={`${styles.entry} ${typeClass} ${isRelated ? styles.mine : ''}`}>
+            <div key={event.id} className={`${styles.entry} ${typeClass} ${isRelated ? styles.mine : ''}`} style={entryStyle}>
               <span className={styles.icon}>{event.icon}</span>
+              {buildColor && <span className={styles.buildDot} style={{ background: buildColor }} />}
               <span className={styles.message}>{event.message}</span>
               <span className={styles.time} title={new Date(event.timestamp).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}>
                 {relativeTime(event.timestamp)}

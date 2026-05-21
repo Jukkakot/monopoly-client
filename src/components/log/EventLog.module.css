@@ -97,6 +97,14 @@
   line-height: 1;
 }
 
+.buildDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
 .message {
   flex: 1;
   font-family: 'Arial Narrow', Arial, sans-serif;
