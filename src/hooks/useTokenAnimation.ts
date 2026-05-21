@@ -3,6 +3,8 @@ import { useGame } from '../store/GameContext'
 import { playTokenMove, playGoToJail } from '../utils/sounds'
 
 const STEP_MS = 390
+const STEP_JITTER = 60        // ±ms random jitter per step
+const STEP_HOP_CSS_MS = 280   // must match .stepHop animation duration
 const BOARD_SIZE = 40
 const JAIL_INDEX = 10
 const JAIL_ARRIVE_CSS_MS = 700  // must match CSS animation duration
@@ -18,6 +20,7 @@ function isMovementCard(key: string | null): boolean {
 const _animatingPlayers = new Set<string>()
 const _jailingPlayers = new Set<string>()
 const _cardJumpingPlayers = new Set<string>()
+const _steppingPlayers = new Set<string>()  // briefly set on each step landing
 const _listeners = new Set<() => void>()
 
 function notifyListeners() {
@@ -46,6 +49,15 @@ function setPlayerCardJumping(pid: string, jumping: boolean) {
   if (jumping) _cardJumpingPlayers.add(pid)
   else _cardJumpingPlayers.delete(pid)
   notifyListeners()
+}
+
+function flashPlayerStepping(pid: string) {
+  _steppingPlayers.add(pid)
+  notifyListeners()
+  setTimeout(() => {
+    _steppingPlayers.delete(pid)
+    notifyListeners()
+  }, STEP_HOP_CSS_MS)
 }
 
 // Hook: returns true while any token is mid-animation
@@ -90,6 +102,17 @@ export function useCardJumpingPlayers(): Set<string> {
     return () => { _listeners.delete(update) }
   }, [])
   return jumping
+}
+
+// Hook: returns set of playerIds currently mid-step (brief flash per landing)
+export function useSteppingPlayers(): Set<string> {
+  const [stepping, setStepping] = useState(() => new Set<string>(_steppingPlayers))
+  useEffect(() => {
+    const update = () => setStepping(new Set(_steppingPlayers))
+    _listeners.add(update)
+    return () => { _listeners.delete(update) }
+  }, [])
+  return stepping
 }
 
 // Returns animated positions: Map<playerId, displayIndex>
@@ -211,11 +234,14 @@ export function useTokenAnimation(): Map<string, number> {
       const next = queue[0]
       queueRef.current.set(pid, queue.slice(1))
       setDisplayPositions(prev => new Map(prev).set(pid, next))
+      flashPlayerStepping(pid)
       playTokenMove()
-      setTimeout(step, STEP_MS)
+      const jitter = (Math.random() * 2 - 1) * STEP_JITTER
+      setTimeout(step, STEP_MS + jitter)
     }
 
-    setTimeout(step, STEP_MS)
+    const jitter = (Math.random() * 2 - 1) * STEP_JITTER
+    setTimeout(step, STEP_MS + jitter)
   }
 
   return displayPositions

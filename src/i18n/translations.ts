@@ -38,6 +38,9 @@ export interface T {
   rollDiceKbd: string
   endTurn: string
   endTurnKbd: string
+  rollAgainBtn: string
+  rollAgainBtnKbd: string
+  rentPopupText: (amount: number, ownerName: string) => string
   startTrade: (open: boolean) => string
   buildHousesSectionTitle: string
   mortgageSectionTitle: string
@@ -310,6 +313,7 @@ export interface T {
     tradeAccepted: (a: string, b: string) => string
     tradeDeclined: (name: string) => string
     tradeCancelled: string
+    rolledDice: (name: string, d1: number, d2: number) => string
   }
 }
 
@@ -356,6 +360,9 @@ const fi: T = {
   rollDiceKbd: '🎲 Heitä nopat  [välilyönti]',
   endTurn: '✅ Lopeta vuoro',
   endTurnKbd: '✅ Lopeta vuoro  [välilyönti]',
+  rollAgainBtn: '🎲 Heitä uudelleen',
+  rollAgainBtnKbd: '🎲 Heitä uudelleen  [välilyönti]',
+  rentPopupText: (amount, owner) => `Maksoit vuokraa €${amount} omistajalle ${owner}`,
   startTrade: (open) => `🤝 Aloita kauppa ${open ? '▴' : '▾'}`,
   buildHousesSectionTitle: 'Rakenna taloja',
   mortgageSectionTitle: 'Kiinnitys',
@@ -412,6 +419,7 @@ const fi: T = {
   // EventLog
   filterAll: 'Kaikki',
   filterTitles: {
+    dice:     'Nopanheitot',
     moves:    'Siirtymät',
     money:    'Raha & vuokrat',
     property: 'Kiinteistöt & huutokaupat',
@@ -648,6 +656,7 @@ const fi: T = {
     tradeAccepted: (a, b) => `Kauppa hyväksytty: ${a} ↔ ${b}`,
     tradeDeclined: (name) => `${name} hylkäsi kauppatarjouksen`,
     tradeCancelled: 'Kaupankäynti peruutettu',
+    rolledDice: (name, d1, d2) => `${name} heitti ${d1}+${d2}=${d1+d2}${d1===d2?' (tupla)':''}`,
   },
 }
 
@@ -694,6 +703,9 @@ const en: T = {
   rollDiceKbd: '🎲 Roll dice  [space]',
   endTurn: '✅ End turn',
   endTurnKbd: '✅ End turn  [space]',
+  rollAgainBtn: '🎲 Roll again',
+  rollAgainBtnKbd: '🎲 Roll again  [space]',
+  rentPopupText: (amount, owner) => `You paid €${amount} rent to ${owner}`,
   startTrade: (open) => `🤝 Trade ${open ? '▴' : '▾'}`,
   buildHousesSectionTitle: 'Build houses',
   mortgageSectionTitle: 'Mortgage',
@@ -750,6 +762,7 @@ const en: T = {
   // EventLog
   filterAll: 'All',
   filterTitles: {
+    dice:     'Dice rolls',
     moves:    'Movement',
     money:    'Money & rent',
     property: 'Properties & auctions',
@@ -986,6 +999,7 @@ const en: T = {
     tradeAccepted: (a, b) => `Trade accepted: ${a} ↔ ${b}`,
     tradeDeclined: (name) => `${name} declined the trade offer`,
     tradeCancelled: 'Trade cancelled',
+    rolledDice: (name, d1, d2) => `${name} rolled ${d1}+${d2}=${d1+d2}${d1===d2?' (doubles)':''}`,
   },
 }
 

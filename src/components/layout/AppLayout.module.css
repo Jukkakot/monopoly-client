@@ -24,7 +24,8 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding-bottom: 56px; /* bottom nav height */
+  background: #f5f9f5;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
 }
 
 .mobileHeader {
@@ -67,16 +68,22 @@
   padding: 12px;
 }
 
+.mobileHidden {
+  display: none;
+}
+
 .mobileNav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 56px;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
   display: flex;
   background: #fff;
   border-top: 1px solid #c8e6c9;
   z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: flex-start;
 }
 
 .navBtn {

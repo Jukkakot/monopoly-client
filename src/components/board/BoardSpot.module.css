@@ -343,3 +343,15 @@
   display: inline-block;
   animation: cardArrive 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+@keyframes stepHop {
+  0%   { transform: translateY(0) scale(1); }
+  35%  { transform: translateY(-3px) scale(1.12); }
+  70%  { transform: translateY(1px) scale(0.95); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.stepHop {
+  display: inline-block;
+  animation: stepHop 0.28s ease-out forwards;
+}

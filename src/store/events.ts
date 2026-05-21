@@ -58,6 +58,31 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
     }
   }
 
+  // Dice roll — infer from active player movement when phase was WAITING_FOR_ROLL
+  if (prev.turn?.phase === 'WAITING_FOR_ROLL') {
+    const rollerId = prev.turn.activePlayerId
+    const pp = prev.players.find(p => p.playerId === rollerId)
+    const np = next.players.find(p => p.playerId === rollerId)
+    if (pp && np && np.boardIndex !== pp.boardIndex && !np.inJail) {
+      const steps = (np.boardIndex - pp.boardIndex + BOARD_SIZE) % BOARD_SIZE
+      if (steps >= 2 && steps <= 12) {
+        const prevDoubles = prev.turn.consecutiveDoubles
+        const nextDoubles = next.turn?.consecutiveDoubles ?? 0
+        const isDoubles = nextDoubles > prevDoubles
+        let d1: number, d2: number
+        if (isDoubles && steps % 2 === 0 && steps / 2 >= 1 && steps / 2 <= 6) {
+          d1 = d2 = steps / 2
+        } else {
+          d1 = Math.min(6, steps - 1)
+          d2 = steps - d1
+        }
+        if (d1 >= 1 && d2 >= 1 && d2 <= 6) {
+          events.push(ev('🎲', t.rolledDice(np.name, d1, d2), [rollerId], `${d1}_${d2}`))
+        }
+      }
+    }
+  }
+
   // Card message
   if (next.lastCardKey && next.lastCardKey !== prev.lastCardKey) {
     const actorId = next.turn?.activePlayerId ?? ''

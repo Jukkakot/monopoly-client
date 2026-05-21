@@ -5,6 +5,7 @@ import DiceStats from '../stats/DiceStats'
 import { useT } from '../../i18n/LanguageContext'
 
 const ICON_CLASS: Record<string, string> = {
+  '🎲': styles.typeDice,
   '🏃': styles.typeMove,
   '⛓': styles.typeJail,
   '🔓': styles.typeJail,
@@ -24,9 +25,10 @@ const ICON_CLASS: Record<string, string> = {
   '🏆': styles.typeGameOver,
 }
 
-type FilterGroup = 'moves' | 'money' | 'property' | 'build' | 'trade' | 'jail'
+type FilterGroup = 'dice' | 'moves' | 'money' | 'property' | 'build' | 'trade' | 'jail'
 
 const FILTER_ICONS: Record<FilterGroup, Set<string>> = {
+  dice:     new Set(['🎲']),
   moves:    new Set(['🏃']),
   money:    new Set(['💰', '💸']),
   property: new Set(['🏠', '🔨']),
@@ -36,6 +38,7 @@ const FILTER_ICONS: Record<FilterGroup, Set<string>> = {
 }
 
 const FILTER_LABELS: Record<FilterGroup, string> = {
+  dice:     '🎲',
   moves:    '🏃',
   money:    '💸',
   property: '🏠',

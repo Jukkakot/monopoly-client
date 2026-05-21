@@ -5,7 +5,7 @@ import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 
@@ -245,6 +245,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const animatedPositions = useTokenAnimation()
   const jailingPlayers = useJailingPlayers()
   const cardJumpingPlayers = useCardJumpingPlayers()
+  const steppingPlayers = useSteppingPlayers()
   const animatingPlayers = useAnimatingPlayers()
   const { state: gameState } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
@@ -324,6 +325,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             tokenShapes={tokenShapes}
             jailingPlayers={jailingPlayers}
             cardJumpingPlayers={cardJumpingPlayers}
+            steppingPlayers={steppingPlayers}
             highlighted={isSelected ? 'selected' : isGroupHighlighted ? 'group' : undefined}
           />
         )

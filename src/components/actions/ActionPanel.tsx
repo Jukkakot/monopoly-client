@@ -94,6 +94,39 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevActiveRef.current = activeId
   }, [state.lastCardKey, state.lastCardMessage, activeId, myPlayerId])
 
+  // Track rent payment: record cash when my turn starts (WAITING_FOR_ROLL), detect drop on end
+  const [visibleRent, setVisibleRent] = useState<{ amount: number; ownerName: string } | null>(null)
+  const [rentDismissed, setRentDismissed] = useState(false)
+  const cashAtRollStartRef = useRef<number | null>(null)
+  const prevPhaseRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (phase === 'WAITING_FOR_ROLL' && isMyTurn) {
+      cashAtRollStartRef.current = me?.cash ?? null
+      setVisibleRent(null)
+      setRentDismissed(false)
+    }
+    if (phase === 'WAITING_FOR_END_TURN' && prevPhaseRef.current === 'WAITING_FOR_ROLL' && isMyTurn) {
+      const cashBefore = cashAtRollStartRef.current
+      const cashNow = me?.cash ?? null
+      if (cashBefore !== null && cashNow !== null && cashNow < cashBefore) {
+        const myBoardIndex = me?.boardIndex
+        const landedPropId = myBoardIndex !== undefined ? SPOTS[myBoardIndex]?.id : undefined
+        const landedProp = landedPropId
+          ? state.properties.find(p => p.propertyId === landedPropId)
+          : undefined
+        if (landedProp?.ownerPlayerId && landedProp.ownerPlayerId !== myPlayerId) {
+          const owner = state.players.find(p => p.playerId === landedProp.ownerPlayerId)
+          setVisibleRent({ amount: cashBefore - cashNow, ownerName: owner?.name ?? '?' })
+        }
+      }
+    }
+    if (activeId !== myPlayerId) {
+      setVisibleRent(null)
+      setRentDismissed(false)
+    }
+    prevPhaseRef.current = phase
+  }, [phase, isMyTurn, me?.cash, me?.boardIndex, activeId, myPlayerId, state.properties, state.players])
+
   function TabBar() {
     if (!hasPropActions) return null
     const mortgagedCount = myProps.filter(p => p.mortgaged).length
@@ -319,6 +352,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
     const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
+    const consecutiveDoubles = turn?.consecutiveDoubles ?? 0
+    const hasDoubles = consecutiveDoubles > 0
+    const endTurnLabel = hasDoubles
+      ? (isTouchDevice ? t.rollAgainBtn : t.rollAgainBtnKbd)
+      : (isTouchDevice ? t.endTurn : t.endTurnKbd)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
@@ -331,7 +369,14 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
               </div>
             )}
-            <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
+            {visibleRent && !rentDismissed && (
+              <div className={`${styles.cardPopup} ${styles.rentPopup}`}>
+                <span className={styles.cardPopupIcon}>💸</span>
+                <span className={styles.cardPopupText}>{t.rentPopupText(visibleRent.amount, visibleRent.ownerName)}</span>
+                <button className={styles.cardPopupOk} onClick={() => setRentDismissed(true)}>{t.cardOkBtn}</button>
+              </div>
+            )}
+            <Btn label={endTurnLabel} onClick={() => cmd('EndTurn')} variant="primary" />
             <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
           </>
         ) : (

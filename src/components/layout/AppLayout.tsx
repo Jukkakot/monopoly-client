@@ -121,7 +121,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           {board}
         </div>
         <div className={styles.mobileSection}>
-          {mobileTab === 'board' && <div className={styles.mobilePadded}>{actions}</div>}
+          {/* Keep actions mounted so popup-dismiss state survives tab switches */}
+          <div className={`${styles.mobilePadded} ${mobileTab !== 'board' ? styles.mobileHidden : ''}`}>{actions}</div>
           {mobileTab === 'players' && players}
           {mobileTab === 'log' && log}
         </div>
