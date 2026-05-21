@@ -128,7 +128,7 @@ export default function LobbyScreen() {
 
         <div className={styles.players}>
           {rows.map((row, i) => (
-            <div key={i} className={styles.playerRow}>
+            <div key={i} className={`${styles.playerRow} ${row.isBot ? styles.playerRowBot : ''}`}>
               <div className={styles.colorRow}>
                 {PRESET_COLORS.map(c => (
                   <button
