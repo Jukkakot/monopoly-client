@@ -250,13 +250,28 @@
   border-radius: 8px;
   font-size: 0.85rem;
   color: #1565c0;
-  flex-wrap: wrap;
+}
+
+.rejoinInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rejoinCode {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0d47a1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rejoinBtn {
-  flex: 1;
-  min-width: 0;
-  padding: 6px 12px;
+  padding: 6px 14px;
   background: #1565c0;
   color: #fff;
   border: none;
@@ -264,10 +279,7 @@
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  font-family: ui-monospace, monospace;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  flex-shrink: 0;
   transition: filter 0.15s;
 }
 

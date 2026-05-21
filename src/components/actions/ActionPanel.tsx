@@ -109,7 +109,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   }
 
   // While token is moving — don't reveal destination yet
-  if (tokenAnimating && (phase === 'WAITING_FOR_DECISION' || phase === 'WAITING_FOR_END_TURN')) {
+  if (tokenAnimating && (phase === 'WAITING_FOR_DECISION' || phase === 'WAITING_FOR_END_TURN' || phase === 'WAITING_FOR_ROLL')) {
     return (
       <div className={styles.panel}>
         <div className={`${styles.infoBox} ${styles.moving}`}>

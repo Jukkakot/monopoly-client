@@ -107,3 +107,16 @@
   color: #999;
   font-variant-numeric: tabular-nums;
 }
+
+@media (hover: none) {
+  .filterBtn {
+    min-height: 36px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+  }
+
+  .filterRow {
+    gap: 5px;
+    padding: 8px 10px 6px;
+  }
+}

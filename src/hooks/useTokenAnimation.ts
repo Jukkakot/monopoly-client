@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useGame } from '../store/GameContext'
 import { playTokenMove } from '../utils/sounds'
 
-const STEP_MS = 130
+const STEP_MS = 390
 const BOARD_SIZE = 40
 
 // Module-level animation state so any component can subscribe
@@ -39,6 +39,8 @@ export function useTokenAnimation(): Map<string, number> {
   const settledRef = useRef<Map<string, number>>(new Map())
   const [displayPositions, setDisplayPositions] = useState<Map<string, number>>(new Map())
   const queueRef = useRef<Map<string, number[]>>(new Map())
+  // Per-instance tracking (not global) so multiple Board instances don't block each other
+  const localAnimatingRef = useRef(new Set<string>())
 
   useEffect(() => {
     if (!snapshot) return
@@ -70,18 +72,20 @@ export function useTokenAnimation(): Map<string, number> {
       const existing = queueRef.current.get(pid) ?? []
       queueRef.current.set(pid, [...existing, ...steps])
 
-      if (!_animatingPlayers.has(pid)) {
+      if (!localAnimatingRef.current.has(pid)) {
         animatePlayer(pid)
       }
     }
   }, [snapshot])
 
   function animatePlayer(pid: string) {
+    localAnimatingRef.current.add(pid)
     setPlayerAnimating(pid, true)
 
     function step() {
       const queue = queueRef.current.get(pid) ?? []
       if (queue.length === 0) {
+        localAnimatingRef.current.delete(pid)
         setPlayerAnimating(pid, false)
         return
       }

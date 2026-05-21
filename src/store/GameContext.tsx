@@ -93,7 +93,8 @@ function reducer(state: GameState, action: Action): GameState {
           const nextPlayer = newSnapshot.players.find(p => p.playerId === activeId)
           if (prevPlayer && nextPlayer &&
               prevPlayer.boardIndex !== nextPlayer.boardIndex &&
-              !(nextPlayer.inJail && !prevPlayer.inJail)) {
+              !(nextPlayer.inJail && !prevPlayer.inJail) &&
+              prevTurn?.phase === 'WAITING_FOR_ROLL') {
             const steps = (nextPlayer.boardIndex - prevPlayer.boardIndex + 40) % 40
             if (steps >= 2 && steps <= 12) {
               const isDoubles = (nextTurn?.consecutiveDoubles ?? 0) === (prevTurn?.consecutiveDoubles ?? 0) + 1

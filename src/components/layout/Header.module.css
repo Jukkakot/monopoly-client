@@ -129,4 +129,6 @@
 
 @media (max-width: 767px) {
   .title { display: none; }
+  .phase { display: none; }
+  .sessionIdBtn { max-width: 80px; }
 }

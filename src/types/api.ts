@@ -138,8 +138,8 @@ export interface ClientSessionSnapshot {
 export interface SessionSummary {
   sessionId: string
   status: SessionStatus
-  playerCount: number
-  createdAt: string
+  playerNames: string[]
+  createdAt?: string
 }
 
 export interface CreateSessionRequest {

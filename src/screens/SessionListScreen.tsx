@@ -130,12 +130,15 @@ export default function SessionListScreen() {
 
         {lastSession && lastSessionExists === true && (
           <div className={styles.rejoinBanner}>
-            <span>{t.rejoinBanner}</span>
+            <div className={styles.rejoinInfo}>
+              <span>{t.rejoinBanner}</span>
+              <span className={styles.rejoinCode}>{lastSession}</span>
+            </div>
             <button
               className={styles.rejoinBtn}
               onClick={() => { joinSession(lastSession); navigate(`/game/${lastSession}`) }}
             >
-              {t.joinLabel}: {lastSession}
+              {t.joinLabel}
             </button>
             <button
               className={styles.rejoinDismiss}
@@ -253,7 +256,11 @@ function SessionRow({ session, onJoin, onDelete, label, playerCountMeta, session
             {copied ? '✓' : '⎘'}
           </button>
         </div>
-        <div className={styles.sessionMeta}>{playerCountMeta(session.playerCount)} · {age}</div>
+        <div className={styles.sessionMeta}>
+          {playerCountMeta(session.playerNames?.length ?? 0)}
+          {session.playerNames?.length > 0 && ` · ${session.playerNames.join(', ')}`}
+          {session.createdAt && ` · ${age}`}
+        </div>
       </div>
       <button className={styles.joinBtn} onClick={onJoin}>{label}</button>
       <button className={styles.deleteBtn} onClick={onDelete} title="Poista peli">✕</button>
