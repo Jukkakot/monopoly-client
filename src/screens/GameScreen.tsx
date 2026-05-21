@@ -234,7 +234,7 @@ export default function GameScreen() {
             )}
             <ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />
           </>
-        }}
+        }
       />
     </>
   )

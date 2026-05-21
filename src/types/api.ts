@@ -1,5 +1,5 @@
 export type SeatKind = 'HUMAN' | 'BOT'
-export type BotDifficulty = 'EASY' | 'NORMAL'
+export type BotDifficulty = 'EASY' | 'NORMAL' | 'STRONG'
 export type SessionStatus = 'LOBBY' | 'IN_PROGRESS' | 'GAME_OVER'
 export type TurnPhase =
   | 'WAITING_FOR_ROLL'
