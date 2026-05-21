@@ -855,40 +855,41 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
   const partnerSeat = state.seats.find(s => s.playerId === partnerId)
 
+  const mySeat = state.seats.find(s => s.playerId === myPlayerId)
+
   function renderProps(props: typeof myProps, offerSide: boolean, offerData: typeof myOffer) {
-    // Group by streetType
+    const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
     const groups = new Map<string, typeof props>()
     for (const prop of props) {
-      const spot = SPOTS.find(s => s.id === prop.propertyId)
-      const key = spot?.streetType ?? 'OTHER'
-      const arr = groups.get(key) ?? []
-      arr.push(prop)
-      groups.set(key, arr)
+      const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
+      const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
     }
-    return Array.from(groups.entries()).map(([type, groupProps]) => {
+    const sorted = [...groups.entries()].sort(([a], [b]) => {
+      const ai = TYPE_ORDER.indexOf(a); const bi = TYPE_ORDER.indexOf(b)
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+    })
+    return sorted.map(([type, groupProps]) => {
       const color = STREET_COLORS[type]
       return (
-        <div key={type} className={styles.tradePropGroup}>
-          <div className={styles.tradePropGroupItems}>
-            {groupProps.map(prop => {
-              const spot = SPOTS.find(s => s.id === prop.propertyId)
-              const included = offerData.propertyIds.includes(prop.propertyId)
-              return (
-                <label key={prop.propertyId}
-                  className={`${styles.propCheck} ${prop.mortgaged ? styles.propCheckMortgaged : ''}`}
-                  style={color ? { background: color + '28' } : undefined}>
-                  <input type="checkbox" checked={included}
-                    onChange={() => toggleProp(offerSide, prop.propertyId, included)} />
-                  <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
-                  {prop.mortgaged
-                    ? <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>
-                    : spot?.price
-                      ? <span className={styles.propCheckPrice}>€{spot.price}</span>
-                      : null}
-                </label>
-              )
-            })}
-          </div>
+        <div key={type} className={styles.tradePropGroup} style={color ? { borderLeft: `3px solid ${color}` } : undefined}>
+          {groupProps.map(prop => {
+            const spot = SPOTS.find(s => s.id === prop.propertyId)
+            const included = offerData.propertyIds.includes(prop.propertyId)
+            return (
+              <label key={prop.propertyId}
+                className={`${styles.propCheck} ${prop.mortgaged ? styles.propCheckMortgaged : ''}`}
+                style={color ? { background: color + '28' } : undefined}>
+                <input type="checkbox" checked={included}
+                  onChange={() => toggleProp(offerSide, prop.propertyId, included)} />
+                <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
+                {prop.mortgaged
+                  ? <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>
+                  : spot?.price
+                    ? <span className={styles.propCheckPrice}>€{spot.price}</span>
+                    : null}
+              </label>
+            )
+          })}
         </div>
       )
     })
@@ -909,7 +910,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
       <div className={styles.tradeColumns}>
         {/* Left: what I give */}
-        <div className={styles.tradeCol}>
+        <div className={styles.tradeCol} style={mySeat ? { background: mySeat.tokenColorHex + '18', borderRadius: 8 } : undefined}>
           <div className={styles.tradeColTitle}>{t.youOfferLabel}</div>
           <div className={styles.tradeMoney}>
             <span>€{myOffer.moneyAmount}</span>
@@ -924,7 +925,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         </div>
 
         {/* Right: what I request */}
-        <div className={styles.tradeCol}>
+        <div className={styles.tradeCol} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '18', borderRadius: 8 } : undefined}>
           <div className={styles.tradeColTitle}>{t.youRequestLabel}</div>
           <div className={styles.tradeMoney}>
             <span>€{myRequest.moneyAmount}</span>

@@ -448,7 +448,9 @@
 
 /* Property group in trade (color band + 2-col items) */
 .tradePropGroup {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  padding-left: 4px;
+  border-radius: 0 4px 4px 0;
 }
 
 .tradePropGroupBar {
