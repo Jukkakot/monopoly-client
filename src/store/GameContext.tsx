@@ -123,25 +123,6 @@ function reducer(state: GameState, action: Action): GameState {
         }
       }
 
-      // Play sounds for derived events
-      for (const e of newEvents) {
-        switch (e.icon) {
-          case '🏃': playTokenMove(); break
-          case '🏠': playBuyProperty(); break
-          case '🏗': e.kind === 'hotel' ? playBuildHotel() : playBuildHouse(); break
-          case '⛓': playGoToJail(); break
-          case '🔓': playReleaseJail(); break
-          case '🃏': playDrawCard(); break
-          case '💀': playBankruptcy(); break
-          case '🎊': playGameOver(); break
-          case '🤝': if (e.kind === 'accepted') playTradeAccepted(); break
-          case '🏦': playMortgage(); break
-          case '💳': playMortgage(); break
-          case '💰': playPassGo(); break
-          case '💸': playPayRent(); break
-          case '🏆': playAuctionWin(); break
-        }
-      }
       const diceHistory = lastDice && lastDice !== state.lastDice
         ? [...state.diceHistory, lastDice].slice(-10)
         : state.diceHistory
@@ -231,6 +212,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const retryCount = useRef(0)
   const esRef = useRef<EventSource | null>(null)
   const versionRef = useRef(0)
+  const lastSoundedId = useRef(-1)
+
+  // Play sounds in sync with event log visibility (respects releaseAt animation delay)
+  useEffect(() => {
+    const newEvents = state.events.filter(e => e.id > lastSoundedId.current)
+    if (newEvents.length === 0) return
+    lastSoundedId.current = Math.max(...newEvents.map(e => e.id))
+    const now = Date.now()
+    const timers: ReturnType<typeof setTimeout>[] = []
+    for (const e of newEvents) {
+      const delay = e.releaseAt ? Math.max(0, e.releaseAt - now) : 0
+      timers.push(setTimeout(() => {
+        switch (e.icon) {
+          case '🏃': playTokenMove(); break
+          case '🏠': playBuyProperty(); break
+          case '🏗': e.kind === 'hotel' ? playBuildHotel() : playBuildHouse(); break
+          case '⛓': playGoToJail(); break
+          case '🔓': playReleaseJail(); break
+          case '🃏': playDrawCard(); break
+          case '💀': playBankruptcy(); break
+          case '🎊': playGameOver(); break
+          case '🤝': if (e.kind === 'accepted') playTradeAccepted(); break
+          case '🏦': playMortgage(); break
+          case '💳': playMortgage(); break
+          case '💰': playPassGo(); break
+          case '💸': playPayRent(); break
+          case '🏆': playAuctionWin(); break
+        }
+      }, delay))
+    }
+    return () => timers.forEach(clearTimeout)
+  }, [state.events])
 
   const joinSession = useCallback((sessionId: string) => {
     dispatch({ type: 'SET_SESSION', sessionId })
