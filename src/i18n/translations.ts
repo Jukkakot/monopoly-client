@@ -307,7 +307,7 @@ const fi: T = {
   spectatorBadge: '👁 Katsoja',
   soundMuted: 'Äänet pois päältä (paina M)',
   soundOn: 'Äänet päällä (paina M)',
-  langLabel: '🇬🇧',
+  langLabel: '🇫🇮',
 
   connecting: 'Yhdistetään…',
   reconnecting: 'Yhdistetään uudelleen…',
@@ -633,7 +633,7 @@ const en: T = {
   spectatorBadge: '👁 Spectator',
   soundMuted: 'Sound off (press M)',
   soundOn: 'Sound on (press M)',
-  langLabel: '🇫🇮',
+  langLabel: '🇬🇧',
 
   connecting: 'Connecting…',
   reconnecting: 'Reconnecting…',
