@@ -239,6 +239,7 @@ export default function LobbyScreen() {
                   >
                     <option value="EASY">{t.easyLabel}</option>
                     <option value="NORMAL">{t.normalLabel}</option>
+                    <option value="STRONG">{t.strongLabel}</option>
                   </select>
                 )}
               </div>

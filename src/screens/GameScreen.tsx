@@ -42,7 +42,15 @@ export default function GameScreen() {
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [highlightGroupType, setHighlightGroupType] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
+  const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
+  const isDebugMode = new URLSearchParams(window.location.search).has('debug')
+
+  // Auto-clear debug player selection when the active player changes
+  const activePlayerId = state.snapshot?.turn?.activePlayerId
+  useEffect(() => {
+    if (isDebugMode) setDebugPlayerId(null)
+  }, [activePlayerId, isDebugMode])
 
   function handleSpotClick(spotId: string) {
     setSelectedSpotId(spotId)
@@ -174,8 +182,6 @@ export default function GameScreen() {
     )
   }
 
-  const isDebugMode = new URLSearchParams(window.location.search).has('debug')
-  const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const effectivePlayerId = isDebugMode
     ? (debugPlayerId ?? state.snapshot.turn?.activePlayerId ?? state.myPlayerId ?? '')
     : (state.myPlayerId ?? '')

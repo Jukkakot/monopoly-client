@@ -162,6 +162,7 @@ export interface T {
   botLabel: string
   easyLabel: string
   normalLabel: string
+  strongLabel: string
   randomizeNamesBtn: string
   startGameBtn: string
   startingLabel: string
@@ -477,6 +478,7 @@ const fi: T = {
   botLabel: 'Botti',
   easyLabel: 'Helppo',
   normalLabel: 'Normaali',
+  strongLabel: 'Vahva',
   randomizeNamesBtn: '🎲 Arvo nimet',
   startGameBtn: 'Aloita peli',
   startingLabel: 'Luodaan…',
@@ -808,6 +810,7 @@ const en: T = {
   botLabel: 'Bot',
   easyLabel: 'Easy',
   normalLabel: 'Normal',
+  strongLabel: 'Strong',
   randomizeNamesBtn: '🎲 Random names',
   startGameBtn: 'Start game',
   startingLabel: 'Creating…',
