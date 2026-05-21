@@ -45,34 +45,6 @@
   letter-spacing: 0.8px;
 }
 
-.countRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.countBtns {
-  display: flex;
-  gap: 6px;
-}
-
-.countBtn {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #c8e6c9;
-  border-radius: 8px;
-  background: #f1f8e9;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #2e7d32;
-  transition: background 0.1s, border-color 0.1s;
-}
-
-.countBtn.active {
-  background: #2e7d32;
-  border-color: #2e7d32;
-  color: #fff;
-}
 
 .players {
   display: flex;
@@ -145,14 +117,34 @@
 .human { background: #c8e6c9; color: #1b5e20; }
 .bot { background: #ffe082; color: #5d4037; }
 
-.diffSelect {
-  padding: 6px 8px;
-  border: 1.5px solid #ffe082;
+.removeBtn {
+  padding: 6px 10px;
+  background: transparent;
+  color: #bbb;
+  border: 1.5px solid #e0e0e0;
   border-radius: 6px;
-  font-size: 0.85rem;
-  background: #fff8e1;
-  color: #5d4037;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.1s, border-color 0.1s;
 }
+
+.removeBtn:hover { color: #e53935; border-color: #e53935; }
+
+.addPlayerBtn {
+  padding: 10px;
+  background: #f1f8e9;
+  color: #2e7d32;
+  border: 2px dashed #a5d6a7;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addPlayerBtn:hover:not(:disabled) { background: #dcedc8; }
+.addPlayerBtn:disabled { opacity: 0.5; cursor: default; }
 
 .errorMsg {
   background: #ffebee;
