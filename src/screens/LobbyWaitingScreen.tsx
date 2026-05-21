@@ -54,6 +54,8 @@ export default function LobbyWaitingScreen() {
     try {
       const res = await joinLobby(sessionId, name.trim())
       try { sessionStorage.setItem(`monopoly_player_${sessionId}`, res.playerId) } catch {}
+      try { sessionStorage.setItem(`monopoly_token_${sessionId}`, res.playerToken) } catch {}
+      try { localStorage.setItem(`monopoly_token_${sessionId}_${res.playerId}`, res.playerToken) } catch {}
       try { localStorage.setItem('monopoly_last_name', name.trim()) } catch {}
       setMyPlayerId(res.playerId)
     } catch {

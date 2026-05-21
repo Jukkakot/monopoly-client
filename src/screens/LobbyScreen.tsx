@@ -101,12 +101,15 @@ export default function LobbyScreen() {
         }),
       })
       if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-      const { sessionId } = await res.json()
+      const { sessionId, hostToken } = await res.json()
+      try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}
       saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
       // Auto-join as the first player
       const firstHuman = rows[0]
       const joined = await joinLobby(sessionId, firstHuman.name.trim(), firstHuman.color)
       try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
+      try { sessionStorage.setItem(`monopoly_token_${sessionId}`, joined.playerToken) } catch {}
+      try { localStorage.setItem(`monopoly_token_${sessionId}_${joined.playerId}`, joined.playerToken) } catch {}
       try { localStorage.setItem('monopoly_last_name', firstHuman.name.trim()) } catch {}
       joinSession(sessionId)
       navigate(`/lobby-wait/${sessionId}`)
@@ -126,12 +129,13 @@ export default function LobbyScreen() {
     }
     setLoading(true)
     try {
-      const sessionId = await createSession({
+      const { sessionId, hostToken } = await createSession({
         names: rows.map(r => r.name.trim()),
         colors: rows.map(r => r.color),
         seatKinds: rows.map(r => r.kind),
         difficulties: rows.map(r => r.difficulty),
       })
+      try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}
       saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
       joinSession(sessionId)
       navigate(`/game/${sessionId}`)

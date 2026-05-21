@@ -2,15 +2,14 @@ import type { CreateSessionRequest, CommandResult, SessionSummary } from '../typ
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
 
-export async function createSession(req: CreateSessionRequest): Promise<string> {
+export async function createSession(req: CreateSessionRequest): Promise<{ sessionId: string; hostToken: string }> {
   const res = await fetch(`${BASE}/sessions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
   })
   if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  const data = await res.json()
-  return data.sessionId as string
+  return res.json()
 }
 
 export async function listSessions(): Promise<SessionSummary[]> {
@@ -38,7 +37,7 @@ export async function sessionExists(sessionId: string): Promise<boolean> {
   return res.ok
 }
 
-export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{ playerId: string; seatId: string; tokenColorHex: string }> {
+export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{ playerId: string; seatId: string; tokenColorHex: string; playerToken: string }> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/join`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

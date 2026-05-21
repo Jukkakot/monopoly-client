@@ -234,6 +234,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                   <span className={styles.turnNum}>{turnIdx + 1}.</span>
                   {player.name}
                   {isMe && <span className={styles.meBadge}>{t.youBadge}</span>}
+                  {player.playerId === state.hostPlayerId && <span className={styles.hostBadge}>HOST</span>}
                   {isBankrupt && <span className={styles.badge}>{t.bankruptBadge}</span>}
                   {player.inJail && !isBankrupt && (
                     <span className={styles.badge}>🔒{player.jailRoundsRemaining > 0 ? `${player.jailRoundsRemaining}v` : ''}</span>

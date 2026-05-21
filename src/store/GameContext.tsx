@@ -39,7 +39,20 @@ function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, exi
   if (sessionId) {
     try {
       const stored = sessionStorage.getItem(`monopoly_player_${sessionId}`)
-      if (stored) return stored  // Stable identity: always honour an explicit localStorage entry
+      if (stored) return stored
+    } catch {}
+    // sessionStorage empty (tab was closed) — try to find a token in localStorage
+    try {
+      const humanSeats = snapshot.seats.filter(s => s.seatKind === 'HUMAN')
+      for (const seat of humanSeats) {
+        const token = localStorage.getItem(`monopoly_token_${sessionId}_${seat.playerId}`)
+        if (token) {
+          // Restore sessionStorage so subsequent calls are fast
+          sessionStorage.setItem(`monopoly_player_${sessionId}`, seat.playerId)
+          sessionStorage.setItem(`monopoly_token_${sessionId}`, token)
+          return seat.playerId
+        }
+      }
     } catch {}
   }
   // No localStorage entry → dynamic mode: follow whoever needs to act right now.
@@ -234,7 +247,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const sendCmd = useCallback(async (command: object) => {
     if (!state.sessionId) return
     try {
-      const result = await sendCommand(state.sessionId, command)
+      const sid = state.sessionId
+      const playerToken = sessionStorage.getItem(`monopoly_token_${sid}`) ?? undefined
+      const cmdType = (command as { type?: string }).type
+      const hostToken = cmdType === 'AbortGame'
+        ? (localStorage.getItem(`monopoly_host_${sid}`) ?? undefined)
+        : undefined
+      const enriched = { ...command, ...(playerToken ? { playerToken } : {}), ...(hostToken ? { hostToken } : {}) }
+      const result = await sendCommand(sid, enriched)
       if (!result.accepted && result.rejections.length > 0) {
         dispatch({ type: 'SET_COMMAND_ERROR', message: result.rejections.join(' · ') })
         setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)

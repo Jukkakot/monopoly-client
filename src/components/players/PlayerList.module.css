@@ -54,6 +54,18 @@
   flex-shrink: 0;
 }
 
+.hostBadge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: #e65100;
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
 .token {
   flex-shrink: 0;
 }
