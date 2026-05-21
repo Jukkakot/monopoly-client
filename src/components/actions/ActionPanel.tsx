@@ -472,40 +472,45 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
       {buildableProps.length > 0 && (
         <>
           <div className={styles.sectionTitle}>{t.buildHousesSectionTitle}</div>
-          {buildableProps.map(prop => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            if (!spot) return null
-            const color = STREET_COLORS[spot.streetType]
-            // Sellable if this is the max level in the group
-            const groupProps = myProps.filter(p => {
-              const s = SPOTS.find(ss => ss.id === p.propertyId)
-              return s?.streetType === spot.streetType
-            })
-            const maxLevel = Math.max(...groupProps.map(p => p.hotelCount > 0 ? 5 : p.houseCount))
-            const myLevel = prop.hotelCount > 0 ? 5 : prop.houseCount
-            const canSell = myLevel > 0 && myLevel >= maxLevel
-            return (
-              <div key={prop.propertyId} className={styles.buildRow}>
-                <span className={styles.buildName} style={{ borderLeft: `3px solid ${color}`, paddingLeft: 4 }}>
-                  {spot.name}
-                </span>
-                <div className={styles.buildHouses}>
-                  {Array.from({ length: prop.houseCount }).map((_, i) => <div key={i} className={styles.houseBox} />)}
-                  {Array.from({ length: 4 - prop.houseCount }).map((_, i) => <div key={i} className={styles.houseEmpty} />)}
-                </div>
-                {canSell && (
-                  <button className={`${styles.buildBtn} ${styles.sellBtn}`}
-                    onClick={() => sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                    −🏠
-                  </button>
-                )}
-                <button className={styles.buildBtn}
-                  onClick={() => sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                  +🏠
-                </button>
+          {(() => {
+            const groups = new Map<string, typeof buildableProps>()
+            for (const prop of buildableProps) {
+              const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
+              const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
+            }
+            return Array.from(groups.entries()).map(([type, groupProps]) => (
+              <div key={type} className={styles.buildGroup}>
+                {groupProps.map(prop => {
+                  const spot = SPOTS.find(s => s.id === prop.propertyId)
+                  if (!spot) return null
+                  const color = STREET_COLORS[spot.streetType]
+                  const typeGroup = myProps.filter(p => SPOTS.find(ss => ss.id === p.propertyId)?.streetType === spot.streetType)
+                  const maxLevel = Math.max(...typeGroup.map(p => p.hotelCount > 0 ? 5 : p.houseCount))
+                  const myLevel = prop.hotelCount > 0 ? 5 : prop.houseCount
+                  const canSell = myLevel > 0 && myLevel >= maxLevel
+                  return (
+                    <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
+                      <span className={styles.buildName}>{spot.name}</span>
+                      <div className={styles.buildHouses}>
+                        {Array.from({ length: prop.houseCount }).map((_, i) => <div key={i} className={styles.houseBox} />)}
+                        {Array.from({ length: 4 - prop.houseCount }).map((_, i) => <div key={i} className={styles.houseEmpty} />)}
+                      </div>
+                      {canSell && (
+                        <button className={`${styles.buildBtn} ${styles.sellBtn}`}
+                          onClick={() => sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
+                          −🏠
+                        </button>
+                      )}
+                      <button className={styles.buildBtn}
+                        onClick={() => sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
+                        +🏠
+                      </button>
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })}
+            ))
+          })()}
         </>
       )}
       {myProps.length > 0 && (() => {
@@ -519,20 +524,31 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
               {mortgagedCount > 0 && <span className={styles.sectionBadge}>{mortgagedCount} pantattu</span>}
               <span className={styles.sectionChevron}>{mortgageOpen ? '▴' : '▾'}</span>
             </button>
-            {mortgageOpen && mortgageProps.map(prop => {
-              const spot = SPOTS.find(s => s.id === prop.propertyId)
-              if (!spot) return null
-              const color = STREET_COLORS[spot.streetType]
-              return (
-                <div key={prop.propertyId} className={styles.buildRow}>
-                  <span className={styles.buildName} style={color ? { borderLeft: `3px solid ${color}`, paddingLeft: 4 } : {}}>{spot.name}</span>
-                  <button className={styles.buildBtn}
-                    onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                    {prop.mortgaged ? t.redeemBtn : t.mortgageBtn}
-                  </button>
+            {mortgageOpen && (() => {
+              const groups = new Map<string, typeof mortgageProps>()
+              for (const prop of mortgageProps) {
+                const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
+                const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
+              }
+              return Array.from(groups.entries()).map(([type, groupProps]) => (
+                <div key={type} className={styles.buildGroup}>
+                  {groupProps.map(prop => {
+                    const spot = SPOTS.find(s => s.id === prop.propertyId)
+                    if (!spot) return null
+                    const color = STREET_COLORS[spot.streetType]
+                    return (
+                      <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
+                        <span className={styles.buildName}>{spot.name}</span>
+                        <button className={styles.buildBtn}
+                          onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
+                          {prop.mortgaged ? t.redeemBtn : t.mortgageBtn}
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
-              )
-            })}
+              ))
+            })()}
           </>
         )
       })()}

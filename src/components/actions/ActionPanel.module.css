@@ -535,11 +535,17 @@
   margin-top: 4px;
 }
 
+.buildGroup {
+  margin-bottom: 4px;
+}
+
 .buildRow {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
+  border-radius: 4px;
+  padding: 2px 5px;
 }
 
 .buildName {
