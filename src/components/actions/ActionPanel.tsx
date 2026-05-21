@@ -573,9 +573,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   const minBid = auction.minimumNextBid > 0 ? auction.minimumNextBid : auction.currentBid + 10
   const isEligible = auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
   const currentActor = state.players.find(p => p.playerId === auction.currentActorPlayerId)
-  const spotPrice = spot ? (SPOTS.find(s => s.id === spot.id)?.price ?? 0) : 0
-  const fairBid = spotPrice > 0 ? Math.round(spotPrice * 0.85 / 10) * 10 : 0
-  const isBelowFair = fairBid > 0 && auction.currentBid < fairBid
+  const spotPrice = spot?.price ?? 0
 
   function placeBid(amount: number) {
     playAuctionBid()
@@ -613,9 +611,9 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           {passedNames.length > 0 && t.auctionPassed(passedNames.join(', '))}
         </span>
       </div>
-      {isBelowFair && isEligible && (
+      {spotPrice > 0 && (
         <div className={styles.auctionHint}>
-          {t.auctionFairValue(fairBid)}
+          {t.auctionListPrice(spotPrice)}
         </div>
       )}
       {!isEligible && currentActor && auction.status === 'ACTIVE' && (

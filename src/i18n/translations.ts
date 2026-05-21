@@ -52,7 +52,7 @@ export interface T {
   auctionHighest: (bid: number, leaderName: string | null) => string
   auctionRemaining: (n: number) => string
   auctionPassed: (names: string) => string
-  auctionFairValue: (v: number) => string
+  auctionListPrice: (v: number) => string
   auctionActorWaiting: (name: string) => string
   auctionConfirmWin: string
   placeBidBtn: string
@@ -373,7 +373,7 @@ const fi: T = {
   auctionHighest: (bid, leader) => `Korkein: €${bid}${leader ? ` — ${leader}` : ''}`,
   auctionRemaining: (n) => `${n} pelaajaa jäljellä`,
   auctionPassed: (names) => ` · Passasi: ${names}`,
-  auctionFairValue: (v) => `💡 Markkina-arvo ~€${v} (85% listahinnasta)`,
+  auctionListPrice: (v) => `🏷 Listahinta €${v}`,
   auctionActorWaiting: (name) => `⏳ ${name} tekee tarjouksen…`,
   auctionConfirmWin: '🏆 Vahvista voitto',
   placeBidBtn: 'Tarjoa',
@@ -715,7 +715,7 @@ const en: T = {
   auctionHighest: (bid, leader) => `Highest: €${bid}${leader ? ` — ${leader}` : ''}`,
   auctionRemaining: (n) => `${n} player${n !== 1 ? 's' : ''} remaining`,
   auctionPassed: (names) => ` · Passed: ${names}`,
-  auctionFairValue: (v) => `💡 Market value ~€${v} (85% of list price)`,
+  auctionListPrice: (v) => `🏷 List price €${v}`,
   auctionActorWaiting: (name) => `⏳ ${name} is bidding…`,
   auctionConfirmWin: '🏆 Confirm win',
   placeBidBtn: 'Bid',
