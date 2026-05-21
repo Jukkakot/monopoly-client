@@ -79,8 +79,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // Track card only for MY turn — clear when active player changes
   const [visibleCard, setVisibleCard] = useState<{ key: string; msg: string | null } | null>(null)
   const [cardDismissed, setCardDismissed] = useState(false)
-  const prevCardKeyRef = useRef<string | null>(null)
-  const prevActiveRef = useRef<string | undefined>(undefined)
+  const prevCardKeyRef = useRef<string | null>(state.lastCardKey)
+  const prevActiveRef = useRef<string | undefined>(activeId)
   useEffect(() => {
     if (state.lastCardKey && state.lastCardKey !== prevCardKeyRef.current && activeId === myPlayerId) {
       setVisibleCard({ key: state.lastCardKey, msg: state.lastCardMessage })
