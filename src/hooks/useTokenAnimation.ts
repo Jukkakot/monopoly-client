@@ -6,10 +6,18 @@ const STEP_MS = 390
 const BOARD_SIZE = 40
 const JAIL_INDEX = 10
 const JAIL_ARRIVE_CSS_MS = 700  // must match CSS animation duration
+const CARD_ARRIVE_CSS_MS = 500  // must match .cardArrive animation duration
+
+// Card types that move the player (non-jail; jail is handled separately)
+function isMovementCard(key: string | null): boolean {
+  if (!key) return false
+  return /:MOVE:|:MOVE_NEAREST:|:MOVE_BACK_3:/.test(key)
+}
 
 // Module-level animation state so any component can subscribe
 const _animatingPlayers = new Set<string>()
 const _jailingPlayers = new Set<string>()
+const _cardJumpingPlayers = new Set<string>()
 const _listeners = new Set<() => void>()
 
 function notifyListeners() {
@@ -29,6 +37,14 @@ function setPlayerJailing(pid: string, jailing: boolean) {
   if (!changed) return
   if (jailing) _jailingPlayers.add(pid)
   else _jailingPlayers.delete(pid)
+  notifyListeners()
+}
+
+function setPlayerCardJumping(pid: string, jumping: boolean) {
+  const changed = jumping ? !_cardJumpingPlayers.has(pid) : _cardJumpingPlayers.has(pid)
+  if (!changed) return
+  if (jumping) _cardJumpingPlayers.add(pid)
+  else _cardJumpingPlayers.delete(pid)
   notifyListeners()
 }
 
@@ -54,6 +70,17 @@ export function useJailingPlayers(): Set<string> {
   return jailing
 }
 
+// Hook: returns set of playerIds currently doing card-jump animation
+export function useCardJumpingPlayers(): Set<string> {
+  const [jumping, setJumping] = useState(() => new Set<string>(_cardJumpingPlayers))
+  useEffect(() => {
+    const update = () => setJumping(new Set(_cardJumpingPlayers))
+    _listeners.add(update)
+    return () => { _listeners.delete(update) }
+  }, [])
+  return jumping
+}
+
 // Returns animated positions: Map<playerId, displayIndex>
 export function useTokenAnimation(): Map<string, number> {
   const { state } = useGame()
@@ -63,9 +90,14 @@ export function useTokenAnimation(): Map<string, number> {
   const queueRef = useRef<Map<string, number[]>>(new Map())
   const localAnimatingRef = useRef(new Set<string>())
   const prevInJailRef = useRef<Map<string, boolean>>(new Map())
+  const prevCardKeyRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!snapshot) return
+
+    const cardKeyChanged = snapshot.lastCardKey !== null &&
+                           snapshot.lastCardKey !== prevCardKeyRef.current
+    const isCardMove = cardKeyChanged && isMovementCard(snapshot.lastCardKey)
 
     for (const player of snapshot.players) {
       if (player.bankrupt || player.eliminated) continue
@@ -108,6 +140,31 @@ export function useTokenAnimation(): Map<string, number> {
         continue
       }
 
+      // Card move: jump directly (no step-by-step walk)
+      if (isCardMove) {
+        const dist = Math.min(
+          (currentIdx - settledIdx + BOARD_SIZE) % BOARD_SIZE,
+          (settledIdx - currentIdx + BOARD_SIZE) % BOARD_SIZE
+        )
+        const blockDuration = Math.max(500, Math.min(1400, 500 + (dist / 39) * 900))
+
+        settledRef.current.set(pid, currentIdx)
+        queueRef.current.delete(pid)
+        setDisplayPositions(prev => new Map(prev).set(pid, currentIdx))
+
+        if (!localAnimatingRef.current.has(pid)) {
+          localAnimatingRef.current.add(pid)
+          setPlayerAnimating(pid, true)
+          setPlayerCardJumping(pid, true)
+          setTimeout(() => setPlayerCardJumping(pid, false), CARD_ARRIVE_CSS_MS)
+          setTimeout(() => {
+            localAnimatingRef.current.delete(pid)
+            setPlayerAnimating(pid, false)
+          }, blockDuration)
+        }
+        continue
+      }
+
       const steps: number[] = []
       let pos = settledIdx
       while (pos !== currentIdx) {
@@ -125,6 +182,8 @@ export function useTokenAnimation(): Map<string, number> {
         animatePlayer(pid)
       }
     }
+
+    prevCardKeyRef.current = snapshot.lastCardKey
   }, [snapshot])
 
   function animatePlayer(pid: string) {

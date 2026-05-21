@@ -15,6 +15,7 @@ interface Props {
   onClick?: () => void
   tokenShapes?: Map<string, TokenShape>
   jailingPlayers?: Set<string>
+  cardJumpingPlayers?: Set<string>
   highlighted?: 'selected' | 'group'
 }
 
@@ -46,11 +47,12 @@ const ROTATION: Record<string, string> = {
 }
 
 
-function PlayerTokens({ players, seats, tokenShapes, jailingPlayers }: {
+function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumpingPlayers }: {
   players: PlayerSnapshot[]
   seats: SeatState[]
   tokenShapes?: Map<string, TokenShape>
   jailingPlayers?: Set<string>
+  cardJumpingPlayers?: Set<string>
 }) {
   if (!players.length) return null
   return (
@@ -59,8 +61,10 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers }: {
         const seat = seats.find(s => s.playerId === p.playerId)
         const shape = tokenShapes?.get(p.playerId) ?? 'circle'
         const isJailing = jailingPlayers?.has(p.playerId) ?? false
+        const isCardJumping = cardJumpingPlayers?.has(p.playerId) ?? false
+        const animClass = isJailing ? styles.jailArrive : isCardJumping ? styles.cardArrive : undefined
         return (
-          <span key={p.playerId} className={isJailing ? styles.jailArrive : undefined}>
+          <span key={p.playerId} className={animClass}>
             <TokenSvg
               color={seat?.tokenColorHex ?? '#888'}
               shape={shape}
@@ -143,7 +147,7 @@ function GoJailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot
   )
 }
 
-export default function BoardSpot({ spot, index, property, players, seats, onClick, tokenShapes, jailingPlayers, highlighted }: Props) {
+export default function BoardSpot({ spot, index, property, players, seats, onClick, tokenShapes, jailingPlayers, cardJumpingPlayers, highlighted }: Props) {
   const { row, col } = indexToGridPos(index)
   const side = getSide(index)
 
@@ -218,7 +222,7 @@ export default function BoardSpot({ spot, index, property, players, seats, onCli
       {spot.price && <div className={styles.price}>€{spot.price}</div>}
 
       {/* Tokens rendered last so they're always on top */}
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} cardJumpingPlayers={cardJumpingPlayers} />
     </div>
     </div>
   )
