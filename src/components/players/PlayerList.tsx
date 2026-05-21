@@ -235,6 +235,11 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                   {player.name}
                   {isMe && <span className={styles.meBadge}>{t.youBadge}</span>}
                   {player.playerId === state.hostPlayerId && <span className={styles.hostBadge}>HOST</span>}
+                  {seat?.seatKind === 'BOT' && (
+                    <span className={`${styles.badge} ${styles.botBadge} ${seat.botDifficulty === 'EASY' ? styles.botEasy : seat.botDifficulty === 'STRONG' ? styles.botStrong : styles.botNormal}`}>
+                      🤖{seat.botDifficulty === 'EASY' ? 'E' : seat.botDifficulty === 'STRONG' ? 'S' : 'N'}
+                    </span>
+                  )}
                   {isBankrupt && <span className={styles.badge}>{t.bankruptBadge}</span>}
                   {player.inJail && !isBankrupt && (
                     <span className={styles.badge}>🔒{player.jailRoundsRemaining > 0 ? `${player.jailRoundsRemaining}v` : ''}</span>
