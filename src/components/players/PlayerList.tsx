@@ -94,7 +94,7 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
               const spot = SPOTS.find(s => s.id === prop.propertyId)
               return (
                 <div key={prop.propertyId} className={`${styles.propRow} ${onSpotClick ? styles.propRowClickable : ''}`}
-                  onClick={() => onSpotClick?.(prop.propertyId)}>
+                  onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
                   <span className={styles.propDot} style={{ background: color ?? '#aaa' }} />
                   <span className={styles.propName}>{spot?.name ?? prop.propertyId}</span>
                   <span className={styles.propBuildings}>
