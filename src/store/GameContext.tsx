@@ -11,6 +11,7 @@ import {
 import { calcNetWorth } from '../utils/netWorth'
 import { getLang } from '../i18n/lang'
 import { translations } from '../i18n/translations'
+import { isAnyPlayerAnimating, onAnimationIdle } from '../hooks/useTokenAnimation'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -217,6 +218,28 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const esRef = useRef<EventSource | null>(null)
   const versionRef = useRef(0)
   const lastSoundedId = useRef(-1)
+  const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
+  // Always points to latest closure — updated each render so refs and dispatch are fresh
+  const drainPendingRef = useRef<() => void>(null!)
+  drainPendingRef.current = () => {
+    if (isAnyPlayerAnimating()) return
+    const next = pendingSnapshots.current.shift()
+    if (!next) return
+    dispatch({ type: 'SET_SNAPSHOT', snapshot: next })
+    // After a yield, check if this snapshot started an animation.
+    // If not, immediately drain the next one.
+    setTimeout(() => { if (!isAnyPlayerAnimating()) drainPendingRef.current() }, 50)
+  }
+
+  // Drain snapshot queue when all movement animations finish
+  useEffect(() => {
+    return onAnimationIdle(() => drainPendingRef.current())
+  }, [])
+
+  // Clear pending queue on session change or disconnect
+  useEffect(() => {
+    pendingSnapshots.current = []
+  }, [state.sessionId])
 
   // Play sounds in sync with event log visibility (respects releaseAt animation delay)
   useEffect(() => {
@@ -298,9 +321,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
       es.onmessage = (e) => {
         try {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
-          versionRef.current = snap.version
+          versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
-          dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
+          // Queue snapshot if animation is running or queue already has pending items
+          // (maintain order: once queuing starts, all subsequent snaps must queue too)
+          if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0) {
+            pendingSnapshots.current.push(snap)
+          } else {
+            dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
+          }
         } catch {
           // ignore parse errors
         }

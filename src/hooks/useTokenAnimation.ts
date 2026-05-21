@@ -60,6 +60,18 @@ function flashPlayerStepping(pid: string) {
   }, STEP_HOP_CSS_MS)
 }
 
+// Non-hook: read animation state outside React render cycle (for snapshot queue)
+export function isAnyPlayerAnimating(): boolean {
+  return _animatingPlayers.size > 0
+}
+
+// Non-hook: subscribe to animation-idle transitions (fires each time _animatingPlayers → empty)
+export function onAnimationIdle(fn: () => void): () => void {
+  const wrapper = () => { if (_animatingPlayers.size === 0) fn() }
+  _listeners.add(wrapper)
+  return () => _listeners.delete(wrapper)
+}
+
 // Hook: returns true while any token is mid-animation
 export function useIsAnimating(): boolean {
   const [animating, setAnimating] = useState(_animatingPlayers.size > 0)
