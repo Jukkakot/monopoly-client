@@ -51,34 +51,36 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
     <header className={styles.header}>
       <div className={styles.title}>Monopoly Helsinki</div>
       <div className={styles.turnInfo} />
-      {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
-      {snapshot && (
-        <button
-          className={styles.sessionIdBtn}
-          onClick={copySessionId}
-          title={`Kopioi pelin koodi: ${snapshot.sessionId}`}
-        >
-          {idCopied ? '✓' : snapshot.sessionId}
+      <div className={styles.controls}>
+        {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
+        {snapshot && (
+          <button
+            className={styles.sessionIdBtn}
+            onClick={copySessionId}
+            title={`Kopioi pelin koodi: ${snapshot.sessionId}`}
+          >
+            {idCopied ? '✓' : snapshot.sessionId}
+          </button>
+        )}
+        <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>
+          {muted ? '🔇' : '🔊'}
         </button>
-      )}
-      <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>
-        {muted ? '🔇' : '🔊'}
-      </button>
-      <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
-        <img
-          src={lang === 'fi' ? 'https://flagcdn.com/20x15/fi.png' : 'https://flagcdn.com/20x15/gb.png'}
-          width={20} height={15}
-          alt={lang === 'fi' ? 'FI' : 'EN'}
-          style={{ display: 'block', borderRadius: 2 }}
-        />
-      </button>
-      {snapshot !== null && (
-        <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
-          {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
-          {statusLabel[connectionStatus]}
-        </div>
-      )}
-      <OverflowMenu />
+        <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
+          <img
+            src={lang === 'fi' ? 'https://flagcdn.com/20x15/fi.png' : 'https://flagcdn.com/20x15/gb.png'}
+            width={20} height={15}
+            alt={lang === 'fi' ? 'FI' : 'EN'}
+            style={{ display: 'block', borderRadius: 2 }}
+          />
+        </button>
+        {snapshot !== null && (
+          <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
+            {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
+            {statusLabel[connectionStatus]}
+          </div>
+        )}
+        <OverflowMenu />
+      </div>
     </header>
   )
 }
