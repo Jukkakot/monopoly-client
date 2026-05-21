@@ -5,7 +5,7 @@
   padding: 10px 12px;
   background: #2e7d32;
   color: #fff;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   min-width: 0;
   overflow: visible;
 }
