@@ -626,11 +626,11 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
   const trade = state.tradeState!
   const { status } = trade
 
-  if (status === 'EDITING' && trade.editingPlayerId === myPlayerId) {
+  if ((status === 'EDITING' || status === 'COUNTERED') && trade.editingPlayerId === myPlayerId) {
     return <TradeEditor state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
-  if ((status === 'SUBMITTED' || status === 'COUNTERED') && trade.decisionRequiredFromPlayerId === myPlayerId) {
+  if (status === 'SUBMITTED' && trade.decisionRequiredFromPlayerId === myPlayerId) {
     return <TradeReceiver state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
