@@ -1,13 +1,14 @@
 .page {
   min-height: 100svh;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   background: #e8f5e9;
-  padding: 16px;
+  padding-bottom: 24px;
 }
 
 .card {
+  margin-top: 20px;
   background: #fff;
   border: 2px solid #a5d6a7;
   border-radius: 16px;
@@ -54,6 +55,31 @@
 
 .newBtn:hover { filter: brightness(1.1); }
 
+.quickDivider {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #aaa;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.quickDivider::before, .quickDivider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  height: 1px;
+  background: #ddd;
+}
+.quickDivider::before { left: 0; }
+.quickDivider::after { right: 0; }
+
+.quickHint {
+  font-size: 0.72rem;
+  color: #aaa;
+  text-align: center;
+}
+
 .quickRow {
   display: flex;
   gap: 6px;
@@ -61,19 +87,18 @@
 
 .quickBtn {
   flex: 1;
-  padding: 10px 6px;
-  background: #f1f8e9;
-  border: 1.5px solid #a5d6a7;
+  padding: 11px 6px;
+  background: #e8f5e9;
+  border: 2px solid #81c784;
   border-radius: 8px;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #2e7d32;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
-  font-family: 'Arial Narrow', Arial, sans-serif;
 }
 
-.quickBtn:hover { background: #dcedc8; border-color: #66bb6a; }
+.quickBtn:hover { background: #dcedc8; border-color: #43a047; }
 .quickBtn:disabled { opacity: 0.5; cursor: default; }
 
 .listSection {

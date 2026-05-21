@@ -7,6 +7,7 @@ import { saveTokenShapes } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './SessionListScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
+import Header from '../components/layout/Header'
 
 export default function SessionListScreen() {
   const navigate = useNavigate()
@@ -123,6 +124,7 @@ export default function SessionListScreen() {
 
   return (
     <div className={styles.page}>
+      <Header snapshot={null} connectionStatus="LIVE" />
       <div className={styles.card}>
         <div className={styles.logoBox}>
           <div className={styles.logo}>Monopoly</div>
@@ -153,17 +155,19 @@ export default function SessionListScreen() {
           <button className={styles.newBtn} onClick={() => navigate('/lobby')}>
             {t.newGameBtn}
           </button>
+          <div className={styles.quickDivider}>{t.quickStartLabel}</div>
           <div className={styles.quickRow}>
-            <button className={styles.quickBtn} onClick={() => handleQuickStart(1)} disabled={loading}>
-              ⚡ 1 vs Botti
+            <button className={styles.quickBtn} onClick={() => handleQuickStart(1)} disabled={loading} title={t.quickStartHint}>
+              ⚡ 1 vs 1
             </button>
-            <button className={styles.quickBtn} onClick={() => handleQuickStart(2)} disabled={loading}>
-              ⚡ 1 vs 2 Botti
+            <button className={styles.quickBtn} onClick={() => handleQuickStart(2)} disabled={loading} title={t.quickStartHint}>
+              ⚡ 1 vs 2
             </button>
-            <button className={styles.quickBtn} onClick={() => handleQuickStart(3)} disabled={loading}>
-              ⚡ 1 vs 3 Botti
+            <button className={styles.quickBtn} onClick={() => handleQuickStart(3)} disabled={loading} title={t.quickStartHint}>
+              ⚡ 1 vs 3
             </button>
           </div>
+          <div className={styles.quickHint}>{t.quickStartHint}</div>
         </div>
 
         <div className={styles.joinCodeSection}>

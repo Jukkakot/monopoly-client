@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { joinLobby } from '../api/sessionApi'
-import { GEOMETRIC_SHAPES, EMOJI_SHAPES, ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
 import Header from '../components/layout/Header'
+import { TokenSvg } from '../components/board/TokenSvg'
 import styles from './LobbyScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 
@@ -124,35 +125,25 @@ export default function LobbyScreen() {
         </div>
 
         <div className={styles.players}>
-          {rows.map((row, i) => (
+          {rows.map((row, i) => {
+            const usedByOthers = new Set(rows.filter((_, j) => j !== i).map(r => r.color))
+            return (
             <div key={i} className={`${styles.playerRow} ${row.isBot ? styles.playerRowBot : ''}`}>
               <div className={styles.colorRow}>
                 {PRESET_COLORS.map(c => (
                   <button
                     key={c}
-                    className={`${styles.colorDot} ${row.color === c ? styles.selected : ''}`}
+                    className={`${styles.colorDot} ${row.color === c ? styles.selected : ''} ${usedByOthers.has(c) ? styles.colorDotUsed : ''}`}
                     style={{ background: c }}
                     onClick={() => { playButtonClick(); updateRow(i, { color: c }) }}
-                    title={c}
+                    title={usedByOthers.has(c) ? t.colorUsedByOther : c}
                   />
                 ))}
               </div>
 
               <div className={styles.shapeSection}>
-                <div className={styles.shapeLabel}>{t.tokenLabel}</div>
                 <div className={styles.shapeRow}>
-                  {GEOMETRIC_SHAPES.map(s => (
-                    <button
-                      key={s.key}
-                      className={`${styles.shapeBtn} ${row.tokenShape === s.key ? styles.shapeSelected : ''}`}
-                      style={row.tokenShape === s.key ? { color: row.color, borderColor: row.color } : {}}
-                      onClick={() => { playButtonClick(); updateRow(i, { tokenShape: s.key }) }}
-                      title={s.key}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
-                  {EMOJI_SHAPES.map(s => (
+                  {ALL_SHAPES.map(s => (
                     <button
                       key={s.key}
                       className={`${styles.shapeBtn} ${row.tokenShape === s.key ? styles.shapeSelected : ''}`}
@@ -160,9 +151,16 @@ export default function LobbyScreen() {
                       onClick={() => { playButtonClick(); updateRow(i, { tokenShape: s.key }) }}
                       title={s.key}
                     >
-                      {s.label}
+                      <TokenSvg
+                        color={row.tokenShape === s.key ? row.color : '#bbb'}
+                        shape={s.key}
+                        size={20}
+                      />
                     </button>
                   ))}
+                  <div className={styles.tokenPreview}>
+                    <TokenSvg color={row.color} shape={row.tokenShape} size={32} />
+                  </div>
                 </div>
               </div>
 
@@ -184,7 +182,7 @@ export default function LobbyScreen() {
                 )}
               </div>
             </div>
-          ))}
+          )})}
         </div>
 
         {rows.length < 6 && (

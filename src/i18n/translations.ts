@@ -139,6 +139,8 @@ export interface T {
   gameNotFoundErr: string
   connectionErr: string
   quickStartFailed: string
+  quickStartLabel: string
+  quickStartHint: string
   rejoinBanner: string
   waitingRoomsTitle: string
   activeGamesTitle: string
@@ -158,6 +160,7 @@ export interface T {
   // LobbyScreen
   playerCountLabel: string
   tokenLabel: string
+  colorUsedByOther: string
   humanLabel: string
   botLabel: string
   easyLabel: string
@@ -458,6 +461,8 @@ const fi: T = {
   gameNotFoundErr: 'Peliä ei löydy. Tarkista koodi.',
   connectionErr: 'Yhteysongelma. Yritä uudelleen.',
   quickStartFailed: 'Pikapelin luonti epäonnistui.',
+  quickStartLabel: 'tai aloita heti bottia vastaan',
+  quickStartHint: 'Luo pelin heti sinulle + boteille',
   rejoinBanner: '↩ Jatkasitko viime peliä?',
   waitingRoomsTitle: 'Odotushuoneet',
   activeGamesTitle: 'Käynnissä olevat pelit',
@@ -477,6 +482,7 @@ const fi: T = {
   // LobbyScreen
   playerCountLabel: 'Pelaajia',
   tokenLabel: 'Pelimerkki',
+  colorUsedByOther: 'Väri on jo käytössä toisella pelaajalla',
   humanLabel: 'Ihminen',
   botLabel: 'Botti',
   easyLabel: 'Helppo',
@@ -793,6 +799,8 @@ const en: T = {
   gameNotFoundErr: 'Game not found. Check the code.',
   connectionErr: 'Connection error. Try again.',
   quickStartFailed: 'Failed to create quick game.',
+  quickStartLabel: 'or start instantly vs bots',
+  quickStartHint: 'Creates a game for you + bots immediately',
   rejoinBanner: '↩ Continue last game?',
   waitingRoomsTitle: 'Waiting rooms',
   activeGamesTitle: 'Active games',
@@ -812,6 +820,7 @@ const en: T = {
   // LobbyScreen
   playerCountLabel: 'Players',
   tokenLabel: 'Token',
+  colorUsedByOther: 'Color already used by another player',
   humanLabel: 'Human',
   botLabel: 'Bot',
   easyLabel: 'Easy',
