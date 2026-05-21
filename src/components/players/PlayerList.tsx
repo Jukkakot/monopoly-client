@@ -86,6 +86,7 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             {totalHouses > 0 && <span className={styles.propStat}>🏠{totalHouses}</span>}
             {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>{t.mortgagedStat(mortgagedCount)}</span>}
           </div>
+      <div className={styles.propGrid}>
       {Array.from(groups.entries()).map(([type, props]) => {
         const color = STREET_COLORS[type]
         return (
@@ -113,6 +114,7 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
           </div>
         )
       })}
+      </div>
         </>
       )}
     </div>
