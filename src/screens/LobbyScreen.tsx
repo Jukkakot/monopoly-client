@@ -56,25 +56,22 @@ export default function LobbyScreen() {
 
   function randomizeAll() {
     playButtonClick()
-    const usedNames: string[] = []
-    const usedColors = new Set<string>()
-    const usedShapes = new Set<TokenShape>()
-
-    const availableColors = [...PRESET_COLORS].sort(() => Math.random() - 0.5)
-    const availableShapes = [...ALL_SHAPES].sort(() => Math.random() - 0.5)
-
-    setRows(prev => prev.map((r) => {
-      const name = r.isBot ? randomBotName(usedNames) : randomHumanName(usedNames)
-      usedNames.push(name)
-
-      let color = availableColors.find(c => !usedColors.has(c)) ?? r.color
-      usedColors.add(color)
-
-      let shape = availableShapes.find(s => !usedShapes.has(s.key))?.key ?? r.tokenShape
-      usedShapes.add(shape)
-
-      return { ...r, name, color, tokenShape: shape }
-    }))
+    setRows(prev => {
+      const usedNames: string[] = []
+      const usedColors = new Set<string>()
+      const usedShapes = new Set<TokenShape>()
+      const availableColors = [...PRESET_COLORS].sort(() => Math.random() - 0.5)
+      const availableShapes = [...ALL_SHAPES].sort(() => Math.random() - 0.5)
+      return prev.map(r => {
+        const name = r.isBot ? randomBotName(usedNames) : randomHumanName(usedNames)
+        usedNames.push(name)
+        const color = availableColors.find(c => !usedColors.has(c)) ?? r.color
+        usedColors.add(color)
+        const shape = availableShapes.find(s => !usedShapes.has(s.key))?.key ?? r.tokenShape
+        usedShapes.add(shape)
+        return { ...r, name, color, tokenShape: shape }
+      })
+    })
   }
 
   async function handleCreate() {
