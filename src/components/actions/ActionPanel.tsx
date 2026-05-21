@@ -67,6 +67,19 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
 
+  // Track card only for the turn it was drawn — clear when active player changes
+  const [visibleCard, setVisibleCard] = useState<{ key: string; msg: string | null } | null>(null)
+  const prevCardKeyRef = useRef<string | null>(null)
+  const prevActiveRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (state.lastCardKey && state.lastCardKey !== prevCardKeyRef.current)
+      setVisibleCard({ key: state.lastCardKey, msg: state.lastCardMessage })
+    if (activeId !== prevActiveRef.current && prevActiveRef.current !== undefined)
+      setVisibleCard(null)
+    prevCardKeyRef.current = state.lastCardKey
+    prevActiveRef.current = activeId
+  }, [state.lastCardKey, state.lastCardMessage, activeId])
+
 
   // GAME OVER
   if (state.status === 'GAME_OVER' || phase === 'GAME_OVER') {
@@ -193,10 +206,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
         )}
 
-        {getCardText(state.lastCardKey, state.lastCardMessage) && (
+        {getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null) && (
           <div className={styles.cardMessage}>
             <span className={styles.cardMessageIcon}>🃏</span>
-            <span>{getCardText(state.lastCardKey, state.lastCardMessage)}</span>
+            <span>{getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)}</span>
           </div>
         )}
         {myPlayer && (
@@ -258,10 +271,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
 
-        {getCardText(state.lastCardKey, state.lastCardMessage) && (
+        {getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null) && (
           <div className={styles.cardMessage}>
             <span className={styles.cardMessageIcon}>🃏</span>
-            <span>{getCardText(state.lastCardKey, state.lastCardMessage)}</span>
+            <span>{getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)}</span>
           </div>
         )}
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />

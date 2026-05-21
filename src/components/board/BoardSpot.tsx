@@ -14,6 +14,7 @@ interface Props {
   seats: SeatState[]
   onClick?: () => void
   tokenShapes?: Map<string, TokenShape>
+  jailingPlayers?: Set<string>
   highlighted?: 'selected' | 'group'
 }
 
@@ -45,10 +46,11 @@ const ROTATION: Record<string, string> = {
 }
 
 
-function PlayerTokens({ players, seats, tokenShapes }: {
+function PlayerTokens({ players, seats, tokenShapes, jailingPlayers }: {
   players: PlayerSnapshot[]
   seats: SeatState[]
   tokenShapes?: Map<string, TokenShape>
+  jailingPlayers?: Set<string>
 }) {
   if (!players.length) return null
   return (
@@ -56,12 +58,14 @@ function PlayerTokens({ players, seats, tokenShapes }: {
       {players.map(p => {
         const seat = seats.find(s => s.playerId === p.playerId)
         const shape = tokenShapes?.get(p.playerId) ?? 'circle'
+        const isJailing = jailingPlayers?.has(p.playerId) ?? false
         return (
-          <TokenSvg
-            key={p.playerId}
-            color={seat?.tokenColorHex ?? '#888'}
-            shape={shape}
-          />
+          <span key={p.playerId} className={isJailing ? styles.jailArrive : undefined}>
+            <TokenSvg
+              color={seat?.tokenColorHex ?? '#888'}
+              shape={shape}
+            />
+          </span>
         )
       })}
     </div>
@@ -80,7 +84,7 @@ function GoCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; 
   )
 }
 
-function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape> }) {
+function JailCorner({ players, seats, tokenShapes, jailingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; jailingPlayers?: Set<string> }) {
   const t = useT()
   const jailed = players.filter(p => p.inJail)
   const visiting = players.filter(p => !p.inJail)
@@ -93,9 +97,12 @@ function JailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot[]
           {jailed.map(p => {
             const seat = seats.find(s => s.playerId === p.playerId)
             const shape = tokenShapes?.get(p.playerId) ?? 'circle'
+            const isJailing = jailingPlayers?.has(p.playerId) ?? false
             return (
               <div key={p.playerId} className={styles.jailPrisonerRow}>
-                <TokenSvg color={seat?.tokenColorHex ?? '#888'} shape={shape} />
+                <span className={isJailing ? styles.jailArrive : undefined}>
+                  <TokenSvg color={seat?.tokenColorHex ?? '#888'} shape={shape} />
+                </span>
                 <span className={styles.jailRounds}>{p.jailRoundsRemaining}v</span>
               </div>
             )
@@ -136,7 +143,7 @@ function GoJailCorner({ players, seats, tokenShapes }: { players: PlayerSnapshot
   )
 }
 
-export default function BoardSpot({ spot, index, property, players, seats, onClick, tokenShapes, highlighted }: Props) {
+export default function BoardSpot({ spot, index, property, players, seats, onClick, tokenShapes, jailingPlayers, highlighted }: Props) {
   const { row, col } = indexToGridPos(index)
   const side = getSide(index)
 
@@ -148,7 +155,7 @@ export default function BoardSpot({ spot, index, property, players, seats, onCli
   if (side === 'corner') {
     const inner =
       spot.id === 'GO_SPOT'      ? <GoCorner players={players} seats={seats} tokenShapes={tokenShapes} /> :
-      spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} tokenShapes={tokenShapes} /> :
+      spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} /> :
       spot.id === 'FREE_PARKING' ? <ParkingCorner players={players} seats={seats} tokenShapes={tokenShapes} /> :
                                    <GoJailCorner players={players} seats={seats} tokenShapes={tokenShapes} />
     return <div className={styles.cornerWrapper} style={gridStyle}>{inner}</div>
@@ -211,7 +218,7 @@ export default function BoardSpot({ spot, index, property, players, seats, onCli
       {spot.price && <div className={styles.price}>€{spot.price}</div>}
 
       {/* Tokens rendered last so they're always on top */}
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} />
     </div>
     </div>
   )
