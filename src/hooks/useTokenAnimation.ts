@@ -59,6 +59,17 @@ export function useIsAnimating(): boolean {
   return animating
 }
 
+// Hook: returns the set of playerIds currently mid-animation
+export function useAnimatingPlayers(): Set<string> {
+  const [animating, setAnimating] = useState(() => new Set<string>(_animatingPlayers))
+  useEffect(() => {
+    const update = () => setAnimating(new Set(_animatingPlayers))
+    _listeners.add(update)
+    return () => { _listeners.delete(update) }
+  }, [])
+  return animating
+}
+
 // Hook: returns set of playerIds currently doing jail-fly animation
 export function useJailingPlayers(): Set<string> {
   const [jailing, setJailing] = useState(() => new Set<string>(_jailingPlayers))

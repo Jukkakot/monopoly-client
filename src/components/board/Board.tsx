@@ -5,7 +5,7 @@ import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 
@@ -245,9 +245,22 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const animatedPositions = useTokenAnimation()
   const jailingPlayers = useJailingPlayers()
   const cardJumpingPlayers = useCardJumpingPlayers()
+  const animatingPlayers = useAnimatingPlayers()
   const { state: gameState } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
+
+  // While a player is animating, keep showing previous ownership for properties they just acquired
+  const prevProperties = gameState.prevSnapshot?.properties
+  const displayProperties = (animatingPlayers.size > 0 && prevProperties)
+    ? state.properties.map(p => {
+        if (!p.ownerPlayerId || !animatingPlayers.has(p.ownerPlayerId)) return p
+        const prev = prevProperties.find(pp => pp.propertyId === p.propertyId)
+        if (prev?.ownerPlayerId === p.ownerPlayerId) return p
+        return { ...p, ownerPlayerId: prev?.ownerPlayerId ?? null, houseCount: prev?.houseCount ?? 0, hotelCount: prev?.hotelCount ?? 0, mortgaged: prev?.mortgaged ?? false }
+      })
+    : state.properties
+  const displayState = displayProperties === state.properties ? state : { ...state, properties: displayProperties }
 
   function handleBoardMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const el = (e.target as HTMLElement).closest('[data-spot-id]') as HTMLElement | null
@@ -293,7 +306,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       onMouseLeave={() => setHoveredSpotId(null)}
     >
       {SPOTS.map((spot, idx) => {
-        const property = state.properties.find(p => p.propertyId === spot.id)
+        const property = displayState.properties.find(p => p.propertyId === spot.id)
         const isSelected = spot.id === selectedSpotId
         const isGroupHighlighted = !isSelected && (
           (selectedGroupType && spot.streetType === selectedGroupType && !NON_HIGHLIGHTABLE.has(selectedGroupType)) ||
@@ -316,7 +329,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         )
       })}
       <div className={styles.center}>
-        <OwnershipEdgeBars state={state} />
+        <OwnershipEdgeBars state={displayState} />
         <BoardDice dice={gameState.lastDice} />
         <div className={styles.centerLogo}>Monopoly</div>
         <div className={styles.centerSub}>Helsinki Edition</div>
@@ -325,15 +338,15 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             {activeTurnPlayer.name}
           </div>
         )}
-        <BoardStats state={state} />
-        <GroupOwnershipBar state={state} activeGroup={highlightGroupType} onGroupClick={onGroupHighlight} />
+        <BoardStats state={displayState} />
+        <GroupOwnershipBar state={displayState} activeGroup={highlightGroupType} onGroupClick={onGroupHighlight} />
         {gameState.turnCount > 0 && (
           <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
       </div>
     </div>
     {hoveredSpotId && (
-      <SpotTooltip spotId={hoveredSpotId} state={state} pos={hoverPos} />
+      <SpotTooltip spotId={hoveredSpotId} state={displayState} pos={hoverPos} />
     )}
     </>
   )

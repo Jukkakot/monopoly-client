@@ -17,6 +17,7 @@ type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 interface GameState {
   sessionId: string | null
   snapshot: SessionState | null
+  prevSnapshot: SessionState | null
   version: number
   connectionStatus: ConnectionStatus
   events: GameEvent[]
@@ -80,6 +81,7 @@ function reducer(state: GameState, action: Action): GameState {
         ...state,
         sessionId: action.sessionId,
         snapshot: null,
+        prevSnapshot: null,
         version: 0,
         connectionStatus: 'CONNECTING',
         events: [],
@@ -152,6 +154,7 @@ function reducer(state: GameState, action: Action): GameState {
 
       return {
         ...state,
+        prevSnapshot: state.snapshot,
         snapshot: newSnapshot,
         version: action.snapshot.version,
         connectionStatus: 'LIVE',
@@ -198,6 +201,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, {
     sessionId: null,
     snapshot: null,
+    prevSnapshot: null,
     version: 0,
     connectionStatus: 'CONNECTING',
     events: [],
