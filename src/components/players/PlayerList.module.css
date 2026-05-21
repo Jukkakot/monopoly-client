@@ -248,9 +248,9 @@
 }
 
 .propGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px 4px;
 }
 
 .propRow {
@@ -282,6 +282,7 @@
 
 .propName {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
