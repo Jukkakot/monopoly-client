@@ -8,7 +8,7 @@ import styles from './LobbyScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 
 const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
-const DEFAULT_SHAPES: TokenShape[] = ['circle', 'star', 'square', 'triangle', 'hat', 'car']
+const DEFAULT_SHAPES: TokenShape[] = ['hat', 'car', 'dog', 'tram', 'reindeer', 'bear']
 
 interface PlayerRow {
   name: string

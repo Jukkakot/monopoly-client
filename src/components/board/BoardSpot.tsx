@@ -59,7 +59,7 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
     <div className={styles.tokens}>
       {players.map(p => {
         const seat = seats.find(s => s.playerId === p.playerId)
-        const shape = tokenShapes?.get(p.playerId) ?? 'circle'
+        const shape = tokenShapes?.get(p.playerId) ?? 'hat'
         const isJailing = jailingPlayers?.has(p.playerId) ?? false
         const isCardJumping = cardJumpingPlayers?.has(p.playerId) ?? false
         const animClass = isJailing ? styles.jailArrive : isCardJumping ? styles.cardArrive : undefined
@@ -100,7 +100,7 @@ function JailCorner({ players, seats, tokenShapes, jailingPlayers }: { players: 
         <div className={styles.jailPrisoners}>
           {jailed.map(p => {
             const seat = seats.find(s => s.playerId === p.playerId)
-            const shape = tokenShapes?.get(p.playerId) ?? 'circle'
+            const shape = tokenShapes?.get(p.playerId) ?? 'hat'
             const isJailing = jailingPlayers?.has(p.playerId) ?? false
             return (
               <div key={p.playerId} className={styles.jailPrisonerRow}>

@@ -95,7 +95,7 @@ export default function SessionListScreen() {
       const difficulties = ['NORMAL', ...Array(bots).fill('NORMAL')] as ('EASY' | 'NORMAL')[]
       const { sessionId, hostToken } = await createSession({ names, colors, seatKinds, difficulties })
       try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}
-      const shapes = (['circle', 'star', 'square', 'triangle'] as const).slice(0, 1 + bots)
+      const shapes = (['hat', 'car', 'dog', 'tram'] as const).slice(0, 1 + bots)
       saveTokenShapes(sessionId, [...shapes])
       joinSession(sessionId)
       navigate(`/game/${sessionId}`)
