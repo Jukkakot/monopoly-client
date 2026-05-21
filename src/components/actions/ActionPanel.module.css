@@ -308,12 +308,54 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.78rem;
 }
 
 .propCheckPrice {
   font-size: 0.73rem;
   color: #888;
   flex-shrink: 0;
+}
+
+.propCheckMortgaged { opacity: 0.75; }
+
+.propMortgagedTag {
+  font-size: 0.65rem;
+  color: #b71c1c;
+  background: #ffebee;
+  border-radius: 3px;
+  padding: 1px 4px;
+  flex-shrink: 0;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Property group in trade (color band + 2-col items) */
+.tradePropGroup {
+  margin-bottom: 4px;
+}
+
+.tradePropGroupBar {
+  height: 3px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}
+
+.tradePropGroupItems {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+/* Cash row shown in trade header */
+.tradeCashRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #555;
+  padding: 0 2px 4px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 4px;
 }
 
 /* ── Trade offer summary (receiver view) ── */
@@ -432,26 +474,40 @@
 .sellBtn { border-color: #ef9a9a; color: #b71c1c; }
 .sellBtn:hover:not(:disabled) { background: #ffebee; }
 
-/* ── Card message ── */
-.cardMessage {
+/* ── Card popup (modal-style, my turn only) ── */
+.cardPopup {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  background: #fff8e1;
-  border: 1.5px solid #ffe082;
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 0.9rem;
+  background: #fffde7;
+  border: 2px solid #f9a825;
+  border-radius: 12px;
+  padding: 16px 14px 12px;
+  font-size: 0.92rem;
   color: #5d4037;
-  line-height: 1.45;
+  line-height: 1.5;
   font-style: italic;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(249,168,37,0.25);
 }
 
-.cardMessageIcon {
-  font-size: 1.3rem;
-  flex-shrink: 0;
+.cardPopupIcon { font-size: 2rem; font-style: normal; }
+.cardPopupText { flex: 1; }
+
+.cardPopupOk {
+  margin-top: 4px;
+  padding: 7px 22px;
+  background: #f9a825;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
   font-style: normal;
 }
+.cardPopupOk:hover { background: #f57f17; }
 
 /* ── Dice display ── */
 .diceRow {

@@ -67,18 +67,23 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
 
-  // Track card only for the turn it was drawn — clear when active player changes
+  // Track card only for MY turn — clear when active player changes
   const [visibleCard, setVisibleCard] = useState<{ key: string; msg: string | null } | null>(null)
+  const [cardDismissed, setCardDismissed] = useState(false)
   const prevCardKeyRef = useRef<string | null>(null)
   const prevActiveRef = useRef<string | undefined>(undefined)
   useEffect(() => {
-    if (state.lastCardKey && state.lastCardKey !== prevCardKeyRef.current)
+    if (state.lastCardKey && state.lastCardKey !== prevCardKeyRef.current && activeId === myPlayerId) {
       setVisibleCard({ key: state.lastCardKey, msg: state.lastCardMessage })
-    if (activeId !== prevActiveRef.current && prevActiveRef.current !== undefined)
+      setCardDismissed(false)
+    }
+    if (activeId !== prevActiveRef.current && prevActiveRef.current !== undefined) {
       setVisibleCard(null)
+      setCardDismissed(false)
+    }
     prevCardKeyRef.current = state.lastCardKey
     prevActiveRef.current = activeId
-  }, [state.lastCardKey, state.lastCardMessage, activeId])
+  }, [state.lastCardKey, state.lastCardMessage, activeId, myPlayerId])
 
 
   // GAME OVER
@@ -206,12 +211,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
         )}
 
-        {getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null) && (
-          <div className={styles.cardMessage}>
-            <span className={styles.cardMessageIcon}>🃏</span>
-            <span>{getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)}</span>
-          </div>
-        )}
         {myPlayer && (
           <div className={styles.myStats}>
             <div className={styles.myStatRow}>
@@ -239,8 +238,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // WAITING_FOR_ROLL
   if (phase === 'WAITING_FOR_ROLL') {
     const consecutiveDoubles = turn?.consecutiveDoubles ?? 0
+    const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+        {cardText && !cardDismissed && (
+          <div className={styles.cardPopup}>
+            <span className={styles.cardPopupIcon}>🃏</span>
+            <span className={styles.cardPopupText}>{cardText}</span>
+            <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
+          </div>
+        )}
         {consecutiveDoubles > 0 && (
           <div className={`${styles.infoBox} ${styles.doubles}`}>
             {t.doublesRoll}
@@ -267,16 +274,17 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
+    const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
-        <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
-
-        {getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null) && (
-          <div className={styles.cardMessage}>
-            <span className={styles.cardMessageIcon}>🃏</span>
-            <span>{getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)}</span>
+        {cardText && !cardDismissed && (
+          <div className={styles.cardPopup}>
+            <span className={styles.cardPopupIcon}>🃏</span>
+            <span className={styles.cardPopupText}>{cardText}</span>
+            <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
           </div>
         )}
+        <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
         <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
       </div>
@@ -684,8 +692,12 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const myOfferSide = isProposer  // true = offeredToRecipient
   const myRequestSide = !isProposer
 
-  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
-  const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
+  // Include mortgaged but exclude properties with buildings (can't trade those)
+  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && p.houseCount === 0 && p.hotelCount === 0)
+  const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && p.houseCount === 0 && p.hotelCount === 0)
+
+  const myPlayer = state.players.find(p => p.playerId === myPlayerId)
+  const partnerPlayer = state.players.find(p => p.playerId === partnerId)
 
   function editMoney(offeredSide: boolean, delta: number) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
@@ -709,6 +721,40 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
   const partnerSeat = state.seats.find(s => s.playerId === partnerId)
 
+  function renderProps(props: typeof myProps, offerSide: boolean, offerData: typeof myOffer) {
+    // Group by streetType
+    const groups = new Map<string, typeof props>()
+    for (const prop of props) {
+      const spot = SPOTS.find(s => s.id === prop.propertyId)
+      const key = spot?.streetType ?? 'OTHER'
+      const arr = groups.get(key) ?? []
+      arr.push(prop)
+      groups.set(key, arr)
+    }
+    return Array.from(groups.entries()).map(([type, groupProps]) => {
+      const color = STREET_COLORS[type]
+      return (
+        <div key={type} className={styles.tradePropGroup}>
+          {color && <div className={styles.tradePropGroupBar} style={{ background: color }} />}
+          <div className={styles.tradePropGroupItems}>
+            {groupProps.map(prop => {
+              const spot = SPOTS.find(s => s.id === prop.propertyId)
+              const included = offerData.propertyIds.includes(prop.propertyId)
+              return (
+                <label key={prop.propertyId} className={`${styles.propCheck} ${prop.mortgaged ? styles.propCheckMortgaged : ''}`}>
+                  <input type="checkbox" checked={included}
+                    onChange={() => toggleProp(offerSide, prop.propertyId, included)} />
+                  <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
+                  {prop.mortgaged && <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>}
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      )
+    })
+  }
+
   return (
     <div className={styles.panel}>
       <div className={styles.infoBox}>
@@ -716,6 +762,10 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         {partnerSeat && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 6 }}>
           <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill={partnerSeat.tokenColorHex} /></svg>
         </span>}
+      </div>
+      <div className={styles.tradeCashRow}>
+        <span>{t.tradeCashLabel(myPlayer?.cash ?? 0)}</span>
+        <span>{t.tradeCashLabel(partnerPlayer?.cash ?? 0)} {partner?.name?.split(' ')[0]}</span>
       </div>
 
       <div className={styles.tradeColumns}>
@@ -731,20 +781,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
               <button onClick={() => editMoney(myOfferSide, 50)}>+50</button>
             </div>
           </div>
-          {myProps.map(prop => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            const included = myOffer.propertyIds.includes(prop.propertyId)
-            const color = spot ? STREET_COLORS[spot.streetType] : undefined
-            return (
-              <label key={prop.propertyId} className={styles.propCheck}>
-                <input type="checkbox" checked={included}
-                  onChange={() => toggleProp(myOfferSide, prop.propertyId, included)} />
-                {color && <span className={styles.propCheckDot} style={{ background: color }} />}
-                <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
-                {spot?.price && <span className={styles.propCheckPrice}>€{spot.price}</span>}
-              </label>
-            )
-          })}
+          {renderProps(myProps, myOfferSide, myOffer)}
         </div>
 
         {/* Right: what I request */}
@@ -759,20 +796,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
               <button onClick={() => editMoney(myRequestSide, 50)}>+50</button>
             </div>
           </div>
-          {partnerProps.map(prop => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            const included = myRequest.propertyIds.includes(prop.propertyId)
-            const color = spot ? STREET_COLORS[spot.streetType] : undefined
-            return (
-              <label key={prop.propertyId} className={styles.propCheck}>
-                <input type="checkbox" checked={included}
-                  onChange={() => toggleProp(myRequestSide, prop.propertyId, included)} />
-                {color && <span className={styles.propCheckDot} style={{ background: color }} />}
-                <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
-                {spot?.price && <span className={styles.propCheckPrice}>€{spot.price}</span>}
-              </label>
-            )
-          })}
+          {renderProps(partnerProps, myRequestSide, myRequest)}
         </div>
       </div>
 

@@ -184,7 +184,7 @@ export default function BoardSpot({ spot, index, property, players, seats, onCli
 
   return (
     <div
-      className={`${styles.spotWrapper} ${typeClass} ${onClick ? styles.clickable : ''} ${highlightClass}`}
+      className={`${styles.spotWrapper} ${typeClass} ${onClick ? styles.clickable : ''} ${highlightClass} ${property?.mortgaged ? styles.mortgagedSpot : ''}`}
       style={gridStyle}
       onClick={onClick}
       data-spot-id={spot.id}

@@ -85,6 +85,10 @@ export interface T {
   acceptBtn: string
   counterOfferBtn: string
   declineBtn: string
+  // Card popup
+  cardOkBtn: string
+  tradeCashLabel: (amount: number) => string
+  mortgagedInTrade: string
 
   // ── EventLog ────────────────────────────────────────────────────────────────
   filterAll: string
@@ -390,6 +394,9 @@ const fi: T = {
   acceptBtn: '✅ Hyväksy',
   counterOfferBtn: '💬 Vastatarjous',
   declineBtn: '❌ Hylkää',
+  cardOkBtn: '✓ Selvä',
+  tradeCashLabel: (amount) => `Kassa: €${amount}`,
+  mortgagedInTrade: 'pantattu',
 
   // EventLog
   filterAll: 'Kaikki',
@@ -716,6 +723,9 @@ const en: T = {
   acceptBtn: '✅ Accept',
   counterOfferBtn: '💬 Counter offer',
   declineBtn: '❌ Decline',
+  cardOkBtn: '✓ Got it',
+  tradeCashLabel: (amount) => `Cash: €${amount}`,
+  mortgagedInTrade: 'mortgaged',
 
   // EventLog
   filterAll: 'All',

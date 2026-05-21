@@ -3,6 +3,7 @@ import { useGame } from '../../store/GameContext'
 import type { GameEvent } from '../../store/events'
 import styles from './FlashBanner.module.css'
 import { useT } from '../../i18n/LanguageContext'
+import { useIsAnimating } from '../../hooks/useTokenAnimation'
 
 interface BannerItem {
   event: GameEvent
@@ -14,29 +15,36 @@ let _localId = -1
 export default function FlashBanner() {
   const { state } = useGame()
   const t = useT()
+  const animating = useIsAnimating()
   const [banners, setBanners] = useState<BannerItem[]>([])
   const seenIds = useRef(new Set<number>())
   const prevActiveId = useRef<string | null>(null)
+  const pendingMyTurn = useRef<{ playerId: string; msg: string } | null>(null)
 
-  // Detect when it becomes my turn and show a special banner
+  // Detect when it becomes my turn — defer banner until animation finishes
   useEffect(() => {
     const activeId = state.snapshot?.turn?.activePlayerId ?? null
-    if (
-      activeId &&
-      activeId === state.myPlayerId &&
-      prevActiveId.current !== activeId
-    ) {
+    if (activeId && activeId === state.myPlayerId && prevActiveId.current !== activeId) {
+      pendingMyTurn.current = { playerId: activeId, msg: t.yourTurnMsg }
+    }
+    prevActiveId.current = activeId
+  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, t.yourTurnMsg])
+
+  // Fire the "your turn" banner once animation stops
+  useEffect(() => {
+    if (!animating && pendingMyTurn.current) {
+      const { playerId, msg } = pendingMyTurn.current
+      pendingMyTurn.current = null
       const syntheticEvent: GameEvent = {
         id: _localId--,
         timestamp: Date.now(),
         icon: '⭐',
-        message: t.yourTurnMsg,
-        relatedPlayerIds: [activeId],
+        message: msg,
+        relatedPlayerIds: [playerId],
       }
       setBanners(prev => [...prev, { event: syntheticEvent, visible: true }])
     }
-    prevActiveId.current = activeId
-  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, t.yourTurnMsg])
+  }, [animating])
 
   useEffect(() => {
     if (!state.myPlayerId || state.events.length === 0) return
@@ -54,12 +62,21 @@ export default function FlashBanner() {
 
     if (newEvents.length === 0) return
 
+    // Mark all as seen immediately to avoid double-processing
     for (const e of newEvents) seenIds.current.add(e.id)
 
-    setBanners(prev => [
-      ...prev,
-      ...newEvents.map(e => ({ event: e, visible: true })),
-    ])
+    const now = Date.now()
+    const immediate = newEvents.filter(e => !e.releaseAt || e.releaseAt <= now)
+    const delayed = newEvents.filter(e => e.releaseAt && e.releaseAt > now)
+
+    if (immediate.length > 0) {
+      setBanners(prev => [...prev, ...immediate.map(e => ({ event: e, visible: true }))])
+    }
+    for (const e of delayed) {
+      setTimeout(() => {
+        setBanners(prev => [...prev, { event: e, visible: true }])
+      }, e.releaseAt! - now)
+    }
   }, [state.events, state.myPlayerId])
 
   // Auto-dismiss banners after 3s

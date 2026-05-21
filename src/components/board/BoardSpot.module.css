@@ -116,6 +116,18 @@
   opacity: 0.55;
 }
 
+/* Black X cross overlay on the whole spot for mortgaged properties */
+.mortgagedSpot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(0,0,0,0.45) calc(50% - 1px), rgba(0,0,0,0.45) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom left,  transparent calc(50% - 1px), rgba(0,0,0,0.45) calc(50% - 1px), rgba(0,0,0,0.45) calc(50% + 1px), transparent calc(50% + 1px));
+  pointer-events: none;
+  z-index: 3;
+}
+
 .mortgagedLabel {
   flex: 1;
   display: flex;
