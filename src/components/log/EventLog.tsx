@@ -50,10 +50,29 @@ export default function EventLog() {
   const [activeFilters, setActiveFilters] = useState<Set<FilterGroup>>(new Set())
   const [mineOnly, setMineOnly] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
+  const [releasedIds, setReleasedIds] = useState<Set<number>>(new Set())
+
+  // Schedule delayed events to appear when token animation finishes
+  useEffect(() => {
+    const now = Date.now()
+    const timers: ReturnType<typeof setTimeout>[] = []
+    for (const e of state.events) {
+      if (e.releaseAt && e.releaseAt > now && !releasedIds.has(e.id)) {
+        timers.push(setTimeout(() => {
+          setReleasedIds(prev => new Set(prev).add(e.id))
+        }, e.releaseAt - now))
+      }
+    }
+    return () => timers.forEach(clearTimeout)
+  }, [state.events])
+
+  const visibleEvents = state.events.filter(e =>
+    !e.releaseAt || e.releaseAt <= Date.now() || releasedIds.has(e.id)
+  )
 
   useEffect(() => {
     topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [state.events.length])
+  }, [visibleEvents.length])
 
   function toggleFilter(f: FilterGroup) {
     setActiveFilters(prev => {
@@ -73,7 +92,7 @@ export default function EventLog() {
     return new Date(timestamp).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' })
   }
 
-  const filtered = [...state.events]
+  const filtered = [...visibleEvents]
     .filter(e => {
       if (activeFilters.size === 0) return true
       for (const group of activeFilters) {
