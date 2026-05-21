@@ -174,7 +174,12 @@ export default function GameScreen() {
     )
   }
 
-  const myPlayerId = state.myPlayerId ?? ''
+  const isDebugMode = new URLSearchParams(window.location.search).has('debug')
+  const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
+  const effectivePlayerId = isDebugMode
+    ? (debugPlayerId ?? state.snapshot.turn?.activePlayerId ?? state.myPlayerId ?? '')
+    : (state.myPlayerId ?? '')
+  const myPlayerId = effectivePlayerId
   const isGameOver = state.snapshot.status === 'GAME_OVER'
 
   return (
@@ -205,7 +210,31 @@ export default function GameScreen() {
           }
         }} />}
         log={<EventLog />}
-        actions={<ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />}
+        actions={
+          <>
+            {isDebugMode && (
+              <div className={styles.debugBar}>
+                <span className={styles.debugLabel}>🔧 debug</span>
+                {state.snapshot.players.filter(p => !p.bankrupt && !p.eliminated).map(p => {
+                  const seat = state.snapshot!.seats.find(s => s.playerId === p.playerId)
+                  const isActive = p.playerId === state.snapshot!.turn?.activePlayerId
+                  const isSelected = myPlayerId === p.playerId
+                  return (
+                    <button
+                      key={p.playerId}
+                      className={`${styles.debugPlayer} ${isSelected ? styles.debugPlayerSelected : ''} ${isActive ? styles.debugPlayerActive : ''}`}
+                      onClick={() => setDebugPlayerId(p.playerId)}
+                      style={{ borderColor: seat?.tokenColorHex ?? '#888' }}
+                    >
+                      {p.name.split(' ')[0]}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+            <ActionPanel state={state.snapshot} myPlayerId={myPlayerId} />
+          </>
+        }}
       />
     </>
   )

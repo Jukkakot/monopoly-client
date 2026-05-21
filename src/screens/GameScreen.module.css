@@ -105,3 +105,46 @@
   font-family: ui-monospace, monospace;
   font-size: 0.88rem;
 }
+
+/* ── Debug bar ── */
+.debugBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 6px;
+  background: #1a1a2e;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.debugLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #7986cb;
+  font-family: ui-monospace, monospace;
+  flex-shrink: 0;
+}
+
+.debugPlayer {
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #2a2a4a;
+  color: #bbb;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.debugPlayer:hover { background: #3a3a5a; color: #fff; }
+
+.debugPlayerSelected {
+  background: #3a3a5a;
+  color: #fff;
+}
+
+.debugPlayerActive {
+  font-style: italic;
+}
