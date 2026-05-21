@@ -36,6 +36,12 @@
   animation: shimmer 1.5s infinite;
 }
 
+.skeletonSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .skeletonBar {
   height: 14px;
   border-radius: 7px;
@@ -44,8 +50,11 @@
   animation: shimmer 1.5s infinite;
 }
 
+.skeletonBar:nth-child(1) { animation-delay: 0.0s; }
 .skeletonBar:nth-child(2) { width: 70%; animation-delay: 0.1s; }
 .skeletonBar:nth-child(3) { width: 55%; animation-delay: 0.2s; }
+.skeletonBar:nth-child(4) { width: 80%; animation-delay: 0.3s; }
+.skeletonBar:nth-child(5) { width: 60%; animation-delay: 0.4s; }
 
 .skeletonLabel {
   font-size: 0.9rem;
@@ -55,6 +64,29 @@
   font-weight: 700;
   letter-spacing: 1px;
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (min-width: 768px) {
+  .skeleton {
+    width: min(90vw, 760px);
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .skeletonLabel {
+    width: 100%;
+  }
+  .skeletonBoard {
+    flex: 0 0 auto;
+    width: min(50vw, 400px);
+    aspect-ratio: 1;
+  }
+  .skeletonSidebar {
+    flex: 1;
+    min-width: 200px;
+    padding-top: 4px;
+  }
 }
 
 @keyframes shimmer {

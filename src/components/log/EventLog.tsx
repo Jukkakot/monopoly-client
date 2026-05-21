@@ -118,6 +118,7 @@ export default function EventLog() {
             className={`${styles.filterBtn} ${activeFilters.has(f) ? styles.filterActive : ''}`}
             onClick={() => toggleFilter(f)}
             title={t.filterTitles[f]}
+            data-label={t.filterTitles[f]}
           >
             {FILTER_LABELS[f]}
           </button>

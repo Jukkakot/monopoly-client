@@ -212,7 +212,8 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
         const isBankrupt = player.bankrupt || player.eliminated
         const flash = flashMap.get(player.playerId)
 
-        const isExpanded = expandedId === player.playerId
+        const isBot = seat?.seatKind === 'BOT'
+        const isExpanded = !isBot && expandedId === player.playerId
         const isMe = player.playerId === gs.myPlayerId
         const netWorth = isBankrupt ? 0 : calcNetWorth(player, state)
         const rank = wealthRank.get(player.playerId) ?? -1
@@ -221,8 +222,8 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
         return (
           <div
             key={player.playerId}
-            className={`${styles.card} ${isActive ? styles.active : ''} ${isBankrupt ? styles.bankrupt : ''} ${isMe ? styles.me : ''}`}
-            onClick={() => setExpandedId(isExpanded ? null : player.playerId)}
+            className={`${styles.card} ${isActive ? styles.active : ''} ${isBankrupt ? styles.bankrupt : ''} ${isMe ? styles.me : ''} ${isBot ? styles.cardBot : ''}`}
+            onClick={() => { if (!isBot) setExpandedId(isExpanded ? null : player.playerId) }}
           >
             <div className={styles.cardHeader}>
               <div className={styles.token}>
@@ -277,7 +278,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                     : null
                 })()}
               </div>
-              <span className={styles.chevron}>{isExpanded ? '▴' : '▾'}</span>
+              {!isBot && <span className={styles.chevron}>{isExpanded ? '▴' : '▾'}</span>}
             </div>
             {!isBankrupt && (
               <div className={styles.wealthBar}>
@@ -297,7 +298,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                 />
               </div>
             )}
-            {isExpanded && <PropertyExpanded player={player} state={state} onSpotClick={onSpotClick} onTradeWith={!isBankrupt && player.playerId !== gs.myPlayerId ? onTradeWith : undefined} />}
+            {isExpanded && !isBot && <PropertyExpanded player={player} state={state} onSpotClick={onSpotClick} onTradeWith={!isBankrupt && player.playerId !== gs.myPlayerId ? onTradeWith : undefined} />}
           </div>
         )
       })}

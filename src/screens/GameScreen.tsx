@@ -175,8 +175,13 @@ export default function GameScreen() {
         <div className={styles.skeleton}>
           <div className={styles.skeletonLabel}>{t.loadingGame}</div>
           <div className={styles.skeletonBoard} />
-          <div className={styles.skeletonBar} />
-          <div className={styles.skeletonBar} />
+          <div className={styles.skeletonSidebar}>
+            <div className={styles.skeletonBar} />
+            <div className={styles.skeletonBar} />
+            <div className={styles.skeletonBar} />
+            <div className={styles.skeletonBar} />
+            <div className={styles.skeletonBar} />
+          </div>
         </div>
       </div>
     )
