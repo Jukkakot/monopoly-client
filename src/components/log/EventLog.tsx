@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './EventLog.module.css'
 import { useGame } from '../../store/GameContext'
-import DiceStats from '../stats/DiceStats'
 import { useT } from '../../i18n/LanguageContext'
 
 const ICON_CLASS: Record<string, string> = {
@@ -136,7 +135,6 @@ export default function EventLog() {
           </button>
         )}
       </div>
-      <DiceStats />
       <div className={styles.log}>
         <div ref={topRef} />
         {filtered.length === 0 && (

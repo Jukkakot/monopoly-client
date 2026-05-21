@@ -272,14 +272,6 @@ export interface T {
   gameSoundsDesc: string
   saveBtn: string
 
-  // ── DiceStats ────────────────────────────────────────────────────────────────
-  diceStatsTitle: string
-  rollCount: (n: number) => string
-  mostCommonLabel: string
-  doublesStatLabel: string
-  rolledLegend: string
-  theoryLegend: string
-
   // ── FlashBanner ──────────────────────────────────────────────────────────────
   yourTurnMsg: string
   reconnectingMsg: string
@@ -609,14 +601,6 @@ const fi: T = {
   gameSoundsLabel: 'Pelitapahtumat',
   gameSoundsDesc: 'Noppa, osto',
   saveBtn: 'Tallenna',
-
-  // DiceStats
-  diceStatsTitle: '🎲 Noppätilasto',
-  rollCount: (n) => `${n} heittoa`,
-  mostCommonLabel: 'Yleisin:',
-  doublesStatLabel: 'Tuplat:',
-  rolledLegend: 'Heitetty',
-  theoryLegend: 'Teoria',
 
   // FlashBanner
   yourTurnMsg: 'Sinun vuorosi!',
@@ -952,14 +936,6 @@ const en: T = {
   gameSoundsLabel: 'Game events',
   gameSoundsDesc: 'Dice, purchase',
   saveBtn: 'Save',
-
-  // DiceStats
-  diceStatsTitle: '🎲 Dice stats',
-  rollCount: (n) => `${n} roll${n !== 1 ? 's' : ''}`,
-  mostCommonLabel: 'Most common:',
-  doublesStatLabel: 'Doubles:',
-  rolledLegend: 'Rolled',
-  theoryLegend: 'Theory',
 
   // FlashBanner
   yourTurnMsg: 'Your turn!',
