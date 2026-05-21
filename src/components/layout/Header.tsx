@@ -3,7 +3,7 @@ import styles from './Header.module.css'
 import type { SessionState } from '../../types/api'
 import OverflowMenu from '../menu/OverflowMenu'
 import { loadSoundConfig, saveSoundConfig } from '../menu/SoundSettings'
-import { useT, useLangToggle } from '../../i18n/LanguageContext'
+import { useT, useLang, useLangToggle } from '../../i18n/LanguageContext'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 
@@ -15,6 +15,7 @@ interface Props {
 
 export default function Header({ snapshot, connectionStatus, isSpectator }: Props) {
   const t = useT()
+  const lang = useLang()
   const toggleLang = useLangToggle()
   const [muted, setMuted] = useState(() => loadSoundConfig().volume === 0)
   const [idCopied, setIdCopied] = useState(false)
@@ -63,8 +64,13 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
       <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>
         {muted ? '🔇' : '🔊'}
       </button>
-      <button className={styles.muteBtn} onClick={toggleLang}>
-        {t.langLabel}
+      <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
+        <img
+          src={lang === 'fi' ? 'https://flagcdn.com/20x15/fi.png' : 'https://flagcdn.com/20x15/gb.png'}
+          width={20} height={15}
+          alt={lang === 'fi' ? 'FI' : 'EN'}
+          style={{ display: 'block', borderRadius: 2 }}
+        />
       </button>
       <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
         {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
