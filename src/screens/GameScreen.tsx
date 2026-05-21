@@ -76,7 +76,7 @@ export default function GameScreen() {
     }
     const isMyTurn = turn.activePlayerId === state.myPlayerId
     const activeName = snap.players.find(p => p.playerId === turn.activePlayerId)?.name ?? '?'
-    document.title = isMyTurn ? `⭐ ${t.yourTurnMsg} — Monopoly Helsinki` : `${activeName}… — Monopoly Helsinki`
+    document.title = isMyTurn ? `🎲 ${t.yourTurnMsg}` : `${activeName}… — Monopoly Helsinki`
     return () => { document.title = 'Monopoly Helsinki' }
   }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, state.snapshot?.status])
 
