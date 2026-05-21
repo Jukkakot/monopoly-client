@@ -644,7 +644,7 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
 
   const isCounterEditPhase = status === 'COUNTERED' && trade.editingPlayerId !== null && trade.editingPlayerId !== myPlayerId
   const waitingMsg = isCounterEditPhase ? t.tradeCounterEditing : t.tradeWaiting
-  const canCancel = myPlayerId === trade.initiatorPlayerId
+  const canCancel = myPlayerId === trade.editingPlayerId
 
   return (
     <div className={styles.panel}>
@@ -679,18 +679,17 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
     const newAmount = Math.max(0, side.moneyAmount + delta)
     sendCmd({
       type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
-      patch: { offeredSide, moneyAmount: newAmount, addPropertyIds: [], removePropertyIds: [] }
+      patch: { offeredSide, replaceMoneyAmount: newAmount, propertyIdsToAdd: [], propertyIdsToRemove: [] }
     })
   }
 
   function toggleProp(offeredSide: boolean, propertyId: string, included: boolean) {
-    const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
     sendCmd({
       type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
       patch: {
-        offeredSide, moneyAmount: side.moneyAmount,
-        addPropertyIds: included ? [] : [propertyId],
-        removePropertyIds: included ? [propertyId] : []
+        offeredSide,
+        propertyIdsToAdd: included ? [] : [propertyId],
+        propertyIdsToRemove: included ? [propertyId] : []
       }
     })
   }
