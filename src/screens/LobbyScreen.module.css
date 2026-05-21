@@ -151,6 +151,14 @@
 .addPlayerBtn:hover:not(:disabled) { background: #dcedc8; }
 .addPlayerBtn:disabled { opacity: 0.5; cursor: default; }
 
+.addPlayerBtnBot {
+  background: #fffde7;
+  border-color: #ffe082;
+  color: #5d4037;
+}
+
+.addPlayerBtnBot:hover:not(:disabled) { background: #fff9c4; }
+
 .errorMsg {
   background: #ffebee;
   border: 1px solid #ef9a9a;

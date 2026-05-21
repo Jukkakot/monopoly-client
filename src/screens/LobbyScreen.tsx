@@ -191,7 +191,7 @@ export default function LobbyScreen() {
         </div>
 
         {rows.length < 6 && (
-          <button className={styles.addPlayerBtn} onClick={addBot} disabled={loading}>
+          <button className={`${styles.addPlayerBtn} ${styles.addPlayerBtnBot}`} onClick={addBot} disabled={loading}>
             + {t.addBotBtn}
           </button>
         )}
