@@ -73,6 +73,10 @@
 .menuItem.danger { color: #c62828; }
 .menuItem.danger:hover { background: #ffebee; }
 
+@media (hover: none) {
+  .desktopOnly { display: none; }
+}
+
 .divider {
   height: 1px;
   background: #eee;

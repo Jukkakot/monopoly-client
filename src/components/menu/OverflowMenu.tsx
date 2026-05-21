@@ -33,11 +33,6 @@ export default function OverflowMenu() {
 
   const canAct = isMyTurn && (phase === 'WAITING_FOR_ROLL' || phase === 'WAITING_FOR_END_TURN')
 
-  // Trade partners
-  const others = canAct
-    ? (snapshot?.players ?? []).filter(p => p.playerId !== myPlayerId && !p.bankrupt && !p.eliminated)
-    : []
-
   // Buildable properties
   const myProps = canAct
     ? (snapshot?.properties ?? []).filter(p => p.ownerPlayerId === myPlayerId)
@@ -177,22 +172,6 @@ export default function OverflowMenu() {
           <div className={styles.menu}>
             <div className={styles.menuTitle}>{t.moreActionsTitle}</div>
 
-            {canAct && others.length > 0 && (
-              <>
-                <div className={styles.menuLabel}>{t.startTradeSection}</div>
-                {others.map(p => {
-                  const seat = snapshot?.seats.find(s => s.playerId === p.playerId)
-                  return (
-                    <button key={p.playerId} className={`${styles.menuItem} ${styles.tradeBtn}`}
-                      onClick={() => { setOpen(false); cmd('OpenTrade', { recipientPlayerId: p.playerId }) }}>
-                      <span className={styles.tradeColor} style={{ background: seat?.tokenColorHex ?? '#888' }} />
-                      {p.name}
-                    </button>
-                  )
-                })}
-                <div className={styles.divider} />
-              </>
-            )}
 
             {canAct && hasBuildActions && (
               <button className={styles.menuItem} onClick={() => { setOpen(false); setShowBuild(true) }}>
@@ -208,7 +187,7 @@ export default function OverflowMenu() {
             <button className={styles.menuItem} onClick={() => { setOpen(false); setShowSound(true) }}>
               {t.soundSettingsBtn}
             </button>
-            <button className={styles.menuItem} onClick={() => { setOpen(false); setShowHelp(true) }}>
+            <button className={`${styles.menuItem} ${styles.desktopOnly}`} onClick={() => { setOpen(false); setShowHelp(true) }}>
               {t.keyboardShortcutsBtn}
             </button>
             <div className={styles.divider} />
