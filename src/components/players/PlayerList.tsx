@@ -213,7 +213,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
         const flash = flashMap.get(player.playerId)
 
         const isBot = seat?.seatKind === 'BOT'
-        const isExpanded = !isBot && expandedId === player.playerId
+        const isExpanded = expandedId === player.playerId
         const isMe = player.playerId === gs.myPlayerId
         const netWorth = isBankrupt ? 0 : calcNetWorth(player, state)
         const rank = wealthRank.get(player.playerId) ?? -1
@@ -223,7 +223,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
           <div
             key={player.playerId}
             className={`${styles.card} ${isActive ? styles.active : ''} ${isBankrupt ? styles.bankrupt : ''} ${isMe ? styles.me : ''} ${isBot ? styles.cardBot : ''}`}
-            onClick={() => { if (!isBot) setExpandedId(isExpanded ? null : player.playerId) }}
+            onClick={() => setExpandedId(isExpanded ? null : player.playerId)}
           >
             <div className={styles.cardHeader}>
               <div className={styles.token}>
@@ -278,7 +278,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                     : null
                 })()}
               </div>
-              {!isBot && <span className={styles.chevron}>{isExpanded ? '▴' : '▾'}</span>}
+              <span className={styles.chevron}>{isExpanded ? '▴' : '▾'}</span>
             </div>
             {!isBankrupt && (
               <div className={styles.wealthBar}>
@@ -298,7 +298,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                 />
               </div>
             )}
-            {isExpanded && !isBot && <PropertyExpanded player={player} state={state} onSpotClick={onSpotClick} onTradeWith={!isBankrupt && player.playerId !== gs.myPlayerId ? onTradeWith : undefined} />}
+            {isExpanded && <PropertyExpanded player={player} state={state} onSpotClick={onSpotClick} onTradeWith={!isBankrupt && !isBot && player.playerId !== gs.myPlayerId ? onTradeWith : undefined} />}
           </div>
         )
       })}

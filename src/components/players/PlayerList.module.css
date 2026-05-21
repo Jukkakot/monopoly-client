@@ -17,7 +17,6 @@
 }
 
 .card:hover { border-color: #81c784; }
-.cardBot { cursor: default; }
 
 .cardHeader {
   display: flex;
