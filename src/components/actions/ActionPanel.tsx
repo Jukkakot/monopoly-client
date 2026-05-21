@@ -127,6 +127,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevPhaseRef.current = phase
   }, [phase, isMyTurn, me?.cash, me?.boardIndex, activeId, myPlayerId, state.properties, state.players])
 
+  // Auto-advance on doubles — skip the redundant "roll again" button
+  useEffect(() => {
+    if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') return
+    if ((turn?.consecutiveDoubles ?? 0) === 0) return
+    if (tokenAnimating) return
+    if (visibleCard && !cardDismissed) return
+    if (visibleRent && !rentDismissed) return
+    cmd('EndTurn')
+  }, [isMyTurn, phase, turn?.consecutiveDoubles, tokenAnimating, visibleCard, cardDismissed, visibleRent, rentDismissed])
+
   function TabBar() {
     if (!hasPropActions) return null
     const mortgagedCount = myProps.filter(p => p.mortgaged).length
@@ -352,11 +362,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
     const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
-    const consecutiveDoubles = turn?.consecutiveDoubles ?? 0
-    const hasDoubles = consecutiveDoubles > 0
-    const endTurnLabel = hasDoubles
-      ? (isTouchDevice ? t.rollAgainBtn : t.rollAgainBtnKbd)
-      : (isTouchDevice ? t.endTurn : t.endTurnKbd)
+    const hasDoubles = (turn?.consecutiveDoubles ?? 0) > 0
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
@@ -376,8 +382,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 <button className={styles.cardPopupOk} onClick={() => setRentDismissed(true)}>{t.cardOkBtn}</button>
               </div>
             )}
-            <Btn label={endTurnLabel} onClick={() => cmd('EndTurn')} variant="primary" />
-            <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+            {!hasDoubles && <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />}
+            {!hasDoubles && <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />}
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />

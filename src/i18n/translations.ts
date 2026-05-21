@@ -38,8 +38,6 @@ export interface T {
   rollDiceKbd: string
   endTurn: string
   endTurnKbd: string
-  rollAgainBtn: string
-  rollAgainBtnKbd: string
   rentPopupText: (amount: number, ownerName: string) => string
   startTrade: (open: boolean) => string
   buildHousesSectionTitle: string
@@ -359,8 +357,6 @@ const fi: T = {
   rollDiceKbd: '🎲 Heitä nopat  [välilyönti]',
   endTurn: '✅ Lopeta vuoro',
   endTurnKbd: '✅ Lopeta vuoro  [välilyönti]',
-  rollAgainBtn: '🎲 Heitä uudelleen',
-  rollAgainBtnKbd: '🎲 Heitä uudelleen  [välilyönti]',
   rentPopupText: (amount, owner) => `Maksoit vuokraa €${amount} omistajalle ${owner}`,
   startTrade: (open) => `🤝 Aloita kauppa ${open ? '▴' : '▾'}`,
   buildHousesSectionTitle: 'Rakenna taloja',
@@ -701,8 +697,6 @@ const en: T = {
   rollDiceKbd: '🎲 Roll dice  [space]',
   endTurn: '✅ End turn',
   endTurnKbd: '✅ End turn  [space]',
-  rollAgainBtn: '🎲 Roll again',
-  rollAgainBtnKbd: '🎲 Roll again  [space]',
   rentPopupText: (amount, owner) => `You paid €${amount} rent to ${owner}`,
   startTrade: (open) => `🤝 Trade ${open ? '▴' : '▾'}`,
   buildHousesSectionTitle: 'Build houses',
