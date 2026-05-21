@@ -94,6 +94,22 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevActiveRef.current = activeId
   }, [state.lastCardKey, state.lastCardMessage, activeId, myPlayerId])
 
+  const mySeat = state.seats.find(s => s.playerId === myPlayerId)
+
+  function CashBar() {
+    if (!me) return null
+    const netWorth = calcNetWorth(me, state)
+    return (
+      <div className={styles.cashBar}>
+        <span className={styles.cashBarColor} style={{ background: mySeat?.tokenColorHex ?? '#888' }} />
+        <span className={styles.cashBarAmount}>€{me.cash}</span>
+        {netWorth !== me.cash && (
+          <span className={styles.cashBarNet}>~€{netWorth}</span>
+        )}
+      </div>
+    )
+  }
+
   function TabBar() {
     if (!hasPropActions) return null
     const mortgagedCount = myProps.filter(p => p.mortgaged).length
@@ -157,6 +173,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (tokenAnimating && (phase === 'WAITING_FOR_DECISION' || phase === 'WAITING_FOR_END_TURN' || phase === 'WAITING_FOR_ROLL')) {
     return (
       <div className={styles.panel}>
+        <CashBar />
         <div className={`${styles.infoBox} ${styles.moving}`}>
           <div className={styles.movingDots}>
             <span />
@@ -177,6 +194,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const color = spot ? STREET_COLORS[spot.streetType] : undefined
     return (
       <div className={styles.panel}>
+        <CashBar />
         <TabBar />
         {activeTab === 'action' ? (
           <>
@@ -230,6 +248,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
     return (
       <div className={styles.panel}>
+        <CashBar />
         <TabBar />
         {activeTab === 'action' ? (
           <>
@@ -279,6 +298,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+        <CashBar />
         <TabBar />
         {activeTab === 'action' ? (
           <>
@@ -321,6 +341,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+        <CashBar />
         <TabBar />
         {activeTab === 'action' ? (
           <>
