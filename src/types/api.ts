@@ -52,6 +52,7 @@ export interface TurnState {
   canRoll: boolean
   canEndTurn: boolean
   consecutiveDoubles: number
+  lastDice: [number, number] | null
 }
 
 export interface PendingDecision {
