@@ -112,6 +112,14 @@ export interface TradeState {
   decisionRequiredFromPlayerId: string | null
 }
 
+export interface GameEventEntry {
+  id: number
+  timestamp: number
+  type: string
+  playerIds: string[]
+  data: Record<string, string>
+}
+
 export interface SessionState {
   sessionId: string
   version: number
@@ -128,6 +136,8 @@ export interface SessionState {
   lastCardMessage: string | null
   lastCardKey: string | null
   hostPlayerId: string | null
+  eventLog: GameEventEntry[]
+  nextEventId: number
 }
 
 export interface ClientSessionSnapshot {

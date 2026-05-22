@@ -1,4 +1,5 @@
-import type { SessionState } from '../types/api'
+import type { GameEventEntry, SessionState } from '../types/api'
+import type { PlayerSnapshot } from '../types/api'
 import { getCardText } from '../i18n/cards'
 import { getLang } from '../i18n/lang'
 import { translations } from '../i18n/translations'
@@ -35,7 +36,120 @@ function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean): number
   return steps * STEP_MS
 }
 
-export function deriveEvents(prev: SessionState | null, next: SessionState): GameEvent[] {
+/**
+ * Translate backend-persisted GameEventEntry records into display events.
+ * Call with only the NEW entries (id > lastSeenEventId).
+ */
+export function translateBackendEvents(entries: GameEventEntry[], players: PlayerSnapshot[]): GameEvent[] {
+  const t = translations[getLang()].ev
+  const events: GameEvent[] = []
+  // Tracks last movement delay per player so subsequent events appear after animation
+  const playerDelayMs = new Map<string, number>()
+
+  for (const e of entries) {
+    const pid = e.playerIds[0] ?? ''
+    const pid2 = e.playerIds[1] ?? ''
+    const player = players.find(p => p.playerId === pid)
+    const name = player?.name ?? pid
+
+    switch (e.type) {
+      case 'DICE_ROLLED': {
+        const d1 = parseInt(e.data.d1 ?? '1')
+        const d2 = parseInt(e.data.d2 ?? '1')
+        events.push(ev('🎲', t.rolledDice(name, d1, d2), [pid], `${d1}_${d2}`))
+        break
+      }
+      case 'PLAYER_MOVED': {
+        const from = parseInt(e.data.from ?? '0')
+        const to = parseInt(e.data.to ?? '0')
+        const delay = moveDelay(from, to, false)
+        playerDelayMs.set(pid, delay)
+        const spot = SPOTS[to]
+        events.push(ev('🏃', `${name} → ${spot?.name ?? `#${to}`}`, [pid], undefined, delay))
+        break
+      }
+      case 'PASSED_GO': {
+        const delay = playerDelayMs.get(pid) ?? 0
+        events.push(ev('💰', t.passedGo(name), [pid], undefined, delay))
+        break
+      }
+      case 'WENT_TO_JAIL': {
+        const from = e.data.from != null ? parseInt(e.data.from) : null
+        const delay = from != null ? moveDelay(from, JAIL_INDEX, true) : (playerDelayMs.get(pid) ?? 0)
+        playerDelayMs.set(pid, delay)
+        events.push(ev('⛓', t.wentToJail(name), [pid], undefined, delay))
+        break
+      }
+      case 'RELEASED_FROM_JAIL': {
+        events.push(ev('🔓', t.releasedFromJail(name), [pid]))
+        break
+      }
+      case 'DREW_CARD': {
+        const cardKey = e.data.card ?? ''
+        const text = getCardText(cardKey, null)
+        const delay = playerDelayMs.get(pid) ?? 0
+        if (text) events.push(ev('🃏', t.drewCard(name, text), [pid], undefined, delay))
+        break
+      }
+      case 'PAID_RENT': {
+        const creditor = players.find(p => p.playerId === pid2)
+        const amount = parseInt(e.data.amount ?? '0')
+        const delay = playerDelayMs.get(pid) ?? 0
+        events.push(ev('💸', t.paidRent(name, amount, creditor?.name ?? '?'), e.playerIds.slice(0, 2), undefined, delay))
+        break
+      }
+      case 'BOUGHT_PROPERTY': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        const propName = spot?.name ?? e.data.property ?? '?'
+        const delay = playerDelayMs.get(pid) ?? 0
+        events.push(ev('🏠', t.bought(name, propName), [pid], undefined, delay))
+        break
+      }
+      case 'BUILT_HOUSE': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        events.push(ev('🏗', t.builtHouse(name, spot?.name ?? e.data.property ?? '?'), [pid], `house:${spot?.streetType ?? ''}`))
+        break
+      }
+      case 'BUILT_HOTEL': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        events.push(ev('🏗', t.builtHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `hotel:${spot?.streetType ?? ''}`))
+        break
+      }
+      case 'SOLD_HOUSE': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        events.push(ev('🏚', t.soldHouse(name, spot?.name ?? e.data.property ?? '?'), [pid], `sell:${spot?.streetType ?? ''}`))
+        break
+      }
+      case 'SOLD_HOTEL': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        events.push(ev('🏚', t.soldHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `sellhotel:${spot?.streetType ?? ''}`))
+        break
+      }
+      case 'MORTGAGED': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        events.push(ev('🏦', t.mortgaged(name, spot?.name ?? e.data.property ?? '?'), [pid]))
+        break
+      }
+      case 'REDEEMED': {
+        const spot = SPOTS.find(s => s.id === e.data.property)
+        events.push(ev('💳', t.redeemed(name, spot?.name ?? e.data.property ?? '?'), [pid]))
+        break
+      }
+      case 'WENT_BANKRUPT': {
+        events.push(ev('💀', t.wentBankrupt(name), [pid]))
+        break
+      }
+    }
+  }
+
+  return events
+}
+
+/**
+ * Derive events that aren't tracked in the backend event log:
+ * game over, monopoly gains, auction results, trade results, property transfers.
+ */
+export function deriveMiscEvents(prev: SessionState | null, next: SessionState): GameEvent[] {
   if (!prev) return []
   const events: GameEvent[] = []
   const t = translations[getLang()].ev
@@ -47,99 +161,14 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
     return events
   }
 
-  // Pre-compute animation delay per player so movement-caused events appear on arrival
-  const playerDelay = new Map<string, number>()
-  for (const np of next.players) {
-    const pp = prev.players.find(p => p.playerId === np.playerId)
-    if (!pp) continue
-    const goingToJail = !pp.inJail && np.inJail
-    if (np.boardIndex !== pp.boardIndex || goingToJail) {
-      playerDelay.set(np.playerId, moveDelay(pp.boardIndex, np.boardIndex, goingToJail))
-    }
-  }
-
-  // Dice roll — infer from active player movement when phase was WAITING_FOR_ROLL
-  if (prev.turn?.phase === 'WAITING_FOR_ROLL') {
-    const rollerId = prev.turn.activePlayerId
-    const pp = prev.players.find(p => p.playerId === rollerId)
-    const np = next.players.find(p => p.playerId === rollerId)
-    if (pp && np && np.boardIndex !== pp.boardIndex && !np.inJail) {
-      const steps = (np.boardIndex - pp.boardIndex + BOARD_SIZE) % BOARD_SIZE
-      if (steps >= 2 && steps <= 12) {
-        const prevDoubles = prev.turn.consecutiveDoubles
-        const nextDoubles = next.turn?.consecutiveDoubles ?? 0
-        const isDoubles = nextDoubles > prevDoubles
-        let d1: number, d2: number
-        if (isDoubles && steps % 2 === 0 && steps / 2 >= 1 && steps / 2 <= 6) {
-          d1 = d2 = steps / 2
-        } else {
-          d1 = Math.min(6, steps - 1)
-          d2 = steps - d1
-        }
-        if (d1 >= 1 && d2 >= 1 && d2 <= 6) {
-          events.push(ev('🎲', t.rolledDice(np.name, d1, d2), [rollerId], `${d1}_${d2}`))
-        }
-      }
-    }
-  }
-
-  // Card message
-  if (next.lastCardKey && next.lastCardKey !== prev.lastCardKey) {
-    const actorId = next.turn?.activePlayerId ?? ''
-    const actor = next.players.find(p => p.playerId === actorId)
-    const text = getCardText(next.lastCardKey, next.lastCardMessage)
-    const delay = playerDelay.get(actorId) ?? 0
-    if (text && actor) events.push(ev('🃏', t.drewCard(actor.name, text), actorId ? [actorId] : [], undefined, delay))
-    else if (text) events.push(ev('🃏', text, [], undefined, delay))
-  }
-
-  // Per-player changes
-  for (const np of next.players) {
-    const pp = prev.players.find(p => p.playerId === np.playerId)
-    if (!pp) continue
-    const delay = playerDelay.get(np.playerId) ?? 0
-
-    if (np.boardIndex !== pp.boardIndex) {
-      const spot = SPOTS[np.boardIndex]
-      events.push(ev('🏃', `${np.name} → ${spot?.name ?? `#${np.boardIndex}`}`, [np.playerId], undefined, delay))
-      // Passed GO
-      if (np.boardIndex !== 0 && np.boardIndex < pp.boardIndex && !np.inJail) {
-        events.push(ev('💰', t.passedGo(np.name), [np.playerId], undefined, delay))
-      }
-      // Rent paid
-      if (np.cash < pp.cash) {
-        const landedProp = next.properties.find(p => p.propertyId === spot?.id)
-        if (landedProp?.ownerPlayerId && landedProp.ownerPlayerId !== np.playerId) {
-          const rentPaid = pp.cash - np.cash
-          const owner = next.players.find(p => p.playerId === landedProp.ownerPlayerId)
-          events.push(ev('💸', t.paidRent(np.name, rentPaid, owner?.name ?? '?'), [np.playerId, landedProp.ownerPlayerId], undefined, delay))
-        }
-      }
-    }
-
-    if (np.inJail && !pp.inJail) {
-      events.push(ev('⛓', t.wentToJail(np.name), [np.playerId], undefined, delay))
-    }
-    if (!np.inJail && pp.inJail) {
-      events.push(ev('🔓', t.releasedFromJail(np.name), [np.playerId], undefined, delay))
-    }
-    if ((np.bankrupt || np.eliminated) && !pp.bankrupt && !pp.eliminated) {
-      events.push(ev('💀', t.wentBankrupt(np.name), [np.playerId], undefined, delay))
-    }
-  }
-
-  // Property changes
+  // Monopoly gained (property purchase completing a color set)
   for (const np of next.properties) {
     const pp = prev.properties.find(p => p.propertyId === np.propertyId)
     if (!pp) continue
-    const spot = SPOTS.find(s => s.id === np.propertyId)
-    const name = spot?.name ?? np.propertyId
 
     if (np.ownerPlayerId && !pp.ownerPlayerId) {
+      const spot = SPOTS.find(s => s.id === np.propertyId)
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      const delay = owner ? (playerDelay.get(owner.playerId) ?? 0) : 0
-      events.push(ev('🏠', t.bought(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], undefined, delay))
-
       if (spot && owner && !['RAILROAD', 'UTILITY', 'CORNER', 'COMMUNITY', 'CHANCE', 'TAX'].includes(spot.streetType)) {
         const groupProps = next.properties.filter(p => {
           const s = SPOTS.find(ss => ss.id === p.propertyId)
@@ -147,43 +176,18 @@ export function deriveEvents(prev: SessionState | null, next: SessionState): Gam
         })
         const ownerGroupCount = groupProps.filter(p => p.ownerPlayerId === owner.playerId).length
         if (ownerGroupCount === groupProps.length) {
-          events.push(ev('🏆', t.gotMonopoly(owner.name, spot.streetType), [owner.playerId], undefined, delay))
+          events.push(ev('🏆', t.gotMonopoly(owner.name, spot.streetType), [owner.playerId]))
         }
       }
     }
+
+    // Property transferred (bankruptcy)
     if (np.ownerPlayerId && pp.ownerPlayerId && np.ownerPlayerId !== pp.ownerPlayerId) {
       const newOwner = next.players.find(p => p.playerId === np.ownerPlayerId)
       const prevOwner = next.players.find(p => p.playerId === pp.ownerPlayerId)
-      events.push(ev('🤝', t.transferred(name, prevOwner?.name ?? '?', newOwner?.name ?? '?'), [np.ownerPlayerId, pp.ownerPlayerId]))
-    }
-
-    if (np.mortgaged && !pp.mortgaged) {
-      const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      events.push(ev('🏦', t.mortgaged(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : []))
-    }
-    if (!np.mortgaged && pp.mortgaged) {
-      const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      events.push(ev('💳', t.redeemed(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : []))
-    }
-    if (np.houseCount > pp.houseCount) {
-      const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      const streetType = spot?.streetType ?? ''
-      events.push(ev('🏗', t.builtHouse(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `house:${streetType}`))
-    }
-    if (np.houseCount < pp.houseCount && pp.hotelCount === 0) {
-      const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      const streetType = spot?.streetType ?? ''
-      events.push(ev('🏚', t.soldHouse(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `sell:${streetType}`))
-    }
-    if (np.hotelCount > pp.hotelCount) {
-      const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      const streetType = spot?.streetType ?? ''
-      events.push(ev('🏗', t.builtHotel(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `hotel:${streetType}`))
-    }
-    if (np.hotelCount < pp.hotelCount) {
-      const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      const streetType = spot?.streetType ?? ''
-      events.push(ev('🏚', t.soldHotel(owner?.name ?? '?', name), np.ownerPlayerId ? [np.ownerPlayerId] : [], `sellhotel:${streetType}`))
+      const spot = SPOTS.find(s => s.id === np.propertyId)
+      events.push(ev('🤝', t.transferred(spot?.name ?? np.propertyId, prevOwner?.name ?? '?', newOwner?.name ?? '?'),
+        [np.ownerPlayerId, pp.ownerPlayerId]))
     }
   }
 

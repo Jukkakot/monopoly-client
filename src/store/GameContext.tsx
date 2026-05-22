@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer, useCallback, type ReactNode } fr
 import type { SessionState, ClientSessionSnapshot } from '../types/api'
 import { sendCommand, sseUrl } from '../api/sessionApi'
 import { useEffect, useRef } from 'react'
-import { deriveEvents, type GameEvent } from './events'
+import { translateBackendEvents, deriveMiscEvents, type GameEvent } from './events'
 import {
   playTokenMove, playBuyProperty, playBuildHouse, playBuildHotel,
   playGoToJail, playReleaseJail, playDrawCard, playBankruptcy,
@@ -28,6 +28,7 @@ interface GameState {
   commandError: string | null
   turnCount: number
   netWorthHistory: Map<string, number[]>
+  lastSeenEventId: number
 }
 
 type Action =
@@ -92,10 +93,24 @@ function reducer(state: GameState, action: Action): GameState {
         commandError: null,
         turnCount: 0,
         netWorthHistory: new Map(),
+        lastSeenEventId: -1,
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
-      const newEvents = newSnapshot ? deriveEvents(state.snapshot, newSnapshot) : []
+
+      // Translate backend-persisted events (new entries only) + derive misc events from state diff
+      let newEvents: GameEvent[] = []
+      let lastSeenEventId = state.lastSeenEventId
+      if (newSnapshot) {
+        const backendLog = newSnapshot.eventLog ?? []
+        const newEntries = backendLog.filter(e => e.id > lastSeenEventId)
+        if (newEntries.length > 0) {
+          lastSeenEventId = Math.max(...newEntries.map(e => e.id))
+          newEvents.push(...translateBackendEvents(newEntries, newSnapshot.players))
+        }
+        newEvents.push(...deriveMiscEvents(state.snapshot, newSnapshot))
+      }
+
       const myPlayerId = newSnapshot ? resolveMyPlayerId(newSnapshot, state.sessionId, state.myPlayerId) : state.myPlayerId
 
       // Derive dice from active player movement
@@ -165,6 +180,7 @@ function reducer(state: GameState, action: Action): GameState {
         diceHistory,
         turnCount,
         netWorthHistory,
+        lastSeenEventId,
       }
     }
     case 'LEAVE_SESSION':
@@ -179,6 +195,7 @@ function reducer(state: GameState, action: Action): GameState {
         diceHistory: [],
         turnCount: 0,
         netWorthHistory: new Map(),
+        lastSeenEventId: -1,
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
@@ -212,6 +229,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     commandError: null,
     turnCount: 0,
     netWorthHistory: new Map(),
+    lastSeenEventId: -1,
   })
 
   const retryCount = useRef(0)
