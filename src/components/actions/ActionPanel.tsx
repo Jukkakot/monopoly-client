@@ -608,7 +608,6 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   const [customBid, setCustomBid] = useState('')
 
   const spot = SPOTS.find(s => s.id === auction.propertyId)
-  const leader = state.players.find(p => p.playerId === auction.leadingPlayerId)
   const minBid = auction.minimumNextBid > 0 ? auction.minimumNextBid : auction.currentBid + 10
   const isEligible = auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
   const currentActor = state.players.find(p => p.playerId === auction.currentActorPlayerId)
@@ -620,41 +619,37 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
     setCustomBid('')
   }
 
-  const passedNames = auction.passedPlayerIds
-    .map(id => state.players.find(p => p.playerId === id)?.name ?? '?')
-  const remainingCount = auction.eligiblePlayerIds.length - auction.passedPlayerIds.length
-
   return (
     <div className={styles.panel}>
-      <div className={`${styles.infoBox} ${styles.auction}`}>
-        {t.auctionTitle(spot?.name ?? auction.propertyId)}<br />
-        {t.auctionHighest(auction.currentBid, leader?.name ?? null)}
+      <div className={styles.auctionHeader}>
+        <span className={styles.auctionTitle}>🔨 {spot?.name ?? auction.propertyId}</span>
+        {spotPrice > 0 && <span className={styles.auctionListPriceTag}>🏷 €{spotPrice}</span>}
       </div>
-      <div className={styles.auctionProgress}>
-        <div className={styles.auctionProgressBar}>
-          {auction.eligiblePlayerIds.map(id => {
-            const passed = auction.passedPlayerIds.includes(id)
-            const seat = state.seats.find(s => s.playerId === id)
-            return (
-              <div
-                key={id}
-                className={`${styles.auctionPip} ${passed ? styles.auctionPipPassed : ''}`}
-                style={{ background: passed ? '#ccc' : seat?.tokenColorHex ?? '#2e7d32' }}
-                title={state.players.find(p => p.playerId === id)?.name}
-              />
-            )
-          })}
-        </div>
-        <span className={styles.auctionProgressText}>
-          {remainingCount > 0 ? t.auctionRemaining(remainingCount) : ''}
-          {passedNames.length > 0 && t.auctionPassed(passedNames.join(', '))}
-        </span>
+      <div className={styles.auctionPlayerList}>
+        {auction.eligiblePlayerIds.map(id => {
+          const player = state.players.find(p => p.playerId === id)
+          const seat = state.seats.find(s => s.playerId === id)
+          const passed = auction.passedPlayerIds.includes(id)
+          const isLeader = id === auction.leadingPlayerId
+          const isActor = id === auction.currentActorPlayerId && auction.status === 'ACTIVE'
+          const color = seat?.tokenColorHex ?? '#888'
+          return (
+            <div
+              key={id}
+              className={`${styles.auctionPlayerRow} ${passed ? styles.auctionPlayerRowPassed : ''} ${isLeader ? styles.auctionPlayerRowLeader : ''}`}
+              style={isLeader ? { borderLeftColor: color, background: `${color}1a` } : undefined}
+            >
+              <div className={styles.auctionPlayerDot} style={{ background: passed ? '#ccc' : color }} />
+              <span className={styles.auctionPlayerName}>{player?.name ?? '?'}</span>
+              <span className={styles.auctionPlayerRight}>
+                {isLeader && <span className={styles.auctionLeadBid}>€{auction.currentBid}</span>}
+                {isActor && !passed && <span className={styles.auctionActorTag}>vuorossa</span>}
+                {passed && <span className={styles.auctionPassTag}>passi</span>}
+              </span>
+            </div>
+          )
+        })}
       </div>
-      {spotPrice > 0 && (
-        <div className={styles.auctionHint}>
-          {t.auctionListPrice(spotPrice)}
-        </div>
-      )}
       {!isEligible && currentActor && auction.status === 'ACTIVE' && (
         <div className={styles.infoBox}>
           {t.auctionActorWaiting(currentActor.name)}

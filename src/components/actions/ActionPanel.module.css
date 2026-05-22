@@ -266,34 +266,110 @@
   border: 2px solid #ffe082;
 }
 
-/* ── Auction progress ── */
-.auctionProgress {
+/* ── Auction ── */
+.auctionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0 2px;
+}
+
+.auctionTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e65100;
+}
+
+.auctionListPriceTag {
+  font-size: 0.75rem;
+  color: #5d4037;
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  border-radius: 5px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.auctionPlayerList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
-.auctionProgressBar {
+.auctionPlayerRow {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  border-left: 3px solid transparent;
+  background: #fafafa;
+  transition: background 0.2s;
 }
 
-.auctionPip {
-  width: 16px;
-  height: 16px;
+.auctionPlayerRowLeader {
+  font-weight: 700;
+}
+
+.auctionPlayerRowPassed {
+  opacity: 0.45;
+}
+
+.auctionPlayerDot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
-  transition: background 0.3s;
 }
 
-.auctionPipPassed {
-  opacity: 0.4;
+.auctionPlayerName {
+  flex: 1;
+  font-size: 0.88rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.auctionProgressText {
-  font-size: 0.75rem;
-  color: #888;
-  font-style: italic;
+.auctionPlayerRight {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.auctionLeadBid {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #2e7d32;
+}
+
+.auctionActorTag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #fff8e1;
+  color: #e65100;
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.auctionPassTag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: #f5f5f5;
+  color: #999;
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 
 .auctionHint {
