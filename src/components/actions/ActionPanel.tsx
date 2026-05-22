@@ -78,24 +78,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
 
-  // Track card only for MY turn — clear when active player changes
-  const [visibleCard, setVisibleCard] = useState<{ key: string; msg: string | null } | null>(null)
-  const [cardDismissed, setCardDismissed] = useState(false)
-  const prevCardKeyRef = useRef<string | null>(state.lastCardKey)
-  const prevActiveRef = useRef<string | undefined>(activeId)
-  useEffect(() => {
-    if (state.lastCardKey && state.lastCardKey !== prevCardKeyRef.current && activeId === myPlayerId) {
-      setVisibleCard({ key: state.lastCardKey, msg: state.lastCardMessage })
-      setCardDismissed(false)
-    }
-    if (activeId !== prevActiveRef.current && prevActiveRef.current !== undefined) {
-      setVisibleCard(null)
-      setCardDismissed(false)
-    }
-    prevCardKeyRef.current = state.lastCardKey
-    prevActiveRef.current = activeId
-  }, [state.lastCardKey, state.lastCardMessage, activeId, myPlayerId])
-
   // Track rent payment: record cash when my turn starts (WAITING_FOR_ROLL), detect drop on end
   const [visibleRent, setVisibleRent] = useState<{ amount: number; ownerName: string } | null>(null)
   const [rentDismissed, setRentDismissed] = useState(false)
@@ -134,10 +116,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') return
     if ((turn?.consecutiveDoubles ?? 0) === 0) return
     if (tokenAnimating) return
-    if (visibleCard && !cardDismissed) return
     if (visibleRent && !rentDismissed) return
     cmd('EndTurn')
-  }, [isMyTurn, phase, turn?.consecutiveDoubles, tokenAnimating, visibleCard, cardDismissed, visibleRent, rentDismissed])
+  }, [isMyTurn, phase, turn?.consecutiveDoubles, tokenAnimating, visibleRent, rentDismissed])
 
   function TabBar() {
     if (!hasPropActions) return null
@@ -318,22 +299,40 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     )
   }
 
+  // WAITING_FOR_CARD_ACK — player must acknowledge the drawn card before effect is applied
+  if (phase === 'WAITING_FOR_CARD_ACK') {
+    const cardText = getCardText(state.lastCardKey ?? null, state.lastCardMessage ?? null)
+    if (isMyTurn) {
+      return (
+        <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+          <div className={styles.cardPopup}>
+            <span className={styles.cardPopupIcon}>🃏</span>
+            <span className={styles.cardPopupText}>{cardText ?? '🃏'}</span>
+            <button className={styles.cardPopupOk} onClick={() => cmd('AcknowledgeCard')}>{t.cardOkBtn}</button>
+          </div>
+        </div>
+      )
+    }
+    // Not my turn — show who is reading the card
+    const activePlayer = state.players.find(p => p.playerId === activeId)
+    const activeSeat = state.seats.find(s => s.playerId === activeId)
+    return (
+      <div className={styles.panel}>
+        <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+          🃏 {activePlayer?.name ?? '?'} — {t.phases['WAITING_FOR_CARD_ACK']}
+        </div>
+      </div>
+    )
+  }
+
   // WAITING_FOR_ROLL
   if (phase === 'WAITING_FOR_ROLL') {
     const consecutiveDoubles = turn?.consecutiveDoubles ?? 0
-    const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            {cardText && !cardDismissed && (
-              <div className={styles.cardPopup}>
-                <span className={styles.cardPopupIcon}>🃏</span>
-                <span className={styles.cardPopupText}>{cardText}</span>
-                <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
-              </div>
-            )}
             {consecutiveDoubles > 0 && (
               <div className={`${styles.infoBox} ${styles.doubles}`}>
                 {t.doublesRoll}
@@ -363,20 +362,12 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
-    const cardText = getCardText(visibleCard?.key ?? null, visibleCard?.msg ?? null)
     const hasDoubles = (turn?.consecutiveDoubles ?? 0) > 0
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            {cardText && !cardDismissed && (
-              <div className={styles.cardPopup}>
-                <span className={styles.cardPopupIcon}>🃏</span>
-                <span className={styles.cardPopupText}>{cardText}</span>
-                <button className={styles.cardPopupOk} onClick={() => setCardDismissed(true)}>{t.cardOkBtn}</button>
-              </div>
-            )}
             {visibleRent && !rentDismissed && (
               <div className={`${styles.cardPopup} ${styles.rentPopup}`}>
                 <span className={styles.cardPopupIcon}>💸</span>

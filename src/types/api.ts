@@ -3,6 +3,7 @@ export type BotDifficulty = 'EASY' | 'NORMAL' | 'STRONG'
 export type SessionStatus = 'LOBBY' | 'IN_PROGRESS' | 'GAME_OVER'
 export type TurnPhase =
   | 'WAITING_FOR_ROLL'
+  | 'WAITING_FOR_CARD_ACK'
   | 'WAITING_FOR_END_TURN'
   | 'WAITING_FOR_DECISION'
   | 'WAITING_FOR_AUCTION'

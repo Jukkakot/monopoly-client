@@ -329,6 +329,7 @@ const fi: T = {
 
   phases: {
     WAITING_FOR_ROLL: 'Heittää nopat',
+    WAITING_FOR_CARD_ACK: 'Lukee korttia',
     WAITING_FOR_END_TURN: 'Lopettaa vuoron',
     WAITING_FOR_DECISION: 'Tekee päätöksen',
     WAITING_FOR_AUCTION: 'Huutokauppa',
@@ -669,6 +670,7 @@ const en: T = {
 
   phases: {
     WAITING_FOR_ROLL: 'Rolling dice',
+    WAITING_FOR_CARD_ACK: 'Reading card',
     WAITING_FOR_END_TURN: 'Ending turn',
     WAITING_FOR_DECISION: 'Deciding',
     WAITING_FOR_AUCTION: 'Auction',
