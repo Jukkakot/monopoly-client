@@ -96,6 +96,7 @@ export interface T {
   declineBtn: string
   // Card popup
   cardOkBtn: string
+  botDrawingCard: (name: string) => string
   actionTabLabel: string
   propertiesTabLabel: string
   tradeCashLabel: (amount: number) => string
@@ -418,6 +419,7 @@ const fi: T = {
   counterOfferBtn: '💬 Vastatarjous',
   declineBtn: '❌ Hylkää',
   cardOkBtn: '✓ Selvä',
+  botDrawingCard: (name) => `${name} nostaa kortin`,
   actionTabLabel: '🎲 Vuoro',
   propertiesTabLabel: '🏠 Kiinteistöt',
   tradeCashLabel: (amount) => `Kassa: €${amount}`,
@@ -762,6 +764,7 @@ const en: T = {
   counterOfferBtn: '💬 Counter offer',
   declineBtn: '❌ Decline',
   cardOkBtn: '✓ Got it',
+  botDrawingCard: (name) => `${name} draws a card`,
   actionTabLabel: '🎲 Turn',
   propertiesTabLabel: '🏠 Properties',
   tradeCashLabel: (amount) => `Cash: €${amount}`,

@@ -313,13 +313,17 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         </div>
       )
     }
-    // Not my turn — show who is reading the card
+    // Not my turn — show the card the other player drew (auto-dismisses when bot acknowledges)
     const activePlayer = state.players.find(p => p.playerId === activeId)
     const activeSeat = state.seats.find(s => s.playerId === activeId)
     return (
       <div className={styles.panel}>
-        <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
-          🃏 {activePlayer?.name ?? '?'} — {t.phases['WAITING_FOR_CARD_ACK']}
+        <div className={`${styles.cardPopup} ${styles.cardPopupObserver}`}>
+          <span className={styles.cardPopupPlayer} style={activeSeat ? { color: activeSeat.tokenColorHex } : {}}>
+            {t.botDrawingCard(activePlayer?.name ?? '?')}
+          </span>
+          <span className={styles.cardPopupIcon}>🃏</span>
+          <span className={styles.cardPopupText}>{cardText ?? '?'}</span>
         </div>
       </div>
     )

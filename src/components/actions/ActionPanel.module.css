@@ -717,6 +717,19 @@
 }
 .cardPopupOk:hover { background: #f57f17; }
 
+/* Observer variant — shown when watching another player draw a card */
+.cardPopupObserver {
+  opacity: 0.82;
+}
+
+.cardPopupPlayer {
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* Rent popup — red tint variant */
 .rentPopup {
   background: #ffebee;
