@@ -140,6 +140,20 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         events.push(ev('💀', t.wentBankrupt(name), [pid]))
         break
       }
+      case 'TRADE_ACCEPTED': {
+        const p2 = players.find(p => p.playerId === pid2)
+        events.push(ev('🤝', t.tradeAccepted(name, p2?.name ?? '?'), [pid, pid2], 'accepted'))
+        break
+      }
+      case 'TRADE_DECLINED': {
+        const p2 = players.find(p => p.playerId === pid2)
+        events.push(ev('🚫', t.tradeDeclined(p2?.name ?? '?'), [pid, pid2]))
+        break
+      }
+      case 'TRADE_CANCELLED': {
+        events.push(ev('🤝', t.tradeCancelled, [pid, pid2]))
+        break
+      }
     }
   }
 
@@ -182,8 +196,8 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
       }
     }
 
-    // Property transferred (bankruptcy)
-    if (np.ownerPlayerId && pp.ownerPlayerId && np.ownerPlayerId !== pp.ownerPlayerId) {
+    // Property transferred (bankruptcy) — skip if a trade was active (transfers handled by TRADE_ACCEPTED backend event)
+    if (np.ownerPlayerId && pp.ownerPlayerId && np.ownerPlayerId !== pp.ownerPlayerId && !prev.tradeState) {
       const newOwner = next.players.find(p => p.playerId === np.ownerPlayerId)
       const prevOwner = next.players.find(p => p.playerId === pp.ownerPlayerId)
       const spot = SPOTS.find(s => s.id === np.propertyId)
@@ -204,21 +218,7 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
     }
   }
 
-  // Trade ended
-  if (prev.tradeState && !next.tradeState) {
-    const initId = prev.tradeState.initiatorPlayerId
-    const recpId = prev.tradeState.recipientPlayerId
-    const initName = next.players.find(p => p.playerId === initId)?.name ?? '?'
-    const recpName = next.players.find(p => p.playerId === recpId)?.name ?? '?'
-    const status = prev.tradeState.status
-    if (status === 'ACCEPTED_PENDING_APPLY') {
-      events.push(ev('🤝', t.tradeAccepted(initName, recpName), [initId, recpId], 'accepted'))
-    } else if (status === 'DECLINED') {
-      events.push(ev('🚫', t.tradeDeclined(recpName), [initId, recpId]))
-    } else {
-      events.push(ev('🤝', t.tradeCancelled, [initId, recpId]))
-    }
-  }
+  // Trade ended: now handled by TRADE_ACCEPTED / TRADE_DECLINED / TRADE_CANCELLED backend events
 
   return events
 }
