@@ -367,11 +367,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
     const hasDoubles = (turn?.consecutiveDoubles ?? 0) > 0
+    const lastDice = turn?.lastDice
+    const showJailEscapeNote = !hasDoubles && !me?.inJail && lastDice?.[0] === lastDice?.[1] && lastDice?.[0] != null
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
         {activeTab === 'action' ? (
           <>
+            {showJailEscapeNote && (
+              <div className={styles.infoBox}>{t.jailEscapeDoubles}</div>
+            )}
             {visibleRent && !rentDismissed && (
               <div className={`${styles.cardPopup} ${styles.rentPopup}`}>
                 <span className={styles.cardPopupIcon}>💸</span>

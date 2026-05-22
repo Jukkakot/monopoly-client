@@ -31,6 +31,7 @@ export interface T {
   yourTurnIn: (n: number) => string
   doublesRoll: string
   doublesWarning: string
+  jailEscapeDoubles: string
   inJail: (rounds: number) => string
   useJailCard: (n: number) => string
   payJailFine: string
@@ -355,6 +356,7 @@ const fi: T = {
   yourTurnIn: (n) => `${n} pelaajan jälkeen`,
   doublesRoll: '🎲 Tuplaheitto! Heitä uudelleen',
   doublesWarning: ' — varoitus: 3. tupla = vankila',
+  jailEscapeDoubles: '🔓 Tupla vapautti vankilasta — uutta heittovuoroa ei saa',
   inJail: (r) => `⛓ Vankilassa — ${r} kierrosta jäljellä`,
   useJailCard: (n) => `🃏 Käytä vapautuskortti (${n})`,
   payJailFine: '💸 Maksa €50 ja vapaudu',
@@ -700,6 +702,7 @@ const en: T = {
   yourTurnIn: (n) => `after ${n} player${n !== 1 ? 's' : ''}`,
   doublesRoll: '🎲 Doubles! Roll again',
   doublesWarning: ' — warning: 3rd double = jail',
+  jailEscapeDoubles: '🔓 Doubles released from jail — no extra turn',
   inJail: (r) => `⛓ In jail — ${r} round${r !== 1 ? 's' : ''} left`,
   useJailCard: (n) => `🃏 Use get-out-of-jail card (${n})`,
   payJailFine: '💸 Pay €50 and get out',
