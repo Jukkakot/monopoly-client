@@ -158,6 +158,23 @@
 .addPlayerBtn:hover:not(:disabled) { background: #dcedc8; }
 .addPlayerBtn:disabled { opacity: 0.5; cursor: default; }
 
+.addPlayerRow {
+  display: flex;
+  gap: 8px;
+}
+
+.addPlayerRow .addPlayerBtn {
+  flex: 1;
+}
+
+.addPlayerBtnHuman {
+  background: #f1f8e9;
+  border-color: #a5d6a7;
+  color: #2e7d32;
+}
+
+.addPlayerBtnHuman:hover:not(:disabled) { background: #dcedc8; }
+
 .addPlayerBtnBot {
   background: #fffde7;
   border-color: #ffe082;

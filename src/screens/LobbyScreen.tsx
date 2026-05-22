@@ -36,6 +36,15 @@ export default function LobbyScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  function addHuman() {
+    if (rows.length >= 6) return
+    playButtonClick()
+    setRows(prev => {
+      const usedNames = prev.map(r => r.name)
+      return [...prev, makeHumanRow(prev.length, usedNames)]
+    })
+  }
+
   function addBot() {
     if (rows.length >= 6) return
     playButtonClick()
@@ -115,7 +124,7 @@ export default function LobbyScreen() {
       saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
       const spectatorMode = rows.every(r => r.isBot)
       if (!spectatorMode) {
-        const me = rows[0]
+        const me = rows.find(r => !r.isBot) ?? rows[0]
         const joined = await joinLobby(sessionId, me.name.trim(), me.color)
         try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
         try { sessionStorage.setItem(`monopoly_token_${sessionId}`, joined.playerToken) } catch {}
@@ -201,9 +210,14 @@ export default function LobbyScreen() {
         </div>
 
         {rows.length < 6 && (
-          <button className={`${styles.addPlayerBtn} ${styles.addPlayerBtnBot}`} onClick={addBot} disabled={loading}>
-            + {t.addBotBtn}
-          </button>
+          <div className={styles.addPlayerRow}>
+            <button className={`${styles.addPlayerBtn} ${styles.addPlayerBtnHuman}`} onClick={addHuman} disabled={loading}>
+              + {t.addHumanBtn}
+            </button>
+            <button className={`${styles.addPlayerBtn} ${styles.addPlayerBtnBot}`} onClick={addBot} disabled={loading}>
+              + {t.addBotBtn}
+            </button>
+          </div>
         )}
 
         {error && <div className={styles.errorMsg}>{error}</div>}

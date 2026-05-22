@@ -90,7 +90,7 @@ export default function LobbyWaitingScreen() {
   const joinedHumanSeats = humanSeats.filter(s => s.joined)
   const freeHumanSeats = humanSeats.filter(s => !s.joined)
   const alreadyJoined = !!myPlayerId
-  const canStart = joinedHumanSeats.length >= 1
+  const canStart = joinedHumanSeats.length >= 1 || (humanSeats.length === 0 && botSeats.length >= 2)
 
   return (
     <div className={styles.page}>
