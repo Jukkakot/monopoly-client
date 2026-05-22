@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { createLobby } from '../api/sessionApi'
+import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { playButtonClick } from '../utils/sounds'
+import { TokenSvg } from '../components/board/TokenSvg'
 import Header from '../components/layout/Header'
 import styles from './LobbyScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
@@ -18,6 +20,7 @@ export default function LobbyScreen() {
     try { return localStorage.getItem('monopoly_last_name') ?? '' } catch { return '' }
   })
   const [color, setColor] = useState(PRESET_COLORS[0])
+  const [tokenShape, setTokenShape] = useState<TokenShape>('circle')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,6 +31,7 @@ export default function LobbyScreen() {
     setLoading(true)
     try {
       const result = await createLobby(name.trim(), color)
+      saveTokenShapes(result.sessionId, [tokenShape])
       try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
       try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}
       try { sessionStorage.setItem(`monopoly_token_${result.sessionId}`, result.playerToken) } catch {}
@@ -72,6 +76,22 @@ export default function LobbyScreen() {
                 onClick={() => { playButtonClick(); setColor(c) }}
               />
             ))}
+          </div>
+          <div className={styles.shapeRow}>
+            {ALL_SHAPES.map(s => (
+              <button
+                key={s.key}
+                className={`${styles.shapeBtn} ${tokenShape === s.key ? styles.shapeSelected : ''}`}
+                style={tokenShape === s.key ? { borderColor: color } : {}}
+                onClick={() => { playButtonClick(); setTokenShape(s.key) }}
+                title={s.key}
+              >
+                <TokenSvg color={tokenShape === s.key ? color : '#bbb'} shape={s.key} size={20} />
+              </button>
+            ))}
+            <div className={styles.tokenPreview}>
+              <TokenSvg color={color} shape={tokenShape} size={32} />
+            </div>
           </div>
         </div>
 
