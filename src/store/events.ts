@@ -18,6 +18,7 @@ export interface GameEvent {
   relatedPlayerIds: string[]
   kind?: string
   releaseAt?: number  // hide in event log until this timestamp
+  historical?: boolean  // loaded from existing log on reconnect/refresh — no sounds
 }
 
 let _id = 0

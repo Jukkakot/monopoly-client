@@ -103,12 +103,22 @@ function reducer(state: GameState, action: Action): GameState {
       let lastSeenEventId = state.lastSeenEventId
       if (newSnapshot) {
         const backendLog = newSnapshot.eventLog ?? []
-        const newEntries = backendLog.filter(e => e.id > lastSeenEventId)
-        if (newEntries.length > 0) {
-          lastSeenEventId = Math.max(...newEntries.map(e => e.id))
-          newEvents.push(...translateBackendEvents(newEntries, newSnapshot.players))
+        if (state.snapshot === null) {
+          // First snapshot after connect/refresh: mark all existing log entries as historical
+          // so they appear in the event log without triggering sounds or notifications.
+          if (backendLog.length > 0) {
+            lastSeenEventId = Math.max(...backendLog.map(e => e.id))
+            newEvents.push(...translateBackendEvents(backendLog, newSnapshot.players)
+              .map(e => ({ ...e, historical: true })))
+          }
+        } else {
+          const newEntries = backendLog.filter(e => e.id > lastSeenEventId)
+          if (newEntries.length > 0) {
+            lastSeenEventId = Math.max(...newEntries.map(e => e.id))
+            newEvents.push(...translateBackendEvents(newEntries, newSnapshot.players))
+          }
+          newEvents.push(...deriveMiscEvents(state.snapshot, newSnapshot))
         }
-        newEvents.push(...deriveMiscEvents(state.snapshot, newSnapshot))
       }
 
       const myPlayerId = newSnapshot ? resolveMyPlayerId(newSnapshot, state.sessionId, state.myPlayerId) : state.myPlayerId
@@ -236,9 +246,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Play sounds in sync with event log visibility (respects releaseAt animation delay)
   useEffect(() => {
-    const newEvents = state.events.filter(e => e.id > lastSoundedId.current)
+    const newEvents = state.events.filter(e => e.id > lastSoundedId.current && !e.historical)
+    const allNew = state.events.filter(e => e.id > lastSoundedId.current)
+    if (allNew.length > 0) lastSoundedId.current = Math.max(...allNew.map(e => e.id))
     if (newEvents.length === 0) return
-    lastSoundedId.current = Math.max(...newEvents.map(e => e.id))
     const now = Date.now()
     const timers: ReturnType<typeof setTimeout>[] = []
     for (const e of newEvents) {
