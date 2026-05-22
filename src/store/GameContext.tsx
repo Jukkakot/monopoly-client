@@ -79,6 +79,7 @@ function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, exi
 function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'SET_SESSION':
+      if (state.sessionId === action.sessionId) return state  // already joined, don't reset
       return {
         ...state,
         sessionId: action.sessionId,
@@ -343,7 +344,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         es.close()
         esRef.current = null
         if (cancelled) return
-        if (retryCount.current >= 10) {
+        if (retryCount.current >= 5) {
           dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
           return
         }
