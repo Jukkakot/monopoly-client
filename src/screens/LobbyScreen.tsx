@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { createLobby } from '../api/sessionApi'
 import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
 import { TokenSvg } from '../components/board/TokenSvg'
 import Header from '../components/layout/Header'
@@ -23,6 +24,13 @@ export default function LobbyScreen() {
   const [tokenShape, setTokenShape] = useState<TokenShape>('circle')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function randomize() {
+    playButtonClick()
+    setName(randomHumanName([]))
+    setColor(PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)])
+    setTokenShape(ALL_SHAPES[Math.floor(Math.random() * ALL_SHAPES.length)].key)
+  }
 
   async function handleCreate() {
     if (!name.trim()) { setError(t.nameRequiredErr); return }
@@ -97,13 +105,18 @@ export default function LobbyScreen() {
 
         {error && <div className={styles.errorMsg}>{error}</div>}
 
-        <button
-          className={styles.createBtn}
-          onClick={handleCreate}
-          disabled={loading || !name.trim()}
-        >
-          {loading ? t.creatingLabel : t.createLobbyBtn}
-        </button>
+        <div className={styles.actionRow}>
+          <button className={styles.randomBtn} onClick={randomize} disabled={loading} title={t.randomizeBtn}>
+            {t.randomizeBtn}
+          </button>
+          <button
+            className={styles.createBtn}
+            onClick={handleCreate}
+            disabled={loading || !name.trim()}
+          >
+            {loading ? t.creatingLabel : t.createLobbyBtn}
+          </button>
+        </div>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
           {t.backBtn}
