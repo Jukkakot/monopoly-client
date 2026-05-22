@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { sessionExists } from '../api/sessionApi'
 import { playDiceRoll, playButtonClick } from '../utils/sounds'
 import { loadSoundConfig, saveSoundConfig } from '../components/menu/SoundSettings'
 import AppLayout from '../components/layout/AppLayout'
@@ -26,13 +25,7 @@ export default function GameScreen() {
 
   useEffect(() => {
     if (!sessionId) { navigate('/'); return }
-    let cancelled = false
-    sessionExists(sessionId).then(exists => {
-      if (cancelled) return
-      if (!exists) { navigate('/'); return }
-      joinSession(sessionId)
-    }).catch(() => { if (!cancelled) navigate('/') })
-    return () => { cancelled = true }
+    joinSession(sessionId)
   }, [sessionId])
 
   useEffect(() => {
