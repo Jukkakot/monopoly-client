@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { joinLobby, startLobby, sseUrl } from '../api/sessionApi'
+import { joinLobby, addLobbyBot, removeLobbyBot, setLobbyReady, sseUrl } from '../api/sessionApi'
 import type { ClientSessionSnapshot, SeatState } from '../types/api'
 import styles from './LobbyWaitingScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
@@ -14,17 +14,34 @@ export default function LobbyWaitingScreen() {
 
   const [seats, setSeats] = useState<SeatState[]>([])
   const [status, setStatus] = useState<string>('LOBBY')
+  const [hostPlayerId, setHostPlayerId] = useState<string | null>(null)
   const [name, setName] = useState(() => {
     try { return localStorage.getItem('monopoly_last_name') ?? '' } catch { return '' }
   })
-  const [myPlayerId, setMyPlayerId] = useState<string | null>(() => {
+  const [myPlayerId] = useState<string | null>(() => {
     try { return sessionStorage.getItem(`monopoly_player_${sessionId}`) } catch { return null }
   })
+  const [myPlayerToken] = useState<string | null>(() => {
+    try { return sessionStorage.getItem(`monopoly_token_${sessionId}`) } catch { return null }
+  })
+  const [hostToken] = useState<string | null>(() => {
+    try { return localStorage.getItem(`monopoly_host_${sessionId}`) } catch { return null }
+  })
   const [joining, setJoining] = useState(false)
-  const [starting, setStarting] = useState(false)
+  const [settingReady, setSettingReady] = useState(false)
+  const [addingBot, setAddingBot] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const navigatedRef = useRef(false)
+
+  const isHost = !!hostToken
+  const mySeat = seats.find(s => s.playerId === myPlayerId)
+  const alreadyJoined = !!myPlayerId && !!mySeat
+  const humanSeats = seats.filter(s => s.seatKind === 'HUMAN')
+  const botSeats = seats.filter(s => s.seatKind === 'BOT')
+  const readyCount = humanSeats.filter(s => s.ready).length
+  const totalHumans = humanSeats.length
+  const canAddBot = seats.length < 6
 
   useEffect(() => {
     if (!sessionId) return
@@ -35,6 +52,7 @@ export default function LobbyWaitingScreen() {
         if (snap.state) {
           setSeats(snap.state.seats)
           setStatus(snap.state.status)
+          setHostPlayerId(snap.state.hostPlayerId)
           if (snap.state.status === 'IN_PROGRESS' && !navigatedRef.current) {
             navigatedRef.current = true
             es.close()
@@ -57,23 +75,44 @@ export default function LobbyWaitingScreen() {
       try { sessionStorage.setItem(`monopoly_token_${sessionId}`, res.playerToken) } catch {}
       try { localStorage.setItem(`monopoly_token_${sessionId}_${res.playerId}`, res.playerToken) } catch {}
       try { localStorage.setItem('monopoly_last_name', name.trim()) } catch {}
-      setMyPlayerId(res.playerId)
+      // Reload to pick up the new credentials from sessionStorage
+      window.location.reload()
     } catch {
       setError(t.joinFailedErr)
-    } finally {
       setJoining(false)
     }
   }
 
-  async function handleStart() {
-    if (!sessionId) return
-    setError(null)
-    setStarting(true)
+  async function handleReady(ready: boolean) {
+    if (!sessionId || !myPlayerId || !myPlayerToken) return
+    setSettingReady(true)
     try {
-      await startLobby(sessionId)
+      await setLobbyReady(sessionId, myPlayerId, myPlayerToken, ready)
     } catch {
-      setError(t.startFailedErr)
-      setStarting(false)
+      setError(t.joinFailedErr)
+    } finally {
+      setSettingReady(false)
+    }
+  }
+
+  async function handleAddBot() {
+    if (!sessionId || !hostToken) return
+    setAddingBot(true)
+    try {
+      await addLobbyBot(sessionId, hostToken)
+    } catch {
+      setError(t.joinFailedErr)
+    } finally {
+      setAddingBot(false)
+    }
+  }
+
+  async function handleRemoveBot(seatId: string) {
+    if (!sessionId || !hostToken) return
+    try {
+      await removeLobbyBot(sessionId, seatId, hostToken)
+    } catch {
+      setError(t.joinFailedErr)
     }
   }
 
@@ -85,12 +124,7 @@ export default function LobbyWaitingScreen() {
     })
   }
 
-  const botSeats = seats.filter(s => s.seatKind === 'BOT')
-  const humanSeats = seats.filter(s => s.seatKind === 'HUMAN')
-  const joinedHumanSeats = humanSeats.filter(s => s.joined)
-  const freeHumanSeats = humanSeats.filter(s => !s.joined)
-  const alreadyJoined = !!myPlayerId
-  const canStart = joinedHumanSeats.length >= 1 || (humanSeats.length === 0 && botSeats.length >= 2)
+  const myReady = mySeat?.ready ?? false
 
   return (
     <div className={styles.page}>
@@ -109,29 +143,51 @@ export default function LobbyWaitingScreen() {
         </div>
 
         <div className={styles.seatSection}>
-          <div className={styles.sectionTitle}>{t.seatsLabel(joinedHumanSeats.length + botSeats.length, seats.length)}</div>
-          {joinedHumanSeats.map(s => (
+          <div className={styles.sectionHeader}>
+            <span className={styles.sectionTitle}>
+              {t.seatsLabel(humanSeats.filter(s => s.joined).length + botSeats.length, seats.length)}
+            </span>
+            {totalHumans > 0 && (
+              <span className={styles.readyCount}>
+                {t.readyCount(readyCount, totalHumans)}
+              </span>
+            )}
+          </div>
+
+          {humanSeats.map(s => (
             <div key={s.seatId} className={styles.seatRow}>
               <span className={styles.seatDot} style={{ background: s.tokenColorHex }} />
-              <span className={styles.seatName}>{s.displayName ?? '–'}</span>
+              <span className={styles.seatName}>
+                {s.displayName ?? '–'}
+                {s.playerId === hostPlayerId && <span className={styles.hostTag}> 👑</span>}
+              </span>
               {s.playerId === myPlayerId && <span className={styles.meTag}>{t.youBadge}</span>}
+              <span className={`${styles.readyBadge} ${s.ready ? styles.readyBadgeYes : styles.readyBadgeNo}`}>
+                {s.ready ? '✓' : '…'}
+              </span>
             </div>
           ))}
+
           {botSeats.map(s => (
             <div key={s.seatId} className={styles.seatRow}>
               <span className={styles.seatDot} style={{ background: s.tokenColorHex }} />
               <span className={styles.seatName}>🤖 {s.displayName ?? '–'}</span>
-            </div>
-          ))}
-          {freeHumanSeats.map(s => (
-            <div key={s.seatId} className={`${styles.seatRow} ${styles.freeSeat}`}>
-              <span className={styles.seatDot} style={{ background: s.tokenColorHex, opacity: 0.3 }} />
-              <span className={styles.seatNameFree}>{t.freeSeatLabel}</span>
+              <span className={`${styles.readyBadge} ${styles.readyBadgeYes}`}>✓</span>
+              {isHost && (
+                <button
+                  className={styles.removeBotBtn}
+                  onClick={() => handleRemoveBot(s.seatId)}
+                  title={t.removeBotBtn}
+                >
+                  ✕
+                </button>
+              )}
             </div>
           ))}
         </div>
 
-        {!alreadyJoined && freeHumanSeats.length > 0 && (
+        {/* Join form — for visitors who haven't joined yet */}
+        {!alreadyJoined && status === 'LOBBY' && (
           <div className={styles.joinSection}>
             <div className={styles.sectionTitle}>{t.joinGameTitle}</div>
             <div className={styles.joinRow}>
@@ -148,7 +204,7 @@ export default function LobbyWaitingScreen() {
               <button
                 className={styles.joinBtn}
                 onClick={handleJoin}
-                disabled={joining || !name.trim()}
+                disabled={joining || !name.trim() || seats.length >= 6}
               >
                 {joining ? '…' : t.joinBtnLabel}
               </button>
@@ -156,21 +212,35 @@ export default function LobbyWaitingScreen() {
           </div>
         )}
 
-        {alreadyJoined && (
-          <div className={styles.joinedBanner}>
-            {t.joinedMsg}
-          </div>
+        {/* Ready button — for joined human players */}
+        {alreadyJoined && status === 'LOBBY' && (
+          <button
+            className={`${styles.readyBtn} ${myReady ? styles.readyBtnActive : ''}`}
+            onClick={() => handleReady(!myReady)}
+            disabled={settingReady}
+          >
+            {myReady ? t.cancelReadyBtn : t.readyBtn}
+          </button>
+        )}
+
+        {/* Host: add bot button */}
+        {isHost && status === 'LOBBY' && (
+          <button
+            className={styles.addBotBtn}
+            onClick={handleAddBot}
+            disabled={addingBot || !canAddBot}
+          >
+            + {t.addBotBtn}
+          </button>
         )}
 
         {error && <div className={styles.errorMsg}>{error}</div>}
 
-        <button
-          className={styles.startBtn}
-          onClick={handleStart}
-          disabled={starting || !canStart || status !== 'LOBBY'}
-        >
-          {starting ? t.startingBtn : canStart ? t.startBtn : t.needMorePlayers(joinedHumanSeats.length, humanSeats.length)}
-        </button>
+        <div className={styles.hint}>
+          {status === 'LOBBY'
+            ? t.waitingForReady(readyCount, totalHumans)
+            : t.gameStarting}
+        </div>
 
         <button className={styles.backBtn} onClick={() => navigate('/')}>
           {t.backBtn}

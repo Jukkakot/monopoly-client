@@ -73,13 +73,25 @@
 
 .copyBtn:hover { color: #2e7d32; border-color: #2e7d32; }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
 .sectionTitle {
   font-size: 0.75rem;
   font-weight: 700;
   color: #777;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+}
+
+.readyCount {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #2e7d32;
 }
 
 .seatSection {
@@ -98,11 +110,6 @@
   border-radius: 8px;
 }
 
-.freeSeat {
-  background: #fafafa;
-  border-color: #e0e0e0;
-}
-
 .seatDot {
   width: 14px;
   height: 14px;
@@ -117,11 +124,8 @@
   color: #1b5e20;
 }
 
-.seatNameFree {
-  flex: 1;
-  font-size: 0.88rem;
-  color: #bbb;
-  font-style: italic;
+.hostTag {
+  font-weight: normal;
 }
 
 .meTag {
@@ -131,7 +135,33 @@
   border-radius: 4px;
   padding: 1px 6px;
   font-weight: 700;
+  flex-shrink: 0;
 }
+
+.readyBadge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.readyBadgeYes { color: #2e7d32; }
+.readyBadgeNo  { color: #bbb; }
+
+.removeBotBtn {
+  padding: 2px 7px;
+  background: transparent;
+  color: #bbb;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.removeBotBtn:hover { color: #e53935; border-color: #e53935; }
 
 .joinSection {
   display: flex;
@@ -173,16 +203,42 @@
 .joinBtn:hover:not(:disabled) { filter: brightness(1.1); }
 .joinBtn:disabled { opacity: 0.5; cursor: default; }
 
-.joinedBanner {
-  padding: 10px 14px;
-  background: #e8f5e9;
-  border: 1.5px solid #a5d6a7;
-  border-radius: 8px;
+.readyBtn {
+  padding: 14px;
+  background: #fff;
   color: #2e7d32;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
+  border: 2px solid #2e7d32;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
+
+.readyBtn:hover:not(:disabled) { background: #f1f8e9; }
+.readyBtn:disabled { opacity: 0.5; cursor: default; }
+
+.readyBtnActive {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.readyBtnActive:hover:not(:disabled) { background: #388e3c; }
+
+.addBotBtn {
+  padding: 10px;
+  background: #fffde7;
+  color: #5d4037;
+  border: 2px dashed #ffe082;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBotBtn:hover:not(:disabled) { background: #fff9c4; }
+.addBotBtn:disabled { opacity: 0.5; cursor: default; }
 
 .errorMsg {
   background: #ffebee;
@@ -196,22 +252,8 @@
 .hint {
   font-size: 0.85rem;
   color: #999;
+  text-align: center;
 }
-
-.startBtn {
-  padding: 14px;
-  background: #2e7d32;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: filter 0.15s;
-}
-
-.startBtn:hover:not(:disabled) { filter: brightness(1.1); }
-.startBtn:disabled { opacity: 0.45; cursor: default; }
 
 .backBtn {
   padding: 10px;

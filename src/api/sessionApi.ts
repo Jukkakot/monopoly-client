@@ -37,7 +37,27 @@ export async function sessionExists(sessionId: string): Promise<boolean> {
   return res.ok
 }
 
-export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{ playerId: string; seatId: string; tokenColorHex: string; playerToken: string }> {
+export async function createLobby(hostName: string, hostColor?: string): Promise<{
+  sessionId: string
+  hostToken: string
+  playerId: string
+  playerToken: string
+}> {
+  const res = await fetch(`${BASE}/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lobbyMode: true, hostName, hostColor }),
+  })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  return res.json()
+}
+
+export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{
+  playerId: string
+  seatId: string
+  tokenColorHex: string
+  playerToken: string
+}> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/join`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -47,11 +67,44 @@ export async function joinLobby(sessionId: string, name: string, color?: string)
   return res.json()
 }
 
-export async function startLobby(sessionId: string): Promise<void> {
-  const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
+export async function addLobbyBot(sessionId: string, hostToken: string): Promise<{ seatId: string; name: string }> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/lobby/bots`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hostToken }),
+  })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  return res.json()
+}
+
+export async function removeLobbyBot(sessionId: string, seatId: string, hostToken: string): Promise<void> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/lobby/bots/${seatId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hostToken }),
+  })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+}
+
+export async function setLobbyReady(
+  sessionId: string,
+  playerId: string,
+  playerToken: string,
+  ready: boolean,
+): Promise<void> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/lobby/ready`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ playerId, playerToken, ready }),
+  })
   if (!res.ok) throw new Error(`Backend returned ${res.status}`)
 }
 
 export function sseUrl(sessionId: string): string {
   return `${BASE}/sessions/${sessionId}/events`
+}
+
+export async function startLobby(sessionId: string): Promise<void> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
 }

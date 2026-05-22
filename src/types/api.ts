@@ -23,6 +23,7 @@ export interface SeatState {
   tokenColorHex: string
   joined: boolean
   botDifficulty: BotDifficulty | null
+  ready: boolean
 }
 
 export interface PlayerSnapshot {

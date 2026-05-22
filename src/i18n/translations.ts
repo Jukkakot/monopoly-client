@@ -211,6 +211,12 @@ export interface T {
   needMorePlayers: (have: number, total: number) => string
   startFailedErr: string
   joinFailedErr: string
+  readyBtn: string
+  cancelReadyBtn: string
+  readyCount: (ready: number, total: number) => string
+  waitingForReady: (ready: number, total: number) => string
+  gameStarting: string
+  removeBotBtn: string
 
   // ── GameOverOverlay ──────────────────────────────────────────────────────────
   gameOverScreenTitle: string
@@ -541,6 +547,12 @@ const fi: T = {
   needMorePlayers: (have, total) => `Tarvitaan vähintään 2 pelaajaa (${have}/${total})`,
   startFailedErr: 'Pelin aloitus epäonnistui.',
   joinFailedErr: 'Liittyminen epäonnistui — odotushuone täynnä tai peli jo aloitettu.',
+  readyBtn: 'Olen valmis',
+  cancelReadyBtn: 'Peru valmius',
+  readyCount: (ready, total) => `${ready}/${total} valmis`,
+  waitingForReady: (ready, total) => `Odotetaan pelaajia — ${ready}/${total} valmiina`,
+  gameStarting: 'Peli alkaa…',
+  removeBotBtn: 'Poista botti',
 
   // GameOverOverlay
   gameOverScreenTitle: 'Peli päättyi!',
@@ -887,6 +899,12 @@ const en: T = {
   needMorePlayers: (have, total) => `Need at least 2 players (${have}/${total})`,
   startFailedErr: 'Failed to start game.',
   joinFailedErr: 'Join failed — waiting room full or game already started.',
+  readyBtn: 'Ready',
+  cancelReadyBtn: 'Cancel ready',
+  readyCount: (ready, total) => `${ready}/${total} ready`,
+  waitingForReady: (ready, total) => `Waiting for players — ${ready}/${total} ready`,
+  gameStarting: 'Game starting…',
+  removeBotBtn: 'Remove bot',
 
   // GameOverOverlay
   gameOverScreenTitle: 'Game over!',
