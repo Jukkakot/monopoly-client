@@ -45,6 +45,17 @@ export default function LobbyScreen() {
     })
   }
 
+  function toggleKind(i: number) {
+    playButtonClick()
+    setRows(prev => prev.map((r, idx) => {
+      if (idx !== i) return r
+      const usedNames = prev.filter((_, j) => j !== i).map(rr => rr.name)
+      const newIsBot = !r.isBot
+      const name = newIsBot ? randomBotName(usedNames) : randomHumanName(usedNames)
+      return { ...r, isBot: newIsBot, name }
+    }))
+  }
+
   function removeRow(i: number) {
     if (i === 0) return
     playButtonClick()
@@ -77,6 +88,7 @@ export default function LobbyScreen() {
 
   async function handleCreate() {
     setError(null)
+    if (rows.length < 2) { setError(t.minPlayersErr); return }
     const usedColors = new Set<string>()
     for (const r of rows) {
       if (!r.name.trim()) { setError(t.nameRequiredErr); return }
@@ -101,12 +113,15 @@ export default function LobbyScreen() {
       const { sessionId, hostToken } = await res.json()
       try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}
       saveTokenShapes(sessionId, rows.map(r => r.tokenShape))
-      const me = rows[0]
-      const joined = await joinLobby(sessionId, me.name.trim(), me.color)
-      try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
-      try { sessionStorage.setItem(`monopoly_token_${sessionId}`, joined.playerToken) } catch {}
-      try { localStorage.setItem(`monopoly_token_${sessionId}_${joined.playerId}`, joined.playerToken) } catch {}
-      try { localStorage.setItem('monopoly_last_name', me.name.trim()) } catch {}
+      const spectatorMode = rows.every(r => r.isBot)
+      if (!spectatorMode) {
+        const me = rows[0]
+        const joined = await joinLobby(sessionId, me.name.trim(), me.color)
+        try { sessionStorage.setItem(`monopoly_player_${sessionId}`, joined.playerId) } catch {}
+        try { sessionStorage.setItem(`monopoly_token_${sessionId}`, joined.playerToken) } catch {}
+        try { localStorage.setItem(`monopoly_token_${sessionId}_${joined.playerId}`, joined.playerToken) } catch {}
+        try { localStorage.setItem('monopoly_last_name', me.name.trim()) } catch {}
+      }
       joinSession(sessionId)
       navigate(`/lobby-wait/${sessionId}`)
     } catch (e) {
@@ -165,9 +180,9 @@ export default function LobbyScreen() {
               </div>
 
               <div className={styles.nameKindRow}>
-                <span className={`${styles.kindLabel} ${row.isBot ? styles.bot : styles.human}`}>
+                <button className={`${styles.kindLabel} ${row.isBot ? styles.bot : styles.human}`} onClick={() => toggleKind(i)} title={row.isBot ? t.humanLabel : t.botLabel}>
                   {row.isBot ? t.botLabel : t.humanLabel}
-                </span>
+                </button>
                 <input
                   className={styles.nameInput}
                   value={row.name}

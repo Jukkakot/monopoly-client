@@ -186,6 +186,7 @@ export interface T {
   lobbyHint: string
   immediateHint: string
   nameRequiredErr: string
+  minPlayersErr: string
   colorsUniqueErr: string
   lobbyFailedErr: (e: string) => string
   sessionFailedErr: (e: string) => string
@@ -512,6 +513,7 @@ const fi: T = {
   lobbyHint: 'Muut voivat liittyä jaettavalla koodilla',
   immediateHint: 'Peli alkaa heti — voit pelata botteja tai toisia vastaan',
   nameRequiredErr: 'Kaikilla pelaajilla pitää olla nimi.',
+  minPlayersErr: 'Pelissä täytyy olla vähintään 2 pelaajaa.',
   colorsUniqueErr: 'Jokaisella pelaajalla pitää olla eri väri.',
   lobbyFailedErr: (e) => `Odotushuoneen luonti epäonnistui: ${e}`,
   sessionFailedErr: (e) => `Sessio ei onnistunut: ${e}`,
@@ -854,6 +856,7 @@ const en: T = {
   lobbyHint: 'Others can join with a shared code',
   immediateHint: 'Game starts immediately — play against bots or others',
   nameRequiredErr: 'All players must have a name.',
+  minPlayersErr: 'The game requires at least 2 players.',
   colorsUniqueErr: 'Each player must have a unique color.',
   lobbyFailedErr: (e) => `Failed to create waiting room: ${e}`,
   sessionFailedErr: (e) => `Session failed: ${e}`,
