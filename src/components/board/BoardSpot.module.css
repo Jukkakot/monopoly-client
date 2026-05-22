@@ -108,8 +108,10 @@
   width: clamp(7px, 2.2vmin, 18px);
   height: 80%;
   flex-shrink: 0;
-  background: #e53935;
+  background: #b71c1c;
   border-radius: 2px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
 }
 
 .colorBarMortgaged {

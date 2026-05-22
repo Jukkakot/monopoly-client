@@ -43,6 +43,7 @@ export interface T {
   buildHousesSectionTitle: string
   mortgageSectionTitle: string
   redeemBtn: string
+  redeemAllBtn: (cost: number) => string
   mortgageBtn: string
   unknownPhase: (phase: string) => string
   // Auction
@@ -363,6 +364,7 @@ const fi: T = {
   buildHousesSectionTitle: 'Rakenna taloja',
   mortgageSectionTitle: 'Kiinnitys',
   redeemBtn: '💳 Lunasta',
+  redeemAllBtn: (cost) => `💳 Lunasta kaikki €${cost}`,
   mortgageBtn: '🏦 Panttaa',
   unknownPhase: (p) => `Tila: ${p}`,
 
@@ -704,6 +706,7 @@ const en: T = {
   buildHousesSectionTitle: 'Build houses',
   mortgageSectionTitle: 'Mortgage',
   redeemBtn: '💳 Redeem',
+  redeemAllBtn: (cost) => `💳 Redeem all €${cost}`,
   mortgageBtn: '🏦 Mortgage',
   unknownPhase: (p) => `State: ${p}`,
 

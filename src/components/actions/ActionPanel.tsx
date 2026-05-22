@@ -401,9 +401,24 @@ function TradeButtons({ state, myPlayerId, sendCmd }: {
   const others = state.players.filter(p => p.playerId !== myPlayerId && !p.bankrupt && !p.eliminated)
   if (others.length === 0) return null
 
+  // Single opponent: skip the picker, open trade directly
+  if (others.length === 1) {
+    const only = others[0]
+    const seat = state.seats.find(s => s.playerId === only.playerId)
+    return (
+      <div className={styles.tradeSection}>
+        <button className={`${styles.btn} ${styles.neutral}`}
+          onClick={() => { playButtonClick(); sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, recipientPlayerId: only.playerId }) }}>
+          {seat && <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: seat.tokenColorHex, marginRight: 6, verticalAlign: 'middle' }} />}
+          {t.tradeWithBtn(only.name)}
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.tradeSection}>
-      <button className={`${styles.btn} ${styles.neutral}`} onClick={() => setOpen(v => !v)}>
+      <button className={`${styles.btn} ${styles.neutral}`} onClick={() => { playButtonClick(); setOpen(v => !v) }}>
         {t.startTrade(open)}
       </button>
       {open && (
@@ -515,7 +530,14 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
       {myProps.length > 0 && (() => {
         const mortgageProps = myProps.filter(p => p.houseCount === 0 && p.hotelCount === 0)
         if (mortgageProps.length === 0) return null
-        const mortgagedCount = mortgageProps.filter(p => p.mortgaged).length
+        const mortgagedProps = mortgageProps.filter(p => p.mortgaged)
+        const mortgagedCount = mortgagedProps.length
+        const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
+        const totalRedeemCost = mortgagedProps.reduce((sum, prop) => {
+          const spot = SPOTS.find(s => s.id === prop.propertyId)
+          const mv = spot?.price ? Math.floor(spot.price / 2) : 0
+          return sum + Math.ceil(mv * 1.1)
+        }, 0)
         return (
           <>
             <button className={styles.sectionToggle} onClick={() => setMortgageOpen(v => !v)}>
@@ -529,32 +551,42 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                 const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
                 const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
               }
-              return Array.from(groups.entries()).map(([type, groupProps]) => (
-                <div key={type} className={styles.buildGroup}>
-                  {groupProps.map(prop => {
-                    const spot = SPOTS.find(s => s.id === prop.propertyId)
-                    if (!spot) return null
-                    const color = STREET_COLORS[spot.streetType]
-                    const mortgageVal = spot.price ? Math.floor(spot.price / 2) : null
-                    const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
-                    return (
-                      <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
-                        <span className={styles.buildName}>{spot.name}</span>
-                        {prop.mortgaged && redeemCost && (
-                          <span className={styles.mortgageVal}>€{redeemCost}</span>
-                        )}
-                        {!prop.mortgaged && mortgageVal && (
-                          <span className={styles.mortgageVal}>+€{mortgageVal}</span>
-                        )}
-                        <button className={styles.buildBtn}
-                          onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                          {prop.mortgaged ? t.redeemBtn : t.mortgageBtn}
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              ))
+              return (
+                <>
+                  {mortgagedCount >= 2 && (
+                    <Btn label={t.redeemAllBtn(totalRedeemCost)} variant="info"
+                      disabled={myCash < totalRedeemCost}
+                      onClick={() => mortgagedProps.forEach(prop =>
+                        sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }))} />
+                  )}
+                  {Array.from(groups.entries()).map(([type, groupProps]) => (
+                    <div key={type} className={styles.buildGroup}>
+                      {groupProps.map(prop => {
+                        const spot = SPOTS.find(s => s.id === prop.propertyId)
+                        if (!spot) return null
+                        const color = STREET_COLORS[spot.streetType]
+                        const mortgageVal = spot.price ? Math.floor(spot.price / 2) : null
+                        const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
+                        return (
+                          <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
+                            <span className={styles.buildName}>{spot.name}</span>
+                            {prop.mortgaged && redeemCost && (
+                              <span className={styles.mortgageVal}>€{redeemCost}</span>
+                            )}
+                            {!prop.mortgaged && mortgageVal && (
+                              <span className={styles.mortgageVal}>+€{mortgageVal}</span>
+                            )}
+                            <button className={styles.buildBtn}
+                              onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
+                              {prop.mortgaged ? t.redeemBtn : t.mortgageBtn}
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </>
+              )
             })()}
           </>
         )
