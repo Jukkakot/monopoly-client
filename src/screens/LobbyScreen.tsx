@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { createLobby } from '../api/sessionApi'
+import { createLobby, createBotsOnlySession } from '../api/sessionApi'
 import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
@@ -24,6 +24,8 @@ export default function LobbyScreen() {
   const [tokenShape, setTokenShape] = useState<TokenShape>('circle')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [botCount, setBotCount] = useState(3)
+  const [startingBots, setStartingBots] = useState(false)
 
   function randomize() {
     playButtonClick()
@@ -50,6 +52,20 @@ export default function LobbyScreen() {
     } catch (e) {
       setError(t.lobbyFailedErr(String(e)))
       setLoading(false)
+    }
+  }
+
+  async function handleStartBots() {
+    setError(null)
+    playButtonClick()
+    setStartingBots(true)
+    try {
+      const { sessionId } = await createBotsOnlySession(botCount)
+      joinSession(sessionId)
+      navigate(`/game/${sessionId}`)
+    } catch (e) {
+      setError(t.lobbyFailedErr(String(e)))
+      setStartingBots(false)
     }
   }
 
@@ -115,6 +131,32 @@ export default function LobbyScreen() {
             disabled={loading || !name.trim()}
           >
             {loading ? t.creatingLabel : t.createLobbyBtn}
+          </button>
+        </div>
+
+        <div className={styles.divider} />
+
+        <div className={styles.botsSection}>
+          <div className={styles.sectionTitle}>{t.watchBotsTitle}</div>
+          <div className={styles.botCountRow}>
+            <button
+              className={styles.botCountBtn}
+              onClick={() => { playButtonClick(); setBotCount(c => Math.max(2, c - 1)) }}
+              disabled={startingBots || botCount <= 2}
+            >−</button>
+            <span className={styles.botCountLabel}>{t.botCountLabel(botCount)}</span>
+            <button
+              className={styles.botCountBtn}
+              onClick={() => { playButtonClick(); setBotCount(c => Math.min(5, c + 1)) }}
+              disabled={startingBots || botCount >= 5}
+            >+</button>
+          </div>
+          <button
+            className={styles.botsBtn}
+            onClick={handleStartBots}
+            disabled={startingBots || loading}
+          >
+            {startingBots ? t.startingLabel : t.startBotsBtn}
           </button>
         </div>
 

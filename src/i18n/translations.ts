@@ -218,6 +218,15 @@ export interface T {
   gameStarting: string
   removeBotBtn: string
 
+  // LobbyScreen — bot-only section
+  watchBotsTitle: string
+  botCountLabel: (n: number) => string
+  startBotsBtn: string
+
+  // ActionPanel — spectator
+  spectatorMsg: string
+  endGameBtn: string
+
   // ── GameOverOverlay ──────────────────────────────────────────────────────────
   gameOverScreenTitle: string
   wonLabel: (name: string) => string
@@ -554,6 +563,11 @@ const fi: T = {
   waitingForReady: (ready, total) => `Odotetaan pelaajia — ${ready}/${total} valmiina`,
   gameStarting: 'Peli alkaa…',
   removeBotBtn: 'Poista botti',
+  watchBotsTitle: '👁 Seuraa bottipeliä',
+  botCountLabel: (n) => `Botteja: ${n}`,
+  startBotsBtn: 'Aloita bottipeli',
+  spectatorMsg: 'Olet katsojana',
+  endGameBtn: '🛑 Lopeta peli',
 
   // GameOverOverlay
   gameOverScreenTitle: 'Peli päättyi!',
@@ -907,6 +921,11 @@ const en: T = {
   waitingForReady: (ready, total) => `Waiting for players — ${ready}/${total} ready`,
   gameStarting: 'Game starting…',
   removeBotBtn: 'Remove bot',
+  watchBotsTitle: '👁 Watch bot game',
+  botCountLabel: (n) => `Bots: ${n}`,
+  startBotsBtn: 'Start bot game',
+  spectatorMsg: 'You are a spectator',
+  endGameBtn: '🛑 End game',
 
   // GameOverOverlay
   gameOverScreenTitle: 'Game over!',

@@ -139,6 +139,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   }
 
 
+  // SPECTATOR (no player credentials — bot-only game watcher)
+  if (!myPlayerId) {
+    return (
+      <div className={styles.panel}>
+        <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
+        <Btn label={t.endGameBtn} onClick={() => cmd('AbortGame')} variant="danger" />
+      </div>
+    )
+  }
+
   // GAME OVER
   if (state.status === 'GAME_OVER' || phase === 'GAME_OVER') {
     const sorted = [...state.players].sort((a, b) => {

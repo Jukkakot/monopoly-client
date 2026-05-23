@@ -282,6 +282,66 @@
 .lobbyBtn:hover:not(:disabled) { filter: brightness(1.1); }
 .lobbyBtn:disabled { opacity: 0.6; cursor: default; }
 
+.divider {
+  border: none;
+  border-top: 1.5px dashed #d0d0d0;
+  margin: 0;
+}
+
+.botsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.botCountRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.botCountBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1.5px solid #c8e6c9;
+  background: #f1f8e9;
+  color: #2e7d32;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botCountBtn:hover:not(:disabled) { background: #dcedc8; }
+.botCountBtn:disabled { opacity: 0.4; cursor: default; }
+
+.botCountLabel {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #333;
+  min-width: 70px;
+}
+
+.botsBtn {
+  padding: 12px;
+  background: #546e7a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.botsBtn:hover:not(:disabled) { filter: brightness(1.1); }
+.botsBtn:disabled { opacity: 0.6; cursor: default; }
+
 .backBtn {
   padding: 10px;
   background: transparent;

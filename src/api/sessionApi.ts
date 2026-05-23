@@ -104,6 +104,18 @@ export function sseUrl(sessionId: string): string {
   return `${BASE}/sessions/${sessionId}/events`
 }
 
+export async function createBotsOnlySession(botCount: number): Promise<{ sessionId: string }> {
+  const names = Array.from({ length: botCount }, (_, i) => `Botti ${i + 1}`)
+  const seatKinds = Array(botCount).fill('BOT')
+  const res = await fetch(`${BASE}/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ names, seatKinds }),
+  })
+  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  return res.json()
+}
+
 export async function startLobby(sessionId: string): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
   if (!res.ok) throw new Error(`Backend returned ${res.status}`)
