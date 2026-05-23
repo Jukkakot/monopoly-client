@@ -299,7 +299,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Expose SSE timings function globally for debugging
-    ;(window as any).exportSSETimings = () => {
+    ; (window as any).exportSSETimings = () => {
       const data = sseTimings.current.map(t => ({
         delay: t.delayMs?.toFixed(0) ?? 'initial',
         networkLatency: t.networkLatencyMs?.toFixed(0),
@@ -352,7 +352,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
           // Calculate network latency using server timestamp
           const networkLatencyMs = clientReceivedMs - snap.serverTimestampMs
-          
+
           // Log SSE timing
           const delayMs = lastEventTimestamp.current ? clientReceivedMs - lastEventTimestamp.current : undefined
           lastEventTimestamp.current = clientReceivedMs
@@ -364,57 +364,57 @@ export function GameProvider({ children }: { children: ReactNode }) {
           } else {
             console.log(`📡 SSE v${snap.version} (first event, network: ${networkLatencyMs.toFixed(0)}ms)`)
           }
-          }
+        }
 
           versionRef.current = snap.version  // always update for reconnection
-          retryCount.current = 0
-          // Queue snapshot if animation is running, queue has pending items, or we're still
-          // in the settling window after a direct dispatch (animation useEffect not yet fired).
-          if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0 || settlingRef.current) {
-            pendingSnapshots.current.push(snap)
-          } else {
-            settlingRef.current = true
-            dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
-            setTimeout(() => {
-              settlingRef.current = false
-              if (!isAnyPlayerAnimating()) drainPendingRef.current()
-            }, 60)
-          }
-        } catch {
-          // ignore parse errors
+        retryCount.current = 0
+        // Queue snapshot if animation is running, queue has pending items, or we're still
+        // in the settling window after a direct dispatch (animation useEffect not yet fired).
+        if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0 || settlingRef.current) {
+          pendingSnapshots.current.push(snap)
+        } else {
+          settlingRef.current = true
+          dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
+          setTimeout(() => {
+            settlingRef.current = false
+            if (!isAnyPlayerAnimating()) drainPendingRef.current()
+          }, 60)
         }
-      }
-
-      es.onerror = () => {
-        es.close()
-        esRef.current = null
-        if (cancelled) return
-        if (retryCount.current >= 5) {
-          dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
-          return
-        }
-        const delay = Math.min(1000 * 2 ** retryCount.current, 30000)
-        retryCount.current++
-        dispatch({ type: 'SET_CONNECTION', status: 'RECONNECTING' })
-        timeoutId = setTimeout(connect, delay)
+      } catch {
+        // ignore parse errors
       }
     }
+
+    es.onerror = () => {
+      es.close()
+      esRef.current = null
+      if (cancelled) return
+      if (retryCount.current >= 5) {
+        dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
+        return
+      }
+      const delay = Math.min(1000 * 2 ** retryCount.current, 30000)
+      retryCount.current++
+      dispatch({ type: 'SET_CONNECTION', status: 'RECONNECTING' })
+      timeoutId = setTimeout(connect, delay)
+    }
+  }
 
     connect()
 
     return () => {
-      cancelled = true
-      clearTimeout(timeoutId)
-      esRef.current?.close()
-      esRef.current = null
-    }
-  }, [state.sessionId])
+    cancelled = true
+    clearTimeout(timeoutId)
+    esRef.current?.close()
+    esRef.current = null
+  }
+}, [state.sessionId])
 
-  return (
-    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd }}>
-      {children}
-    </GameContext.Provider>
-  )
+return (
+  <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd }}>
+    {children}
+  </GameContext.Provider>
+)
 }
 
 export function useGame() {
