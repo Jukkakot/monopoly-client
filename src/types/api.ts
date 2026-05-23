@@ -148,6 +148,7 @@ export interface ClientSessionSnapshot {
   version: number
   status: SessionStatus
   state: SessionState | null
+  serverTimestampMs: number
 }
 
 export interface SessionSummary {
