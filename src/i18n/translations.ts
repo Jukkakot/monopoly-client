@@ -632,7 +632,7 @@ const fi: T = {
   buildAndMortgageBtn: '🏠 Rakenna / Panttaa',
   copyInviteLink: '🔗 Kopioi kutsulink',
   linkCopied: '✓ Linkki kopioitu!',
-  soundSettingsBtn: '⚙️ Ääniasetukset',
+  soundSettingsBtn: '⚙️ Asetukset',
   keyboardShortcutsBtn: '⌨ Pikanäppäimet',
   leaveGameBtn: '🚪 Poistu pelistä',
   endGameForAllBtn: '🛑 Lopeta peli kaikille',
@@ -646,7 +646,7 @@ const fi: T = {
   redeemBtnMenu: 'Lunasta',
 
   // SoundSettings
-  soundSettingsTitle: '⚙️ Ääniasetukset',
+  soundSettingsTitle: '⚙️ Asetukset',
   uiSoundsLabel: 'UI-äänet',
   uiSoundsDesc: 'Napit, siirtymät',
   notifSoundsLabel: 'Ilmoitusäänet',
@@ -994,7 +994,7 @@ const en: T = {
   buildAndMortgageBtn: '🏠 Build / Mortgage',
   copyInviteLink: '🔗 Copy invite link',
   linkCopied: '✓ Link copied!',
-  soundSettingsBtn: '⚙️ Sound settings',
+  soundSettingsBtn: '⚙️ Settings',
   keyboardShortcutsBtn: '⌨ Keyboard shortcuts',
   leaveGameBtn: '🚪 Leave game',
   endGameForAllBtn: '🛑 End game for all',
@@ -1008,7 +1008,7 @@ const en: T = {
   redeemBtnMenu: 'Redeem',
 
   // SoundSettings
-  soundSettingsTitle: '⚙️ Sound settings',
+  soundSettingsTitle: '⚙️ Settings',
   uiSoundsLabel: 'UI sounds',
   uiSoundsDesc: 'Buttons, movement',
   notifSoundsLabel: 'Notification sounds',
