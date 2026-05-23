@@ -1,0 +1,75 @@
+export type AnimationSpeed = 'fast' | 'normal' | 'slow'
+
+export interface AnimationConfig {
+  stepMs: number
+  stepJitter: number
+  stepHopCssMs: number
+  jailArriveCssMs: number
+  cardArriveCssMs: number
+  jailBlockMin: number
+  jailBlockMax: number
+  cardBlockMin: number
+  cardBlockMax: number
+}
+
+const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
+  fast: {
+    stepMs: 40,
+    stepJitter: 0,
+    stepHopCssMs: 20,
+    jailArriveCssMs: 50,
+    cardArriveCssMs: 30,
+    jailBlockMin: 80,
+    jailBlockMax: 120,
+    cardBlockMin: 60,
+    cardBlockMax: 120,
+  },
+  normal: {
+    stepMs: 390,
+    stepJitter: 60,
+    stepHopCssMs: 280,
+    jailArriveCssMs: 700,
+    cardArriveCssMs: 500,
+    jailBlockMin: 600,
+    jailBlockMax: 2000,
+    cardBlockMin: 500,
+    cardBlockMax: 1400,
+  },
+  slow: {
+    stepMs: 750,
+    stepJitter: 80,
+    stepHopCssMs: 550,
+    jailArriveCssMs: 1400,
+    cardArriveCssMs: 900,
+    jailBlockMin: 1200,
+    jailBlockMax: 4000,
+    cardBlockMin: 900,
+    cardBlockMax: 2500,
+  },
+}
+
+const LS_KEY = 'animation-speed'
+
+export function loadAnimationSpeed(): AnimationSpeed {
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    if (raw === 'fast' || raw === 'normal' || raw === 'slow') return raw
+  } catch { /* ignore */ }
+  return 'normal'
+}
+
+export function saveAnimationSpeed(speed: AnimationSpeed) {
+  try { localStorage.setItem(LS_KEY, speed) } catch { /* ignore */ }
+}
+
+export function getAnimationConfig(speed: AnimationSpeed): AnimationConfig {
+  return CONFIGS[speed]
+}
+
+export function applyAnimationSpeedToCss(speed: AnimationSpeed) {
+  const cfg = CONFIGS[speed]
+  const root = document.documentElement
+  root.style.setProperty('--anim-hop-ms', `${cfg.stepHopCssMs}ms`)
+  root.style.setProperty('--anim-jail-ms', `${cfg.jailArriveCssMs}ms`)
+  root.style.setProperty('--anim-card-ms', `${cfg.cardArriveCssMs}ms`)
+}

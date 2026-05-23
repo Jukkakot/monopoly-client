@@ -297,6 +297,10 @@ export interface T {
   gameSoundsLabel: string
   gameSoundsDesc: string
   saveBtn: string
+  animSpeedLabel: string
+  animSpeedFast: string
+  animSpeedNormal: string
+  animSpeedSlow: string
 
   // ── FlashBanner ──────────────────────────────────────────────────────────────
   yourTurnMsg: string
@@ -650,6 +654,10 @@ const fi: T = {
   gameSoundsLabel: 'Pelitapahtumat',
   gameSoundsDesc: 'Noppa, osto',
   saveBtn: 'Tallenna',
+  animSpeedLabel: 'Animaationopeus',
+  animSpeedFast: 'Nopein',
+  animSpeedNormal: 'Normaali',
+  animSpeedSlow: 'Hidas',
 
   // FlashBanner
   yourTurnMsg: 'Sinun vuorosi!',
@@ -1008,6 +1016,10 @@ const en: T = {
   gameSoundsLabel: 'Game events',
   gameSoundsDesc: 'Dice, purchase',
   saveBtn: 'Save',
+  animSpeedLabel: 'Animation speed',
+  animSpeedFast: 'Fastest',
+  animSpeedNormal: 'Normal',
+  animSpeedSlow: 'Slow',
 
   // FlashBanner
   yourTurnMsg: 'Your turn!',

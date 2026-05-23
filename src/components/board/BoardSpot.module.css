@@ -332,7 +332,7 @@
 
 .jailArrive {
   display: inline-block;
-  animation: jailArrive 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: jailArrive var(--anim-jail-ms, 700ms) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes cardArrive {
@@ -343,7 +343,7 @@
 
 .cardArrive {
   display: inline-block;
-  animation: cardArrive 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: cardArrive var(--anim-card-ms, 500ms) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes stepHop {
@@ -355,5 +355,5 @@
 
 .stepHop {
   display: inline-block;
-  animation: stepHop 0.28s ease-out forwards;
+  animation: stepHop var(--anim-hop-ms, 280ms) ease-out forwards;
 }

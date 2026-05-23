@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
+import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss } from '../../utils/animationSettings'
 
 const LS_KEY = 'sound-settings'
 
@@ -31,8 +32,15 @@ interface Props {
 export default function SoundSettings({ onClose }: Props) {
   const t = useT()
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
+  const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
+
+  function handleAnimSpeed(speed: AnimationSpeed) {
+    setAnimSpeed(speed)
+    saveAnimationSpeed(speed)
+    applyAnimationSpeedToCss(speed)
+  }
 
   const soundCategories = [
     { key: 'uiSounds',           label: t.uiSoundsLabel,    desc: t.uiSoundsDesc },
@@ -74,6 +82,21 @@ export default function SoundSettings({ onClose }: Props) {
           />
         </label>
       ))}
+
+      <div className={styles.divider} />
+
+      <div className={styles.row}>
+        <label className={styles.label}>{t.animSpeedLabel}</label>
+        <select
+          className={styles.select}
+          value={animSpeed}
+          onChange={e => handleAnimSpeed(e.target.value as AnimationSpeed)}
+        >
+          <option value="fast">{t.animSpeedFast}</option>
+          <option value="normal">{t.animSpeedNormal}</option>
+          <option value="slow">{t.animSpeedSlow}</option>
+        </select>
+      </div>
 
       <button className={styles.saveBtn} onClick={onClose}>{t.saveBtn}</button>
     </div>

@@ -109,3 +109,13 @@
 }
 
 .saveBtn:hover { filter: brightness(1.1); }
+
+.select {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fafafa;
+  cursor: pointer;
+  accent-color: #2e7d32;
+}

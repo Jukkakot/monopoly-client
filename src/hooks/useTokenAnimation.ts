@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useGame } from '../store/GameContext'
 import { playTokenMove, playGoToJail } from '../utils/sounds'
+import { loadAnimationSpeed, getAnimationConfig, applyAnimationSpeedToCss } from '../utils/animationSettings'
 
-const STEP_MS = 390
-const STEP_JITTER = 60        // ±ms random jitter per step
-const STEP_HOP_CSS_MS = 280   // must match .stepHop animation duration
 const BOARD_SIZE = 40
 const JAIL_INDEX = 10
-const JAIL_ARRIVE_CSS_MS = 700  // must match CSS animation duration
-const CARD_ARRIVE_CSS_MS = 500  // must match .cardArrive animation duration
+
+// Apply CSS variables for animation durations on module load
+applyAnimationSpeedToCss(loadAnimationSpeed())
+
+function cfg() { return getAnimationConfig(loadAnimationSpeed()) }
 
 // Card types that move the player (non-jail; jail is handled separately)
 function isMovementCard(key: string | null): boolean {
@@ -57,7 +58,7 @@ function flashPlayerStepping(pid: string) {
   setTimeout(() => {
     _steppingPlayers.delete(pid)
     notifyListeners()
-  }, STEP_HOP_CSS_MS)
+  }, cfg().stepHopCssMs)
 }
 
 // Non-hook: read animation state outside React render cycle (for snapshot queue)
@@ -166,7 +167,8 @@ export function useTokenAnimation(): Map<string, number> {
       // Jail fly: skip step-by-step, jump directly with scaled duration
       if (!wasInJail && player.inJail && currentIdx === JAIL_INDEX) {
         const dist = (JAIL_INDEX - settledIdx + BOARD_SIZE) % BOARD_SIZE
-        const blockDuration = Math.max(600, Math.min(2000, 600 + (dist / 39) * 1400))
+        const { jailBlockMin, jailBlockMax } = cfg()
+        const blockDuration = Math.max(jailBlockMin, Math.min(jailBlockMax, jailBlockMin + (dist / 39) * (jailBlockMax - jailBlockMin)))
 
         settledRef.current.set(pid, JAIL_INDEX)
         queueRef.current.delete(pid)
@@ -177,7 +179,7 @@ export function useTokenAnimation(): Map<string, number> {
           setPlayerAnimating(pid, true)
           setPlayerJailing(pid, true)
           playGoToJail()
-          setTimeout(() => setPlayerJailing(pid, false), JAIL_ARRIVE_CSS_MS)
+          setTimeout(() => setPlayerJailing(pid, false), cfg().jailArriveCssMs)
           setTimeout(() => {
             localAnimatingRef.current.delete(pid)
             setPlayerAnimating(pid, false)
@@ -192,7 +194,8 @@ export function useTokenAnimation(): Map<string, number> {
           (currentIdx - settledIdx + BOARD_SIZE) % BOARD_SIZE,
           (settledIdx - currentIdx + BOARD_SIZE) % BOARD_SIZE
         )
-        const blockDuration = Math.max(500, Math.min(1400, 500 + (dist / 39) * 900))
+        const { cardBlockMin, cardBlockMax } = cfg()
+        const blockDuration = Math.max(cardBlockMin, Math.min(cardBlockMax, cardBlockMin + (dist / 39) * (cardBlockMax - cardBlockMin)))
 
         settledRef.current.set(pid, currentIdx)
         queueRef.current.delete(pid)
@@ -202,7 +205,7 @@ export function useTokenAnimation(): Map<string, number> {
           localAnimatingRef.current.add(pid)
           setPlayerAnimating(pid, true)
           setPlayerCardJumping(pid, true)
-          setTimeout(() => setPlayerCardJumping(pid, false), CARD_ARRIVE_CSS_MS)
+          setTimeout(() => setPlayerCardJumping(pid, false), cfg().cardArriveCssMs)
           setTimeout(() => {
             localAnimatingRef.current.delete(pid)
             setPlayerAnimating(pid, false)
@@ -248,12 +251,12 @@ export function useTokenAnimation(): Map<string, number> {
       setDisplayPositions(prev => new Map(prev).set(pid, next))
       flashPlayerStepping(pid)
       playTokenMove()
-      const jitter = (Math.random() * 2 - 1) * STEP_JITTER
-      setTimeout(step, STEP_MS + jitter)
+      const jitter = (Math.random() * 2 - 1) * cfg().stepJitter
+      setTimeout(step, cfg().stepMs + jitter)
     }
 
-    const jitter = (Math.random() * 2 - 1) * STEP_JITTER
-    setTimeout(step, STEP_MS + jitter)
+    const jitter = (Math.random() * 2 - 1) * cfg().stepJitter
+    setTimeout(step, cfg().stepMs + jitter)
   }
 
   return displayPositions
