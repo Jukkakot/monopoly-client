@@ -112,11 +112,17 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   }, [phase, isMyTurn, me?.cash, me?.boardIndex, activeId, myPlayerId, state.properties, state.players])
 
   // Auto-advance on doubles — skip the redundant "roll again" button
+  const doublesAutoAdvancedRef = useRef(false)
   useEffect(() => {
-    if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') return
+    if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') {
+      doublesAutoAdvancedRef.current = false
+      return
+    }
     if ((turn?.consecutiveDoubles ?? 0) === 0) return
     if (tokenAnimating) return
     if (visibleRent && !rentDismissed) return
+    if (doublesAutoAdvancedRef.current) return
+    doublesAutoAdvancedRef.current = true
     cmd('EndTurn')
   }, [isMyTurn, phase, turn?.consecutiveDoubles, tokenAnimating, visibleRent, rentDismissed])
 
