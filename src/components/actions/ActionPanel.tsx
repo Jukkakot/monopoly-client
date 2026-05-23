@@ -179,18 +179,24 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return <TradeSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
-  // Debt
-  if (state.activeDebt) {
-    return <DebtSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-  }
-
-  // Auction
-  if (state.auctionState) {
-    return <AuctionSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-  }
-
-  // While token is moving — don't reveal destination yet
-  if (tokenAnimating && (phase === 'WAITING_FOR_DECISION' || phase === 'WAITING_FOR_END_TURN' || phase === 'WAITING_FOR_ROLL')) {
+  // While any token is moving — hold all phase-sensitive UI until arrival
+  if (tokenAnimating) {
+    if (!isMyTurn) {
+      const activePlayer = state.players.find(p => p.playerId === activeId)
+      const activeSeat = state.seats.find(s => s.playerId === activeId)
+      return (
+        <div className={styles.panel}>
+          <div className={`${styles.infoBox} ${styles.moving}`} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+            <div className={styles.movingDots}>
+              <span />
+              <span />
+              <span />
+            </div>
+            {activePlayer?.name ?? '?'} …
+          </div>
+        </div>
+      )
+    }
     return (
       <div className={styles.panel}>
         <div className={`${styles.infoBox} ${styles.moving}`}>
@@ -203,6 +209,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         </div>
       </div>
     )
+  }
+
+  // Debt
+  if (state.activeDebt) {
+    return <DebtSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+  }
+
+  // Auction
+  if (state.auctionState) {
+    return <AuctionSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
   // Buy decision
@@ -234,21 +250,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const activePlayer = state.players.find(p => p.playerId === activeId)
     const activeSeat = state.seats.find(s => s.playerId === activeId)
     const isAfk = turnSeconds >= 30
-
-    if (tokenAnimating) {
-      return (
-        <div className={styles.panel}>
-          <div className={`${styles.infoBox} ${styles.moving}`} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
-            <div className={styles.movingDots}>
-              <span />
-              <span />
-              <span />
-            </div>
-            {activePlayer?.name ?? '?'} …
-          </div>
-        </div>
-      )
-    }
 
     // Compute turns until my turn
     const sortedSeats = [...state.seats].sort((a, b) => a.seatIndex - b.seatIndex)

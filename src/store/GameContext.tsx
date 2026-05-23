@@ -223,16 +223,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const versionRef = useRef(0)
   const lastSoundedId = useRef(-1)
   const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
+  // Briefly true after any direct dispatch — blocks incoming SSE snaps from bypassing the queue
+  // before the animation useEffect has had a chance to set isAnyPlayerAnimating().
+  const settlingRef = useRef(false)
   // Always points to latest closure — updated each render so refs and dispatch are fresh
   const drainPendingRef = useRef<() => void>(null!)
   drainPendingRef.current = () => {
     if (isAnyPlayerAnimating()) return
     const next = pendingSnapshots.current.shift()
     if (!next) return
+    settlingRef.current = true
     dispatch({ type: 'SET_SNAPSHOT', snapshot: next })
     // After a yield, check if this snapshot started an animation.
     // If not, immediately drain the next one.
-    setTimeout(() => { if (!isAnyPlayerAnimating()) drainPendingRef.current() }, 50)
+    setTimeout(() => {
+      settlingRef.current = false
+      if (!isAnyPlayerAnimating()) drainPendingRef.current()
+    }, 60)
   }
 
   // Drain snapshot queue when all movement animations finish
@@ -328,12 +335,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
-          // Queue snapshot if animation is running or queue already has pending items
-          // (maintain order: once queuing starts, all subsequent snaps must queue too)
-          if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0) {
+          // Queue snapshot if animation is running, queue has pending items, or we're still
+          // in the settling window after a direct dispatch (animation useEffect not yet fired).
+          if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0 || settlingRef.current) {
             pendingSnapshots.current.push(snap)
           } else {
+            settlingRef.current = true
             dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
+            setTimeout(() => {
+              settlingRef.current = false
+              if (!isAnyPlayerAnimating()) drainPendingRef.current()
+            }, 60)
           }
         } catch {
           // ignore parse errors
