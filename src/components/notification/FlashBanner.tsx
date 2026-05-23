@@ -24,7 +24,7 @@ export default function FlashBanner() {
   // Detect when it becomes my turn — defer banner until animation finishes
   useEffect(() => {
     const activeId = state.snapshot?.turn?.activePlayerId ?? null
-    if (activeId && activeId === state.myPlayerId && prevActiveId.current !== activeId) {
+    if (activeId && activeId === state.myPlayerId && prevActiveId.current !== null && prevActiveId.current !== activeId) {
       pendingMyTurn.current = { playerId: activeId, msg: t.yourTurnMsg }
     }
     prevActiveId.current = activeId
@@ -56,6 +56,7 @@ export default function FlashBanner() {
       : new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰', '💸', '🏆'])
     const newEvents = state.events.filter(e =>
       !seenIds.current.has(e.id) &&
+      !e.historical &&
       NOTIFY_ICONS.has(e.icon) &&
       (e.relatedPlayerIds.length === 0 || e.relatedPlayerIds.includes(state.myPlayerId!))
     )
