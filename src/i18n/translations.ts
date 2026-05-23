@@ -301,6 +301,10 @@ export interface T {
   animSpeedFast: string
   animSpeedNormal: string
   animSpeedSlow: string
+  botSpeedLabel: string
+  botSpeedFast: string
+  botSpeedNormal: string
+  botSpeedSlow: string
 
   // ── FlashBanner ──────────────────────────────────────────────────────────────
   yourTurnMsg: string
@@ -658,6 +662,10 @@ const fi: T = {
   animSpeedFast: 'Nopein',
   animSpeedNormal: 'Normaali',
   animSpeedSlow: 'Hidas',
+  botSpeedLabel: 'Botin nopeus',
+  botSpeedFast: 'Nopein',
+  botSpeedNormal: 'Normaali',
+  botSpeedSlow: 'Hidas',
 
   // FlashBanner
   yourTurnMsg: 'Sinun vuorosi!',
@@ -1020,6 +1028,10 @@ const en: T = {
   animSpeedFast: 'Fastest',
   animSpeedNormal: 'Normal',
   animSpeedSlow: 'Slow',
+  botSpeedLabel: 'Bot speed',
+  botSpeedFast: 'Fastest',
+  botSpeedNormal: 'Normal',
+  botSpeedSlow: 'Slow',
 
   // FlashBanner
   yourTurnMsg: 'Your turn!',

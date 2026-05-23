@@ -120,3 +120,11 @@ export async function startLobby(sessionId: string): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
   if (!res.ok) throw new Error(`Backend returned ${res.status}`)
 }
+
+export async function setBotSpeed(sessionId: string, speed: 'fast' | 'normal' | 'slow'): Promise<void> {
+  await fetch(`${BASE}/sessions/${sessionId}/bot-speed`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ speed }),
+  })
+}

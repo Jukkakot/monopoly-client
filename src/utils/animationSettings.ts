@@ -1,4 +1,5 @@
 export type AnimationSpeed = 'fast' | 'normal' | 'slow'
+export type BotSpeed = 'fast' | 'normal' | 'slow'
 
 export interface AnimationConfig {
   stepMs: number
@@ -64,6 +65,20 @@ export function saveAnimationSpeed(speed: AnimationSpeed) {
 
 export function getAnimationConfig(speed: AnimationSpeed): AnimationConfig {
   return CONFIGS[speed]
+}
+
+const BOT_SPEED_LS_KEY = 'bot-speed'
+
+export function loadBotSpeed(): BotSpeed {
+  try {
+    const raw = localStorage.getItem(BOT_SPEED_LS_KEY)
+    if (raw === 'fast' || raw === 'normal' || raw === 'slow') return raw
+  } catch { /* ignore */ }
+  return 'normal'
+}
+
+export function saveBotSpeed(speed: BotSpeed) {
+  try { localStorage.setItem(BOT_SPEED_LS_KEY, speed) } catch { /* ignore */ }
 }
 
 export function applyAnimationSpeedToCss(speed: AnimationSpeed) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
-import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss } from '../../utils/animationSettings'
+import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed } from '../../utils/animationSettings'
 
 const LS_KEY = 'sound-settings'
 
@@ -27,12 +27,14 @@ export function saveSoundConfig(cfg: SoundConfig) {
 
 interface Props {
   onClose: () => void
+  onBotSpeedChange?: (speed: BotSpeed) => void
 }
 
-export default function SoundSettings({ onClose }: Props) {
+export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
   const t = useT()
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
   const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
+  const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
 
@@ -40,6 +42,12 @@ export default function SoundSettings({ onClose }: Props) {
     setAnimSpeed(speed)
     saveAnimationSpeed(speed)
     applyAnimationSpeedToCss(speed)
+  }
+
+  function handleBotSpeed(speed: BotSpeed) {
+    setBotSpeedState(speed)
+    saveBotSpeed(speed)
+    onBotSpeedChange?.(speed)
   }
 
   const soundCategories = [
@@ -95,6 +103,19 @@ export default function SoundSettings({ onClose }: Props) {
           <option value="fast">{t.animSpeedFast}</option>
           <option value="normal">{t.animSpeedNormal}</option>
           <option value="slow">{t.animSpeedSlow}</option>
+        </select>
+      </div>
+
+      <div className={styles.row}>
+        <label className={styles.label}>{t.botSpeedLabel}</label>
+        <select
+          className={styles.select}
+          value={botSpeed}
+          onChange={e => handleBotSpeed(e.target.value as BotSpeed)}
+        >
+          <option value="fast">{t.botSpeedFast}</option>
+          <option value="normal">{t.botSpeedNormal}</option>
+          <option value="slow">{t.botSpeedSlow}</option>
         </select>
       </div>
 
