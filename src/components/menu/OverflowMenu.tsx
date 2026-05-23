@@ -5,7 +5,7 @@ import SoundSettings from './SoundSettings'
 import { useGame } from '../../store/GameContext'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { useT } from '../../i18n/LanguageContext'
-import { type BotSpeed } from '../../utils/animationSettings'
+import { type BotSpeed, saveAnimationSpeed, applyAnimationSpeedToCss } from '../../utils/animationSettings'
 import { applySessionSettings } from '../../api/sessionApi'
 
 export default function OverflowMenu() {
@@ -82,7 +82,11 @@ export default function OverflowMenu() {
             <SoundSettings
               onClose={() => setShowSound(false)}
               onBotSpeedChange={(speed: BotSpeed) => {
-                if (state.sessionId) applySessionSettings(state.sessionId, { botSpeed: speed })
+                if (state.sessionId) {
+                  applySessionSettings(state.sessionId, { botSpeed: speed })
+                  saveAnimationSpeed(speed)
+                  applyAnimationSpeedToCss(speed)
+                }
               }}
             />
           </div>
