@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
 import { useGame } from '../../store/GameContext'
@@ -8,6 +9,7 @@ import { useT } from '../../i18n/LanguageContext'
 export default function OverflowMenu() {
   const { state, sendCmd } = useGame()
   const t = useT()
+  const navigate = useNavigate()
   const { snapshot, myPlayerId } = state
 
   const [open, setOpen] = useState(false)
@@ -30,6 +32,7 @@ export default function OverflowMenu() {
   const turn = snapshot?.turn
   const isMyTurn = !!myPlayerId && turn?.activePlayerId === myPlayerId
   const phase = turn?.phase
+  const isHost = !!myPlayerId && snapshot?.hostPlayerId === myPlayerId
 
   const canAct = isMyTurn && (phase === 'WAITING_FOR_ROLL' || phase === 'WAITING_FOR_END_TURN')
 
@@ -194,20 +197,28 @@ export default function OverflowMenu() {
               <>
                 <div className={styles.divider} />
                 <button className={`${styles.menuItem} ${styles.danger}`}
-                  onClick={() => { setOpen(false); window.location.href = '/' }}>
+                  onClick={() => { setOpen(false); navigate('/') }}>
                   {t.leaveGameBtn}
                 </button>
               </>
             )}
             {snapshot && myPlayerId && snapshot.status === 'IN_PROGRESS' && (
-              <button className={`${styles.menuItem} ${styles.danger}`}
-                onClick={() => {
-                  setOpen(false)
-                  if (confirm(t.endGameConfirmMsg))
-                    sendCmd({ type: 'AbortGame', sessionId: sid, actorPlayerId: myPlayerId })
-                }}>
-                {t.endGameForAllBtn}
-              </button>
+              isHost ? (
+                <button className={`${styles.menuItem} ${styles.danger}`}
+                  onClick={() => {
+                    setOpen(false)
+                    if (confirm(t.endGameConfirmMsg))
+                      sendCmd({ type: 'AbortGame', sessionId: sid, actorPlayerId: myPlayerId })
+                  }}>
+                  {t.endGameForAllBtn}
+                </button>
+              ) : (
+                <button className={`${styles.menuItem} ${styles.danger} ${styles.menuItemDisabled}`}
+                  disabled title={t.onlyHostCanEndGame}>
+                  {t.endGameForAllBtn}
+                  <span className={styles.hostOnlyNote}>{t.onlyHostCanEndGame}</span>
+                </button>
+              )
             )}
           </div>
         </>

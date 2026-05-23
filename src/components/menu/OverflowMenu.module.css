@@ -73,6 +73,21 @@
 .menuItem.danger { color: #c62828; }
 .menuItem.danger:hover { background: #ffebee; }
 
+.menuItemDisabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 1px !important;
+}
+.menuItemDisabled:hover { background: transparent !important; }
+
+.hostOnlyNote {
+  font-size: 0.72rem;
+  color: #888;
+  font-style: italic;
+}
+
 @media (hover: none), (max-width: 767px) {
   .desktopOnly { display: none; }
 }

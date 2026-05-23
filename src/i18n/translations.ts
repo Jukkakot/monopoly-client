@@ -271,6 +271,7 @@ export interface T {
   leaveGameBtn: string
   endGameForAllBtn: string
   endGameConfirmMsg: string
+  onlyHostCanEndGame: string
   buildModalTitle: string
   buildSectionTitle: string
   mortgageSectionMenuTitle: string
@@ -618,6 +619,7 @@ const fi: T = {
   leaveGameBtn: '🚪 Poistu pelistä',
   endGameForAllBtn: '🛑 Lopeta peli kaikille',
   endGameConfirmMsg: 'Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.',
+  onlyHostCanEndGame: 'Vain host voi sulkea pelin',
   buildModalTitle: 'Rakenna / Panttaa',
   buildSectionTitle: '🏠 Rakenna taloja',
   mortgageSectionMenuTitle: '🏦 Panttaa',
@@ -970,6 +972,7 @@ const en: T = {
   leaveGameBtn: '🚪 Leave game',
   endGameForAllBtn: '🛑 End game for all',
   endGameConfirmMsg: 'End game? This ends the game for all players and cannot be undone.',
+  onlyHostCanEndGame: 'Only the host can end the game',
   buildModalTitle: 'Build / Mortgage',
   buildSectionTitle: '🏠 Build houses',
   mortgageSectionMenuTitle: '🏦 Mortgage',
