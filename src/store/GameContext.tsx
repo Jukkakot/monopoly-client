@@ -289,7 +289,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_SESSION', sessionId })
     retryCount.current = 0
     try { localStorage.setItem('monopoly_last_session', sessionId) } catch { /* ignore */ }
-    applySessionSettings(sessionId, { botSpeed: loadBotSpeed() })
+    const botSpeed = loadBotSpeed()
+    applySessionSettings(sessionId, { botSpeed })
+      .then(() => console.debug('[settings] botSpeed sent:', botSpeed))
+      .catch(e => console.warn('[settings] failed to send botSpeed:', e))
   }, [])
 
   const leaveSession = useCallback(() => {
