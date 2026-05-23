@@ -107,7 +107,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
       {/* ── Desktop: sidebar ── */}
       <div className={styles.sideCol} style={{ flexBasis: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}>
-        {header}
+        <div className={styles.sideHeader}>{header}</div>
         <div className={styles.sideSection}>
           <div className={styles.playersWrapper}>{players}</div>
           <div className={styles.sideDivider} />
