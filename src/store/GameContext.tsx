@@ -296,7 +296,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       .then(() => console.debug('[settings] botSpeed sent:', botSpeed))
       .catch(e => console.warn('[settings] failed to send botSpeed:', e))
   }, [])
-
+ const leaveSession = useCallback(() => {
+    dispatch({ type: 'LEAVE_SESSION' })
+    retryCount.current = 0
+    versionRef.current = 0
+  }, [])
   useEffect(() => {
     // Expose SSE timings function globally for debugging
     ; (window as any).exportSSETimings = () => {
@@ -364,7 +368,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           } else {
             console.log(`📡 SSE v${snap.version} (first event, network: ${networkLatencyMs.toFixed(0)}ms)`)
           }
-        }
+        
 
           versionRef.current = snap.version  // always update for reconnection
         retryCount.current = 0
