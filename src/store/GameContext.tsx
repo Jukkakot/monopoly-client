@@ -223,6 +223,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const esRef = useRef<EventSource | null>(null)
   const versionRef = useRef(0)
   const lastSoundedId = useRef(-1)
+  const sseTimings = useRef<Array<{ timestamp: number; version: number; delayMs?: number }>>([])
+  const lastEventTimestamp = useRef<number | null>(null)
   const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
   // Briefly true after any direct dispatch — blocks incoming SSE snaps from bypassing the queue
   // before the animation useEffect has had a chance to set isAnyPlayerAnimating().
@@ -337,7 +339,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       es.onmessage = (e) => {
         try {
+          const now = performance.now()
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
+          
+          // Log SSE timing
+          const delayMs = lastEventTimestamp.current ? now - lastEventTimestamp.current : undefined
+          lastEventTimestamp.current = now
+          sseTimings.current.push({ timestamp: now, version: snap.version, delayMs })
+          
+          // Log to console
+          if (delayMs !== undefined) {
+            console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms`)
+          } else {
+            console.log(`📡 SSE v${snap.version} (first event)`)
+          }
+          
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
           // Queue snapshot if animation is running, queue has pending items, or we're still
@@ -379,6 +395,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeoutId)
       esRef.current?.close()
       esRef.current = null
+      
+      // Expose SSE timings to window for debugging
+      ;(window as any).exportSSETimings = () => {
+        const data = sseTimings.current.map(t => ({
+          delay: t.delayMs?.toFixed(0) ?? 'initial',
+          version: t.version,
+        }))
+        const json = JSON.stringify(data, null, 2)
+        console.log('📊 SSE Timings:', json)
+        return json
+      }
     }
   }, [state.sessionId])
 
