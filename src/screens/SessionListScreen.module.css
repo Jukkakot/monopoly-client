@@ -7,6 +7,10 @@
   padding-bottom: 24px;
 }
 
+.page > :first-child {
+  align-self: stretch;
+}
+
 .card {
   margin-top: 20px;
   background: #fff;
