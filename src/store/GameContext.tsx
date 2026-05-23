@@ -44,7 +44,7 @@ function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, exi
     try {
       const stored = sessionStorage.getItem(`monopoly_player_${sessionId}`)
       if (stored) return stored
-    } catch {}
+    } catch { }
     // sessionStorage empty (tab was closed) — try to find a token in localStorage
     try {
       const humanSeats = snapshot.seats.filter(s => s.seatKind === 'HUMAN')
@@ -57,7 +57,7 @@ function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, exi
           return seat.playerId
         }
       }
-    } catch {}
+    } catch { }
   }
   // No localStorage entry → dynamic mode: follow whoever needs to act right now.
   // This lets solo testers control all players when starting via "Aloita peli".
@@ -297,10 +297,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
       .catch(e => console.warn('[settings] failed to send botSpeed:', e))
   }, [])
 
-  const leaveSession = useCallback(() => {
-    dispatch({ type: 'LEAVE_SESSION' })
-    retryCount.current = 0
-    versionRef.current = 0
+  useEffect(() => {
+    // Expose SSE timings function globally for debugging
+    ;(window as any).exportSSETimings = () => {
+      const data = sseTimings.current.map(t => ({
+        delay: t.delayMs?.toFixed(0) ?? 'initial',
+        version: t.version,
+      }))
+      const json = JSON.stringify(data, null, 2)
+      console.log('📊 SSE Timings:', json)
+      return json
+    }
   }, [])
 
   const sendCmd = useCallback(async (command: object) => {
@@ -341,19 +348,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
         try {
           const now = performance.now()
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
-          
+
           // Log SSE timing
           const delayMs = lastEventTimestamp.current ? now - lastEventTimestamp.current : undefined
           lastEventTimestamp.current = now
           sseTimings.current.push({ timestamp: now, version: snap.version, delayMs })
-          
+
           // Log to console
           if (delayMs !== undefined) {
             console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms`)
           } else {
             console.log(`📡 SSE v${snap.version} (first event)`)
           }
-          
+
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
           // Queue snapshot if animation is running, queue has pending items, or we're still
@@ -395,17 +402,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeoutId)
       esRef.current?.close()
       esRef.current = null
-      
-      // Expose SSE timings to window for debugging
-      ;(window as any).exportSSETimings = () => {
-        const data = sseTimings.current.map(t => ({
-          delay: t.delayMs?.toFixed(0) ?? 'initial',
-          version: t.version,
-        }))
-        const json = JSON.stringify(data, null, 2)
-        console.log('📊 SSE Timings:', json)
-        return json
-      }
     }
   }, [state.sessionId])
 
