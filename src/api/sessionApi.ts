@@ -121,10 +121,14 @@ export async function startLobby(sessionId: string): Promise<void> {
   if (!res.ok) throw new Error(`Backend returned ${res.status}`)
 }
 
-export async function setBotSpeed(sessionId: string, speed: 'fast' | 'normal' | 'slow'): Promise<void> {
-  await fetch(`${BASE}/sessions/${sessionId}/bot-speed`, {
+export interface SessionSettings {
+  botSpeed?: 'fast' | 'normal' | 'slow'
+}
+
+export async function applySessionSettings(sessionId: string, settings: SessionSettings): Promise<void> {
+  await fetch(`${BASE}/sessions/${sessionId}/settings`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ speed }),
+    body: JSON.stringify(settings),
   })
 }

@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react'
 import type { SessionState, ClientSessionSnapshot } from '../types/api'
-import { sendCommand, sseUrl, setBotSpeed } from '../api/sessionApi'
+import { sendCommand, sseUrl, applySessionSettings } from '../api/sessionApi'
 import { loadBotSpeed } from '../utils/animationSettings'
 import { useEffect, useRef } from 'react'
 import { translateBackendEvents, deriveMiscEvents, type GameEvent } from './events'
@@ -289,7 +289,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_SESSION', sessionId })
     retryCount.current = 0
     try { localStorage.setItem('monopoly_last_session', sessionId) } catch { /* ignore */ }
-    setBotSpeed(sessionId, loadBotSpeed())
+    applySessionSettings(sessionId, { botSpeed: loadBotSpeed() })
   }, [])
 
   const leaveSession = useCallback(() => {
