@@ -28,7 +28,7 @@ export default function Header({ isSpectator }: Props) {
 
   return (
     <header className={styles.header}>
-      <div className={styles.title}>Monopoly Helsinki</div>
+      <div className={styles.logo} title="Monopoly Helsinki">MH</div>
       <div className={styles.turnInfo} />
       <div className={styles.controls}>
         {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
