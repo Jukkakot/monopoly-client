@@ -293,12 +293,17 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
   }, [])
 
-  // Clear zoom when turn changes
-  const activePlayerId = state.turn?.activePlayerId
+  // Clear zoom when a NEW animation starts (next player rolls) — not on turn change,
+  // because the turn change fires before the 2500ms timer, cancelling zoom too early.
+  const prevAnimatingSizeRef = useRef(0)
   useEffect(() => {
-    setZoomedSpot(null)
-    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
-  }, [activePlayerId])
+    const nowSize = animatingPlayers.size
+    if (nowSize > 0 && prevAnimatingSizeRef.current === 0) {
+      setZoomedSpot(null)
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
+    }
+    prevAnimatingSizeRef.current = nowSize
+  }, [animatingPlayers])
 
   void zoomEnabled // used indirectly via loadZoomEnabled() in the onAnimationIdle callback
 
