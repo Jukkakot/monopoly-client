@@ -3,6 +3,8 @@ import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 
+type AnimDir = 'right' | 'left'
+
 const SIDEBAR_MIN = 280
 const SIDEBAR_MAX = 700
 const SIDEBAR_DEFAULT = 380
@@ -34,6 +36,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)
+  const [animKey, setAnimKey] = useState(0)
+  const [animDir, setAnimDir] = useState<AnimDir>('right')
+  const [boardEntering, setBoardEntering] = useState(false)
   const dragStartX = useRef<number | null>(null)
   const dragStartW = useRef<number>(sidebarWidth)
 
@@ -84,6 +89,20 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const touchStartX = useRef(0)
   const tabIdx = MOBILE_TABS.indexOf(mobileTab)
 
+  const switchTab = useCallback((tab: MobileTab) => {
+    const currentIdx = MOBILE_TABS.indexOf(mobileTab)
+    const nextIdx = MOBILE_TABS.indexOf(tab)
+    if (tab === mobileTab) return
+    const dir: AnimDir = nextIdx > currentIdx ? 'right' : 'left'
+    setAnimDir(dir)
+    setAnimKey(k => k + 1)
+    if (tab === 'board') {
+      setBoardEntering(true)
+      setTimeout(() => setBoardEntering(false), 260)
+    }
+    setMobileTab(tab)
+  }, [mobileTab])
+
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX
   }
@@ -91,8 +110,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   function handleTouchEnd(e: React.TouchEvent) {
     const dx = e.changedTouches[0].clientX - touchStartX.current
     if (Math.abs(dx) < 50) return
-    if (dx < 0 && tabIdx < MOBILE_TABS.length - 1) setMobileTab(MOBILE_TABS[tabIdx + 1])
-    if (dx > 0 && tabIdx > 0) setMobileTab(MOBILE_TABS[tabIdx - 1])
+    if (dx < 0 && tabIdx < MOBILE_TABS.length - 1) switchTab(MOBILE_TABS[tabIdx + 1])
+    if (dx > 0 && tabIdx > 0) switchTab(MOBILE_TABS[tabIdx - 1])
   }
 
   return (
@@ -125,7 +144,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         {/* Player cash bar — visible on board tab between board and action panel */}
         {mobileTab === 'board' && snap && snap.players.length > 0 && (
           <div className={styles.playerCashBar}>
-            {snap.players.map(p => {
+            {[...snap.players]
+              .sort((a, b) => a.playerId === state.myPlayerId ? -1 : b.playerId === state.myPlayerId ? 1 : 0)
+              .map(p => {
               const seat = snap.seats.find(s => s.playerId === p.playerId)
               const isActive = snap.turn?.activePlayerId === p.playerId
               const isMe = p.playerId === state.myPlayerId
@@ -148,9 +169,17 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         )}
         <div className={styles.mobileSection}>
           {/* Keep actions mounted so popup-dismiss state survives tab switches */}
-          <div className={`${styles.mobilePadded} ${mobileTab !== 'board' ? styles.mobileHidden : ''}`}>{actions}</div>
-          {mobileTab === 'players' && players}
-          {mobileTab === 'log' && log}
+          <div className={[
+            styles.mobilePadded,
+            mobileTab !== 'board' ? styles.mobileHidden : '',
+            boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
+          ].join(' ')}>{actions}</div>
+          {mobileTab === 'players' && (
+            <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
+          )}
+          {mobileTab === 'log' && (
+            <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{log}</div>
+          )}
         </div>
       </div>
 
@@ -160,7 +189,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           <button
             key={tab}
             className={`${styles.navBtn} ${mobileTab === tab ? styles.navActive : ''}`}
-            onClick={() => setMobileTab(tab)}
+            onClick={() => switchTab(tab)}
           >
             {t.mobileTabs[tab]}
             {tab === 'board' && isMyTurn && mobileTab !== 'board' && (

@@ -94,8 +94,11 @@
 }
 
 .cashChipMe {
-  outline: 1.5px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  outline: 1.5px solid rgba(255, 255, 255, 0.7);
   outline-offset: -1px;
+  font-weight: 700;
 }
 
 .cashChipBankrupt {
@@ -206,6 +209,24 @@
 @keyframes alertPulse {
   from { opacity: 0.7; transform: scale(0.9); }
   to   { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.slideFromRight {
+  animation: slideInRight 0.22s ease-out;
+}
+
+.slideFromLeft {
+  animation: slideInLeft 0.22s ease-out;
 }
 
 /* ══════════════════════════════════════
