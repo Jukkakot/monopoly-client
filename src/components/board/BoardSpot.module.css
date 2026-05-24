@@ -78,14 +78,16 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: flex-end;
   gap: 1px;
   /* always on top of color bar, mortgage marker and other spot content */
   position: absolute;
-  bottom: clamp(10px, 2vmin, 20px);
-  left: 0;
-  right: 0;
+  bottom: clamp(6px, 1.5vmin, 14px);
+  left: 1px;
+  right: 1px;
   z-index: 4;
   pointer-events: none;
+  overflow: visible;
 }
 
 /* tokens scale with the board cell — cell ≈ board/11, board ≈ min(100vw,100vh) */
@@ -94,6 +96,22 @@
   height: clamp(10px, 4vmin, 26px);
   flex-shrink: 0;
   drop-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Shrink tokens when multiple players share a spot so all remain visible */
+.tokens[data-count="2"] svg {
+  width: clamp(9px, 3.5vmin, 22px);
+  height: clamp(9px, 3.5vmin, 22px);
+}
+.tokens[data-count="3"] svg,
+.tokens[data-count="4"] svg {
+  width: clamp(8px, 3vmin, 18px);
+  height: clamp(8px, 3vmin, 18px);
+}
+.tokens[data-count="5"] svg,
+.tokens[data-count="6"] svg {
+  width: clamp(7px, 2.5vmin, 15px);
+  height: clamp(7px, 2.5vmin, 15px);
 }
 
 .houseInBar {

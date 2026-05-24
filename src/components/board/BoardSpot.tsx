@@ -58,7 +58,7 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
 }) {
   if (!players.length) return null
   return (
-    <div className={styles.tokens}>
+    <div className={styles.tokens} data-count={players.length}>
       {players.map(p => {
         const seat = seats.find(s => s.playerId === p.playerId)
         const shape = tokenShapes?.get(p.playerId) ?? 'circle'
