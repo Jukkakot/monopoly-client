@@ -274,24 +274,28 @@
   /* Drag handle between board and right panel */
   .mobileResizeHandle {
     display: block;
-    width: 8px;
+    width: 18px;
     flex-shrink: 0;
-    background: #c8e6c9;
+    background: #2e7d32;
     cursor: col-resize;
     touch-action: none;
     position: relative;
   }
 
+  /* Three dots grip indicator */
   .mobileResizeHandle::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 3px;
-    height: 40px;
-    border-radius: 2px;
-    background: rgba(0, 0, 0, 0.15);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+      0 -11px 0 rgba(255, 255, 255, 0.85),
+      0  11px 0 rgba(255, 255, 255, 0.85);
   }
 }
 
