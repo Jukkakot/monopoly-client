@@ -202,7 +202,6 @@ export default function GameScreen() {
       <AppLayout
         header={
           <Header
-            snapshot={state.snapshot}
             isSpectator={!state.myPlayerId}
           />
         }
