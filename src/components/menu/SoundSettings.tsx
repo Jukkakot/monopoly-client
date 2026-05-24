@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed } from '../../utils/animationSettings'
+import { loadZoomEnabled, saveZoomEnabled } from '../../utils/zoomSettings'
 
 const LS_KEY = 'sound-settings'
 
@@ -35,6 +36,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
   const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
   const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
+  const [zoomEnabled, setZoomEnabled] = useState(loadZoomEnabled)
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
 
@@ -118,6 +120,19 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
           <option value="slow">{t.botSpeedSlow}</option>
         </select>
       </div>
+
+      <div className={styles.divider} />
+
+      <label className={styles.toggleRow}>
+        <div className={styles.toggleInfo}>
+          <span className={styles.label}>{t.zoomToggleLabel}</span>
+        </div>
+        <input type="checkbox"
+          checked={zoomEnabled}
+          onChange={e => { saveZoomEnabled(e.target.checked); setZoomEnabled(e.target.checked) }}
+          className={styles.checkbox}
+        />
+      </label>
 
       <button className={styles.saveBtn} onClick={onClose}>{t.saveBtn}</button>
     </div>
