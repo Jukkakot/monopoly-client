@@ -17,6 +17,20 @@ function loadSidebarWidth(): number {
   return SIDEBAR_DEFAULT
 }
 
+const MOBILE_PANEL_MIN = 160
+const MOBILE_PANEL_MAX = 500
+
+function loadMobilePanelWidth(): number {
+  try {
+    const v = localStorage.getItem('monopoly_mobile_panel_width')
+    if (v) { const n = parseInt(v); if (n >= MOBILE_PANEL_MIN && n <= MOBILE_PANEL_MAX) return n }
+  } catch {}
+  // Default: right panel width = viewport width minus viewport height → board is square
+  return typeof window !== 'undefined'
+    ? Math.min(MOBILE_PANEL_MAX, Math.max(MOBILE_PANEL_MIN, window.innerWidth - window.innerHeight))
+    : 240
+}
+
 type MobileTab = 'board' | 'players' | 'log'
 
 const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log']
@@ -36,6 +50,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)
+  const [mobilePanelWidth, setMobilePanelWidth] = useState(loadMobilePanelWidth)
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState<AnimDir>('right')
   const [boardEntering, setBoardEntering] = useState(false)
@@ -51,6 +66,33 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
   const currentWidthRef = useRef(sidebarWidth)
   useEffect(() => { currentWidthRef.current = sidebarWidth }, [sidebarWidth])
+
+  // Mobile landscape resize handle (touch-based)
+  const mobileDragRef = useRef<{ startX: number; startW: number } | null>(null)
+  const mobilePanelWidthRef = useRef(mobilePanelWidth)
+  useEffect(() => { mobilePanelWidthRef.current = mobilePanelWidth }, [mobilePanelWidth])
+
+  useEffect(() => {
+    function onTouchMove(e: TouchEvent) {
+      if (!mobileDragRef.current) return
+      const delta = mobileDragRef.current.startX - e.touches[0].clientX
+      const newW = Math.min(MOBILE_PANEL_MAX, Math.max(MOBILE_PANEL_MIN, mobileDragRef.current.startW + delta))
+      setMobilePanelWidth(newW)
+    }
+    function onTouchEnd() {
+      if (!mobileDragRef.current) return
+      mobileDragRef.current = null
+      try { localStorage.setItem('monopoly_mobile_panel_width', String(mobilePanelWidthRef.current)) } catch {}
+    }
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchend', onTouchEnd)
+    return () => { window.removeEventListener('touchmove', onTouchMove); window.removeEventListener('touchend', onTouchEnd) }
+  }, [])
+
+  function onMobileHandleTouchStart(e: React.TouchEvent) {
+    e.stopPropagation() // prevent tab swipe from firing
+    mobileDragRef.current = { startX: e.touches[0].clientX, startW: mobilePanelWidthRef.current }
+  }
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
@@ -142,8 +184,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           {board}
         </div>
 
+        {/* Landscape resize handle — invisible in portrait */}
+        <div className={styles.mobileResizeHandle} onTouchStart={onMobileHandleTouchStart} />
+
         {/* Right panel: header + content tabs + bottom nav */}
-        <div className={styles.mobileRight}>
+        <div className={styles.mobileRight} style={{ flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth }}>
           <div className={styles.mobileHeader}>{header}</div>
 
           {/* Cash bar — portrait board tab only; hidden in landscape (no vertical room) */}

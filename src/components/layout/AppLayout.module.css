@@ -235,6 +235,11 @@
   animation: slideInLeft 0.22s ease-out;
 }
 
+/* Mobile landscape resize handle — hidden in portrait */
+.mobileResizeHandle {
+  display: none;
+}
+
 /* ══════════════════════════════════════
    LANDSCAPE MOBILE  (landscape + <768px wide)
    Board fills full height on the left; right panel
@@ -246,14 +251,13 @@
     flex-direction: row;
   }
 
-  /* Board always visible as a square left column; aspect-ratio keeps it square */
+  /* Board always visible; takes remaining space after handle + right panel */
   .mobileBoard,
   .mobileBoardHidden {
     display: flex !important;
-    flex-shrink: 0;
-    height: 100svh;
-    width: auto;
-    aspect-ratio: 1 / 1;
+    flex: 1;
+    min-width: 0;
+    align-self: stretch;
     background: #1a5c1a;
     padding: 6px;
     align-items: center;
@@ -261,12 +265,34 @@
     overflow: hidden;
   }
 
-  /* Right panel fills remaining width */
+  /* Right panel width is controlled via inline style (mobilePanelWidth state) */
   .mobileRight {
-    min-width: 0;
+    flex-shrink: 0;
+    overflow: hidden;
   }
 
+  /* Drag handle between board and right panel */
+  .mobileResizeHandle {
+    display: block;
+    width: 8px;
+    flex-shrink: 0;
+    background: #c8e6c9;
+    cursor: col-resize;
+    touch-action: none;
+    position: relative;
+  }
 
+  .mobileResizeHandle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 40px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.15);
+  }
 }
 
 /* ══════════════════════════════════════
