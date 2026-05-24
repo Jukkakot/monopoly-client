@@ -71,7 +71,7 @@ export default function LobbyScreen() {
 
   return (
     <div className={styles.page}>
-      <Header snapshot={null} connectionStatus="LIVE" />
+      <Header snapshot={null} />
       <div className={styles.card}>
         <div className={styles.logoBox}>
           <div className={styles.logo}>Monopoly</div>

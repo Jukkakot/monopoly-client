@@ -5,15 +5,12 @@ import OverflowMenu from '../menu/OverflowMenu'
 import { loadSoundConfig, saveSoundConfig } from '../menu/SoundSettings'
 import { useT, useLang, useLangToggle } from '../../i18n/LanguageContext'
 
-type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
-
 interface Props {
   snapshot: SessionState | null
-  connectionStatus: ConnectionStatus
   isSpectator?: boolean
 }
 
-export default function Header({ snapshot, connectionStatus, isSpectator }: Props) {
+export default function Header({ snapshot, isSpectator }: Props) {
   const t = useT()
   const lang = useLang()
   const toggleLang = useLangToggle()
@@ -38,13 +35,6 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
       setIdCopied(true)
       setTimeout(() => setIdCopied(false), 1500)
     })
-  }
-
-  const statusLabel: Record<ConnectionStatus, string> = {
-    CONNECTING: t.connecting,
-    LIVE: 'LIVE',
-    RECONNECTING: t.reconnecting,
-    FAILED: t.connectionFailed,
   }
 
   return (
@@ -73,12 +63,6 @@ export default function Header({ snapshot, connectionStatus, isSpectator }: Prop
             style={{ display: 'block', borderRadius: 2 }}
           />
         </button>
-        {snapshot !== null && (
-          <div className={`${styles.badge} ${styles[connectionStatus.toLowerCase()]}`}>
-            {connectionStatus === 'LIVE' ? <span className={styles.liveDot} /> : null}
-            {statusLabel[connectionStatus]}
-          </div>
-        )}
         <OverflowMenu />
       </div>
     </header>

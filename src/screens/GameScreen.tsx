@@ -203,7 +203,6 @@ export default function GameScreen() {
         header={
           <Header
             snapshot={state.snapshot}
-            connectionStatus={state.connectionStatus}
             isSpectator={!state.myPlayerId}
           />
         }
