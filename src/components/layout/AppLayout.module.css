@@ -8,8 +8,8 @@
 
 /* ══════════════════════════════════════
    MOBILE layout  (<768px)
-   Board + content area stacked vertically,
-   fixed bottom nav, desktop columns hidden.
+   Portrait: board + right panel stacked vertically.
+   Landscape: board on left, right panel on right.
 ══════════════════════════════════════ */
 
 /* Hide desktop columns on mobile */
@@ -18,18 +18,13 @@
   display: none;
 }
 
+/* Outer container — portrait: column, landscape: row (via media query below) */
 .mobileContent {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background: #f5f9f5;
-  padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
-}
-
-.mobileHeader {
-  flex-shrink: 0;
 }
 
 .mobileBoard {
@@ -55,6 +50,20 @@
   /* compact height – board inside will scale itself */
   max-height: 45vw;
   overflow: hidden;
+}
+
+/* Right panel: header + content + nav, stacked vertically */
+.mobileRight {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #f5f9f5;
+}
+
+.mobileHeader {
+  flex-shrink: 0;
 }
 
 .playerCashBar {
@@ -139,18 +148,15 @@
   display: none;
 }
 
+/* Nav is now in-flow at the bottom of .mobileRight */
 .mobileNav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   height: calc(52px + env(safe-area-inset-bottom, 0px));
   display: flex;
   background: #fff;
   border-top: 1px solid #c8e6c9;
-  z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   align-items: center;
+  flex-shrink: 0;
 }
 
 .navBtn {
@@ -230,6 +236,43 @@
 }
 
 /* ══════════════════════════════════════
+   LANDSCAPE MOBILE  (landscape + <768px wide)
+   Board fills full height on the left; right panel
+   (header + tabs + nav) sits beside it.
+══════════════════════════════════════ */
+
+@media (orientation: landscape) and (max-width: 767px) {
+  .mobileContent {
+    flex-direction: row;
+  }
+
+  /* Board always visible as a square left column; aspect-ratio keeps it square */
+  .mobileBoard,
+  .mobileBoardHidden {
+    display: flex !important;
+    flex-shrink: 0;
+    height: 100svh;
+    width: auto;
+    aspect-ratio: 1 / 1;
+    background: #1a5c1a;
+    padding: 6px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Right panel fills remaining width */
+  .mobileRight {
+    min-width: 0;
+  }
+
+  /* Cash bar hidden — no vertical space in landscape */
+  .playerCashBar {
+    display: none;
+  }
+}
+
+/* ══════════════════════════════════════
    DESKTOP layout  (≥768px)
    Two-column: board left, sidebar right.
    Mobile elements hidden.
@@ -293,8 +336,9 @@
     overflow: hidden;
   }
 
-  /* Hide mobile UI */
+  /* Hide all mobile UI */
   .mobileContent,
+  .mobileRight,
   .mobileNav {
     display: none;
   }

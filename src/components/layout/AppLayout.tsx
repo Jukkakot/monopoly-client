@@ -135,72 +135,79 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         <div className={styles.actions}>{actions}</div>
       </div>
 
-      {/* ── Mobile: content area (above bottom nav) ── */}
+      {/* ── Mobile: outer container (column in portrait, row in landscape) ── */}
       <div className={styles.mobileContent}>
-        <div className={styles.mobileHeader}>{header}</div>
+        {/* Board: portrait = top section (hidden on non-board tabs); landscape = always-visible left column */}
         <div className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}>
           {board}
         </div>
-        {/* Player cash bar — visible on board tab between board and action panel */}
-        {mobileTab === 'board' && snap && snap.players.length > 0 && (
-          <div className={styles.playerCashBar}>
-            {[...snap.players]
-              .sort((a, b) => a.playerId === state.myPlayerId ? -1 : b.playerId === state.myPlayerId ? 1 : 0)
-              .map(p => {
-              const seat = snap.seats.find(s => s.playerId === p.playerId)
-              const isActive = snap.turn?.activePlayerId === p.playerId
-              const isMe = p.playerId === state.myPlayerId
-              return (
-                <div key={p.playerId}
-                  className={[
-                    styles.cashChip,
-                    isActive ? styles.cashChipActive : '',
-                    isMe ? styles.cashChipMe : '',
-                    p.bankrupt ? styles.cashChipBankrupt : '',
-                  ].join(' ')}
-                >
-                  <span className={styles.cashDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
-                  <span className={styles.cashName}>{p.name}</span>
-                  <span className={styles.cashAmt}>{p.bankrupt ? '💀' : `€${p.cash}`}</span>
-                </div>
-              )
-            })}
+
+        {/* Right panel: header + content tabs + bottom nav */}
+        <div className={styles.mobileRight}>
+          <div className={styles.mobileHeader}>{header}</div>
+
+          {/* Cash bar — portrait board tab only; hidden in landscape (no vertical room) */}
+          {snap && snap.players.length > 0 && mobileTab === 'board' && (
+            <div className={styles.playerCashBar}>
+              {[...snap.players]
+                .sort((a, b) => a.playerId === state.myPlayerId ? -1 : b.playerId === state.myPlayerId ? 1 : 0)
+                .map(p => {
+                  const seat = snap.seats.find(s => s.playerId === p.playerId)
+                  const isActive = snap.turn?.activePlayerId === p.playerId
+                  const isMe = p.playerId === state.myPlayerId
+                  return (
+                    <div key={p.playerId}
+                      className={[
+                        styles.cashChip,
+                        isActive ? styles.cashChipActive : '',
+                        isMe ? styles.cashChipMe : '',
+                        p.bankrupt ? styles.cashChipBankrupt : '',
+                      ].join(' ')}
+                    >
+                      <span className={styles.cashDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
+                      <span className={styles.cashName}>{p.name}</span>
+                      <span className={styles.cashAmt}>{p.bankrupt ? '💀' : `€${p.cash}`}</span>
+                    </div>
+                  )
+                })}
+            </div>
+          )}
+
+          <div className={styles.mobileSection}>
+            {/* Keep actions mounted so popup-dismiss state survives tab switches */}
+            <div className={[
+              styles.mobilePadded,
+              mobileTab !== 'board' ? styles.mobileHidden : '',
+              boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
+            ].join(' ')}>{actions}</div>
+            {mobileTab === 'players' && (
+              <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
+            )}
+            {mobileTab === 'log' && (
+              <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{log}</div>
+            )}
           </div>
-        )}
-        <div className={styles.mobileSection}>
-          {/* Keep actions mounted so popup-dismiss state survives tab switches */}
-          <div className={[
-            styles.mobilePadded,
-            mobileTab !== 'board' ? styles.mobileHidden : '',
-            boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
-          ].join(' ')}>{actions}</div>
-          {mobileTab === 'players' && (
-            <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
-          )}
-          {mobileTab === 'log' && (
-            <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{log}</div>
-          )}
+
+          {/* Bottom nav — in-flow inside right panel so it stays in its column in landscape */}
+          <nav className={styles.mobileNav}>
+            {MOBILE_TABS.map(tab => (
+              <button
+                key={tab}
+                className={`${styles.navBtn} ${mobileTab === tab ? styles.navActive : ''}`}
+                onClick={() => switchTab(tab)}
+              >
+                {t.mobileTabs[tab]}
+                {tab === 'board' && isMyTurn && mobileTab !== 'board' && (
+                  <span className={styles.navAlert} />
+                )}
+                {tab === 'log' && unreadLog > 0 && mobileTab !== 'log' && (
+                  <span className={styles.navBadge}>{unreadLog > 9 ? '9+' : unreadLog}</span>
+                )}
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
-
-      {/* ── Mobile: bottom nav ── */}
-      <nav className={styles.mobileNav}>
-        {MOBILE_TABS.map(tab => (
-          <button
-            key={tab}
-            className={`${styles.navBtn} ${mobileTab === tab ? styles.navActive : ''}`}
-            onClick={() => switchTab(tab)}
-          >
-            {t.mobileTabs[tab]}
-            {tab === 'board' && isMyTurn && mobileTab !== 'board' && (
-              <span className={styles.navAlert} />
-            )}
-            {tab === 'log' && unreadLog > 0 && mobileTab !== 'log' && (
-              <span className={styles.navBadge}>{unreadLog > 9 ? '9+' : unreadLog}</span>
-            )}
-          </button>
-        ))}
-      </nav>
     </div>
   )
 }
