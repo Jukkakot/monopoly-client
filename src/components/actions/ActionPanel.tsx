@@ -219,6 +219,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   // Debt
   if (state.activeDebt) {
+    if (state.activeDebt.debtorPlayerId !== myPlayerId) {
+      const debtorName = state.players.find(p => p.playerId === state.activeDebt!.debtorPlayerId)?.name ?? '?'
+      return <div className={styles.infoBox}>{t.waitingForDebt(debtorName)}</div>
+    }
     return <DebtSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 

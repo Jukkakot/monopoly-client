@@ -59,6 +59,7 @@ export interface T {
   passAuctionBtn: string
   passAuctionBtnKbd: string
   waitingForOthers: string
+  waitingForDebt: (playerName: string) => string
   // Debt
   debtTitle: (amount: number, creditor: string) => string
   debtReasonLabel: string
@@ -408,6 +409,7 @@ const fi: T = {
   passAuctionBtn: '🚫 Passi',
   passAuctionBtnKbd: '🚫 Passi  [P]',
   waitingForOthers: '⏳ Odotetaan muita pelaajia…',
+  waitingForDebt: (name: string) => `⏳ ${name} maksaa velkaa…`,
 
   debtTitle: (amount, creditor) => `⚠️ Velka €${amount} → ${creditor}`,
   debtReasonLabel: 'Syy',
@@ -774,6 +776,7 @@ const en: T = {
   passAuctionBtn: '🚫 Pass',
   passAuctionBtnKbd: '🚫 Pass  [P]',
   waitingForOthers: '⏳ Waiting for others…',
+  waitingForDebt: (name: string) => `⏳ ${name} is settling a debt…`,
 
   debtTitle: (amount, creditor) => `⚠️ Debt €${amount} → ${creditor}`,
   debtReasonLabel: 'Reason',
