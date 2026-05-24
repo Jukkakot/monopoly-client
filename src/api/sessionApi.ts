@@ -1,31 +1,30 @@
 import type { CreateSessionRequest, CommandResult, SessionSummary } from '../types/api'
+import { logger } from '../utils/logger'
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
+const JSON_HEADERS = { 'Content-Type': 'application/json' }
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, init)
+  if (!res.ok) {
+    logger.error('API request failed', { url, status: res.status, method: init?.method ?? 'GET' })
+    throw new Error(`Backend returned ${res.status}`)
+  }
+  return res.json()
+}
 
 export async function createSession(req: CreateSessionRequest): Promise<{ sessionId: string; hostToken: string }> {
-  const res = await fetch(`${BASE}/sessions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(req),
-  })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
+  return fetchJson(`${BASE}/sessions`, { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(req) })
 }
 
 export async function listSessions(): Promise<SessionSummary[]> {
-  const res = await fetch(`${BASE}/sessions`)
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
+  return fetchJson(`${BASE}/sessions`)
 }
 
 export async function sendCommand(sessionId: string, command: object): Promise<CommandResult> {
-  const res = await fetch(`${BASE}/sessions/${sessionId}/command`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(command),
+  return fetchJson(`${BASE}/sessions/${sessionId}/command`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(command),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {
@@ -43,13 +42,9 @@ export async function createLobby(hostName: string, hostColor?: string): Promise
   playerId: string
   playerToken: string
 }> {
-  const res = await fetch(`${BASE}/sessions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lobbyMode: true, hostName, hostColor }),
+  return fetchJson(`${BASE}/sessions`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ lobbyMode: true, hostName, hostColor }),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
 }
 
 export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{
@@ -58,32 +53,25 @@ export async function joinLobby(sessionId: string, name: string, color?: string)
   tokenColorHex: string
   playerToken: string
 }> {
-  const res = await fetch(`${BASE}/sessions/${sessionId}/join`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, color }),
+  return fetchJson(`${BASE}/sessions/${sessionId}/join`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ name, color }),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
 }
 
 export async function addLobbyBot(sessionId: string, hostToken: string): Promise<{ seatId: string; name: string }> {
-  const res = await fetch(`${BASE}/sessions/${sessionId}/lobby/bots`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hostToken }),
+  return fetchJson(`${BASE}/sessions/${sessionId}/lobby/bots`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ hostToken }),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
 }
 
 export async function removeLobbyBot(sessionId: string, seatId: string, hostToken: string): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/lobby/bots/${seatId}`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hostToken }),
+    method: 'DELETE', headers: JSON_HEADERS, body: JSON.stringify({ hostToken }),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  if (!res.ok) {
+    logger.error('API request failed', { url: `/lobby/bots/${seatId}`, status: res.status, method: 'DELETE' })
+    throw new Error(`Backend returned ${res.status}`)
+  }
 }
 
 export async function setLobbyReady(
@@ -93,11 +81,12 @@ export async function setLobbyReady(
   ready: boolean,
 ): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/lobby/ready`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ playerId, playerToken, ready }),
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ playerId, playerToken, ready }),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  if (!res.ok) {
+    logger.error('API request failed', { url: '/lobby/ready', status: res.status, method: 'POST' })
+    throw new Error(`Backend returned ${res.status}`)
+  }
 }
 
 export function sseUrl(sessionId: string): string {
@@ -107,18 +96,17 @@ export function sseUrl(sessionId: string): string {
 export async function createBotsOnlySession(botCount: number): Promise<{ sessionId: string }> {
   const names = Array.from({ length: botCount }, (_, i) => `Botti ${i + 1}`)
   const seatKinds = Array(botCount).fill('BOT')
-  const res = await fetch(`${BASE}/sessions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ names, seatKinds }),
+  return fetchJson(`${BASE}/sessions`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, seatKinds }),
   })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
-  return res.json()
 }
 
 export async function startLobby(sessionId: string): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
-  if (!res.ok) throw new Error(`Backend returned ${res.status}`)
+  if (!res.ok) {
+    logger.error('API request failed', { url: `/sessions/${sessionId}/start`, status: res.status, method: 'POST' })
+    throw new Error(`Backend returned ${res.status}`)
+  }
 }
 
 export interface SessionSettings {
@@ -127,8 +115,6 @@ export interface SessionSettings {
 
 export async function applySessionSettings(sessionId: string, settings: SessionSettings): Promise<void> {
   await fetch(`${BASE}/sessions/${sessionId}/settings`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(settings),
+    method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(settings),
   })
 }
