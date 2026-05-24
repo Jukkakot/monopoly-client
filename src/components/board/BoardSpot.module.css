@@ -79,12 +79,12 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 1px;
-  /* always on top of color bar and other spot content */
+  /* always on top of color bar, mortgage marker and other spot content */
   position: absolute;
   bottom: clamp(10px, 2vmin, 20px);
   left: 0;
   right: 0;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
 }
 
