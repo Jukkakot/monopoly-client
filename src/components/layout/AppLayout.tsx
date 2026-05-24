@@ -122,6 +122,30 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         <div className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}>
           {board}
         </div>
+        {/* Player cash bar — visible on board tab between board and action panel */}
+        {mobileTab === 'board' && snap && snap.players.length > 0 && (
+          <div className={styles.playerCashBar}>
+            {snap.players.map(p => {
+              const seat = snap.seats.find(s => s.playerId === p.playerId)
+              const isActive = snap.turn?.activePlayerId === p.playerId
+              const isMe = p.playerId === state.myPlayerId
+              return (
+                <div key={p.playerId}
+                  className={[
+                    styles.cashChip,
+                    isActive ? styles.cashChipActive : '',
+                    isMe ? styles.cashChipMe : '',
+                    p.bankrupt ? styles.cashChipBankrupt : '',
+                  ].join(' ')}
+                >
+                  <span className={styles.cashDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
+                  <span className={styles.cashName}>{p.name}</span>
+                  <span className={styles.cashAmt}>{p.bankrupt ? '💀' : `€${p.cash}`}</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
         <div className={styles.mobileSection}>
           {/* Keep actions mounted so popup-dismiss state survives tab switches */}
           <div className={`${styles.mobilePadded} ${mobileTab !== 'board' ? styles.mobileHidden : ''}`}>{actions}</div>

@@ -25,7 +25,7 @@
   min-height: 0;
   overflow: hidden;
   background: #f5f9f5;
-  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
 }
 
 .mobileHeader {
@@ -57,6 +57,70 @@
   overflow: hidden;
 }
 
+.playerCashBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px 10px;
+  background: #0f3d0f;
+  gap: 6px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.playerCashBar::-webkit-scrollbar {
+  display: none;
+}
+
+.cashChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.72rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.cashChipActive {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-weight: 700;
+}
+
+.cashChipMe {
+  outline: 1.5px solid rgba(255, 255, 255, 0.45);
+  outline-offset: -1px;
+}
+
+.cashChipBankrupt {
+  opacity: 0.35;
+}
+
+.cashDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cashName {
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cashAmt {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
 .mobileSection {
   flex: 1;
   min-height: 0;
@@ -77,13 +141,13 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  height: calc(52px + env(safe-area-inset-bottom, 0px));
   display: flex;
   background: #fff;
   border-top: 1px solid #c8e6c9;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  align-items: flex-start;
+  align-items: center;
 }
 
 .navBtn {
