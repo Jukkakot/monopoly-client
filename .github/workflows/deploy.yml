@@ -22,6 +22,9 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+        env:
+          VITE_AXIOM_TOKEN: ${{ secrets.VITE_AXIOM_TOKEN }}
+          VITE_AXIOM_DATASET: ${{ secrets.VITE_AXIOM_DATASET }}
 
       - uses: peaceiris/actions-gh-pages@v4
         with:
