@@ -266,10 +266,7 @@
     min-width: 0;
   }
 
-  /* Cash bar hidden — no vertical space in landscape */
-  .playerCashBar {
-    display: none;
-  }
+
 }
 
 /* ══════════════════════════════════════

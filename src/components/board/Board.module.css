@@ -27,6 +27,14 @@
   }
 }
 
+@media (max-width: 767px) and (orientation: landscape) {
+  .board {
+    /* In landscape the board fills its dedicated left column (≈ 100svh) */
+    max-width: calc(100svh - 12px);
+    max-height: calc(100svh - 12px);
+  }
+}
+
 .center {
   grid-column: 2 / 11;
   grid-row: 2 / 11;
