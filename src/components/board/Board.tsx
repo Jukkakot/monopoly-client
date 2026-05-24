@@ -5,13 +5,13 @@ import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, onAnimationIdle, isAnyPlayerAnimating } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomEnabled, onZoomSettingChange } from '../../utils/zoomSettings'
 
 const ZOOM_SCALE = 2.5
-const ZOOM_DELAY_MS = 2500
+const ZOOM_OUT_DELAY_MS = 2500
 
 function computeZoomTransform(spotIndex: number): string {
   const { row, col } = indexToGridPos(spotIndex)
@@ -267,45 +267,49 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   const [zoomEnabled, setZoomEnabled] = useState(loadZoomEnabled)
   const [zoomedSpot, setZoomedSpot] = useState<number | null>(null)
-  const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const zoomOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const stateRef = useRef(state)
+  const prevAnimatingSizeRef = useRef(0)
   useEffect(() => { stateRef.current = state }, [state])
 
   useEffect(() => onZoomSettingChange(() => setZoomEnabled(loadZoomEnabled())), [])
 
+  // Follow the active player's token step by step during animation
   useEffect(() => {
-    const unsub = onAnimationIdle(() => {
-      if (!loadZoomEnabled()) return
-      const snap = stateRef.current
-      if (!snap.turn || snap.status === 'GAME_OVER') return
-      const activePlayerId = snap.turn.activePlayerId
-      const boardIndex = snap.players.find(p => p.playerId === activePlayerId)?.boardIndex
-      if (boardIndex === undefined) return
-      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
-      zoomTimerRef.current = setTimeout(() => {
-        if (isAnyPlayerAnimating()) return
-        setZoomedSpot(boardIndex)
-      }, ZOOM_DELAY_MS)
-    })
-    return () => {
-      unsub()
-      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
-    }
-  }, [])
+    if (!loadZoomEnabled()) return
+    if (animatingPlayers.size === 0) return
+    const pid = stateRef.current.turn?.activePlayerId
+    if (!pid || !animatingPlayers.has(pid)) return
+    const pos = animatedPositions.get(pid)
+    if (pos !== undefined) setZoomedSpot(pos)
+  }, [animatedPositions, animatingPlayers])
 
-  // Clear zoom when a NEW animation starts (next player rolls) — not on turn change,
-  // because the turn change fires before the 2500ms timer, cancelling zoom too early.
-  const prevAnimatingSizeRef = useRef(0)
+  // Detect animation start → zoom in immediately; animation end → zoom out after delay
   useEffect(() => {
     const nowSize = animatingPlayers.size
-    if (nowSize > 0 && prevAnimatingSizeRef.current === 0) {
-      setZoomedSpot(null)
-      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
-    }
+    const prevSize = prevAnimatingSizeRef.current
     prevAnimatingSizeRef.current = nowSize
+
+    if (nowSize > 0 && prevSize === 0) {
+      // Animation started: cancel any pending zoom-out, zoom in to current position
+      if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
+      if (!loadZoomEnabled()) return
+      const pid = stateRef.current.turn?.activePlayerId
+      if (!pid || !animatingPlayers.has(pid)) return
+      const pos = animatedPositions.get(pid)
+        ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex
+      if (pos !== undefined) setZoomedSpot(pos)
+    }
+
+    if (nowSize === 0 && prevSize > 0) {
+      // Animation ended: zoom out after delay
+      zoomOutTimerRef.current = setTimeout(() => setZoomedSpot(null), ZOOM_OUT_DELAY_MS)
+    }
   }, [animatingPlayers])
 
-  void zoomEnabled // used indirectly via loadZoomEnabled() in the onAnimationIdle callback
+  useEffect(() => () => { if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current) }, [])
+
+  void zoomEnabled // used by loadZoomEnabled() in effects
 
   // While a player is animating, keep showing previous ownership for properties they just acquired
   const prevProperties = gameState.prevSnapshot?.properties
