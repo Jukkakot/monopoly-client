@@ -1,13 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import styles from './Board.module.css'
 import BoardSpot from './BoardSpot'
-import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, onAnimationIdle, isAnyPlayerAnimating } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+import { loadZoomEnabled, onZoomSettingChange } from '../../utils/zoomSettings'
+
+const ZOOM_SCALE = 2.5
+const ZOOM_DELAY_MS = 2500
+
+function computeZoomTransform(spotIndex: number): string {
+  const { row, col } = indexToGridPos(spotIndex)
+  const tx = -ZOOM_SCALE * (col - 6) / 11 * 100
+  const ty = -ZOOM_SCALE * (row - 6) / 11 * 100
+  const maxOffset = (ZOOM_SCALE - 1) / 2 * 100
+  const clampedTx = Math.max(-maxOffset, Math.min(maxOffset, tx))
+  const clampedTy = Math.max(-maxOffset, Math.min(maxOffset, ty))
+  return `translate(${clampedTx}%, ${clampedTy}%) scale(${ZOOM_SCALE})`
+}
 
 const MAX_HOUSES = 32
 const MAX_HOTELS = 12
@@ -251,6 +265,43 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
 
+  const [zoomEnabled, setZoomEnabled] = useState(loadZoomEnabled)
+  const [zoomedSpot, setZoomedSpot] = useState<number | null>(null)
+  const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const stateRef = useRef(state)
+  useEffect(() => { stateRef.current = state }, [state])
+
+  useEffect(() => onZoomSettingChange(() => setZoomEnabled(loadZoomEnabled())), [])
+
+  useEffect(() => {
+    const unsub = onAnimationIdle(() => {
+      if (!loadZoomEnabled()) return
+      const snap = stateRef.current
+      if (!snap.turn || snap.status === 'GAME_OVER') return
+      const activePlayerId = snap.turn.activePlayerId
+      const boardIndex = snap.players.find(p => p.playerId === activePlayerId)?.boardIndex
+      if (boardIndex === undefined) return
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
+      zoomTimerRef.current = setTimeout(() => {
+        if (isAnyPlayerAnimating()) return
+        setZoomedSpot(boardIndex)
+      }, ZOOM_DELAY_MS)
+    })
+    return () => {
+      unsub()
+      if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
+    }
+  }, [])
+
+  // Clear zoom when turn changes
+  const activePlayerId = state.turn?.activePlayerId
+  useEffect(() => {
+    setZoomedSpot(null)
+    if (zoomTimerRef.current) clearTimeout(zoomTimerRef.current)
+  }, [activePlayerId])
+
+  void zoomEnabled // used indirectly via loadZoomEnabled() in the onAnimationIdle callback
+
   // While a player is animating, keep showing previous ownership for properties they just acquired
   const prevProperties = gameState.prevSnapshot?.properties
   const displayProperties = (animatingPlayers.size > 0 && prevProperties)
@@ -303,6 +354,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     <>
     <div
       className={styles.board}
+      style={zoomedSpot !== null ? { transform: computeZoomTransform(zoomedSpot) } : undefined}
       onMouseMove={handleBoardMouseMove}
       onMouseLeave={() => setHoveredSpotId(null)}
     >
@@ -347,6 +399,11 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         )}
       </div>
     </div>
+    {zoomedSpot !== null && (
+      <button className={styles.zoomOutBtn} onClick={() => setZoomedSpot(null)}>
+        {t.zoomOutBtn}
+      </button>
+    )}
     {hoveredSpotId && (
       <SpotTooltip spotId={hoveredSpotId} state={displayState} pos={hoverPos} />
     )}

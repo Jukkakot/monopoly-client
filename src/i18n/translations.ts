@@ -288,6 +288,8 @@ export interface T {
   redeemSectionMenuTitle: string
   mortgageBtnMenu: string
   redeemBtnMenu: string
+  zoomToggleLabel: string
+  zoomOutBtn: string
 
   // ── SoundSettings ────────────────────────────────────────────────────────────
   soundSettingsTitle: string
@@ -650,6 +652,8 @@ const fi: T = {
   redeemSectionMenuTitle: '💳 Lunasta pantit',
   mortgageBtnMenu: 'Panttaa',
   redeemBtnMenu: 'Lunasta',
+  zoomToggleLabel: 'Automaattinen lähennys',
+  zoomOutBtn: 'Loitonna',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Asetukset',
@@ -1017,6 +1021,8 @@ const en: T = {
   redeemSectionMenuTitle: '💳 Redeem mortgages',
   mortgageBtnMenu: 'Mortgage',
   redeemBtnMenu: 'Redeem',
+  zoomToggleLabel: 'Auto-zoom board',
+  zoomOutBtn: 'Zoom out',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Settings',

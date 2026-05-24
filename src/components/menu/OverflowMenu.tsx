@@ -7,6 +7,7 @@ import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { useT } from '../../i18n/LanguageContext'
 import { type BotSpeed, saveAnimationSpeed, applyAnimationSpeedToCss } from '../../utils/animationSettings'
 import { applySessionSettings } from '../../api/sessionApi'
+import { loadZoomEnabled, saveZoomEnabled } from '../../utils/zoomSettings'
 
 export default function OverflowMenu() {
   const { state, sendCmd } = useGame()
@@ -19,6 +20,7 @@ export default function OverflowMenu() {
   const [showBuild, setShowBuild] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
+  const [zoomEnabled, setZoomEnabled] = useState(loadZoomEnabled)
 
   function copyInviteLink() {
     if (!snapshot) return
@@ -200,6 +202,13 @@ export default function OverflowMenu() {
             )}
             <button className={styles.menuItem} onClick={() => { setOpen(false); setShowSound(true) }}>
               {t.soundSettingsBtn}
+            </button>
+            <button className={styles.menuItem} onClick={() => {
+              const next = !zoomEnabled
+              saveZoomEnabled(next)
+              setZoomEnabled(next)
+            }}>
+              {t.zoomToggleLabel}: {zoomEnabled ? '✓ ON' : 'OFF'}
             </button>
             <button className={`${styles.menuItem} ${styles.desktopOnly}`} onClick={() => { setOpen(false); setShowHelp(true) }}>
               {t.keyboardShortcutsBtn}

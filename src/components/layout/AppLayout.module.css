@@ -35,6 +35,7 @@
   padding: 8px;
   flex-shrink: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .mobileBoardHidden {
@@ -263,6 +264,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
   }
 
   /* Right panel width is controlled via inline style (mobilePanelWidth state) */
@@ -324,6 +326,7 @@
     min-width: 0;
     overflow: hidden;
     height: 100svh;
+    position: relative;
   }
 
   .resizeHandle {
