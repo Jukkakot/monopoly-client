@@ -24,11 +24,21 @@ export default function FlashBanner() {
   // Detect when it becomes my turn — defer banner until animation finishes
   useEffect(() => {
     const activeId = state.snapshot?.turn?.activePlayerId ?? null
-    if (activeId && activeId === state.myPlayerId && prevActiveId.current !== null && prevActiveId.current !== activeId) {
+    const gameOver = state.snapshot?.status === 'GAME_OVER'
+    // Only show in real-player mode (personal token stored), not in solo/dynamic mode
+    const isRealPlayer = !!(state.sessionId && sessionStorage.getItem(`monopoly_token_${state.sessionId}`))
+    if (
+      isRealPlayer &&
+      !gameOver &&
+      activeId &&
+      activeId === state.myPlayerId &&
+      prevActiveId.current !== null &&
+      prevActiveId.current !== activeId
+    ) {
       pendingMyTurn.current = { playerId: activeId, msg: t.yourTurnMsg }
     }
     prevActiveId.current = activeId
-  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, t.yourTurnMsg])
+  }, [state.snapshot?.turn?.activePlayerId, state.snapshot?.status, state.myPlayerId, state.sessionId, t.yourTurnMsg])
 
   // Fire the "your turn" banner once animation stops
   useEffect(() => {
