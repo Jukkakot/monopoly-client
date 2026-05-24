@@ -1,5 +1,16 @@
 import type { CreateSessionRequest, CommandResult, SessionSummary } from '../types/api'
 import { logger } from '../utils/logger'
+import { randomBotName } from '../utils/playerNames'
+import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+
+const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
+
+function pickDistinct<T>(pool: T[], count: number): T[] {
+  const shuffled = [...pool].sort(() => Math.random() - 0.5)
+  const result: T[] = []
+  for (let i = 0; i < count; i++) result.push(shuffled[i % shuffled.length])
+  return result
+}
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
@@ -94,11 +105,20 @@ export function sseUrl(sessionId: string): string {
 }
 
 export async function createBotsOnlySession(botCount: number): Promise<{ sessionId: string }> {
-  const names = Array.from({ length: botCount }, (_, i) => `Botti ${i + 1}`)
-  const seatKinds = Array(botCount).fill('BOT')
-  return fetchJson(`${BASE}/sessions`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, seatKinds }),
+  const usedNames: string[] = []
+  const names = Array.from({ length: botCount }, () => {
+    const name = randomBotName(usedNames)
+    usedNames.push(name)
+    return name
   })
+  const colors = pickDistinct(PRESET_COLORS, botCount)
+  const shapes = pickDistinct(ALL_SHAPES.map(s => s.key) as TokenShape[], botCount)
+  const seatKinds = Array(botCount).fill('BOT')
+  const result = await fetchJson<{ sessionId: string }>(`${BASE}/sessions`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, colors, seatKinds }),
+  })
+  saveTokenShapes(result.sessionId, shapes)
+  return result
 }
 
 export async function startLobby(sessionId: string): Promise<void> {
