@@ -1,22 +1,22 @@
-const LS_KEY_ENABLED = 'monopoly_zoom_enabled'
-const LS_KEY_ALL_PLAYERS = 'monopoly_zoom_all_players'
+export type ZoomMode = 'off' | 'own' | 'all'
+
+const LS_KEY = 'monopoly_zoom_mode'
 const _listeners = new Set<() => void>()
 
-export function loadZoomEnabled(): boolean {
-  try { return localStorage.getItem(LS_KEY_ENABLED) !== 'false' } catch { return true }
+export function loadZoomMode(): ZoomMode {
+  try {
+    const v = localStorage.getItem(LS_KEY)
+    if (v === 'off' || v === 'own' || v === 'all') return v
+    // migrate old keys
+    const oldEnabled = localStorage.getItem('monopoly_zoom_enabled')
+    if (oldEnabled === 'false') return 'off'
+    const oldAll = localStorage.getItem('monopoly_zoom_all_players')
+    return oldAll === 'true' ? 'all' : 'own'
+  } catch { return 'own' }
 }
 
-export function saveZoomEnabled(v: boolean) {
-  try { localStorage.setItem(LS_KEY_ENABLED, v ? 'true' : 'false') } catch {}
-  for (const fn of _listeners) fn()
-}
-
-export function loadZoomAllPlayers(): boolean {
-  try { return localStorage.getItem(LS_KEY_ALL_PLAYERS) === 'true' } catch { return false }
-}
-
-export function saveZoomAllPlayers(v: boolean) {
-  try { localStorage.setItem(LS_KEY_ALL_PLAYERS, v ? 'true' : 'false') } catch {}
+export function saveZoomMode(mode: ZoomMode) {
+  try { localStorage.setItem(LS_KEY, mode) } catch {}
   for (const fn of _listeners) fn()
 }
 

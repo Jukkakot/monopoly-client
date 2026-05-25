@@ -291,8 +291,10 @@ export interface T {
   redeemSectionMenuTitle: string
   mortgageBtnMenu: string
   redeemBtnMenu: string
-  zoomToggleLabel: string
-  zoomAllPlayersLabel: string
+  zoomModeLabel: string
+  zoomModeOff: string
+  zoomModeOwn: string
+  zoomModeAll: string
   zoomOutBtn: string
 
   // ── SoundSettings ────────────────────────────────────────────────────────────
@@ -659,8 +661,10 @@ const fi: T = {
   redeemSectionMenuTitle: '💳 Lunasta pantit',
   mortgageBtnMenu: 'Panttaa',
   redeemBtnMenu: 'Lunasta',
-  zoomToggleLabel: 'Automaattinen lähennys',
-  zoomAllPlayersLabel: 'Seuraa myös vastustajia',
+  zoomModeLabel: 'Automaattinen lähennys',
+  zoomModeOff: 'Pois päältä',
+  zoomModeOwn: 'Seuraa omaa nappulaa',
+  zoomModeAll: 'Seuraa kaikkia',
   zoomOutBtn: 'Loitonna',
 
   // SoundSettings
@@ -1032,8 +1036,10 @@ const en: T = {
   redeemSectionMenuTitle: '💳 Redeem mortgages',
   mortgageBtnMenu: 'Mortgage',
   redeemBtnMenu: 'Redeem',
-  zoomToggleLabel: 'Auto-zoom board',
-  zoomAllPlayersLabel: 'Follow opponents too',
+  zoomModeLabel: 'Auto-zoom',
+  zoomModeOff: 'Off',
+  zoomModeOwn: 'Follow own token',
+  zoomModeAll: 'Follow all players',
   zoomOutBtn: 'Zoom out',
 
   // SoundSettings

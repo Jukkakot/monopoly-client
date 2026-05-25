@@ -8,7 +8,7 @@ import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
-import { loadZoomEnabled, loadZoomAllPlayers, onZoomSettingChange } from '../../utils/zoomSettings'
+import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
 
 const ZOOM_SCALE = 2.5
 const ZOOM_OUT_DELAY_MS = 2500
@@ -265,7 +265,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
 
-  const [zoomEnabled, setZoomEnabled] = useState(loadZoomEnabled)
+  const [zoomMode, setZoomMode] = useState(loadZoomMode)
   const [zoomedSpot, setZoomedSpot] = useState<number | null>(null)
   const zoomOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const stateRef = useRef(state)
@@ -273,21 +273,21 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   useEffect(() => { stateRef.current = state }, [state])
 
   useEffect(() => onZoomSettingChange(() => {
-    const enabled = loadZoomEnabled()
-    setZoomEnabled(enabled)
-    if (!enabled) {
-      // Zoom turned off: immediately zoom out and cancel any pending timer
+    const mode = loadZoomMode()
+    setZoomMode(mode)
+    if (mode === 'off') {
       if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
       setZoomedSpot(null)
     }
   }), [])
 
   function shouldZoomForPlayer(pid: string): boolean {
-    if (!loadZoomEnabled()) return false
+    const mode = loadZoomMode()
+    if (mode === 'off') return false
+    if (mode === 'all') return true
     const myId = gameState.myPlayerId
     if (!myId) return true // spectator: follow everyone
-    if (pid === myId) return true
-    return loadZoomAllPlayers()
+    return pid === myId
   }
 
   // Follow the active player's token step by step during animation
@@ -325,7 +325,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   useEffect(() => () => { if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current) }, [])
 
-  void zoomEnabled // triggers re-render when setting changes so shouldZoomForPlayer stays fresh
+  void zoomMode // triggers re-render when setting changes so shouldZoomForPlayer stays fresh
 
   // While a player is animating, keep showing previous ownership for properties they just acquired
   const prevProperties = gameState.prevSnapshot?.properties

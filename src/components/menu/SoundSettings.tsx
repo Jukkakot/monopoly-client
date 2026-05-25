@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed } from '../../utils/animationSettings'
-import { loadZoomEnabled, saveZoomEnabled, loadZoomAllPlayers, saveZoomAllPlayers } from '../../utils/zoomSettings'
+import { type ZoomMode, loadZoomMode, saveZoomMode } from '../../utils/zoomSettings'
 
 const LS_KEY = 'sound-settings'
 
@@ -36,8 +36,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
   const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
   const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
-  const [zoomEnabled, setZoomEnabled] = useState(loadZoomEnabled)
-  const [zoomAllPlayers, setZoomAllPlayers] = useState(loadZoomAllPlayers)
+  const [zoomMode, setZoomMode] = useState<ZoomMode>(loadZoomMode)
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
 
@@ -124,27 +123,18 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
 
       <div className={styles.divider} />
 
-      <label className={styles.toggleRow}>
-        <div className={styles.toggleInfo}>
-          <span className={styles.label}>{t.zoomToggleLabel}</span>
-        </div>
-        <input type="checkbox"
-          checked={zoomEnabled}
-          onChange={e => { saveZoomEnabled(e.target.checked); setZoomEnabled(e.target.checked) }}
-          className={styles.checkbox}
-        />
-      </label>
-      <label className={`${styles.toggleRow} ${!zoomEnabled ? styles.disabled : ''}`}>
-        <div className={styles.toggleInfo}>
-          <span className={styles.label}>{t.zoomAllPlayersLabel}</span>
-        </div>
-        <input type="checkbox"
-          checked={zoomAllPlayers}
-          disabled={!zoomEnabled}
-          onChange={e => { saveZoomAllPlayers(e.target.checked); setZoomAllPlayers(e.target.checked) }}
-          className={styles.checkbox}
-        />
-      </label>
+      <div className={styles.row}>
+        <label className={styles.label}>{t.zoomModeLabel}</label>
+        <select
+          className={styles.select}
+          value={zoomMode}
+          onChange={e => { saveZoomMode(e.target.value as ZoomMode); setZoomMode(e.target.value as ZoomMode) }}
+        >
+          <option value="off">{t.zoomModeOff}</option>
+          <option value="own">{t.zoomModeOwn}</option>
+          <option value="all">{t.zoomModeAll}</option>
+        </select>
+      </div>
 
       <button className={styles.saveBtn} onClick={onClose}>{t.saveBtn}</button>
     </div>
