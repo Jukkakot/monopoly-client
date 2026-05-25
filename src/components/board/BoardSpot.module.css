@@ -60,9 +60,10 @@
   font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
   font-weight: 700;
   color: #000;
-  line-height: 1.05;
-  white-space: nowrap;
-  overflow: hidden;
+  line-height: 1.1;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
   padding: 0 1px;
 }
 
