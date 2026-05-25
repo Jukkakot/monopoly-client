@@ -148,6 +148,9 @@ export interface T {
   joinBtnLabel: string
   joiningLabel: string
   sessionsLoadFailed: string
+  backendWaking: string
+  backendWakingHint: string
+  backendWakingSeconds: (s: number) => string
   gameNotFoundErr: string
   connectionErr: string
   quickStartFailed: string
@@ -506,6 +509,9 @@ const fi: T = {
   joinBtnLabel: 'Liity',
   joiningLabel: '…',
   sessionsLoadFailed: 'Sessioiden lataus epäonnistui.',
+  backendWaking: 'Herätellään palvelinta…',
+  backendWakingHint: 'Ilmainen palvelin nukkuu käyttämättömänä – herääminen kestää ~30 s.',
+  backendWakingSeconds: (s: number) => `${s} s`,
   gameNotFoundErr: 'Peliä ei löydy. Tarkista koodi.',
   connectionErr: 'Yhteysongelma. Yritä uudelleen.',
   quickStartFailed: 'Pikapelin luonti epäonnistui.',
@@ -876,6 +882,9 @@ const en: T = {
   joinBtnLabel: 'Join',
   joiningLabel: '…',
   sessionsLoadFailed: 'Failed to load sessions.',
+  backendWaking: 'Waking up the server…',
+  backendWakingHint: 'Free server sleeps when idle – waking takes ~30 s.',
+  backendWakingSeconds: (s: number) => `${s} s`,
   gameNotFoundErr: 'Game not found. Check the code.',
   connectionErr: 'Connection error. Try again.',
   quickStartFailed: 'Failed to create quick game.',

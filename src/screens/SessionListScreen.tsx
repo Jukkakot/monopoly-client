@@ -15,6 +15,9 @@ export default function SessionListScreen() {
   const t = useT()
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [loadStartRef] = useState(() => Date.now())
+  const [elapsed, setElapsed] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [joinCode, setJoinCode] = useState('')
   const [joinError, setJoinError] = useState<string | null>(null)
@@ -29,14 +32,22 @@ export default function SessionListScreen() {
     sessionExists(lastSession).then(exists => setLastSessionExists(exists)).catch(() => setLastSessionExists(false))
   }, [lastSession])
 
+  useEffect(() => {
+    if (!initialLoading) return
+    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - loadStartRef) / 1000)), 500)
+    return () => clearInterval(timer)
+  }, [initialLoading, loadStartRef])
+
   async function load() {
     setLoading(true)
     setError(null)
     try {
       const list = await listSessions()
       setSessions(list)
+      setInitialLoading(false)
     } catch {
       setError(t.sessionsLoadFailed)
+      setInitialLoading(false)
     } finally {
       setLoading(false)
     }
@@ -130,6 +141,15 @@ export default function SessionListScreen() {
           <div className={styles.logo}>Monopoly</div>
           <div className={styles.sub}>Helsinki Edition</div>
         </div>
+
+        {initialLoading && (
+          <div className={styles.wakingOverlay}>
+            <div className={styles.diceSpinner}>🎲</div>
+            <div className={styles.wakingTitle}>{t.backendWaking}</div>
+            <div className={styles.wakingHint}>{t.backendWakingHint}</div>
+            <div className={styles.wakingTimer}>{t.backendWakingSeconds(elapsed)}</div>
+          </div>
+        )}
 
         {lastSession && lastSessionExists === true && (
           <div className={styles.rejoinBanner}>
