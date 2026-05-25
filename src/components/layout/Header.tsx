@@ -37,7 +37,7 @@ export default function Header({ isSpectator }: Props) {
         </button>
         <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
           <img
-            src={lang === 'fi' ? 'https://flagcdn.com/20x15/fi.png' : 'https://flagcdn.com/20x15/gb.png'}
+            src={lang === 'fi' ? 'https://flagcdn.com/40x30/fi.png' : 'https://flagcdn.com/40x30/gb.png'}
             width={20} height={15}
             alt={lang === 'fi' ? 'FI' : 'EN'}
             style={{ display: 'block', borderRadius: 2 }}

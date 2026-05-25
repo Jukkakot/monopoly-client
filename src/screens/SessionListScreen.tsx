@@ -122,7 +122,7 @@ export default function SessionListScreen() {
   return (
     <div className={styles.page}>
       <Header />
-      <div className={styles.card}>
+      <main className={styles.card}>
 
         {lastSession && lastSessionExists === true && (
           <div className={styles.rejoinBanner}>
@@ -220,7 +220,7 @@ export default function SessionListScreen() {
           </div>
 
         </div>
-      </div>
+      </main>
     </div>
   )
 }

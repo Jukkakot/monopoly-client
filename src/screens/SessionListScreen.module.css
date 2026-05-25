@@ -76,7 +76,7 @@
 .quickDivider {
   text-align: center;
   font-size: 0.72rem;
-  color: #aaa;
+  color: #767676;
   letter-spacing: 0.5px;
   position: relative;
 }
@@ -94,7 +94,7 @@
 
 .quickHint {
   font-size: 0.72rem;
-  color: #aaa;
+  color: #767676;
   text-align: center;
 }
 
@@ -147,7 +147,7 @@
 .sectionTitle {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4a7c4f;
+  color: #2e5e32;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
