@@ -51,6 +51,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const lastSeenLogCount = useRef(state.events.length)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)
   const [mobilePanelWidth, setMobilePanelWidth] = useState(loadMobilePanelWidth)
+  const [isLandscape, setIsLandscape] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(orientation: landscape) and (max-width: 767px)').matches
+      : false
+  )
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState<AnimDir>('right')
   const [boardEntering, setBoardEntering] = useState(false)
@@ -71,6 +76,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const mobileDragRef = useRef<{ startX: number; startW: number } | null>(null)
   const mobilePanelWidthRef = useRef(mobilePanelWidth)
   useEffect(() => { mobilePanelWidthRef.current = mobilePanelWidth }, [mobilePanelWidth])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
+    const handler = (e: MediaQueryListEvent) => setIsLandscape(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     function onTouchMove(e: TouchEvent) {
@@ -188,7 +200,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         <div className={styles.mobileResizeHandle} onTouchStart={onMobileHandleTouchStart} />
 
         {/* Right panel: header + content tabs + bottom nav */}
-        <div className={styles.mobileRight} style={{ flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth }}>
+        <div className={styles.mobileRight} style={isLandscape ? { flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth } : undefined}>
           <div className={styles.mobileHeader}>{header}</div>
 
           {/* Cash bar — portrait board tab only; hidden in landscape (no vertical room) */}
