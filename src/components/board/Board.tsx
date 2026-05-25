@@ -268,6 +268,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const [zoomMode, setZoomMode] = useState(loadZoomMode)
   const [zoomedSpot, setZoomedSpot] = useState<number | null>(null)
   const zoomOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const userZoomedOutRef = useRef(false)
   const stateRef = useRef(state)
   const prevAnimatingSizeRef = useRef(0)
   useEffect(() => { stateRef.current = state }, [state])
@@ -292,6 +293,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   // Follow the active player's token step by step during animation
   useEffect(() => {
+    if (userZoomedOutRef.current) return
     if (animatingPlayers.size === 0) return
     const pid = stateRef.current.turn?.activePlayerId
     if (!pid || !animatingPlayers.has(pid)) return
@@ -307,7 +309,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     prevAnimatingSizeRef.current = nowSize
 
     if (nowSize > 0 && prevSize === 0) {
-      // Animation started: cancel any pending zoom-out, zoom in to current position
+      // New dice roll: reset user zoom-out, resume auto-zoom
+      userZoomedOutRef.current = false
       if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
       const pid = stateRef.current.turn?.activePlayerId
       if (!pid || !animatingPlayers.has(pid)) return
@@ -425,7 +428,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       </div>
     </div>
     {zoomedSpot !== null && (
-      <button className={styles.zoomOutBtn} onClick={() => setZoomedSpot(null)}>
+      <button className={styles.zoomOutBtn} onClick={() => { userZoomedOutRef.current = true; setZoomedSpot(null) }}>
         {t.zoomOutBtn}
       </button>
     )}
