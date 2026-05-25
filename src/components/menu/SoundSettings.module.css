@@ -77,6 +77,12 @@
   padding: 2px 0;
 }
 
+.disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
 .toggleInfo {
   display: flex;
   flex-direction: column;

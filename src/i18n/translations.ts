@@ -289,6 +289,7 @@ export interface T {
   mortgageBtnMenu: string
   redeemBtnMenu: string
   zoomToggleLabel: string
+  zoomAllPlayersLabel: string
   zoomOutBtn: string
 
   // ── SoundSettings ────────────────────────────────────────────────────────────
@@ -653,6 +654,7 @@ const fi: T = {
   mortgageBtnMenu: 'Panttaa',
   redeemBtnMenu: 'Lunasta',
   zoomToggleLabel: 'Automaattinen lähennys',
+  zoomAllPlayersLabel: 'Seuraa myös vastustajia',
   zoomOutBtn: 'Loitonna',
 
   // SoundSettings
@@ -1022,6 +1024,7 @@ const en: T = {
   mortgageBtnMenu: 'Mortgage',
   redeemBtnMenu: 'Redeem',
   zoomToggleLabel: 'Auto-zoom board',
+  zoomAllPlayersLabel: 'Follow opponents too',
   zoomOutBtn: 'Zoom out',
 
   // SoundSettings
