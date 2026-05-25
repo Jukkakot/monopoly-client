@@ -24,6 +24,20 @@
   gap: 16px;
 }
 
+/* Two-column wrapper — single column by default */
+.cols {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leftCol,
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .logoBox { text-align: center; }
 
 .logo {
@@ -328,4 +342,43 @@
 }
 
 .rejoinDismiss:hover { color: #1565c0; border-color: #1565c0; }
+
+/* ── Landscape mobile ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  .page { padding-bottom: 12px; }
+
+  .card {
+    margin-top: 8px;
+    max-width: 720px;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  /* Logo hidden — header MH already identifies the app */
+  .logoBox { display: none; }
+
+  .cols {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .leftCol {
+    width: 200px;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+
+  .rightCol {
+    flex: 1;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .newBtn { padding: 10px; font-size: 0.95rem; }
+
+  .quickBtn { padding: 8px 4px; font-size: 0.82rem; }
+
+  .quickHint { display: none; }
+}
 

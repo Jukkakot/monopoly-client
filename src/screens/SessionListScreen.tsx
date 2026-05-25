@@ -138,18 +138,6 @@ export default function SessionListScreen() {
     <div className={styles.page}>
       <Header />
       <div className={styles.card}>
-        <div className={styles.logoBox}>
-          <div className={styles.logo}>Monopoly</div>
-          <div className={styles.sub}>Helsinki Edition</div>
-        </div>
-
-        {initialLoading && (
-          <DiceSpinner
-            message={t.backendWaking}
-            hint={t.backendWakingHint}
-            elapsed={elapsed}
-          />
-        )}
 
         {lastSession && lastSessionExists === true && (
           <div className={styles.rejoinBanner}>
@@ -171,84 +159,104 @@ export default function SessionListScreen() {
           </div>
         )}
 
-        <div className={styles.quickSection}>
-          <button className={styles.newBtn} onClick={() => navigate('/lobby')}>
-            {t.newGameBtn}
-          </button>
-          <div className={styles.quickDivider}>{t.quickStartLabel}</div>
-          <div className={styles.quickRow}>
-            <button className={styles.quickBtn} onClick={() => handleQuickStart(1)} disabled={loading} title={t.quickStartHint}>
-              ⚡ 1 vs 1
-            </button>
-            <button className={styles.quickBtn} onClick={() => handleQuickStart(2)} disabled={loading} title={t.quickStartHint}>
-              ⚡ 1 vs 2
-            </button>
-            <button className={styles.quickBtn} onClick={() => handleQuickStart(3)} disabled={loading} title={t.quickStartHint}>
-              ⚡ 1 vs 3
+        <div className={styles.cols}>
+
+          <div className={styles.leftCol}>
+            <div className={styles.logoBox}>
+              <div className={styles.logo}>Monopoly</div>
+              <div className={styles.sub}>Helsinki Edition</div>
+            </div>
+            <div className={styles.quickSection}>
+              <button className={styles.newBtn} onClick={() => navigate('/lobby')}>
+                {t.newGameBtn}
+              </button>
+              <div className={styles.quickDivider}>{t.quickStartLabel}</div>
+              <div className={styles.quickRow}>
+                <button className={styles.quickBtn} onClick={() => handleQuickStart(1)} disabled={loading} title={t.quickStartHint}>
+                  ⚡ 1 vs 1
+                </button>
+                <button className={styles.quickBtn} onClick={() => handleQuickStart(2)} disabled={loading} title={t.quickStartHint}>
+                  ⚡ 1 vs 2
+                </button>
+                <button className={styles.quickBtn} onClick={() => handleQuickStart(3)} disabled={loading} title={t.quickStartHint}>
+                  ⚡ 1 vs 3
+                </button>
+              </div>
+              <div className={styles.quickHint}>{t.quickStartHint}</div>
+            </div>
+          </div>
+
+          <div className={styles.rightCol}>
+            {initialLoading && (
+              <DiceSpinner
+                message={t.backendWaking}
+                hint={t.backendWakingHint}
+                elapsed={elapsed}
+              />
+            )}
+
+            <div className={styles.joinCodeSection}>
+              <div className={styles.sectionTitle}>{t.joinByCodeTitle}</div>
+              <div className={styles.joinCodeRow}>
+                <input
+                  className={styles.joinCodeInput}
+                  type="text"
+                  placeholder={t.joinCodePlaceholder}
+                  value={joinCode}
+                  onChange={e => { setJoinCode(e.target.value); setJoinError(null) }}
+                  onKeyDown={e => e.key === 'Enter' && handleJoinByCode()}
+                  disabled={joinChecking}
+                />
+                <button className={styles.joinCodeBtn} onClick={handleJoinByCode} disabled={joinChecking}>
+                  {joinChecking ? t.joiningLabel : t.joinBtnLabel}
+                </button>
+              </div>
+              {joinError && <div className={styles.joinError}>{joinError}</div>}
+            </div>
+
+            {lobby.length > 0 && (
+              <div className={styles.listSection}>
+                <div className={styles.sectionTitle}>{t.waitingRoomsTitle}</div>
+                {lobby.map(s => (
+                  <SessionRow key={s.sessionId} session={s}
+                    onJoin={() => navigate(`/lobby-wait/${s.sessionId}`)}
+                    onDelete={() => handleDelete(s.sessionId)}
+                    label={t.joinLobbyLabel}
+                    playerCountMeta={t.playerCountMeta}
+                    sessionAge={sessionAge} />
+                ))}
+              </div>
+            )}
+
+            <div className={styles.listSection}>
+              <div className={styles.sectionTitle}>{t.activeGamesTitle}</div>
+              {loading && <div className={styles.hint}>{t.loading}</div>}
+              {error && <div className={styles.errorMsg}>{error}</div>}
+              {!loading && !error && active.length === 0 && (
+                <div className={styles.hint}>{t.noActiveGames}</div>
+              )}
+              {active.map(s => (
+                <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
+                  label={t.joinLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
+              ))}
+            </div>
+
+            {finished.length > 0 && (
+              <div className={styles.listSection}>
+                <div className={styles.sectionTitle}>{t.finishedGamesTitle}</div>
+                {finished.map(s => (
+                  <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
+                    label={t.watchLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
+                ))}
+              </div>
+            )}
+
+            <button className={styles.refreshBtn} onClick={load}>
+              {t.refreshBtn}
             </button>
           </div>
-          <div className={styles.quickHint}>{t.quickStartHint}</div>
+
         </div>
-
-        <div className={styles.joinCodeSection}>
-          <div className={styles.sectionTitle}>{t.joinByCodeTitle}</div>
-          <div className={styles.joinCodeRow}>
-            <input
-              className={styles.joinCodeInput}
-              type="text"
-              placeholder={t.joinCodePlaceholder}
-              value={joinCode}
-              onChange={e => { setJoinCode(e.target.value); setJoinError(null) }}
-              onKeyDown={e => e.key === 'Enter' && handleJoinByCode()}
-              disabled={joinChecking}
-            />
-            <button className={styles.joinCodeBtn} onClick={handleJoinByCode} disabled={joinChecking}>
-              {joinChecking ? t.joiningLabel : t.joinBtnLabel}
-            </button>
-          </div>
-          {joinError && <div className={styles.joinError}>{joinError}</div>}
-        </div>
-
-        {lobby.length > 0 && (
-          <div className={styles.listSection}>
-            <div className={styles.sectionTitle}>{t.waitingRoomsTitle}</div>
-            {lobby.map(s => (
-              <SessionRow key={s.sessionId} session={s}
-                onJoin={() => navigate(`/lobby-wait/${s.sessionId}`)}
-                onDelete={() => handleDelete(s.sessionId)}
-                label={t.joinLobbyLabel}
-                playerCountMeta={t.playerCountMeta}
-                sessionAge={sessionAge} />
-            ))}
-          </div>
-        )}
-
-        <div className={styles.listSection}>
-          <div className={styles.sectionTitle}>{t.activeGamesTitle}</div>
-          {loading && <div className={styles.hint}>{t.loading}</div>}
-          {error && <div className={styles.errorMsg}>{error}</div>}
-          {!loading && !error && active.length === 0 && (
-            <div className={styles.hint}>{t.noActiveGames}</div>
-          )}
-          {active.map(s => (
-            <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
-              label={t.joinLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
-          ))}
-        </div>
-
-        {finished.length > 0 && (
-          <div className={styles.listSection}>
-            <div className={styles.sectionTitle}>{t.finishedGamesTitle}</div>
-            {finished.map(s => (
-              <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
-                label={t.watchLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
-            ))}
-          </div>
-        )}
-
-        <button className={styles.refreshBtn} onClick={load}>
-          {t.refreshBtn}
-        </button>
       </div>
     </div>
   )
