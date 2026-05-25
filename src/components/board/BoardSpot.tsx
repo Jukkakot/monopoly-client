@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import styles from './BoardSpot.module.css'
 import type { SpotDef } from '../../types/spots'
 import { STREET_COLORS, indexToGridPos } from '../../types/spots'
@@ -153,7 +154,7 @@ function GoJailCorner({ players, seats, tokenShapes, steppingPlayers }: { player
   )
 }
 
-export default function BoardSpot(props: Props) {
+function BoardSpot(props: Props) {
   const { spot, index, property, players, seats, onClick, tokenShapes, jailingPlayers, cardJumpingPlayers, steppingPlayers, highlighted } = props
   const { row, col } = indexToGridPos(index)
   const side = getSide(index)
@@ -234,3 +235,18 @@ export default function BoardSpot(props: Props) {
     </div>
   )
 }
+
+// Custom comparator: skip onClick, tokenShapes, spot, index and seats (all static or functions).
+// Re-render only when the visual data actually changes.
+function spotPropsEqual(prev: Props, next: Props): boolean {
+  return (
+    prev.property === next.property &&
+    prev.players === next.players &&
+    prev.highlighted === next.highlighted &&
+    prev.jailingPlayers === next.jailingPlayers &&
+    prev.cardJumpingPlayers === next.cardJumpingPlayers &&
+    prev.steppingPlayers === next.steppingPlayers
+  )
+}
+
+export default memo(BoardSpot, spotPropsEqual)

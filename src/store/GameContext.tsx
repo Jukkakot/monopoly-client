@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react'
-import type { SessionState, ClientSessionSnapshot } from '../types/api'
+import type { SessionState, ClientSessionSnapshot, PlayerSnapshot, PropertyStateSnapshot } from '../types/api'
 import { sendCommand, sseUrl, applySessionSettings } from '../api/sessionApi'
 import { loadBotSpeed } from '../utils/animationSettings'
 import { useEffect, useRef } from 'react'
@@ -15,6 +15,62 @@ import { translations } from '../i18n/translations'
 import { isAnyPlayerAnimating, onAnimationIdle } from '../hooks/useTokenAnimation'
 
 type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
+
+// Structural sharing: reuse object references for unchanged snapshot sub-objects so that
+// React.memo'd children can bail out of re-rendering when their data didn't change.
+function mergePlayer(old: PlayerSnapshot, next: PlayerSnapshot): PlayerSnapshot {
+  if (
+    old.cash === next.cash &&
+    old.boardIndex === next.boardIndex &&
+    old.bankrupt === next.bankrupt &&
+    old.eliminated === next.eliminated &&
+    old.inJail === next.inJail &&
+    old.jailRoundsRemaining === next.jailRoundsRemaining &&
+    old.getOutOfJailCards === next.getOutOfJailCards &&
+    old.ownedPropertyIds.length === next.ownedPropertyIds.length &&
+    old.ownedPropertyIds.every((id, i) => id === next.ownedPropertyIds[i])
+  ) return old
+  return next
+}
+
+function mergeProperty(old: PropertyStateSnapshot, next: PropertyStateSnapshot): PropertyStateSnapshot {
+  if (
+    old.ownerPlayerId === next.ownerPlayerId &&
+    old.mortgaged === next.mortgaged &&
+    old.houseCount === next.houseCount &&
+    old.hotelCount === next.hotelCount
+  ) return old
+  return next
+}
+
+function mergeSnapshot(prev: SessionState | null, next: SessionState): SessionState {
+  if (!prev) return next
+  let playersChanged = prev.players.length !== next.players.length
+  const prevPlayerMap = new Map(prev.players.map(p => [p.playerId, p]))
+  const players = next.players.map(p => {
+    const old = prevPlayerMap.get(p.playerId)
+    if (!old) { playersChanged = true; return p }
+    const merged = mergePlayer(old, p)
+    if (merged !== old) playersChanged = true
+    return merged
+  })
+
+  let propsChanged = prev.properties.length !== next.properties.length
+  const prevPropMap = new Map(prev.properties.map(p => [p.propertyId, p]))
+  const properties = next.properties.map(p => {
+    const old = prevPropMap.get(p.propertyId)
+    if (!old) { propsChanged = true; return p }
+    const merged = mergeProperty(old, p)
+    if (merged !== old) propsChanged = true
+    return merged
+  })
+
+  return {
+    ...next,
+    players: playersChanged ? players : prev.players,
+    properties: propsChanged ? properties : prev.properties,
+  }
+}
 
 interface GameState {
   sessionId: string | null
@@ -123,10 +179,12 @@ function reducer(state: GameState, action: Action): GameState {
         }
       }
 
-      const myPlayerId = newSnapshot ? resolveMyPlayerId(newSnapshot, state.sessionId, state.myPlayerId) : state.myPlayerId
+      const mergedSnapshot = newSnapshot ? mergeSnapshot(state.snapshot, newSnapshot) : null
+
+      const myPlayerId = mergedSnapshot ? resolveMyPlayerId(mergedSnapshot, state.sessionId, state.myPlayerId) : state.myPlayerId
 
       // Read dice directly from backend TurnState
-      const lastDice = newSnapshot?.turn?.lastDice ?? state.lastDice
+      const lastDice = mergedSnapshot?.turn?.lastDice ?? state.lastDice
 
       const diceHistory = lastDice && lastDice !== state.lastDice
         ? [...state.diceHistory, lastDice].slice(-10)
@@ -134,9 +192,9 @@ function reducer(state: GameState, action: Action): GameState {
 
       // Count turns: a turn completes when consecutiveDoubles resets to 0 and the active player changes
       let turnCount = state.turnCount
-      if (newSnapshot && state.snapshot) {
+      if (mergedSnapshot && state.snapshot) {
         const prevActiveId = state.snapshot.turn?.activePlayerId
-        const nextActiveId = newSnapshot.turn?.activePlayerId
+        const nextActiveId = mergedSnapshot.turn?.activePlayerId
         if (prevActiveId && nextActiveId && prevActiveId !== nextActiveId) {
           turnCount++
         }
@@ -144,11 +202,11 @@ function reducer(state: GameState, action: Action): GameState {
 
       // Track net worth history per player (sample every turn change)
       let netWorthHistory = state.netWorthHistory
-      if (newSnapshot && state.snapshot && turnCount !== state.turnCount) {
+      if (mergedSnapshot && state.snapshot && turnCount !== state.turnCount) {
         const newHistory = new Map(netWorthHistory)
-        for (const player of newSnapshot.players) {
+        for (const player of mergedSnapshot.players) {
           if (player.bankrupt || player.eliminated) continue
-          const worth = calcNetWorth(player, newSnapshot)
+          const worth = calcNetWorth(player, mergedSnapshot)
           const prev = newHistory.get(player.playerId) ?? []
           newHistory.set(player.playerId, [...prev, worth].slice(-30))
         }
@@ -158,10 +216,10 @@ function reducer(state: GameState, action: Action): GameState {
       return {
         ...state,
         prevSnapshot: state.snapshot,
-        snapshot: newSnapshot,
+        snapshot: mergedSnapshot,
         version: action.snapshot.version,
         connectionStatus: 'LIVE',
-        events: newSnapshot
+        events: mergedSnapshot
           ? (newEvents.length > 0 ? [...state.events, ...newEvents].slice(-200) : state.events)
           : state.events,
         myPlayerId,

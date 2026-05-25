@@ -1,14 +1,18 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, memo } from 'react'
 import styles from './Board.module.css'
 import BoardSpot from './BoardSpot'
 import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
-import type { SessionState } from '../../types/api'
+import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
+
+// Stable empty array so spots without players get the same reference every render,
+// allowing React.memo(BoardSpot) to bail out without reference-creating ?? [].
+const EMPTY_PLAYERS: PlayerSnapshot[] = []
 
 const ZOOM_SCALE = 2.5
 const ZOOM_OUT_DELAY_MS = 2500
@@ -132,19 +136,20 @@ function SpotTooltip({ spotId, state, pos }: { spotId: string; state: SessionSta
 
 const BOARD_GROUPS = ['BROWN', 'LIGHT_BLUE', 'PURPLE', 'ORANGE', 'RED', 'YELLOW', 'GREEN', 'DARK_BLUE'] as const
 
-function GroupOwnershipBar({ state, activeGroup, onGroupClick }: {
-  state: SessionState
+function GroupOwnershipBar({ properties, seats, activeGroup, onGroupClick }: {
+  properties: PropertyStateSnapshot[]
+  seats: SeatState[]
   activeGroup?: string
   onGroupClick?: (group: string | null) => void
 }) {
   const ownerColors = new Map<string, string>()
-  for (const seat of state.seats) ownerColors.set(seat.playerId, seat.tokenColorHex)
+  for (const seat of seats) ownerColors.set(seat.playerId, seat.tokenColorHex)
 
   return (
     <div className={styles.groupBar}>
       {BOARD_GROUPS.map(group => {
         const groupColor = STREET_COLORS[group]
-        const groupProps = state.properties.filter(p => {
+        const groupProps = properties.filter(p => {
           const spot = SPOTS.find(s => s.id === p.propertyId)
           return spot?.streetType === group
         })
@@ -178,14 +183,14 @@ function GroupOwnershipBar({ state, activeGroup, onGroupClick }: {
   )
 }
 
-function OwnershipEdgeBars({ state }: { state: SessionState }) {
+function OwnershipEdgeBars({ properties, seats }: { properties: PropertyStateSnapshot[]; seats: SeatState[] }) {
   const ownerColors = new Map<string, string>()
-  for (const seat of state.seats) ownerColors.set(seat.playerId, seat.tokenColorHex)
+  for (const seat of seats) ownerColors.set(seat.playerId, seat.tokenColorHex)
 
   function color(idx: number): string | null {
     const spot = SPOTS[idx]
     if (!spot || !spot.isProperty) return null
-    const prop = state.properties.find(p => p.propertyId === spot.id)
+    const prop = properties.find(p => p.propertyId === spot.id)
     return prop?.ownerPlayerId ? (ownerColors.get(prop.ownerPlayerId) ?? null) : null
   }
 
@@ -208,6 +213,17 @@ function OwnershipEdgeBars({ state }: { state: SessionState }) {
     </div>
   )
 }
+
+const GroupOwnershipBarM = memo(GroupOwnershipBar, (prev, next) =>
+  prev.properties === next.properties &&
+  prev.seats === next.seats &&
+  prev.activeGroup === next.activeGroup
+  // onGroupClick intentionally excluded — function ref changes every render but doesn't affect output
+)
+
+const OwnershipEdgeBarsM = memo(OwnershipEdgeBars, (prev, next) =>
+  prev.properties === next.properties && prev.seats === next.seats
+)
 
 const DOT_POSITIONS: Record<number, [number, number][]> = {
   1: [[0.5, 0.5]],
@@ -433,23 +449,29 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     setHoverPos({ x: e.clientX, y: e.clientY })
   }
 
-  // Use animated positions for non-bankrupt players
-  const playersBySpot = new Map<number, typeof state.players>()
-  for (const p of state.players) {
-    if (p.bankrupt || p.eliminated) continue
-    const displayIdx = animatedPositions.get(p.playerId) ?? p.boardIndex
-    const list = playersBySpot.get(displayIdx) ?? []
-    list.push(p)
-    playersBySpot.set(displayIdx, list)
-  }
+  // Recompute only when player data or animated positions change.
+  // EMPTY_PLAYERS is a stable module-level constant so empty spots always get the same reference.
+  const playersBySpot = useMemo(() => {
+    const map = new Map<number, PlayerSnapshot[]>()
+    for (const p of state.players) {
+      if (p.bankrupt || p.eliminated) continue
+      const displayIdx = animatedPositions.get(p.playerId) ?? p.boardIndex
+      const existing = map.get(displayIdx)
+      if (existing) existing.push(p)
+      else map.set(displayIdx, [p])
+    }
+    return map
+  }, [state.players, animatedPositions])
 
-  // Build playerId → shape map from localStorage
-  const tokenShapes = new Map<string, TokenShape>()
-  const savedShapes = loadTokenShapes(state.sessionId)
-  for (const seat of state.seats) {
-    const shape = savedShapes[seat.seatIndex] ?? 'circle'
-    tokenShapes.set(seat.playerId, shape)
-  }
+  // Token shapes come from localStorage and sessionId — stable for a session's lifetime.
+  const tokenShapes = useMemo(() => {
+    const map = new Map<string, TokenShape>()
+    const savedShapes = loadTokenShapes(state.sessionId)
+    for (const seat of state.seats) {
+      map.set(seat.playerId, savedShapes[seat.seatIndex] ?? 'circle')
+    }
+    return map
+  }, [state.sessionId])
 
   const activeTurnPlayer = state.turn
     ? state.players.find(p => p.playerId === state.turn!.activePlayerId)
@@ -496,7 +518,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             spot={spot}
             index={idx}
             property={property}
-            players={playersBySpot.get(idx) ?? []}
+            players={playersBySpot.get(idx) ?? EMPTY_PLAYERS}
             seats={state.seats}
             onClick={spot.isProperty ? () => onSpotClick?.(spot.id) : undefined}
             tokenShapes={tokenShapes}
@@ -508,7 +530,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         )
       })}
       <div className={styles.center}>
-        <OwnershipEdgeBars state={displayState} />
+        <OwnershipEdgeBarsM properties={displayState.properties} seats={displayState.seats} />
         <BoardDice dice={gameState.lastDice} />
         <div className={styles.centerLogo}>Monopoly</div>
         <div className={styles.centerSub}>Helsinki Edition</div>
@@ -518,7 +540,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
           </div>
         )}
         <BoardStats state={displayState} />
-        <GroupOwnershipBar state={displayState} activeGroup={highlightGroupType} onGroupClick={onGroupHighlight} />
+        <GroupOwnershipBarM properties={displayState.properties} seats={displayState.seats} activeGroup={highlightGroupType} onGroupClick={onGroupHighlight} />
         {gameState.turnCount > 0 && (
           <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
