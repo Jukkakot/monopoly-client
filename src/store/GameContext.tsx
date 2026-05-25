@@ -161,7 +161,9 @@ function reducer(state: GameState, action: Action): GameState {
         snapshot: newSnapshot,
         version: action.snapshot.version,
         connectionStatus: 'LIVE',
-        events: newSnapshot ? [...state.events, ...newEvents].slice(-200) : state.events,
+        events: newSnapshot
+          ? (newEvents.length > 0 ? [...state.events, ...newEvents].slice(-200) : state.events)
+          : state.events,
         myPlayerId,
         lastDice,
         diceHistory,
