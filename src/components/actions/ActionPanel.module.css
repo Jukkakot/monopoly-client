@@ -934,4 +934,9 @@
   .sectionToggle {
     min-height: 40px;
   }
+
+  .moneyBtns button {
+    min-height: 44px;
+    padding: 8px 4px;
+  }
 }
