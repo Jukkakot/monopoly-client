@@ -164,21 +164,7 @@ export default function GameScreen() {
   }
 
   if (!state.snapshot) {
-    return (
-      <div className={styles.center}>
-        <div className={styles.skeleton}>
-          <DiceSpinner message={t.loadingGame} />
-          <div className={styles.skeletonBoard} />
-          <div className={styles.skeletonSidebar}>
-            <div className={styles.skeletonBar} />
-            <div className={styles.skeletonBar} />
-            <div className={styles.skeletonBar} />
-            <div className={styles.skeletonBar} />
-            <div className={styles.skeletonBar} />
-          </div>
-        </div>
-      </div>
-    )
+    return <DiceSpinner message={t.loadingGame} overlay />
   }
 
   const effectivePlayerId = isDebugMode
