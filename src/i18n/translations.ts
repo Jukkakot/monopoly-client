@@ -222,7 +222,15 @@ export interface T {
   gameStarting: string
   removeBotBtn: string
 
-  // LobbyScreen — bot-only section
+  // LobbyScreen — mode toggle + opponents
+  playingToggle: string
+  spectatingToggle: string
+  opponentsTitle: string
+  computerPlayersLabel: (n: number) => string
+  startNowBtn: string
+  lobbyWaitHint: string
+
+  // LobbyScreen — bot-only section (kept for compatibility)
   watchBotsTitle: string
   botCountLabel: (n: number) => string
   startBotsBtn: string
@@ -584,6 +592,12 @@ const fi: T = {
   waitingForReady: (ready, total) => `Odotetaan pelaajia — ${ready}/${total} valmiina`,
   gameStarting: 'Peli alkaa…',
   removeBotBtn: 'Poista botti',
+  playingToggle: 'Pelaan itse',
+  spectatingToggle: 'En pelaa itse',
+  opponentsTitle: 'Vastustajat',
+  computerPlayersLabel: (n) => `Tietokonepelaajia: ${n}`,
+  startNowBtn: 'Aloita heti',
+  lobbyWaitHint: 'Muut voivat liittyä PIN-koodilla. Tietokonepelaajat täyttävät tyhjät paikat.',
   watchBotsTitle: '👁 Seuraa bottipeliä',
   botCountLabel: (n) => `Botteja: ${n}`,
   startBotsBtn: 'Aloita bottipeli',
@@ -959,6 +973,12 @@ const en: T = {
   waitingForReady: (ready, total) => `Waiting for players — ${ready}/${total} ready`,
   gameStarting: 'Game starting…',
   removeBotBtn: 'Remove bot',
+  playingToggle: 'I\'m playing',
+  spectatingToggle: 'Not playing',
+  opponentsTitle: 'Opponents',
+  computerPlayersLabel: (n) => `Computer players: ${n}`,
+  startNowBtn: 'Start now',
+  lobbyWaitHint: 'Others can join with a PIN. Computer players fill empty seats.',
   watchBotsTitle: '👁 Watch bot game',
   botCountLabel: (n) => `Bots: ${n}`,
   startBotsBtn: 'Start bot game',
