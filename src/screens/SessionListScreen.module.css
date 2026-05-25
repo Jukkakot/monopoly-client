@@ -130,26 +130,31 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: transparent;
-  border: none;
-  padding: 4px 2px;
+  background: #f1f8e9;
+  border: 1.5px solid #c8e6c9;
+  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
   gap: 6px;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.sectionToggle:hover .sectionTitle { color: #555; }
+.sectionToggle:hover {
+  background: #dcedc8;
+  border-color: #81c784;
+}
 
 .sectionTitle {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #777;
+  color: #4a7c4f;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .sectionChevron {
-  font-size: 0.7rem;
-  color: #aaa;
+  font-size: 0.75rem;
+  color: #81c784;
   flex-shrink: 0;
 }
 
@@ -157,6 +162,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 0 2px;
 }
 
 .sessionRow {
