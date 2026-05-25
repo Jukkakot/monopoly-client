@@ -202,7 +202,7 @@ export default function BoardSpot(props: Props) {
     >
     <div
       className={styles.spot}
-      style={{ transform: ROTATION[side] }}
+      style={{ transform: ROTATION[side], ...(colorBarColor ? { paddingTop: '30%' } : {}) }}
       title={spot.name}
     >
       {colorBarColor && (
