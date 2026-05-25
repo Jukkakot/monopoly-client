@@ -464,20 +464,24 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   const hasPinch = pinch.scale > 1.05
 
+  const boardStyle: React.CSSProperties = {}
+  if (hasPinch) {
+    boardStyle.transform = `translate(${pinch.tx}%, ${pinch.ty}%) scale(${pinch.scale})`
+    boardStyle.transition = 'none'
+  } else if (zoomedSpot !== null) {
+    boardStyle.transform = computeZoomTransform(zoomedSpot)
+  }
+
   return (
     <>
     <div
-      className={styles.boardWrapper}
-      style={hasPinch ? { transform: `translate(${pinch.tx}%, ${pinch.ty}%) scale(${pinch.scale})` } : undefined}
+      className={styles.board}
+      style={boardStyle}
+      onMouseMove={handleBoardMouseMove}
+      onMouseLeave={() => setHoveredSpotId(null)}
       onTouchStart={handlePinchTouchStart}
       onTouchMove={handlePinchTouchMove}
       onTouchEnd={handlePinchTouchEnd}
-    >
-    <div
-      className={styles.board}
-      style={zoomedSpot !== null ? { transform: computeZoomTransform(zoomedSpot) } : undefined}
-      onMouseMove={handleBoardMouseMove}
-      onMouseLeave={() => setHoveredSpotId(null)}
     >
       {SPOTS.map((spot, idx) => {
         const property = displayState.properties.find(p => p.propertyId === spot.id)
@@ -519,7 +523,6 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
           <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
       </div>
-    </div>
     </div>
     {(zoomedSpot !== null || hasPinch) && (
       <button className={styles.zoomOutBtn} onClick={() => {
