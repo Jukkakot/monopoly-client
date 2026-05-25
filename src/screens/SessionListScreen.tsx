@@ -10,6 +10,19 @@ import { useT } from '../i18n/LanguageContext'
 import Header from '../components/layout/Header'
 import DiceSpinner from '../components/common/DiceSpinner'
 
+function CollapsibleSection({ title, defaultOpen, children }: { title: string; defaultOpen: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className={styles.listSection}>
+      <button className={styles.sectionToggle} onClick={() => setOpen(v => !v)}>
+        <span className={styles.sectionTitle}>{title}</span>
+        <span className={styles.sectionChevron}>{open ? '▾' : '▸'}</span>
+      </button>
+      {open && <div className={styles.sectionBody}>{children}</div>}
+    </div>
+  )
+}
+
 export default function SessionListScreen() {
   const navigate = useNavigate()
   const { joinSession } = useGame()
@@ -20,9 +33,6 @@ export default function SessionListScreen() {
   const [loadStartRef] = useState(() => Date.now())
   const [elapsed, setElapsed] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const [joinCode, setJoinCode] = useState('')
-  const [joinError, setJoinError] = useState<string | null>(null)
-  const [joinChecking, setJoinChecking] = useState(false)
   const [lastSession, setLastSession] = useState<string | null>(() => {
     try { return localStorage.getItem('monopoly_last_session') } catch { return null }
   })
@@ -63,31 +73,6 @@ export default function SessionListScreen() {
   function handleJoin(s: SessionSummary) {
     joinSession(s.sessionId)
     navigate(`/game/${s.sessionId}`)
-  }
-
-  async function handleJoinByCode() {
-    const code = joinCode.trim()
-    if (!code) return
-    setJoinError(null)
-    setJoinChecking(true)
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'}/sessions/${code}/snapshot`)
-      if (!res.ok) {
-        setJoinError(t.gameNotFoundErr)
-        return
-      }
-      const snap = await res.json() as { status: string }
-      if (snap.status === 'LOBBY') {
-        navigate(`/lobby-wait/${code}`)
-      } else {
-        joinSession(code)
-        navigate(`/game/${code}`)
-      }
-    } catch {
-      setJoinError(t.connectionErr)
-    } finally {
-      setJoinChecking(false)
-    }
   }
 
   async function handleDelete(sessionId: string) {
@@ -195,28 +180,8 @@ export default function SessionListScreen() {
               />
             )}
 
-            <div className={styles.joinCodeSection}>
-              <div className={styles.sectionTitle}>{t.joinByCodeTitle}</div>
-              <div className={styles.joinCodeRow}>
-                <input
-                  className={styles.joinCodeInput}
-                  type="text"
-                  placeholder={t.joinCodePlaceholder}
-                  value={joinCode}
-                  onChange={e => { setJoinCode(e.target.value); setJoinError(null) }}
-                  onKeyDown={e => e.key === 'Enter' && handleJoinByCode()}
-                  disabled={joinChecking}
-                />
-                <button className={styles.joinCodeBtn} onClick={handleJoinByCode} disabled={joinChecking}>
-                  {joinChecking ? t.joiningLabel : t.joinBtnLabel}
-                </button>
-              </div>
-              {joinError && <div className={styles.joinError}>{joinError}</div>}
-            </div>
-
             {lobby.length > 0 && (
-              <div className={styles.listSection}>
-                <div className={styles.sectionTitle}>{t.waitingRoomsTitle}</div>
+              <CollapsibleSection title={t.waitingRoomsTitle} defaultOpen>
                 {lobby.map(s => (
                   <SessionRow key={s.sessionId} session={s}
                     onJoin={() => navigate(`/lobby-wait/${s.sessionId}`)}
@@ -225,11 +190,10 @@ export default function SessionListScreen() {
                     playerCountMeta={t.playerCountMeta}
                     sessionAge={sessionAge} />
                 ))}
-              </div>
+              </CollapsibleSection>
             )}
 
-            <div className={styles.listSection}>
-              <div className={styles.sectionTitle}>{t.activeGamesTitle}</div>
+            <CollapsibleSection title={t.activeGamesTitle} defaultOpen>
               {loading && <div className={styles.hint}>{t.loading}</div>}
               {error && <div className={styles.errorMsg}>{error}</div>}
               {!loading && !error && active.length === 0 && (
@@ -239,16 +203,15 @@ export default function SessionListScreen() {
                 <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
                   label={t.joinLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
               ))}
-            </div>
+            </CollapsibleSection>
 
             {finished.length > 0 && (
-              <div className={styles.listSection}>
-                <div className={styles.sectionTitle}>{t.finishedGamesTitle}</div>
+              <CollapsibleSection title={t.finishedGamesTitle} defaultOpen={false}>
                 {finished.map(s => (
                   <SessionRow key={s.sessionId} session={s} onJoin={() => handleJoin(s)} onDelete={() => handleDelete(s.sessionId)}
                     label={t.watchLabel} playerCountMeta={t.playerCountMeta} sessionAge={sessionAge} />
                 ))}
-              </div>
+              </CollapsibleSection>
             )}
 
             <button className={styles.refreshBtn} onClick={load}>

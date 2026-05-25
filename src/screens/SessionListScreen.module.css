@@ -122,8 +122,22 @@
 .listSection {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.sectionToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  cursor: pointer;
   gap: 6px;
 }
+
+.sectionToggle:hover .sectionTitle { color: #555; }
 
 .sectionTitle {
   font-size: 0.75rem;
@@ -131,7 +145,18 @@
   color: #777;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 2px;
+}
+
+.sectionChevron {
+  font-size: 0.7rem;
+  color: #aaa;
+  flex-shrink: 0;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .sessionRow {
