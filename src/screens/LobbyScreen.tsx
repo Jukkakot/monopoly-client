@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { createLobby, createBotsOnlySession, addLobbyBot, startLobby } from '../api/sessionApi'
 import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
 import { TokenSvg } from '../components/board/TokenSvg'
 import Header from '../components/layout/Header'
@@ -26,6 +27,13 @@ export default function LobbyScreen() {
   const [botCount, setBotCount] = useState(3)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function randomize() {
+    playButtonClick()
+    setName(randomHumanName([]))
+    setColor(PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)])
+    setTokenShape(ALL_SHAPES[Math.floor(Math.random() * ALL_SHAPES.length)].key)
+  }
 
   const isPlaying = mode === 'playing'
   const minBots = isPlaying ? 0 : 2
@@ -122,17 +130,22 @@ export default function LobbyScreen() {
         {isPlaying && (
           <div className={styles.createSection}>
             <div className={styles.sectionTitle}>{t.yourNamePlaceholder}</div>
-            <input
-              className={styles.nameInput}
-              type="text"
-              placeholder={t.yourNamePlaceholder}
-              value={name}
-              onChange={e => setName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleCreateLobby()}
-              disabled={loading}
-              maxLength={20}
-              autoFocus
-            />
+            <div className={styles.nameRow}>
+              <input
+                className={styles.nameInput}
+                type="text"
+                placeholder={t.yourNamePlaceholder}
+                value={name}
+                onChange={e => setName(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleCreateLobby()}
+                disabled={loading}
+                maxLength={20}
+                autoFocus
+              />
+              <button className={styles.randomizeBtn} onClick={randomize} disabled={loading} title={t.randomizeBtn}>
+                🎲
+              </button>
+            </div>
             <div className={styles.colorRow}>
               {PRESET_COLORS.map(c => (
                 <button

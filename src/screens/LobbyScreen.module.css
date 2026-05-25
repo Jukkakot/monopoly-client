@@ -87,7 +87,14 @@
   letter-spacing: 0.8px;
 }
 
+.nameRow {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
 .nameInput {
+  flex: 1;
   padding: 10px 12px;
   border: 1.5px solid #c8e6c9;
   border-radius: 8px;
@@ -95,13 +102,28 @@
   color: #1b5e20;
   background: #fff;
   box-sizing: border-box;
-  width: 100%;
+  min-width: 0;
 }
 
 .nameInput:focus {
   outline: none;
   border-color: #2e7d32;
 }
+
+.randomizeBtn {
+  padding: 0 12px;
+  background: #f1f8e9;
+  border: 1.5px solid #c8e6c9;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.randomizeBtn:hover:not(:disabled) { background: #dcedc8; }
+.randomizeBtn:disabled { opacity: 0.5; cursor: default; }
 
 .colorRow {
   display: flex;
