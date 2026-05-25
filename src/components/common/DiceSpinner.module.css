@@ -1,0 +1,67 @@
+@keyframes diceSpin {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(15deg) scale(1.15); }
+  50%  { transform: rotate(0deg) scale(1); }
+  75%  { transform: rotate(-15deg) scale(1.15); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+  border: 2px solid #a5d6a7;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(232, 245, 233, 0.88);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  padding: 24px;
+}
+
+.dice {
+  font-size: 3rem;
+  animation: diceSpin 1.4s ease-in-out infinite;
+  line-height: 1;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2e7d32;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: #777;
+  max-width: 300px;
+  line-height: 1.4;
+}
+
+.timer {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #aaa;
+  font-family: ui-monospace, monospace;
+  min-width: 40px;
+}

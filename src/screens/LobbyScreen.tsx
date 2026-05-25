@@ -7,6 +7,7 @@ import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
 import { TokenSvg } from '../components/board/TokenSvg'
 import Header from '../components/layout/Header'
+import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './LobbyScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 
@@ -72,6 +73,12 @@ export default function LobbyScreen() {
   return (
     <div className={styles.page}>
       <Header />
+      {(loading || startingBots) && (
+        <DiceSpinner
+          message={startingBots ? t.startingLabel : t.creatingLabel}
+          overlay
+        />
+      )}
       <div className={styles.card}>
         <div className={styles.logoBox}>
           <div className={styles.logo}>Monopoly</div>

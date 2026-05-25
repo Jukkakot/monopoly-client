@@ -8,6 +8,7 @@ import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './SessionListScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 import Header from '../components/layout/Header'
+import DiceSpinner from '../components/common/DiceSpinner'
 
 export default function SessionListScreen() {
   const navigate = useNavigate()
@@ -143,12 +144,11 @@ export default function SessionListScreen() {
         </div>
 
         {initialLoading && (
-          <div className={styles.wakingOverlay}>
-            <div className={styles.diceSpinner}>🎲</div>
-            <div className={styles.wakingTitle}>{t.backendWaking}</div>
-            <div className={styles.wakingHint}>{t.backendWakingHint}</div>
-            <div className={styles.wakingTimer}>{t.backendWakingSeconds(elapsed)}</div>
-          </div>
+          <DiceSpinner
+            message={t.backendWaking}
+            hint={t.backendWakingHint}
+            elapsed={elapsed}
+          />
         )}
 
         {lastSession && lastSessionExists === true && (

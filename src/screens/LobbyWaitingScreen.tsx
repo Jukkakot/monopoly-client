@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { joinLobby, addLobbyBot, removeLobbyBot, setLobbyReady, sseUrl } from '../api/sessionApi'
 import type { ClientSessionSnapshot, SeatState } from '../types/api'
+import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './LobbyWaitingScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 
@@ -128,6 +129,7 @@ export default function LobbyWaitingScreen() {
 
   return (
     <div className={styles.page}>
+      {joining && <DiceSpinner message={t.joiningLabel} overlay />}
       <div className={styles.card}>
         <div className={styles.logoBox}>
           <div className={styles.logo}>Monopoly</div>

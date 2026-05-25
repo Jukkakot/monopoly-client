@@ -14,6 +14,7 @@ import PropertyDetail from '../components/property/PropertyDetail'
 import KeyboardHelp from '../components/menu/KeyboardHelp'
 import Confetti from '../components/effects/Confetti'
 import GameOverOverlay from '../components/effects/GameOverOverlay'
+import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './GameScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 
@@ -166,7 +167,7 @@ export default function GameScreen() {
     return (
       <div className={styles.center}>
         <div className={styles.skeleton}>
-          <div className={styles.skeletonLabel}>{t.loadingGame}</div>
+          <DiceSpinner message={t.loadingGame} />
           <div className={styles.skeletonBoard} />
           <div className={styles.skeletonSidebar}>
             <div className={styles.skeletonBar} />
