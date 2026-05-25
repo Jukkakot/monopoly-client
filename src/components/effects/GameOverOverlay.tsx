@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './GameOverOverlay.module.css'
 import type { SessionState } from '../../types/api'
@@ -16,27 +16,6 @@ export default function GameOverOverlay({ state }: Props) {
   const navigate = useNavigate()
   const t = useT()
   const [dismissed, setDismissed] = useState(false)
-  const [copied, setCopied] = useState(false)
-
-  const shareResults = useCallback(() => {
-    const sorted = [...state.players].sort((a, b) => {
-      if (a.bankrupt && !b.bankrupt) return 1
-      if (!a.bankrupt && b.bankrupt) return -1
-      return b.cash - a.cash
-    })
-    const text = [
-      '🏆 Monopoly Helsinki — Tulokset',
-      '',
-      ...sorted.map((p, i) => {
-        const medal = ['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`
-        return `${medal} ${p.name}: ${p.bankrupt ? t.bankruptLabel : '€' + p.cash}`
-      }),
-    ].join('\n')
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }, [state.players, t.bankruptLabel])
 
   if (dismissed) return null
 
@@ -102,9 +81,6 @@ export default function GameOverOverlay({ state }: Props) {
         </div>
 
         <div className={styles.buttons}>
-          <button className={styles.btnShare} onClick={shareResults}>
-            {copied ? t.copiedBtn : t.shareResultsBtn}
-          </button>
           <button className={styles.btnSecondary} onClick={() => setDismissed(true)}>
             {t.continueWatchingBtn}
           </button>

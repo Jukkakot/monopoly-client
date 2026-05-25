@@ -19,13 +19,13 @@
 .modal {
   background: #fffde7;
   border-radius: 20px;
-  padding: 32px 28px;
+  padding: 24px 22px;
   width: min(90vw, 400px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   flex-shrink: 0;
 }
@@ -36,7 +36,7 @@
 }
 
 .trophy {
-  font-size: 4rem;
+  font-size: 2.8rem;
   line-height: 1;
   animation: bounce 1s ease-in-out infinite alternate;
 }
@@ -47,7 +47,7 @@
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: #e65100;
   font-family: 'Arial Narrow', Arial, sans-serif;
@@ -58,13 +58,13 @@
 .winnerRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1.2rem;
+  gap: 8px;
+  font-size: 1rem;
   font-weight: 800;
   color: #1b5e20;
   background: #e8f5e9;
-  border-radius: 12px;
-  padding: 10px 18px;
+  border-radius: 10px;
+  padding: 8px 14px;
   width: 100%;
   justify-content: center;
 }
@@ -79,17 +79,17 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .rankRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 7px;
   background: #f5f5f5;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .rankRow.first {
@@ -143,17 +143,17 @@
 .buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
 }
 
 .btnPrimary,
 .btnSecondary {
   width: 100%;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   font-family: 'Arial Narrow', Arial, sans-serif;
@@ -187,4 +187,9 @@
 
 .btnPrimary:hover  { filter: brightness(1.1); }
 .btnSecondary:hover { filter: brightness(0.95); }
-.btnShare:hover { filter: brightness(0.93); }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .trophy { display: none; }
+  .modal { padding: 16px 18px; gap: 8px; }
+  .overlay { padding: 10px 0; }
+}
