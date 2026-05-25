@@ -56,6 +56,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       ? window.matchMedia('(orientation: landscape) and (max-width: 767px)').matches
       : false
   )
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(max-width: 767px)').matches
+      : false
+  )
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState<AnimDir>('right')
   const [boardEntering, setBoardEntering] = useState(false)
@@ -78,10 +83,18 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   useEffect(() => { mobilePanelWidthRef.current = mobilePanelWidth }, [mobilePanelWidth])
 
   useEffect(() => {
-    const mq = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
-    const handler = (e: MediaQueryListEvent) => setIsLandscape(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
+    const mqLandscape = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
+    const handlerLandscape = (e: MediaQueryListEvent) => setIsLandscape(e.matches)
+    mqLandscape.addEventListener('change', handlerLandscape)
+
+    const mqMobile = window.matchMedia('(max-width: 767px)')
+    const handlerMobile = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mqMobile.addEventListener('change', handlerMobile)
+
+    return () => {
+      mqLandscape.removeEventListener('change', handlerLandscape)
+      mqMobile.removeEventListener('change', handlerMobile)
+    }
   }, [])
 
   useEffect(() => {
@@ -172,7 +185,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     <div className={styles.root} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* ── Desktop: board column ── */}
       <div className={styles.boardCol}>
-        {board}
+        {!isMobile && board}
       </div>
 
       {/* ── Desktop: resize handle ── */}
@@ -193,7 +206,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       <div className={styles.mobileContent}>
         {/* Board: portrait = top section (hidden on non-board tabs); landscape = always-visible left column */}
         <div className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}>
-          {board}
+          {isMobile && board}
         </div>
 
         {/* Landscape resize handle — invisible in portrait */}
