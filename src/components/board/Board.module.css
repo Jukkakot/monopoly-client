@@ -1,3 +1,11 @@
+.boardWrapper {
+  position: relative;
+  transform-origin: center center;
+  touch-action: none;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(11, 1fr);

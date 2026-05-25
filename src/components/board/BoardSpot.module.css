@@ -16,7 +16,7 @@
   justify-content: flex-end;
   padding: 2px 1px;
   overflow: hidden;
-  font-size: clamp(4px, 0.85vw, 8.5px);
+  font-size: clamp(3.5px, 0.85vw, 7px);
   cursor: default;
   transform-origin: center center;
 }
@@ -60,9 +60,9 @@
   font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
   font-weight: 700;
   color: #000;
-  line-height: 1.1;
-  word-break: break-word;
-  hyphens: auto;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
   padding: 0 1px;
 }
 

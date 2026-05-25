@@ -273,6 +273,90 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const prevAnimatingSizeRef = useRef(0)
   useEffect(() => { stateRef.current = state }, [state])
 
+  // Manual pinch-to-zoom state
+  const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 })
+  const pinchGestureRef = useRef<{
+    type: 'pinch' | 'pan'
+    startDist: number
+    startScale: number
+    startTx: number
+    startTy: number
+    bx: number   // pinch center fraction from board center (-0.5..0.5)
+    by: number
+    startTouchX: number
+    startTouchY: number
+    boardW: number
+    boardH: number
+  } | null>(null)
+
+  function handlePinchTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    if (e.touches.length === 2) {
+      e.preventDefault()
+      userZoomedOutRef.current = true  // suspend auto-zoom while manually zooming
+      const rect = e.currentTarget.getBoundingClientRect()
+      const t1 = e.touches[0], t2 = e.touches[1]
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY)
+      const midX = (t1.clientX + t2.clientX) / 2
+      const midY = (t1.clientY + t2.clientY) / 2
+      pinchGestureRef.current = {
+        type: 'pinch',
+        startDist: dist,
+        startScale: pinch.scale,
+        startTx: pinch.tx,
+        startTy: pinch.ty,
+        bx: (midX - rect.left) / rect.width - 0.5,
+        by: (midY - rect.top) / rect.height - 0.5,
+        startTouchX: midX, startTouchY: midY,
+        boardW: rect.width, boardH: rect.height,
+      }
+    } else if (e.touches.length === 1 && pinch.scale > 1.05) {
+      e.preventDefault()
+      const rect = e.currentTarget.getBoundingClientRect()
+      pinchGestureRef.current = {
+        type: 'pan',
+        startDist: 0,
+        startScale: pinch.scale,
+        startTx: pinch.tx,
+        startTy: pinch.ty,
+        bx: 0, by: 0,
+        startTouchX: e.touches[0].clientX,
+        startTouchY: e.touches[0].clientY,
+        boardW: rect.width, boardH: rect.height,
+      }
+    }
+  }
+
+  function handlePinchTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    const g = pinchGestureRef.current
+    if (!g) return
+    e.preventDefault()
+
+    if (g.type === 'pinch' && e.touches.length === 2) {
+      const t1 = e.touches[0], t2 = e.touches[1]
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY)
+      const S2 = Math.max(1, Math.min(6, g.startScale * dist / g.startDist))
+      // Keep pinch center fixed: tx' = startTx + 100 * bx * (S1 - S2)
+      const maxT = 50 * (S2 - 1)
+      const newTx = Math.max(-maxT, Math.min(maxT, g.startTx + 100 * g.bx * (g.startScale - S2)))
+      const newTy = Math.max(-maxT, Math.min(maxT, g.startTy + 100 * g.by * (g.startScale - S2)))
+      setPinch({ scale: S2, tx: newTx, ty: newTy })
+
+    } else if (g.type === 'pan' && e.touches.length === 1) {
+      const touch = e.touches[0]
+      const maxT = 50 * (g.startScale - 1)
+      const newTx = Math.max(-maxT, Math.min(maxT,
+        g.startTx + (touch.clientX - g.startTouchX) / g.boardW * 100 / g.startScale))
+      const newTy = Math.max(-maxT, Math.min(maxT,
+        g.startTy + (touch.clientY - g.startTouchY) / g.boardH * 100 / g.startScale))
+      setPinch({ scale: g.startScale, tx: newTx, ty: newTy })
+    }
+  }
+
+  function handlePinchTouchEnd() {
+    pinchGestureRef.current = null
+    setPinch(p => p.scale < 1.15 ? { scale: 1, tx: 0, ty: 0 } : p)
+  }
+
   useEffect(() => onZoomSettingChange(() => {
     const mode = loadZoomMode()
     setZoomMode(mode)
@@ -378,8 +462,17 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const selectedGroupType = selectedSpot?.streetType
   const NON_HIGHLIGHTABLE = new Set(['CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
 
+  const hasPinch = pinch.scale > 1.05
+
   return (
     <>
+    <div
+      className={styles.boardWrapper}
+      style={hasPinch ? { transform: `translate(${pinch.tx}%, ${pinch.ty}%) scale(${pinch.scale})` } : undefined}
+      onTouchStart={handlePinchTouchStart}
+      onTouchMove={handlePinchTouchMove}
+      onTouchEnd={handlePinchTouchEnd}
+    >
     <div
       className={styles.board}
       style={zoomedSpot !== null ? { transform: computeZoomTransform(zoomedSpot) } : undefined}
@@ -427,8 +520,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         )}
       </div>
     </div>
-    {zoomedSpot !== null && (
-      <button className={styles.zoomOutBtn} onClick={() => { userZoomedOutRef.current = true; setZoomedSpot(null) }}>
+    </div>
+    {(zoomedSpot !== null || hasPinch) && (
+      <button className={styles.zoomOutBtn} onClick={() => {
+        userZoomedOutRef.current = true
+        setZoomedSpot(null)
+        setPinch({ scale: 1, tx: 0, ty: 0 })
+      }}>
         {t.zoomOutBtn}
       </button>
     )}
