@@ -300,6 +300,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 </span>
               </div>
             </div>
+            {turn?.lastDice && phase === 'WAITING_FOR_END_TURN' && (
+              <div className={styles.diceResult}>
+                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+              </div>
+            )}
             {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
               <div className={styles.infoBox}>
                 📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
