@@ -111,29 +111,35 @@
 .sectionToggle {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  background: none;
-  border: none;
-  padding: 4px 0;
-  font-size: 0.72rem;
+  background: #f0f4f0;
+  border: 1.5px solid #c8d8c8;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
   font-weight: 700;
-  color: #777;
+  color: #444;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   cursor: pointer;
   text-align: left;
   margin-top: 4px;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.sectionToggle:hover { color: #555; }
+.sectionToggle:hover {
+  background: #e4ede4;
+  border-color: #a5c4a5;
+  color: #2e7d32;
+}
 
 .sectionBadge {
   background: #c8e6c9;
   color: #2e7d32;
   border-radius: 8px;
   padding: 1px 6px;
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: none;
   letter-spacing: 0;
@@ -141,8 +147,8 @@
 
 .sectionChevron {
   margin-left: auto;
-  font-size: 0.8rem;
-  color: #aaa;
+  font-size: 1rem;
+  color: #666;
 }
 
 .infoBox {
