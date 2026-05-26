@@ -285,7 +285,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const esRef = useRef<EventSource | null>(null)
   const versionRef = useRef(0)
   const lastSoundedId = useRef(-1)
-  const sseTimings = useRef<Array<{ timestamp: number; version: number; delayMs?: number; networkLatencyMs?: number }>>([])
+  const sseTimings = useRef<Array<{ timestamp: number; version: number; delayMs?: number }>>([])
   const lastEventTimestamp = useRef<number | null>(null)
   const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
   // Briefly true after any direct dispatch — blocks incoming SSE snaps from bypassing the queue
@@ -368,7 +368,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     ; (window as any).exportSSETimings = () => {
       const data = sseTimings.current.map(t => ({
         delay: t.delayMs?.toFixed(0) ?? 'initial',
-        networkLatency: t.networkLatencyMs?.toFixed(0),
         version: t.version,
       }))
       const json = JSON.stringify(data, null, 2)
@@ -415,19 +414,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         try {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
           const clientReceivedMs = Date.now()
-          // Calculate network latency using server timestamp
-          const networkLatencyMs = clientReceivedMs - snap.serverTimestampMs
 
-          // Log SSE timing
+          // Log inter-event delay (time between successive SSE events)
           const delayMs = lastEventTimestamp.current ? clientReceivedMs - lastEventTimestamp.current : undefined
           lastEventTimestamp.current = clientReceivedMs
-          sseTimings.current.push({ timestamp: clientReceivedMs, version: snap.version, delayMs, networkLatencyMs })
+          sseTimings.current.push({ timestamp: clientReceivedMs, version: snap.version, delayMs })
 
-          // Log to console with network latency
           if (delayMs !== undefined) {
-            console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms (network: ${networkLatencyMs.toFixed(0)}ms)`)
+            console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms`)
           } else {
-            console.log(`📡 SSE v${snap.version} (first event, network: ${networkLatencyMs.toFixed(0)}ms)`)
+            console.log(`📡 SSE v${snap.version} (first event)`)
           }
 
 
