@@ -528,11 +528,20 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
   for (const [type, count] of groupCounts)
     if (count === totalCounts.get(type)) completedGroups.add(type)
 
+  // Groups where any owned property is mortgaged — building forbidden on the whole group
+  const mortgagedGroups = new Set<string>()
+  for (const prop of myProps) {
+    if (prop.mortgaged) {
+      const spot = SPOTS.find(s => s.id === prop.propertyId)
+      if (spot) mortgagedGroups.add(spot.streetType)
+    }
+  }
+
   // Only show if there are buildable props or mortgage candidates
   const buildableProps = myProps.filter(prop => {
     const spot = SPOTS.find(s => s.id === prop.propertyId)
     if (!spot) return false
-    return !prop.mortgaged && completedGroups.has(spot.streetType) && prop.hotelCount === 0
+    return !prop.mortgaged && completedGroups.has(spot.streetType) && prop.hotelCount === 0 && !mortgagedGroups.has(spot.streetType)
   })
   const mortgageable = myProps.filter(p => !p.mortgaged && buildableProps.every(b => b.propertyId !== p.propertyId) || p.mortgaged)
 
