@@ -6,7 +6,6 @@ import { getCardText } from '../../i18n/cards'
 import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
-import { calcNetWorth, calcCurrentRentIncome } from '../../utils/netWorth'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { AnimatedDice } from '../common/DiceDisplay'
 
@@ -277,20 +276,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const activeSeat = state.seats.find(s => s.playerId === activeId)
     const isAfk = turnSeconds >= 30
 
-    // Compute turns until my turn
-    const sortedSeats = [...state.seats].sort((a, b) => a.seatIndex - b.seatIndex)
-    const activeIdx = sortedSeats.findIndex(s => s.playerId === activeId)
-    const myIdx = sortedSeats.findIndex(s => s.playerId === myPlayerId)
-    const activePlayers = state.players.filter(p => !p.bankrupt && !p.eliminated)
-    let turnsUntilMine = 0
-    if (activeIdx !== -1 && myIdx !== -1 && activePlayers.length > 1) {
-      turnsUntilMine = (myIdx - activeIdx + sortedSeats.length) % sortedSeats.length
-    }
-
-    const myPlayer = state.players.find(p => p.playerId === myPlayerId)
-    const myIncome = myPlayer ? calcCurrentRentIncome(myPlayer, state) : 0
-    const myNetWorth = myPlayer ? calcNetWorth(myPlayer, state) : 0
-
     return (
       <div className={styles.panel}>
         <TabBar />
@@ -312,25 +297,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
               <div className={styles.infoBox}>
                 📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
-              </div>
-            )}
-            {myPlayer && (
-              <div className={styles.myStats}>
-                <div className={styles.myStatRow}>
-                  <span className={styles.myStatLabel}>{t.netWorthLabel}</span>
-                  <span className={styles.myStatVal}>~€{myNetWorth}</span>
-                </div>
-                {myIncome > 0 && (
-                  <div className={styles.myStatRow}>
-                    <span className={styles.myStatLabel}>{t.rentalIncomeLabel}</span>
-                    <span className={styles.myStatVal}>~€{myIncome}</span>
-                  </div>
-                )}
-                {turnsUntilMine > 0 && (
-                  <div className={styles.myStatRow}>
-                    <span className={styles.myStatLabel}>{t.yourTurnIn(turnsUntilMine)}</span>
-                  </div>
-                )}
               </div>
             )}
           </>
