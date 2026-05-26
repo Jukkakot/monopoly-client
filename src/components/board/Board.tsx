@@ -10,6 +10,7 @@ import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
 import { AnimatedDice } from '../common/DiceDisplay'
+import { getCardText } from '../../i18n/cards'
 
 // Stable empty array so spots without players get the same reference every render,
 // allowing React.memo(BoardSpot) to bail out without reference-creating ?? [].
@@ -456,6 +457,10 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     ? state.seats.find(s => s.playerId === activeTurnPlayer.playerId)
     : null
 
+  const isCardAck = state.turn?.phase === 'WAITING_FOR_CARD_ACK'
+  const cardBubbleText = isCardAck ? getCardText(state.lastCardKey ?? null, state.lastCardMessage ?? null) : null
+  const cardBubbleIcon = state.lastCardKey?.startsWith('chance') ? '🎲' : '🏙️'
+
   const selectedSpot = selectedSpotId ? SPOTS.find(s => s.id === selectedSpotId) : null
   const selectedGroupType = selectedSpot?.streetType
   const NON_HIGHLIGHTABLE = new Set(['CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
@@ -522,6 +527,15 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         )}
       </div>
     </div>
+    {cardBubbleText && (
+      <div className={styles.cardBubbleWrap}>
+        <div className={styles.cardBubble}>
+          <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+          <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
+          <span className={styles.cardBubbleText}>{cardBubbleText}</span>
+        </div>
+      </div>
+    )}
     {(zoomedSpot !== null || hasPinch) && (
       <button className={styles.zoomOutBtn} onClick={() => {
         userZoomedOutRef.current = true

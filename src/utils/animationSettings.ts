@@ -11,6 +11,7 @@ export interface AnimationConfig {
   jailBlockMax: number
   cardBlockMin: number
   cardBlockMax: number
+  diceToMoveDelayMs: number
 }
 
 const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
@@ -24,6 +25,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     jailBlockMax: 120,
     cardBlockMin: 60,
     cardBlockMax: 120,
+    diceToMoveDelayMs: 150,
   },
   normal: {
     stepMs: 390,
@@ -35,6 +37,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     jailBlockMax: 2000,
     cardBlockMin: 500,
     cardBlockMax: 1400,
+    diceToMoveDelayMs: 500,
   },
   slow: {
     stepMs: 750,
@@ -46,6 +49,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     jailBlockMax: 4000,
     cardBlockMin: 900,
     cardBlockMax: 2500,
+    diceToMoveDelayMs: 900,
   },
 }
 

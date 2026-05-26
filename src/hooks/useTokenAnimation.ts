@@ -252,14 +252,14 @@ export function useTokenAnimation(): Map<string, number> {
       queueRef.current.set(pid, [...existing, ...steps])
 
       if (!localAnimatingRef.current.has(pid)) {
-        animatePlayer(pid)
+        animatePlayer(pid, existing.length === 0 ? cfg().diceToMoveDelayMs : 0)
       }
     }
 
     prevCardKeyRef.current = snapshot.lastCardKey
   }, [snapshot])
 
-  function animatePlayer(pid: string) {
+  function animatePlayer(pid: string, initialDelayMs = 0) {
     localAnimatingRef.current.add(pid)
     setPlayerAnimating(pid, true)
 
@@ -280,7 +280,7 @@ export function useTokenAnimation(): Map<string, number> {
     }
 
     const jitter = (Math.random() * 2 - 1) * cfg().stepJitter
-    setTimeout(step, cfg().stepMs + jitter)
+    setTimeout(step, initialDelayMs + cfg().stepMs + jitter)
   }
 
   return displayPositions
