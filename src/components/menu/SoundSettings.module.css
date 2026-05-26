@@ -118,6 +118,30 @@
 
 .saveBtn:hover { filter: brightness(1.1); }
 
+.pingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.pingLabel {
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.pingValue {
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #333;
+  min-width: 44px;
+  text-align: right;
+}
+
 .select {
   padding: 6px 8px;
   border: 1px solid #ccc;

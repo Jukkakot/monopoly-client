@@ -1,8 +1,40 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed } from '../../utils/animationSettings'
 import { type ZoomMode, loadZoomMode, saveZoomMode } from '../../utils/zoomSettings'
+
+const PING_URL = (import.meta.env.VITE_API_BASE ?? 'http://localhost:8080') + '/ping'
+const PING_INTERVAL_MS = 5_000
+const PING_HISTORY = 5
+
+function usePingRtt(): number | null {
+  const [rtt, setRtt] = useState<number | null>(null)
+  const samples = useRef<number[]>([])
+
+  useEffect(() => {
+    let cancelled = false
+    async function ping() {
+      if (cancelled) return
+      try {
+        const t0 = performance.now()
+        await fetch(PING_URL, { method: 'GET', cache: 'no-store' })
+        const elapsed = performance.now() - t0
+        samples.current.push(elapsed)
+        if (samples.current.length > PING_HISTORY) samples.current.shift()
+        const avg = samples.current.reduce((a, b) => a + b, 0) / samples.current.length
+        if (!cancelled) setRtt(Math.round(avg / 2))
+      } catch {
+        if (!cancelled) setRtt(null)
+      }
+    }
+    ping()
+    const id = setInterval(ping, PING_INTERVAL_MS)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [])
+
+  return rtt
+}
 
 const LS_KEY = 'sound-settings'
 
@@ -37,6 +69,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
   const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
   const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
   const [zoomMode, setZoomMode] = useState<ZoomMode>(loadZoomMode)
+  const rtt = usePingRtt()
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
 
@@ -64,6 +97,15 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
         <span>{t.soundSettingsTitle}</span>
         <button className={styles.close} onClick={onClose}>✕</button>
       </div>
+
+      <div className={styles.pingRow}>
+        <span className={styles.pingLabel}>Verkkolatenssi (RTT/2)</span>
+        <span className={styles.pingValue}>
+          {rtt === null ? '—' : `${rtt} ms`}
+        </span>
+      </div>
+
+      <div className={styles.divider} />
 
       <div className={styles.row}>
         <label className={styles.label}>Volyymi</label>
