@@ -26,6 +26,7 @@ export interface T {
   buyBtnKbd: (price: number) => string
   skipToAuction: string
   skipToAuctionKbd: string
+  insufficientFunds: string
   netWorthLabel: string
   rentalIncomeLabel: string
   yourTurnIn: (n: number) => string
@@ -72,6 +73,8 @@ export interface T {
   debtCash: (n: number) => string
   debtLiquidation: (n: number) => string
   payDebtBtn: string
+  debtMortgageGroupTitle: string
+  debtSellBuildingTitle: string
   mortgagePropBtn: (name: string) => string
   sellRoundBtn: (count: number, type: string) => string
   hotelLabel: string
@@ -392,6 +395,7 @@ const fi: T = {
   buyBtnKbd: (p) => `💰 Osta €${p}  [B]`,
   skipToAuction: '🏷 Ohita → huutokauppa',
   skipToAuctionKbd: '🏷 Ohita → huutokauppa  [D]',
+  insufficientFunds: 'Rahat eivät riitä — panttaa kiinteistöjä saadaksesi lisää',
   netWorthLabel: 'Nettovarallisuus',
   rentalIncomeLabel: 'Vuokratulot/kierros',
   yourTurnIn: (n) => `${n} pelaajan jälkeen`,
@@ -438,6 +442,8 @@ const fi: T = {
   debtCash: (n) => `Käteinen: €${n}`,
   debtLiquidation: (n) => `Likvidointiarvo: ~€${n}`,
   payDebtBtn: '💸 Maksa velka',
+  debtMortgageGroupTitle: 'Panttaa kiinteistö',
+  debtSellBuildingTitle: 'Myy rakennuksia',
   mortgagePropBtn: (name) => `🏦 Panttaa ${name}`,
   sellRoundBtn: (count, type) => `🏘 Myy kierros (${count} kiin.): ${type}`,
   hotelLabel: 'hotelli',
@@ -773,6 +779,7 @@ const en: T = {
   buyBtnKbd: (p) => `💰 Buy €${p}  [B]`,
   skipToAuction: '🏷 Skip → auction',
   skipToAuctionKbd: '🏷 Skip → auction  [D]',
+  insufficientFunds: 'Not enough money — mortgage properties to raise funds',
   netWorthLabel: 'Net worth',
   rentalIncomeLabel: 'Rental income/round',
   yourTurnIn: (n) => `after ${n} player${n !== 1 ? 's' : ''}`,
@@ -819,6 +826,8 @@ const en: T = {
   debtCash: (n) => `Cash: €${n}`,
   debtLiquidation: (n) => `Liquidation value: ~€${n}`,
   payDebtBtn: '💸 Pay debt',
+  debtMortgageGroupTitle: 'Mortgage property',
+  debtSellBuildingTitle: 'Sell buildings',
   mortgagePropBtn: (name) => `🏦 Mortgage ${name}`,
   sellRoundBtn: (count, type) => `🏘 Sell round (${count} prop.): ${type}`,
   hotelLabel: 'hotel',

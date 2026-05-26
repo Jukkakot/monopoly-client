@@ -249,6 +249,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const p = dec.payload
     const spot = SPOTS.find(s => s.id === p.propertyId)
     const color = spot ? STREET_COLORS[spot.streetType] : undefined
+    const canAfford = (me?.cash ?? 0) >= p.price
     return (
       <div className={styles.panel}>
         <TabBar />
@@ -258,7 +259,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               📍 <strong>{spot?.name ?? p.propertyDisplayName}</strong><br />
               {t.priceLabel(p.price)}
             </div>
-            <Btn label={isTouchDevice ? t.buyBtn(p.price) : t.buyBtnKbd(p.price)} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
+            {!canAfford && (
+              <div className={styles.warningBox}>{t.insufficientFunds}</div>
+            )}
+            <Btn label={isTouchDevice ? t.buyBtn(p.price) : t.buyBtnKbd(p.price)} disabled={!canAfford} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
             <Btn label={isTouchDevice ? t.skipToAuction : t.skipToAuctionKbd} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
           </>
         ) : (
@@ -811,25 +815,34 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
       {debt.allowedActions.includes('PAY_DEBT_NOW') && (
         <Btn label={t.payDebtBtn} onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />
       )}
-      {debt.allowedActions.includes('MORTGAGE_PROPERTY') &&
-        state.properties
+      {debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
+        const mortgageables = state.properties
           .filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
-          .map(prop => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            const color = spot ? STREET_COLORS[spot.streetType] : undefined
-            const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
-            return (
-              <Btn key={prop.propertyId}
-                label={`${spot?.name ?? prop.propertyId}${mortgageVal ? ` +€${mortgageVal}` : ''}`}
-                onClick={() => sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId })}
-                variant="secondary"
-                colorHex={color} />
-            )
-          })
-      }
+        if (mortgageables.length === 0) return null
+        return (
+          <>
+            <div className={styles.debtChipLabel}>{t.debtMortgageGroupTitle}</div>
+            <div className={styles.debtChipRow}>
+              {mortgageables.map(prop => {
+                const spot = SPOTS.find(s => s.id === prop.propertyId)
+                const color = spot ? STREET_COLORS[spot.streetType] : '#888'
+                const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
+                return (
+                  <button key={prop.propertyId} className={styles.debtChip}
+                    style={{ background: (color ?? '#888') + '30', borderColor: color ?? '#888' }}
+                    onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
+                    {spot?.name ?? prop.propertyId}{mortgageVal ? ` +€${mortgageVal}` : ''}
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )
+      })()}
       {debt.allowedActions.includes('SELL_BUILDING') && (() => {
         const builtProps = state.properties.filter(p =>
           p.ownerPlayerId === debt.debtorPlayerId && (p.houseCount > 0 || p.hotelCount > 0))
+        if (builtProps.length === 0) return null
 
         // Group by streetType for SellBuildingRoundsAcrossSetForDebt
         const groups = new Map<string, typeof builtProps>()
@@ -843,33 +856,36 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
 
         return (
           <>
-            {/* Sell one round from an entire color group */}
-            {Array.from(groups.entries()).filter(([, props]) => props.length > 1).map(([type, props]) => {
-              const spot = SPOTS.find(s => s.id === props[0].propertyId)
-              const color = STREET_COLORS[type]
-              const proceeds = spot?.price ? Math.floor(spot.price / 2 / 2) * props.length : null
-              return (
-                <Btn key={`set-${props[0].propertyId}`}
-                  label={`${t.sellRoundBtn(props.length, spot?.streetType ?? '')}${proceeds ? ` +€${proceeds}` : ''}`}
-                  onClick={() => sendCmd({ type: 'SellBuildingRoundsAcrossSetForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: props[0].propertyId, rounds: 1 })}
-                  variant="secondary"
-                  colorHex={color} />
-              )
-            })}
-            {/* Sell from individual properties */}
-            {builtProps.map(prop => {
-              const spot = SPOTS.find(s => s.id === prop.propertyId)
-              const color = spot ? STREET_COLORS[spot.streetType] : undefined
-              const proceeds = spot?.price ? Math.floor(spot.price / 2 / 2) : null
-              const type = prop.hotelCount > 0 ? t.hotelLabel : t.houseLabel
-              return (
-                <Btn key={prop.propertyId}
-                  label={`${t.sellBuildingBtn(type, spot?.name ?? prop.propertyId)}${proceeds ? ` +€${proceeds}` : ''}`}
-                  onClick={() => sendCmd({ type: 'SellBuildingForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 })}
-                  variant="secondary"
-                  colorHex={color} />
-              )
-            })}
+            <div className={styles.debtChipLabel}>{t.debtSellBuildingTitle}</div>
+            <div className={styles.debtChipRow}>
+              {/* Sell one round from an entire color group */}
+              {Array.from(groups.entries()).filter(([, props]) => props.length > 1).map(([type, props]) => {
+                const spot = SPOTS.find(s => s.id === props[0].propertyId)
+                const color = STREET_COLORS[type] ?? '#888'
+                const proceeds = spot?.price ? Math.floor(spot.price / 2 / 2) * props.length : null
+                return (
+                  <button key={`set-${props[0].propertyId}`} className={styles.debtChip}
+                    style={{ background: color + '30', borderColor: color }}
+                    onClick={() => { playButtonClick(); sendCmd({ type: 'SellBuildingRoundsAcrossSetForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: props[0].propertyId, rounds: 1 }) }}>
+                    {t.sellRoundBtn(props.length, spot?.streetType ?? '')}{proceeds ? ` +€${proceeds}` : ''}
+                  </button>
+                )
+              })}
+              {/* Sell from individual properties */}
+              {builtProps.map(prop => {
+                const spot = SPOTS.find(s => s.id === prop.propertyId)
+                const color = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
+                const proceeds = spot?.price ? Math.floor(spot.price / 2 / 2) : null
+                const buildingType = prop.hotelCount > 0 ? t.hotelLabel : t.houseLabel
+                return (
+                  <button key={prop.propertyId} className={styles.debtChip}
+                    style={{ background: color + '30', borderColor: color }}
+                    onClick={() => { playButtonClick(); sendCmd({ type: 'SellBuildingForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId, count: 1 }) }}>
+                    {t.sellBuildingBtn(buildingType, spot?.name ?? prop.propertyId)}{proceeds ? ` +€${proceeds}` : ''}
+                  </button>
+                )
+              })}
+            </div>
           </>
         )
       })()}

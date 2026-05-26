@@ -265,6 +265,38 @@
   color: #c62828;
 }
 
+/* Debt property/building chip buttons */
+.debtChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.debtChipLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #b71c1c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.debtChip {
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  border: 2px solid currentColor;
+  cursor: pointer;
+  color: #111;
+  line-height: 1.25;
+  text-align: left;
+  transition: filter 0.12s;
+}
+
+.debtChip:hover  { filter: brightness(0.9); }
+.debtChip:active { filter: brightness(0.75); }
+
 .winner {
   text-align: center;
   font-size: 1.4rem;
