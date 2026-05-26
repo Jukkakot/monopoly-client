@@ -8,6 +8,7 @@ import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { calcNetWorth, calcCurrentRentIncome } from '../../utils/netWorth'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
+import { AnimatedDice } from '../common/DiceDisplay'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -77,6 +78,17 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
+
+  // Track dice roll key for animation
+  const [diceRollKey, setDiceRollKey] = useState(0)
+  const prevDiceStrRef = useRef<string | null>(null)
+  const diceStr = turn?.lastDice ? turn.lastDice.join(',') : null
+  useEffect(() => {
+    if (diceStr && diceStr !== prevDiceStrRef.current) {
+      prevDiceStrRef.current = diceStr
+      setDiceRollKey(k => k + 1)
+    }
+  }, [diceStr])
 
   // Track rent payment: record cash when my turn starts (WAITING_FOR_ROLL), detect drop on end
   const [visibleRent, setVisibleRent] = useState<{ amount: number; ownerName: string } | null>(null)
@@ -358,6 +370,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
+            {consecutiveDoubles > 0 && turn?.lastDice && (
+              <div className={styles.diceResult}>
+                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={32} showSum />
+              </div>
+            )}
             {consecutiveDoubles > 0 && (
               <div className={`${styles.infoBox} ${styles.doubles}`}>
                 {t.doublesRoll}
@@ -395,6 +412,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
+            {lastDice && (
+              <div className={styles.diceResult}>
+                <AnimatedDice dice={lastDice} rollKey={diceRollKey} size={32} showSum />
+              </div>
+            )}
             {showJailEscapeNote && (
               <div className={styles.infoBox}>{t.jailEscapeDoubles}</div>
             )}

@@ -9,6 +9,7 @@ import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimati
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
+import { AnimatedDice } from '../common/DiceDisplay'
 
 // Stable empty array so spots without players get the same reference every render,
 // allowing React.memo(BoardSpot) to bail out without reference-creating ?? [].
@@ -225,42 +226,6 @@ const OwnershipEdgeBarsM = memo(OwnershipEdgeBars, (prev, next) =>
   prev.properties === next.properties && prev.seats === next.seats
 )
 
-const DOT_POSITIONS: Record<number, [number, number][]> = {
-  1: [[0.5, 0.5]],
-  2: [[0.28, 0.72], [0.72, 0.28]],
-  3: [[0.28, 0.72], [0.5, 0.5], [0.72, 0.28]],
-  4: [[0.28, 0.28], [0.72, 0.28], [0.28, 0.72], [0.72, 0.72]],
-  5: [[0.28, 0.28], [0.72, 0.28], [0.5, 0.5], [0.28, 0.72], [0.72, 0.72]],
-  6: [[0.28, 0.25], [0.72, 0.25], [0.28, 0.5], [0.72, 0.5], [0.28, 0.75], [0.72, 0.75]],
-}
-
-function DieFace({ value, size }: { value: number; size: number }) {
-  const positions = DOT_POSITIONS[value] ?? []
-  const s = size
-  return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
-      <rect x="1.5" y="1.5" width={s - 3} height={s - 3} rx={s * 0.16} fill="white"
-        stroke="rgba(0,0,0,0.15)" strokeWidth="1"
-        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.25))' }} />
-      {positions.map(([fx, fy], i) => (
-        <circle key={i} cx={fx * s} cy={fy * s} r={s * 0.088} fill="#1a1a2e" />
-      ))}
-    </svg>
-  )
-}
-
-function BoardDice({ dice }: { dice: [number, number] | null }) {
-  const t = useT()
-  if (!dice) return null
-  const isDoubles = dice[0] === dice[1]
-  return (
-    <div className={styles.diceArea}>
-      <DieFace value={dice[0]} size={36} />
-      <DieFace value={dice[1]} size={36} />
-      {isDoubles && <span className={styles.diceDoubles}>{t.doublesLabel}</span>}
-    </div>
-  )
-}
 
 interface Props {
   state: SessionState
@@ -288,6 +253,17 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const stateRef = useRef(state)
   const prevAnimatingSizeRef = useRef(0)
   useEffect(() => { stateRef.current = state }, [state])
+
+  // Track dice rolls for animation
+  const [diceRollKey, setDiceRollKey] = useState(0)
+  const prevDiceStrRef = useRef<string | null>(null)
+  const diceStr = gameState.lastDice ? gameState.lastDice.join(',') : null
+  useEffect(() => {
+    if (diceStr && diceStr !== prevDiceStrRef.current) {
+      prevDiceStrRef.current = diceStr
+      setDiceRollKey(k => k + 1)
+    }
+  }, [diceStr])
 
   // Manual pinch-to-zoom state
   const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 })
@@ -531,7 +507,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       })}
       <div className={styles.center}>
         <OwnershipEdgeBarsM properties={displayState.properties} seats={displayState.seats} />
-        <BoardDice dice={gameState.lastDice} />
+        <AnimatedDice dice={gameState.lastDice} rollKey={diceRollKey} showSum className={styles.diceArea} />
         <div className={styles.centerLogo}>Monopoly</div>
         <div className={styles.centerSub}>Helsinki Edition</div>
         {activeTurnPlayer && state.status !== 'GAME_OVER' && (

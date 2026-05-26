@@ -60,6 +60,16 @@
   50%       { outline-color: #66bb6a; }
 }
 
+.diceResult {
+  display: flex;
+  justify-content: center;
+  padding: 8px 10px;
+  background: #f1f8e9;
+  border-radius: 8px;
+  border: 1px solid #c8e6c9;
+  animation: panelIn 0.2s ease-out;
+}
+
 @keyframes panelIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
