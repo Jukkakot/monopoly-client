@@ -33,8 +33,9 @@ function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean): number
     const dist = (JAIL_INDEX - fromIdx + BOARD_SIZE) % BOARD_SIZE
     return Math.max(600, Math.min(2000, 600 + (dist / 39) * 1400))
   }
-  const steps = (toIdx - fromIdx + BOARD_SIZE) % BOARD_SIZE
-  return steps * STEP_MS
+  const forward = (toIdx - fromIdx + BOARD_SIZE) % BOARD_SIZE
+  const backward = (fromIdx - toIdx + BOARD_SIZE) % BOARD_SIZE
+  return Math.min(forward, backward) * STEP_MS
 }
 
 /**

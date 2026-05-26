@@ -17,6 +17,10 @@ function isMovementCard(key: string | null): boolean {
   return /:MOVE:|:MOVE_NEAREST:|:MOVE_BACK_3:/.test(key)
 }
 
+function isBackThreeCard(key: string | null): boolean {
+  return key != null && key.includes(':MOVE_BACK_3:')
+}
+
 // Module-level animation state so any component can subscribe
 const _animatingPlayers = new Set<string>()
 const _jailingPlayers = new Set<string>()
@@ -145,6 +149,7 @@ export function useTokenAnimation(): Map<string, number> {
     const cardKeyChanged = snapshot.lastCardKey !== null &&
                            snapshot.lastCardKey !== prevCardKeyRef.current
     const isCardMove = cardKeyChanged && isMovementCard(snapshot.lastCardKey)
+    const isCardBackThree = isCardMove && isBackThreeCard(snapshot.lastCardKey)
 
     for (const player of snapshot.players) {
       if (player.bankrupt || player.eliminated) continue
@@ -184,6 +189,25 @@ export function useTokenAnimation(): Map<string, number> {
             localAnimatingRef.current.delete(pid)
             setPlayerAnimating(pid, false)
           }, blockDuration)
+        }
+        continue
+      }
+
+      // Back-3 card: step backward one at a time
+      if (isCardBackThree) {
+        const steps: number[] = []
+        let pos = settledIdx
+        while (pos !== currentIdx) {
+          pos = (pos - 1 + BOARD_SIZE) % BOARD_SIZE
+          steps.push(pos)
+        }
+        settledRef.current.set(pid, currentIdx)
+        if (steps.length > 0) {
+          const existing = queueRef.current.get(pid) ?? []
+          queueRef.current.set(pid, [...existing, ...steps])
+          if (!localAnimatingRef.current.has(pid)) {
+            animatePlayer(pid)
+          }
         }
         continue
       }
