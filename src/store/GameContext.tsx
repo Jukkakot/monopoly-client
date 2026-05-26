@@ -20,6 +20,8 @@ type ConnectionStatus = 'CONNECTING' | 'LIVE' | 'RECONNECTING' | 'FAILED'
 // React.memo'd children can bail out of re-rendering when their data didn't change.
 function mergePlayer(old: PlayerSnapshot, next: PlayerSnapshot): PlayerSnapshot {
   if (
+    old.name === next.name &&
+    old.seatId === next.seatId &&
     old.cash === next.cash &&
     old.boardIndex === next.boardIndex &&
     old.bankrupt === next.bankrupt &&
