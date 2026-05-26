@@ -459,7 +459,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   const isCardAck = state.turn?.phase === 'WAITING_FOR_CARD_ACK'
   const cardBubbleText = isCardAck ? getCardText(state.lastCardKey ?? null, state.lastCardMessage ?? null) : null
-  const cardBubbleIcon = state.lastCardKey?.startsWith('chance') ? '🎲' : '🏙️'
+  const isChanceCard = state.lastCardKey?.startsWith('chance') ?? false
+  const cardBubbleIcon = isChanceCard ? '?' : '🏙'
+  const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
   const selectedSpot = selectedSpotId ? SPOTS.find(s => s.id === selectedSpotId) : null
   const selectedGroupType = selectedSpot?.streetType
@@ -529,10 +531,15 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     </div>
     {cardBubbleText && (
       <div className={styles.cardBubbleWrap}>
-        <div className={styles.cardBubble}>
-          <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
-          <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
-          <span className={styles.cardBubbleText}>{cardBubbleText}</span>
+        <div className={`${styles.cardBubble} ${isChanceCard ? styles.cardChance : styles.cardCommunity}`}>
+          <div className={styles.cardBubbleHeader}>
+            <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
+            <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
+          </div>
+          <div className={styles.cardBubbleBody}>
+            <span className={styles.cardBubbleText}>{cardBubbleText}</span>
+            <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+          </div>
         </div>
       </div>
     )}
