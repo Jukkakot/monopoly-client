@@ -149,6 +149,17 @@
 .readyBadgeYes { color: #2e7d32; }
 .readyBadgeNo  { color: #bbb; }
 
+.diffBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #5d4037;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 2px;
+}
+
 .removeBotBtn {
   padding: 2px 7px;
   background: transparent;
