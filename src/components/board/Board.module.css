@@ -353,50 +353,76 @@
   transform: scale(1.08);
 }
 
-/* ── Card overlay — rises like a dealt card ── */
-.cardBubbleWrap {
+/* ── Card overlay anchored near the active token ── */
+.cardBubbleAnchor {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   pointer-events: none;
-  z-index: 150;
-  perspective: 800px;
+  z-index: 200;
+  /* left/top set inline; card card extends away from token via child transform */
 }
 
-/* Pseudo-deck shadow behind the card */
-.cardBubbleWrap::before {
+/* Speech-bubble tail on the anchor, pointing toward the token */
+.cardBubbleAnchor::after {
   content: '';
   position: absolute;
-  width: clamp(80px, 18vw, 150px);
-  height: clamp(110px, 26vw, 210px);
-  background: rgba(0,0,0,0.18);
-  border-radius: 8px;
-  transform: translateY(6px) translateX(4px);
+  width: 0;
+  height: 0;
+  border: clamp(5px, 0.8vw, 8px) solid transparent;
 }
+
+/* Tail when card is ABOVE the token (tail points down) */
+.bubbleAbove .cardBubble { transform: translate(0, -100%); }
+.bubbleAbove.tailRight::after {
+  top: 0;
+  left: clamp(8px, 18%, 24px);
+  border-top: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+  border-bottom: none;
+}
+.bubbleAbove.tailLeft::after {
+  top: 0;
+  right: clamp(8px, 18%, 24px);
+  border-top: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+  border-bottom: none;
+}
+
+/* Tail when card is BELOW the token (tail points up) */
+.bubbleBelow .cardBubble { transform: translate(0, 0); }
+.bubbleBelow.tailRight::after {
+  bottom: 0;
+  left: clamp(8px, 18%, 24px);
+  border-bottom: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+  border-top: none;
+}
+.bubbleBelow.tailLeft::after {
+  bottom: 0;
+  right: clamp(8px, 18%, 24px);
+  border-bottom: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+  border-top: none;
+}
+
+/* Left/right shifts so tail and card align correctly */
+.tailLeft  .cardBubble { margin-left: auto; }
 
 .cardBubble {
   position: relative;
-  width: clamp(90px, 20vw, 165px);
+  width: clamp(82px, 17vw, 148px);
   border-radius: 8px;
   overflow: hidden;
   box-shadow:
-    0 12px 40px rgba(0,0,0,0.55),
-    0 3px 10px rgba(0,0,0,0.35),
-    inset 0 0 0 1.5px rgba(255,255,255,0.25);
+    0 10px 36px rgba(0,0,0,0.55),
+    0 3px 10px rgba(0,0,0,0.3),
+    inset 0 0 0 1px rgba(255,255,255,0.15);
   display: flex;
   flex-direction: column;
-  animation: cardDeal 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  transform-origin: center bottom;
+  animation: cardDeal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Chance = orange, Community = teal-blue */
+.cardChance  { --card-color: #e65100; border: 2px solid #e65100; }
+.cardCommunity { --card-color: #1565c0; border: 2px solid #1565c0; }
+
 .cardChance .cardBubbleHeader  { background: linear-gradient(160deg, #e65100 0%, #bf360c 100%); }
 .cardCommunity .cardBubbleHeader { background: linear-gradient(160deg, #1565c0 0%, #0d47a1 100%); }
-
-.cardChance  { border: 2px solid #e65100; }
-.cardCommunity { border: 2px solid #1565c0; }
 
 .cardBubbleHeader {
   padding: clamp(5px, 1vw, 9px) clamp(6px, 1.2vw, 12px);
@@ -455,16 +481,16 @@
 
 @keyframes cardDeal {
   0%   {
-    transform: translateY(55%) rotateX(55deg) rotateZ(-4deg) scale(0.65);
+    transform: scale(0.5) rotateX(50deg) rotateZ(-6deg);
     opacity: 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
   55%  {
-    transform: translateY(-6%) rotateX(-4deg) rotateZ(1deg) scale(1.04);
+    transform: scale(1.06) rotateX(-3deg) rotateZ(1.5deg);
     opacity: 1;
   }
   100% {
-    transform: translateY(0) rotateX(0deg) rotateZ(0deg) scale(1);
+    transform: scale(1) rotateX(0deg) rotateZ(0deg);
     opacity: 1;
   }
 }

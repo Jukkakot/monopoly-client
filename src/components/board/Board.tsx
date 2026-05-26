@@ -463,6 +463,22 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
+  // Position the card bubble near the active player's token
+  const cardBubblePos = useMemo(() => {
+    if (!cardBubbleText || !activeTurnPlayer) return null
+    const displayIdx = animatedPositions.get(activeTurnPlayer.playerId) ?? activeTurnPlayer.boardIndex
+    const { row, col } = indexToGridPos(displayIdx)
+    // Fraction of board (0–1) for center of token's cell
+    const tx = (col - 0.5) / 11
+    const ty = (row - 0.5) / 11
+    // Bubble appears on the inward side of the token (toward board center)
+    const inTop = ty < 0.45    // token in top half → bubble below
+    const inLeft = tx < 0.45   // token in left half → bubble to the right
+    const bubbleX = inLeft ? tx + 1/11 : tx - 1/11
+    const bubbleY = inTop  ? ty + 1/11 : ty - 1/11
+    return { left: `${bubbleX * 100}%`, top: `${bubbleY * 100}%`, inTop, inLeft }
+  }, [cardBubbleText, activeTurnPlayer, animatedPositions])
+
   const selectedSpot = selectedSpotId ? SPOTS.find(s => s.id === selectedSpotId) : null
   const selectedGroupType = selectedSpot?.streetType
   const NON_HIGHLIGHTABLE = new Set(['CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
@@ -528,21 +544,28 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
           <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
       </div>
-    </div>
-    {cardBubbleText && (
-      <div className={styles.cardBubbleWrap}>
-        <div className={`${styles.cardBubble} ${isChanceCard ? styles.cardChance : styles.cardCommunity}`}>
-          <div className={styles.cardBubbleHeader}>
-            <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
-            <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
-          </div>
-          <div className={styles.cardBubbleBody}>
-            <span className={styles.cardBubbleText}>{cardBubbleText}</span>
-            <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+      {cardBubblePos && cardBubbleText && (
+        <div
+          className={[
+            styles.cardBubbleAnchor,
+            cardBubblePos.inTop  ? styles.bubbleBelow : styles.bubbleAbove,
+            cardBubblePos.inLeft ? styles.tailRight   : styles.tailLeft,
+          ].join(' ')}
+          style={{ left: cardBubblePos.left, top: cardBubblePos.top }}
+        >
+          <div className={`${styles.cardBubble} ${isChanceCard ? styles.cardChance : styles.cardCommunity}`}>
+            <div className={styles.cardBubbleHeader}>
+              <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
+              <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
+            </div>
+            <div className={styles.cardBubbleBody}>
+              <span className={styles.cardBubbleText}>{cardBubbleText}</span>
+              <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
+    </div>
     {(zoomedSpot !== null || hasPinch) && (
       <button className={styles.zoomOutBtn} onClick={() => {
         userZoomedOutRef.current = true
