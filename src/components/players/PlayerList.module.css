@@ -296,6 +296,11 @@
   color: #444;
 }
 
+.propNameMortgaged {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
 .propBuildings {
   display: flex;
   align-items: center;
