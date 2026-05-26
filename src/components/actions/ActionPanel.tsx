@@ -1009,11 +1009,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
                 <input type="checkbox" checked={included}
                   onChange={() => toggleProp(offerSide, prop.propertyId, included)} />
                 <span className={styles.propCheckName}>{spot?.name ?? prop.propertyId}</span>
-                {prop.mortgaged
-                  ? <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>
-                  : spot?.price
-                    ? <span className={styles.propCheckPrice}>€{spot.price}</span>
-                    : null}
+                {spot?.price && <span className={styles.propCheckPrice}>€{spot.price}</span>}
+                {prop.mortgaged && <span className={styles.propMortgagedTag}>{t.mortgagedInTrade}</span>}
               </label>
             )
           })}
