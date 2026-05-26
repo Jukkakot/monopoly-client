@@ -150,7 +150,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   }
 
   function onPortraitHandleTouchStart(e: React.TouchEvent) {
-    e.stopPropagation()
+    if (isLandscape) return
     portraitDragRef.current = { startY: e.touches[0].clientY, startH: mobileBoardHeightRef.current }
   }
 
@@ -247,17 +247,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           {isMobile && board}
         </div>
 
-        {/* Portrait drag handle — between board and right panel, shown only on board tab in portrait */}
-        {isMobile && !isLandscape && mobileTab === 'board' && (
-          <div className={styles.mobilePortraitHandle} onTouchStart={onPortraitHandleTouchStart} />
-        )}
-
         {/* Landscape resize handle — invisible in portrait */}
         <div className={styles.mobileResizeHandle} onTouchStart={onMobileHandleTouchStart} />
 
         {/* Right panel: header + content tabs + bottom nav */}
         <div className={styles.mobileRight} style={isLandscape ? { flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth } : undefined}>
-          <div className={styles.mobileHeader}>{header}</div>
+          {/* Header doubles as portrait drag handle — touch and drag up/down to resize board */}
+          <div className={styles.mobileHeader} onTouchStart={onPortraitHandleTouchStart}>{header}</div>
 
           {/* Cash bar — portrait board tab only; hidden in landscape (no vertical room) */}
           {snap && snap.players.length > 0 && mobileTab === 'board' && (
