@@ -402,7 +402,9 @@ const fi: T = {
   doublesRoll: '🎲 Tuplaheitto! Heitä uudelleen',
   doublesWarning: ' — varoitus: 3. tupla = vankila',
   jailEscapeDoubles: '🔓 Tupla vapautti vankilasta — uutta heittovuoroa ei saa',
-  inJail: (r) => `⛓ Vankilassa — ${r} kierrosta jäljellä`,
+  inJail: (r) => r <= 1
+    ? '⛓ Viimeinen vankila-heitto! Vapaudut automaattisesti (sakko €50, ellei tupla)'
+    : `⛓ Vankilassa — ${r} kierrosta jäljellä`,
   useJailCard: (n) => `🃏 Käytä vapautuskortti (${n})`,
   payJailFine: '💸 Maksa €50 ja vapaudu',
   rollDice: '🎲 Heitä nopat',
@@ -786,7 +788,9 @@ const en: T = {
   doublesRoll: '🎲 Doubles! Roll again',
   doublesWarning: ' — warning: 3rd double = jail',
   jailEscapeDoubles: '🔓 Doubles released from jail — no extra turn',
-  inJail: (r) => `⛓ In jail — ${r} round${r !== 1 ? 's' : ''} left`,
+  inJail: (r) => r <= 1
+    ? '⛓ Last jail turn! Auto-released after roll (€50 fine unless doubles)'
+    : `⛓ In jail — ${r} round${r !== 1 ? 's' : ''} left`,
   useJailCard: (n) => `🃏 Use get-out-of-jail card (${n})`,
   payJailFine: '💸 Pay €50 and get out',
   rollDice: '🎲 Roll dice',

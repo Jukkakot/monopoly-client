@@ -390,17 +390,23 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 {consecutiveDoubles >= 2 && <span>{t.doublesWarning}</span>}
               </div>
             )}
-            {me?.inJail && (
-              <>
-                <div className={styles.infoBox}>{t.inJail(me.jailRoundsRemaining ?? 0)}</div>
-                {me.getOutOfJailCards > 0 && (
-                  <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
-                )}
-                {me.cash >= 50 && (
-                  <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
-                )}
-              </>
-            )}
+            {me?.inJail && (() => {
+              const rounds = me.jailRoundsRemaining ?? 0
+              const isLastRound = rounds <= 1
+              return (
+                <>
+                  <div className={isLastRound ? styles.warningBox : styles.infoBox}>
+                    {t.inJail(rounds)}
+                  </div>
+                  {me.getOutOfJailCards > 0 && (
+                    <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+                  )}
+                  {!isLastRound && me.cash >= 50 && (
+                    <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
+                  )}
+                </>
+              )
+            })()}
             <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
             <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
           </>
