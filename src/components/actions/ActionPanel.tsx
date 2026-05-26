@@ -211,6 +211,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             </div>
             {activePlayer?.name ?? '?'} …
           </div>
+          {turn?.lastDice && (
+            <div className={styles.diceResult}>
+              <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+            </div>
+          )}
         </div>
       )
     }
@@ -224,6 +229,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
           {t.movingToken}
         </div>
+        {turn?.lastDice && (
+          <div className={styles.diceResult}>
+            <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+          </div>
+        )}
       </div>
     )
   }
