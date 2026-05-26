@@ -24,7 +24,7 @@ export default function LobbyScreen() {
   const [name, setName] = useState(() => randomHumanName([]))
   const [color, setColor] = useState(() => PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)])
   const [tokenShape, setTokenShape] = useState<TokenShape>(() => ALL_SHAPES[Math.floor(Math.random() * ALL_SHAPES.length)].key)
-  const [botCount, setBotCount] = useState(3)
+  const [botCount, setBotCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
