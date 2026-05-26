@@ -32,7 +32,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px;
+  padding: 0;
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
@@ -241,30 +241,42 @@
   display: none;
 }
 
-/* Mobile portrait resize handle — drag up/down to resize board vs action panel */
+/* Mobile portrait resize handle — blends into board area, thin visual line */
 .mobilePortraitHandle {
-  height: 28px;
+  height: 20px;
   flex-shrink: 0;
-  background: #2e7d32;
+  background: #1a5c1a;
   cursor: row-resize;
   touch-action: none;
   position: relative;
 }
 
-/* Horizontal dots grip indicator */
+/* Thin horizontal line across the full width */
+.mobilePortraitHandle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background: #2e7d32;
+  transform: translateY(-50%);
+}
+
+/* Three dots on the right side, aligned with the ... menu button above */
 .mobilePortraitHandle::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 5px;
-  height: 5px;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow:
-    -11px 0 0 rgba(255, 255, 255, 0.85),
-     11px 0 0 rgba(255, 255, 255, 0.85);
+    -10px 0 0 rgba(255, 255, 255, 0.9),
+    -20px 0 0 rgba(255, 255, 255, 0.9);
 }
 
 /* ══════════════════════════════════════

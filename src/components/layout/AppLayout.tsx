@@ -31,7 +31,7 @@ function loadMobilePanelWidth(): number {
     : 240
 }
 
-const MOBILE_BOARD_H_MIN = 120
+const MOBILE_BOARD_H_MIN = 150
 const MOBILE_BOARD_H_MAX = 560
 
 function loadMobileBoardHeight(): number {
