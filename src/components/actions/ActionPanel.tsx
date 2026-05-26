@@ -203,6 +203,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       const activeSeat = state.seats.find(s => s.playerId === activeId)
       return (
         <div className={styles.panel}>
+          {turn?.lastDice && (
+            <div className={styles.diceResult}>
+              <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+            </div>
+          )}
           <div className={`${styles.infoBox} ${styles.moving}`} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
             <div className={styles.movingDots}>
               <span />
@@ -211,16 +216,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             </div>
             {activePlayer?.name ?? '?'} …
           </div>
-          {turn?.lastDice && (
-            <div className={styles.diceResult}>
-              <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
-            </div>
-          )}
         </div>
       )
     }
     return (
       <div className={styles.panel}>
+        {turn?.lastDice && (
+          <div className={styles.diceResult}>
+            <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+          </div>
+        )}
         <div className={`${styles.infoBox} ${styles.moving}`}>
           <div className={styles.movingDots}>
             <span />
@@ -229,11 +234,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           </div>
           {t.movingToken}
         </div>
-        {turn?.lastDice && (
-          <div className={styles.diceResult}>
-            <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
-          </div>
-        )}
       </div>
     )
   }
@@ -374,17 +374,23 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                   <div className={isLastRound ? styles.warningBox : styles.infoBox}>
                     {t.inJail(rounds)}
                   </div>
-                  {me.getOutOfJailCards > 0 && (
-                    <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
-                  )}
-                  {!isLastRound && me.cash >= 50 && (
-                    <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
+                  {(me.getOutOfJailCards > 0 || (!isLastRound && me.cash >= 50)) && (
+                    <div className={styles.btnRow}>
+                      {me.getOutOfJailCards > 0 && (
+                        <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+                      )}
+                      {!isLastRound && me.cash >= 50 && (
+                        <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
+                      )}
+                    </div>
                   )}
                 </>
               )
             })()}
-            <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
-            <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+            <div className={styles.btnRow}>
+              <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
+              <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+            </div>
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
@@ -418,8 +424,12 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 <button className={styles.cardPopupOk} onClick={() => setRentDismissed(true)}>{t.cardOkBtn}</button>
               </div>
             )}
-            {!hasDoubles && <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />}
-            {!hasDoubles && <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />}
+            {!hasDoubles && (
+              <div className={styles.btnRow}>
+                <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
+                <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+              </div>
+            )}
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />

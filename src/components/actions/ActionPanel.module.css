@@ -99,6 +99,27 @@
 .info     { background: #1565c0; color: #fff; }
 .ghost    { background: transparent; color: #555; border: 1.5px solid #ccc; }
 
+/* Inline row — buttons share available width equally */
+.btnRow {
+  display: flex;
+  gap: 8px;
+}
+
+.btnRow .btn {
+  flex: 1;
+  width: auto;
+  padding: 10px 8px;
+}
+
+.btnRow .tradeSection {
+  flex: 1;
+  min-width: 0;
+}
+
+.btnRow .tradeSection .btn {
+  width: 100%;
+}
+
 .sectionTitle {
   font-size: 0.72rem;
   font-weight: 700;
