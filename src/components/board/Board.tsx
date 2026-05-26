@@ -463,19 +463,19 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
-  // Position the card bubble near the active player's token
+  // Position the card bubble toward board center from the token so it never clips
   const cardBubblePos = useMemo(() => {
     if (!cardBubbleText || !activeTurnPlayer) return null
     const displayIdx = animatedPositions.get(activeTurnPlayer.playerId) ?? activeTurnPlayer.boardIndex
     const { row, col } = indexToGridPos(displayIdx)
-    // Fraction of board (0–1) for center of token's cell
     const tx = (col - 0.5) / 11
     const ty = (row - 0.5) / 11
-    // Bubble appears on the inward side of the token (toward board center)
-    const inTop = ty < 0.45    // token in top half → bubble below
-    const inLeft = tx < 0.45   // token in left half → bubble to the right
-    const bubbleX = inLeft ? tx + 1/11 : tx - 1/11
-    const bubbleY = inTop  ? ty + 1/11 : ty - 1/11
+    // Place anchor 45% of the way from center toward the token — always well inside the board
+    const bubbleX = 0.5 + 0.45 * (tx - 0.5)
+    const bubbleY = 0.5 + 0.45 * (ty - 0.5)
+    // Tail direction: which side of the card faces the token
+    const inTop = ty < 0.5
+    const inLeft = tx < 0.5
     return { left: `${bubbleX * 100}%`, top: `${bubbleY * 100}%`, inTop, inLeft }
   }, [cardBubbleText, activeTurnPlayer, animatedPositions])
 

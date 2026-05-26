@@ -353,56 +353,15 @@
   transform: scale(1.08);
 }
 
-/* ── Card overlay anchored near the active token ── */
+/* ── Card overlay anchored toward board center from the token ── */
 .cardBubbleAnchor {
   position: absolute;
   pointer-events: none;
   z-index: 200;
-  /* left/top set inline; card card extends away from token via child transform */
+  /* anchor is centered on calculated point; card + tail center on it */
 }
 
-/* Speech-bubble tail on the anchor, pointing toward the token */
-.cardBubbleAnchor::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 0;
-  border: clamp(5px, 0.8vw, 8px) solid transparent;
-}
-
-/* Tail when card is ABOVE the token (tail points down) */
-.bubbleAbove .cardBubble { transform: translate(0, -100%); }
-.bubbleAbove.tailRight::after {
-  top: 0;
-  left: clamp(8px, 18%, 24px);
-  border-top: clamp(8px, 1.2vw, 12px) solid var(--card-color);
-  border-bottom: none;
-}
-.bubbleAbove.tailLeft::after {
-  top: 0;
-  right: clamp(8px, 18%, 24px);
-  border-top: clamp(8px, 1.2vw, 12px) solid var(--card-color);
-  border-bottom: none;
-}
-
-/* Tail when card is BELOW the token (tail points up) */
-.bubbleBelow .cardBubble { transform: translate(0, 0); }
-.bubbleBelow.tailRight::after {
-  bottom: 0;
-  left: clamp(8px, 18%, 24px);
-  border-bottom: clamp(8px, 1.2vw, 12px) solid var(--card-color);
-  border-top: none;
-}
-.bubbleBelow.tailLeft::after {
-  bottom: 0;
-  right: clamp(8px, 18%, 24px);
-  border-bottom: clamp(8px, 1.2vw, 12px) solid var(--card-color);
-  border-top: none;
-}
-
-/* Left/right shifts so tail and card align correctly */
-.tailLeft  .cardBubble { margin-left: auto; }
-
+/* Card is centered on the anchor point */
 .cardBubble {
   position: relative;
   width: clamp(82px, 17vw, 148px);
@@ -414,8 +373,36 @@
     inset 0 0 0 1px rgba(255,255,255,0.15);
   display: flex;
   flex-direction: column;
+  transform: translate(-50%, -50%);
   animation: cardDeal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Speech-bubble tail on the card pointing toward the token */
+.cardBubble::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: clamp(6px, 1vw, 10px) solid transparent;
+}
+
+/* Token is above → tail on top edge of card */
+.bubbleAbove .cardBubble::after {
+  top: -1px;
+  border-top: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+  border-bottom: none;
+}
+.bubbleAbove.tailRight .cardBubble::after { left: 20%; }
+.bubbleAbove.tailLeft  .cardBubble::after { right: 20%; left: auto; }
+
+/* Token is below → tail on bottom edge of card */
+.bubbleBelow .cardBubble::after {
+  bottom: -1px;
+  border-bottom: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+  border-top: none;
+}
+.bubbleBelow.tailRight .cardBubble::after { left: 20%; }
+.bubbleBelow.tailLeft  .cardBubble::after { right: 20%; left: auto; }
 
 /* Chance = orange, Community = teal-blue */
 .cardChance  { --card-color: #e65100; border: 2px solid #e65100; }
