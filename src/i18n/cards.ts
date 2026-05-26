@@ -8,11 +8,11 @@ const cardTextsFi: Record<string, string> = {
   'chance:MONEY:1': 'Pankki maksaa sinulle osinkoa M50',
   'chance:MONEY:2': 'Ylinopeussakko M15',
 
-  'chance:MOVE:0': 'Siirry Boardwalkille',
+  'chance:MOVE:0': 'Siirry Katajanokalle (A)',
   'chance:MOVE:1': 'Siirry lähtöruutuun (Nosta M200)',
-  'chance:MOVE:2': 'Siirry Illinois Avenuelle. Jos ohitat lähtöruudun, nosta M200',
-  'chance:MOVE:3': 'Siirry St. Charles Placelle. Jos ohitat lähtöruudun, nosta M200',
-  'chance:MOVE:4': 'Tee matka Reading Railroadille. Jos ohitat lähtöruudun, nosta M200',
+  'chance:MOVE:2': 'Siirry Tapiolaan. Jos ohitat lähtöruudun, nosta M200',
+  'chance:MOVE:3': 'Siirry Vallilaan. Jos ohitat lähtöruudun, nosta M200',
+  'chance:MOVE:4': 'Matkusta Rautatieasemalle. Jos ohitat lähtöruudun, nosta M200',
 
   'chance:MOVE_NEAREST:0':
     'Siirry lähimmälle rautatieasemalle. Jos se on vapaana, voit ostaa sen pankilta. Jos se on omistettu, maksa omistajalle kaksinkertainen vuokra',
@@ -64,11 +64,11 @@ const cardTextsEn: Record<string, string> = {
   'chance:MONEY:1': 'Bank pays you dividend of M50',
   'chance:MONEY:2': 'Speeding fine M15',
 
-  'chance:MOVE:0': 'Advance to Boardwalk',
+  'chance:MOVE:0': 'Advance to Katajanokka (A)',
   'chance:MOVE:1': 'Advance to Go (Collect M200)',
-  'chance:MOVE:2': 'Advance to Illinois Avenue. If you pass Go, collect M200',
-  'chance:MOVE:3': 'Advance to St. Charles Place. If you pass Go, collect M200',
-  'chance:MOVE:4': 'Take a trip to Reading Railroad. If you pass Go, collect M200',
+  'chance:MOVE:2': 'Advance to Tapiola. If you pass Go, collect M200',
+  'chance:MOVE:3': 'Advance to Vallila. If you pass Go, collect M200',
+  'chance:MOVE:4': 'Take a trip to Rautatieasema. If you pass Go, collect M200',
 
   'chance:MOVE_NEAREST:0':
     'Advance token to the nearest Railroad. If unowned you may buy it from the Bank. If owned, pay owner twice the rental',
