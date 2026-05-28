@@ -259,6 +259,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const prevAnimatingSizeRef = useRef(0)
   const prevActivePlayerRef = useRef<string | null | undefined>(null)
   useEffect(() => { stateRef.current = state }, [state])
+  // Ref so timer callbacks can read the current displayed position (start square, not destination)
+  const animatedPositionsRef = useRef(animatedPositions)
+  useEffect(() => { animatedPositionsRef.current = animatedPositions }, [animatedPositions])
 
   // Track dice rolls for AnimatedDice key
   const [diceRollKey, setDiceRollKey] = useState(0)
@@ -304,8 +307,12 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     zoomToDiceTimerRef.current = setTimeout(() => {
       zoomToDiceTimerRef.current = null
       diceZoomBlockRef.current = false
-      const player = pid ? stateRef.current.players.find(p => p.playerId === pid) : null
-      if (player !== undefined) setZoomedSpot(player?.boardIndex ?? null)
+      // Use animatedPositionsRef (current displayed position = start square) so the zoom
+      // previews where the token IS, not where it's going (snapshot already has final pos).
+      const startPos = pid
+        ? (animatedPositionsRef.current.get(pid) ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex)
+        : undefined
+      if (startPos !== undefined) setZoomedSpot(startPos)
       // Fallback: zoom out if no movement follows (jail, etc.)
       zoomToDiceTimerRef.current = setTimeout(() => {
         zoomToDiceTimerRef.current = null
