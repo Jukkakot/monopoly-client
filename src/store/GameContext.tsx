@@ -439,11 +439,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
           lastEventTimestamp.current = clientReceivedMs
           sseTimings.current.push({ timestamp: clientReceivedMs, version: snap.version, delayMs })
 
-          if (delayMs !== undefined) {
-            console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms`)
-          } else {
-            console.log(`📡 SSE v${snap.version} (first event)`)
-          }
+          // if (delayMs !== undefined ) {
+          //   console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms`)
+          // } else {
+          //   console.log(`📡 SSE v${snap.version} (first event)`)
+          // }
 
 
           versionRef.current = snap.version  // always update for reconnection
