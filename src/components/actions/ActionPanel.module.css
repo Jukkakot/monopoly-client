@@ -960,8 +960,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: #e8f5e9;
-  border: 1px solid #a5d6a7;
+  border: 2px solid #a5d6a7;
   border-radius: 8px;
   padding: 8px 12px;
 }

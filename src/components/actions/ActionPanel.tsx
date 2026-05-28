@@ -222,7 +222,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            <div className={styles.propBuyCard} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
+            <div className={styles.propBuyCard} style={color ? { background: color + '38', borderColor: color } : {}}>
               <span className={styles.propBuyName}>{spot?.name ?? p.propertyDisplayName}</span>
               <span className={styles.propBuyPrice}>{t.priceLabel(p.price)}</span>
             </div>
