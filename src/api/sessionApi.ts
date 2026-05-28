@@ -135,7 +135,10 @@ export interface SessionSettings {
 }
 
 export async function applySessionSettings(sessionId: string, settings: SessionSettings): Promise<void> {
-  await fetch(`${BASE}/sessions/${sessionId}/settings`, {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/settings`, {
     method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(settings),
   })
+  if (!res.ok && res.status !== 404) {
+    logger.error('API request failed', { url: `/sessions/${sessionId}/settings`, status: res.status, method: 'PUT' })
+  }
 }

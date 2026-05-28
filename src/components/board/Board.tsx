@@ -9,7 +9,7 @@ import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimati
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
-import { loadDiceZoomEnabled } from '../../utils/animationSettings'
+import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../../utils/animationSettings'
 import { AnimatedDice } from '../common/DiceDisplay'
 import { getCardText } from '../../i18n/cards'
 

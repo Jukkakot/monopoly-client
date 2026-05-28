@@ -140,6 +140,8 @@ export interface T {
   // GameScreen
   connectionLostTitle: string
   checkNetworkMsg: string
+  sessionNotFoundTitle: string
+  sessionNotFoundMsg: string
   gamePinLabel: string
   retryBtn: string
   loadingGame: string
@@ -516,6 +518,8 @@ const fi: T = {
   // GameScreen
   connectionLostTitle: 'Yhteys katkesi',
   checkNetworkMsg: 'Tarkista verkko tai lataa sivu uudelleen.',
+  sessionNotFoundTitle: 'Peliä ei löydy',
+  sessionNotFoundMsg: 'Peli on jo päättynyt tai poistettu. Palataan aulaan...',
   gamePinLabel: 'Pelin koodi:',
   retryBtn: 'Yritä uudelleen',
   loadingGame: 'Ladataan peliä…',
@@ -902,6 +906,8 @@ const en: T = {
   // GameScreen
   connectionLostTitle: 'Connection lost',
   checkNetworkMsg: 'Check your network or reload the page.',
+  sessionNotFoundTitle: 'Game not found',
+  sessionNotFoundMsg: 'The game has ended or been deleted. Returning to lobby...',
   gamePinLabel: 'Game code:',
   retryBtn: 'Try again',
   loadingGame: 'Loading game…',

@@ -403,6 +403,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     let timeoutId: ReturnType<typeof setTimeout>
 
+    // Counts how many times the connection closed within 400ms of opening (indicates 404 / session gone)
+    let quickFailCount = 0
+
     function connect() {
       if (cancelled) return
       dispatch({ type: 'SET_CONNECTION', status: retryCount.current === 0 ? 'CONNECTING' : 'RECONNECTING' })
@@ -410,6 +413,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const url = sseUrl(state.sessionId!)
       const es = new EventSource(versionRef.current > 0 ? `${url}?lastEventId=${versionRef.current}` : url)
       esRef.current = es
+      const connectTime = Date.now()
 
       // Guard: if no SSE message arrives within 8s the initial snapshot was silently
       // dropped by the backend (race between keepAlive setup and first sendEvent).
@@ -428,6 +432,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       es.onmessage = (e) => {
         if (!firstMessageReceived) {
           firstMessageReceived = true
+          quickFailCount = 0
           clearTimeout(noDataTimer)
         }
         try {
@@ -470,6 +475,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         es.close()
         esRef.current = null
         if (cancelled) return
+        // If the connection closes within 400ms of opening and no message arrived,
+        // it almost certainly means the session doesn't exist (404). After 2 such
+        // quick failures, stop retrying and go straight to FAILED.
+        if (!firstMessageReceived && Date.now() - connectTime < 400) {
+          quickFailCount++
+          if (quickFailCount >= 2) {
+            dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
+            return
+          }
+        }
         if (retryCount.current >= 5) {
           dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
           return

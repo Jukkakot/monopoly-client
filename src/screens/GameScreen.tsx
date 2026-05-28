@@ -148,16 +148,28 @@ export default function GameScreen() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
 
+  const sessionNeverLoaded = state.connectionStatus === 'FAILED' && !state.snapshot
+
+  // Auto-redirect to lobby when the session never loaded — it was deleted or never existed.
+  // Skip the auto-redirect when it's a mid-game connection loss (snapshot was received before).
+  useEffect(() => {
+    if (!sessionNeverLoaded) return
+    const timer = setTimeout(() => navigate('/'), 3000)
+    return () => clearTimeout(timer)
+  }, [sessionNeverLoaded, navigate])
+
   if (state.connectionStatus === 'FAILED') {
     return (
       <div className={styles.center}>
         <div className={styles.error}>
-          <h2>{t.connectionLostTitle}</h2>
-          <p>{t.checkNetworkMsg}</p>
-          {sessionId && (
+          <h2>{sessionNeverLoaded ? t.sessionNotFoundTitle : t.connectionLostTitle}</h2>
+          <p>{sessionNeverLoaded ? t.sessionNotFoundMsg : t.checkNetworkMsg}</p>
+          {sessionId && !sessionNeverLoaded && (
             <p className={styles.sessionIdHint}>{t.gamePinLabel} <code>{sessionId}</code></p>
           )}
-          <button onClick={() => window.location.reload()} className={styles.btn}>{t.retryBtn}</button>
+          {!sessionNeverLoaded && (
+            <button onClick={() => window.location.reload()} className={styles.btn}>{t.retryBtn}</button>
+          )}
           <button onClick={() => navigate('/')} className={`${styles.btn} ${styles.btnSecondary}`}>{t.backBtn}</button>
         </div>
       </div>
