@@ -393,11 +393,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            {lastDice && (
-              <div className={styles.diceResult}>
-                <AnimatedDice dice={lastDice} rollKey={diceRollKey} size={32}  />
-              </div>
-            )}
             {showJailEscapeNote && (
               <div className={styles.infoBox}>{t.jailEscapeDoubles}</div>
             )}
