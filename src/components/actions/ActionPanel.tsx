@@ -10,6 +10,18 @@ import { useIsAnimating } from '../../hooks/useTokenAnimation'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
+// Cross-component handshake: PropertyDetail sets this before sending OpenTrade so that
+// TradeEditor auto-adds the property to the request side on first mount.
+let _pendingTradeProperty: { propertyId: string; offeredSide: boolean } | null = null
+export function setPendingTradeProperty(propertyId: string, offeredSide: boolean) {
+  _pendingTradeProperty = { propertyId, offeredSide }
+}
+function takePendingTradeProperty() {
+  const v = _pendingTradeProperty
+  _pendingTradeProperty = null
+  return v
+}
+
 function useTurnTimer(activeId: string | undefined, phase: string | undefined): number {
   const [seconds, setSeconds] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -322,18 +334,24 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             {me?.inJail && (() => {
               const rounds = me.jailRoundsRemaining ?? 0
               const isLastRound = rounds <= 1
+              const hasCard = me.getOutOfJailCards > 0
+              const canPay = !isLastRound && me.cash >= 50
+              const hasButtons = hasCard || canPay
               return (
                 <>
-                  <div className={isLastRound ? styles.warningBox : styles.infoBox}>
-                    {t.inJail(rounds)}
-                  </div>
-                  {(me.getOutOfJailCards > 0 || (!isLastRound && me.cash >= 50)) && (
+                  {/* Last-round warning always shown; regular rounds info only when no buttons */}
+                  {(isLastRound || !hasButtons) && (
+                    <div className={isLastRound ? styles.warningBox : styles.infoBox}>
+                      {t.inJail(rounds)}
+                    </div>
+                  )}
+                  {hasButtons && (
                     <div className={styles.btnRow}>
-                      {me.getOutOfJailCards > 0 && (
-                        <Btn label={t.useJailCard(me.getOutOfJailCards)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+                      {hasCard && (
+                        <Btn label={t.useJailCard(me.getOutOfJailCards, rounds)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
                       )}
-                      {!isLastRound && me.cash >= 50 && (
-                        <Btn label={t.payJailFine} onClick={() => cmd('PayJailFine')} variant="secondary" />
+                      {canPay && (
+                        <Btn label={t.payJailFine(rounds)} onClick={() => cmd('PayJailFine')} variant="secondary" />
                       )}
                     </div>
                   )}
@@ -886,6 +904,17 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const partnerId = isProposer ? trade.recipientPlayerId : trade.initiatorPlayerId
   const partner = state.players.find(p => p.playerId === partnerId)
   const offer = trade.currentOffer
+
+  // Auto-add a property pre-selected from PropertyDetail when the editor first mounts
+  useEffect(() => {
+    const pending = takePendingTradeProperty()
+    if (!pending) return
+    sendCmd({
+      type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+      patch: { offeredSide: pending.offeredSide, propertyIdsToAdd: [pending.propertyId], propertyIdsToRemove: [] }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // From editor's perspective:
   const myOffer = isProposer ? offer.offeredToRecipient : offer.requestedFromRecipient

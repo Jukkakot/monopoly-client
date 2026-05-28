@@ -4,6 +4,7 @@ import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+import { setPendingTradeProperty } from '../actions/ActionPanel'
 
 interface Props {
   spotId: string
@@ -66,6 +67,9 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
 
   function openTrade() {
     if (!owner || !myPlayerId) return
+    // Pre-select the viewed property on the "request" side of the trade
+    const isMyPropLocal = prop?.ownerPlayerId === myPlayerId
+    setPendingTradeProperty(spotId, isMyPropLocal /* offeredSide */)
     sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, recipientPlayerId: owner.playerId })
     onClose()
   }

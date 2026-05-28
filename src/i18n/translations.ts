@@ -34,8 +34,8 @@ export interface T {
   doublesWarning: string
   jailEscapeDoubles: string
   inJail: (rounds: number) => string
-  useJailCard: (n: number) => string
-  payJailFine: string
+  useJailCard: (n: number, rounds: number) => string
+  payJailFine: (rounds: number) => string
   rollDice: string
   rollDiceKbd: string
   endTurn: string
@@ -397,7 +397,7 @@ const fi: T = {
   buyBtnKbd: (p) => `💰 Osta €${p}  [B]`,
   skipToAuction: '🏷 Ohita → huutokauppa',
   skipToAuctionKbd: '🏷 Ohita → huutokauppa  [D]',
-  insufficientFunds: 'Rahat eivät riitä — panttaa kiinteistöjä saadaksesi lisää',
+  insufficientFunds: 'Rahat eivät riitä',
   netWorthLabel: 'Nettovarallisuus',
   rentalIncomeLabel: 'Vuokratulot/kierros',
   yourTurnIn: (n) => `${n} pelaajan jälkeen`,
@@ -407,8 +407,8 @@ const fi: T = {
   inJail: (r) => r <= 1
     ? '⛓ Viimeinen vankila-heitto! Vapaudut automaattisesti (sakko €50, ellei tupla)'
     : `⛓ Vankilassa — ${r} kierrosta jäljellä`,
-  useJailCard: (n) => `🃏 Käytä vapautuskortti (${n})`,
-  payJailFine: '💸 Maksa €50 ja vapaudu',
+  useJailCard: (n, r) => r > 1 ? `🃏 Käytä vapautuskortti (${n}) — ${r}kr.` : `🃏 Käytä vapautuskortti (${n})`,
+  payJailFine: (r) => r > 1 ? `💸 Maksa €50 — ${r}kr.` : '💸 Maksa €50 ja vapaudu',
   rollDice: '🎲 Heitä nopat',
   rollDiceKbd: '🎲 Heitä nopat  [välilyönti]',
   endTurn: '✅ Lopeta vuoro',
@@ -785,7 +785,7 @@ const en: T = {
   buyBtnKbd: (p) => `💰 Buy €${p}  [B]`,
   skipToAuction: '🏷 Skip → auction',
   skipToAuctionKbd: '🏷 Skip → auction  [D]',
-  insufficientFunds: 'Not enough money — mortgage properties to raise funds',
+  insufficientFunds: 'Not enough money',
   netWorthLabel: 'Net worth',
   rentalIncomeLabel: 'Rental income/round',
   yourTurnIn: (n) => `after ${n} player${n !== 1 ? 's' : ''}`,
@@ -795,8 +795,8 @@ const en: T = {
   inJail: (r) => r <= 1
     ? '⛓ Last jail turn! Auto-released after roll (€50 fine unless doubles)'
     : `⛓ In jail — ${r} round${r !== 1 ? 's' : ''} left`,
-  useJailCard: (n) => `🃏 Use get-out-of-jail card (${n})`,
-  payJailFine: '💸 Pay €50 and get out',
+  useJailCard: (n, r) => r > 1 ? `🃏 Use get-out-of-jail card (${n}) — ${r}r.` : `🃏 Use get-out-of-jail card (${n})`,
+  payJailFine: (r) => r > 1 ? `💸 Pay €50 — ${r}r.` : '💸 Pay €50 and get out',
   rollDice: '🎲 Roll dice',
   rollDiceKbd: '🎲 Roll dice  [space]',
   endTurn: '✅ End turn',
