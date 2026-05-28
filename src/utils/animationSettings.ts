@@ -71,6 +71,16 @@ export function getAnimationConfig(speed: AnimationSpeed): AnimationConfig {
   return CONFIGS[speed]
 }
 
+const DICE_ZOOM_LS_KEY = 'dice-zoom'
+
+export function loadDiceZoomEnabled(): boolean {
+  try { return localStorage.getItem(DICE_ZOOM_LS_KEY) !== 'false' } catch { return true }
+}
+
+export function saveDiceZoomEnabled(enabled: boolean) {
+  try { localStorage.setItem(DICE_ZOOM_LS_KEY, String(enabled)) } catch { /* ignore */ }
+}
+
 const BOT_SPEED_LS_KEY = 'bot-speed'
 
 export function loadBotSpeed(): BotSpeed {

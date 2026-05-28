@@ -9,6 +9,7 @@ import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimati
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
+import { loadDiceZoomEnabled } from '../../utils/animationSettings'
 import { AnimatedDice } from '../common/DiceDisplay'
 import { getCardText } from '../../i18n/cards'
 
@@ -19,7 +20,10 @@ const EMPTY_PLAYERS: PlayerSnapshot[] = []
 const ZOOM_SCALE = 2.5
 const ZOOM_OUT_DELAY_MS = 900
 
+const DICE_CENTER_SENTINEL = -1  // sentinel: zoom to board center (dice area)
+
 function computeZoomTransform(spotIndex: number): string {
+  if (spotIndex === DICE_CENTER_SENTINEL) return `scale(${ZOOM_SCALE})`
   const { row, col } = indexToGridPos(spotIndex)
   const tx = -ZOOM_SCALE * (col - 6) / 11 * 100
   const ty = -ZOOM_SCALE * (row - 6) / 11 * 100
@@ -267,22 +271,26 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
   }, [diceStr])
 
-  // Dice zoom: when new dice result arrives, zoom into board center (where dice are shown)
-  const [zoomToDice, setZoomToDice] = useState(false)
+  // Dice zoom: when new dice result arrives, zoom to center (sentinel -1) via zoomedSpot.
+  // Using zoomedSpot avoids race conditions with the animatingPlayers effect, which
+  // will simply overwrite -1 with the actual token spot on the very next render.
   const zoomToDiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const prevDiceForZoomRef = useRef<string | null>(null)
   useEffect(() => {
     if (!diceStr || diceStr === prevDiceForZoomRef.current) return
     if (loadZoomMode() === 'off') return
+    if (!loadDiceZoomEnabled()) return
     const pid = stateRef.current.turn?.activePlayerId
     if (pid && !shouldZoomForPlayer(pid)) return
     prevDiceForZoomRef.current = diceStr
     userZoomedOutRef.current = false
-    setZoomToDice(true)
+    if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
     if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
-    // Hold until token animation takes over (cleared by animatingPlayers effect)
-    // Fallback timer in case animation never fires (e.g. jail, no movement)
-    zoomToDiceTimerRef.current = setTimeout(() => setZoomToDice(false), 1200)
+    setZoomedSpot(DICE_CENTER_SENTINEL)
+    // Fallback: zoom out if no token animation follows (e.g. stayed in jail)
+    zoomToDiceTimerRef.current = setTimeout(() => {
+      setZoomedSpot(prev => prev === DICE_CENTER_SENTINEL ? null : prev)
+    }, 1400)
   }, [diceStr])
 
   // Manual pinch-to-zoom state
@@ -416,12 +424,6 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       if (pos !== undefined) setZoomedSpot(pos)
     }
 
-    if (nowSize > 0 && prevSize === 0) {
-      // Token starts moving: hand off from dice zoom to token-follow zoom
-      setZoomToDice(false)
-      if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
-    }
-
     if (nowSize === 0 && prevSize > 0) {
       // Animation ended: zoom out after delay
       zoomOutTimerRef.current = setTimeout(() => setZoomedSpot(null), ZOOM_OUT_DELAY_MS)
@@ -532,9 +534,6 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   if (hasPinch) {
     boardStyle.transform = `translate(${pinch.tx}%, ${pinch.ty}%) scale(${pinch.scale})`
     boardStyle.transition = 'none'
-  } else if (zoomToDice) {
-    // Zoom to board center where the dice are displayed (no translation = centered zoom)
-    boardStyle.transform = `scale(${ZOOM_SCALE})`
   } else if (zoomedSpot !== null) {
     boardStyle.transform = computeZoomTransform(zoomedSpot)
   }
