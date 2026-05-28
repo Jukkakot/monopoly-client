@@ -43,9 +43,8 @@
 
 @media (max-width: 767px) {
   .board {
-    /* Always square: bounded by viewport width AND available height (leaving room for UI) */
-    width: min(100vw, calc(100svh - 158px));
-    height: min(100vw, calc(100svh - 158px));
+    /* Fill container; aspect-ratio: 1 ensures it stays square regardless of container height */
+    width: 100%;
     max-width: 100%;
     max-height: 100%;
   }

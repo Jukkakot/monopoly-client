@@ -33,6 +33,8 @@ export default function Header({ isSpectator }: Props) {
   const snap = state.snapshot
   const activePlayer = snap?.players.find(p => p.playerId === snap?.turn?.activePlayerId)
   const activeSeat = snap?.seats.find(s => s.playerId === snap?.turn?.activePlayerId)
+  const lastDice = snap?.turn?.lastDice
+  const diceSum = lastDice ? lastDice[0] + lastDice[1] : null
 
   return (
     <header className={styles.header}>
@@ -46,6 +48,9 @@ export default function Header({ isSpectator }: Props) {
             <span className={styles.movingName} style={{ color: activeSeat?.tokenColorHex ?? 'rgba(255,255,255,0.9)' }}>
               {activePlayer.name}
             </span>
+            {diceSum !== null && (
+              <span className={styles.movingDiceSum}>{diceSum}</span>
+            )}
           </div>
         )}
       </div>

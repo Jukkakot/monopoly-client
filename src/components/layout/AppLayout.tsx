@@ -25,10 +25,22 @@ function loadMobilePanelWidth(): number {
     const v = localStorage.getItem('monopoly_mobile_panel_width')
     if (v) { const n = parseInt(v); if (n >= MOBILE_PANEL_MIN && n <= MOBILE_PANEL_MAX) return n }
   } catch {}
-  // Default: right panel width = viewport width minus viewport height → board is square
   return typeof window !== 'undefined'
     ? Math.min(MOBILE_PANEL_MAX, Math.max(MOBILE_PANEL_MIN, window.innerWidth - window.innerHeight))
     : 240
+}
+
+const MOBILE_BOARD_H_MIN = 150
+const MOBILE_BOARD_H_MAX = 560
+
+function loadMobileBoardHeight(): number {
+  try {
+    const v = localStorage.getItem('monopoly_mobile_board_height')
+    if (v) { const n = parseInt(v); if (n >= MOBILE_BOARD_H_MIN && n <= MOBILE_BOARD_H_MAX) return n }
+  } catch {}
+  return typeof window !== 'undefined'
+    ? Math.min(MOBILE_BOARD_H_MAX, Math.max(MOBILE_BOARD_H_MIN, window.innerWidth))
+    : 320
 }
 
 
@@ -52,6 +64,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const lastSeenLogCount = useRef(state.events.length)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)
   const [mobilePanelWidth, setMobilePanelWidth] = useState(loadMobilePanelWidth)
+  const [mobileBoardHeight, setMobileBoardHeight] = useState(loadMobileBoardHeight)
   const [isLandscape, setIsLandscape] = useState(() =>
     typeof window !== 'undefined'
       ? window.matchMedia('(orientation: landscape) and (max-width: 767px)').matches
@@ -83,6 +96,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const mobilePanelWidthRef = useRef(mobilePanelWidth)
   useEffect(() => { mobilePanelWidthRef.current = mobilePanelWidth }, [mobilePanelWidth])
 
+  // Mobile portrait resize handle (touch-based, vertical)
+  const portraitDragRef = useRef<{ startY: number; startH: number } | null>(null)
+  const mobileBoardHeightRef = useRef(mobileBoardHeight)
+  useEffect(() => { mobileBoardHeightRef.current = mobileBoardHeight }, [mobileBoardHeight])
+
   useEffect(() => {
     const mqLandscape = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
     const handlerLandscape = (e: MediaQueryListEvent) => setIsLandscape(e.matches)
@@ -105,11 +123,20 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         const newW = Math.min(MOBILE_PANEL_MAX, Math.max(MOBILE_PANEL_MIN, mobileDragRef.current.startW + delta))
         setMobilePanelWidth(newW)
       }
+      if (portraitDragRef.current) {
+        const delta = e.touches[0].clientY - portraitDragRef.current.startY
+        const newH = Math.min(MOBILE_BOARD_H_MAX, Math.max(MOBILE_BOARD_H_MIN, portraitDragRef.current.startH + delta))
+        setMobileBoardHeight(newH)
+      }
     }
     function onTouchEnd() {
       if (mobileDragRef.current) {
         mobileDragRef.current = null
         try { localStorage.setItem('monopoly_mobile_panel_width', String(mobilePanelWidthRef.current)) } catch {}
+      }
+      if (portraitDragRef.current) {
+        portraitDragRef.current = null
+        try { localStorage.setItem('monopoly_mobile_board_height', String(mobileBoardHeightRef.current)) } catch {}
       }
     }
     window.addEventListener('touchmove', onTouchMove, { passive: true })
@@ -120,6 +147,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   function onMobileHandleTouchStart(e: React.TouchEvent) {
     e.stopPropagation() // prevent tab swipe from firing
     mobileDragRef.current = { startX: e.touches[0].clientX, startW: mobilePanelWidthRef.current }
+  }
+
+  function onPortraitHandleTouchStart(e: React.TouchEvent) {
+    if (isLandscape) return
+    portraitDragRef.current = { startY: e.touches[0].clientY, startH: mobileBoardHeightRef.current }
   }
 
   useEffect(() => {
@@ -208,7 +240,10 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       {/* ── Mobile: outer container (column in portrait, row in landscape) ── */}
       <div className={styles.mobileContent}>
         {/* Board: portrait = top section (hidden on non-board tabs); landscape = always-visible left column */}
-        <div className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}>
+        <div
+          className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}
+          style={isMobile && !isLandscape ? { height: mobileBoardHeight } : undefined}
+        >
           {isMobile && board}
         </div>
 
@@ -217,7 +252,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
         {/* Right panel: header + content tabs + bottom nav */}
         <div className={styles.mobileRight} style={isLandscape ? { flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth } : undefined} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-          <div className={styles.mobileHeader}>{header}</div>
+          <div className={styles.mobileHeader} onTouchStart={onPortraitHandleTouchStart}>{header}</div>
 
           {/* Cash bar — portrait board tab only; hidden in landscape (no vertical room) */}
           {snap && snap.players.length > 0 && mobileTab === 'board' && (
