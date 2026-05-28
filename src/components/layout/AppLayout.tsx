@@ -217,7 +217,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   }
 
   return (
-    <div className={styles.root} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div className={styles.root}>
       {/* ── Desktop: board column ── */}
       <div className={styles.boardCol}>
         {!isMobile && board}
@@ -233,8 +233,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           <div className={styles.playersWrapper}>{players}</div>
           <div className={styles.sideDivider} />
           <div className={styles.logWrapper}>{log}</div>
+          <div className={styles.actions}>{actions}</div>
         </div>
-        <div className={styles.actions}>{actions}</div>
       </div>
 
       {/* ── Mobile: outer container (column in portrait, row in landscape) ── */}
@@ -251,7 +251,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         <div className={styles.mobileResizeHandle} onTouchStart={onMobileHandleTouchStart} />
 
         {/* Right panel: header + content tabs + bottom nav */}
-        <div className={styles.mobileRight} style={isLandscape ? { flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth } : undefined}>
+        <div className={styles.mobileRight} style={isLandscape ? { flexBasis: mobilePanelWidth, minWidth: mobilePanelWidth, maxWidth: mobilePanelWidth } : undefined} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {/* Header doubles as portrait drag handle — touch and drag up/down to resize board */}
           <div className={styles.mobileHeader} onTouchStart={onPortraitHandleTouchStart}>{header}</div>
 
