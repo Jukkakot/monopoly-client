@@ -271,11 +271,14 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
   }, [diceStr])
 
-  // Dice zoom: when new dice result arrives, zoom to center (sentinel -1) via zoomedSpot.
-  // Using zoomedSpot avoids race conditions with the animatingPlayers effect, which
-  // will simply overwrite -1 with the actual token spot on the very next render.
+  // Dice zoom: zoom to board center when new dice arrive, hold until first token step.
+  // diceZoomBlockRef prevents animatedPositions/animatingPlayers effects from overriding
+  // the sentinel until the token actually moves (pos changes from its settled start pos).
   const zoomToDiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevDiceForZoomRef = useRef<string | null>(null)
+  const prevDiceForZoomRef = useRef<string | null>(diceStr)  // init to current → no zoom on mount
+  const diceZoomBlockRef = useRef(false)
+  const animStartPosRef = useRef<number | null>(null)
+
   useEffect(() => {
     if (!diceStr || diceStr === prevDiceForZoomRef.current) return
     if (loadZoomMode() === 'off') return
@@ -284,11 +287,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (pid && !shouldZoomForPlayer(pid)) return
     prevDiceForZoomRef.current = diceStr
     userZoomedOutRef.current = false
+    diceZoomBlockRef.current = true
     if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
     if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
     setZoomedSpot(DICE_CENTER_SENTINEL)
-    // Fallback: zoom out if no token animation follows (e.g. stayed in jail)
+    // Fallback: release block if token animation never fires (jail, etc.)
     zoomToDiceTimerRef.current = setTimeout(() => {
+      diceZoomBlockRef.current = false
       setZoomedSpot(prev => prev === DICE_CENTER_SENTINEL ? null : prev)
     }, 1400)
   }, [diceStr])
@@ -395,7 +400,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     return pid === myId
   }
 
-  // Follow the active player's token step by step during animation
+  // Follow the active player's token step by step during animation.
+  // Also detects the first REAL step (pos != startPos) to release the dice-zoom block.
   useEffect(() => {
     if (userZoomedOutRef.current) return
     if (animatingPlayers.size === 0) return
@@ -403,29 +409,39 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (!pid || !animatingPlayers.has(pid)) return
     if (!shouldZoomForPlayer(pid)) return
     const pos = animatedPositions.get(pid)
-    if (pos !== undefined) setZoomedSpot(pos)
+    if (pos === undefined) return
+
+    if (diceZoomBlockRef.current) {
+      // Still in dice zoom phase — only release when position actually changes from start
+      if (pos === animStartPosRef.current) return  // no real movement yet
+      // First real step fired: release block and hand off to token zoom
+      diceZoomBlockRef.current = false
+      if (zoomToDiceTimerRef.current) { clearTimeout(zoomToDiceTimerRef.current); zoomToDiceTimerRef.current = null }
+    }
+    setZoomedSpot(pos)
   }, [animatedPositions, animatingPlayers])
 
-  // Detect animation start → zoom in immediately; animation end → zoom out after delay
+  // Detect animation start/end
   useEffect(() => {
     const nowSize = animatingPlayers.size
     const prevSize = prevAnimatingSizeRef.current
     prevAnimatingSizeRef.current = nowSize
 
     if (nowSize > 0 && prevSize === 0) {
-      // New dice roll: reset user zoom-out, resume auto-zoom
       userZoomedOutRef.current = false
       if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
       const pid = stateRef.current.turn?.activePlayerId
       if (!pid || !animatingPlayers.has(pid)) return
       if (!shouldZoomForPlayer(pid)) return
-      const pos = animatedPositions.get(pid)
+      // Record settled position so we know when the first real step fires
+      const startPos = animatedPositions.get(pid)
         ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex
-      if (pos !== undefined) setZoomedSpot(pos)
+      animStartPosRef.current = startPos ?? null
+      // Only set zoom immediately if dice zoom is not active
+      if (!diceZoomBlockRef.current && startPos !== undefined) setZoomedSpot(startPos)
     }
 
     if (nowSize === 0 && prevSize > 0) {
-      // Animation ended: zoom out after delay
       zoomOutTimerRef.current = setTimeout(() => setZoomedSpot(null), ZOOM_OUT_DELAY_MS)
     }
   }, [animatingPlayers])
@@ -592,13 +608,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       {cardBubblePos && cardBubbleText && (() => {
         const tailCls = { top: styles.tailTop, bottom: styles.tailBottom, left: styles.tailLeft, right: styles.tailRight }[cardBubblePos.tailDir]
         const colorCls = isChanceCard ? styles.cardChance : styles.cardCommunity
-        return (
-          <div
-            className={`${styles.cardBubbleAnchor} ${tailCls}`}
-            style={{ left: cardBubblePos.x, top: cardBubblePos.y, pointerEvents: isMyCardAck ? 'all' : 'none', cursor: isMyCardAck ? 'pointer' : 'default' }}
-            onClick={isMyCardAck ? () => sendCmd({ type: 'AcknowledgeCard', sessionId: state.sessionId, actorPlayerId: gameState.myPlayerId! }) : undefined}
-          >
-            <div className={`${styles.cardBubble} ${colorCls}`}>
+        const ackCmd = isMyCardAck
+          ? () => sendCmd({ type: 'AcknowledgeCard', sessionId: state.sessionId, actorPlayerId: gameState.myPlayerId! })
+          : undefined
+        return (<>
+          {isMyCardAck && <div className={styles.cardDismissOverlay} onClick={ackCmd} />}
+          <div className={`${styles.cardBubbleAnchor} ${tailCls}`} style={{ left: cardBubblePos.x, top: cardBubblePos.y }}>
+            <div className={`${styles.cardBubble} ${colorCls}`} onClick={ackCmd} style={{ cursor: isMyCardAck ? 'pointer' : 'default' }}>
               <div className={styles.cardBubbleHeader}>
                 <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
                 <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
@@ -609,7 +625,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
               </div>
             </div>
           </div>
-        )
+        </>)
       })()}
     </div>
     {(zoomedSpot !== null || hasPinch) && (

@@ -279,11 +279,12 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const cardText = getCardText(state.lastCardKey ?? null, state.lastCardMessage ?? null)
     if (isMyTurn) {
       return (
-        <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+        <div className={`${styles.panel} ${styles.myTurnPanel}`}
+          onClick={() => cmd('AcknowledgeCard')} style={{ cursor: 'pointer' }}>
           <div className={styles.cardPopup}>
             <span className={styles.cardPopupIcon}>🃏</span>
             <span className={styles.cardPopupText}>{cardText ?? '🃏'}</span>
-            <button className={styles.cardPopupOk} onClick={() => cmd('AcknowledgeCard')}>{t.cardOkBtn}</button>
+            <div className={styles.cardPopupOk}>{t.cardOkBtn}</div>
           </div>
         </div>
       )

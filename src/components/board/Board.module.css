@@ -356,6 +356,14 @@
   transform: scale(1.08);
 }
 
+/* Transparent overlay so tapping anywhere on the board dismisses the card */
+.cardDismissOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 199;
+  cursor: pointer;
+}
+
 /* ── Card speech bubble anchored at token's board cell ── */
 .cardBubbleAnchor {
   position: absolute;
