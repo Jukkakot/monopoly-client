@@ -450,8 +450,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       // First real step: release block and hand off to token zoom
       diceZoomBlockRef.current = false
       animStartPosRef.current = null
-      if (zoomToDiceTimerRef.current) { clearTimeout(zoomToDiceTimerRef.current); zoomToDiceTimerRef.current = null }
     }
+    // Cancel any pending fallback zoom-out — we're actively following the token now
+    if (zoomToDiceTimerRef.current) { clearTimeout(zoomToDiceTimerRef.current); zoomToDiceTimerRef.current = null }
     setZoomedSpot(pos)
   }, [animatedPositions, animatingPlayers])
 
