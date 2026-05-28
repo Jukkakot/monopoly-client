@@ -87,7 +87,8 @@ export default function GameScreen() {
       if (isMyTurn && turn?.phase === 'WAITING_FOR_ROLL') {
         playDiceRoll()
         sendCmd({ type: 'RollDice', sessionId: snap.sessionId, actorPlayerId: myId })
-      } else if (isMyTurn && turn?.phase === 'WAITING_FOR_END_TURN') {
+      } else if (isMyTurn && turn?.phase === 'WAITING_FOR_END_TURN' && (turn?.consecutiveDoubles ?? 0) === 0) {
+        // Only fire EndTurn from keyboard when auto-advance isn't handling it (consecutiveDoubles>0 means auto-advance fires)
         playButtonClick()
         sendCmd({ type: 'EndTurn', sessionId: snap.sessionId, actorPlayerId: myId })
       }
