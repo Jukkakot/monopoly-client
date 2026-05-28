@@ -256,7 +256,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const prevActivePlayerRef = useRef<string | null | undefined>(null)
   useEffect(() => { stateRef.current = state }, [state])
 
-  // Track dice rolls for animation
+  // Track dice rolls for AnimatedDice key
   const [diceRollKey, setDiceRollKey] = useState(0)
   const prevDiceStrRef = useRef<string | null>(null)
   const diceStr = gameState.lastDice ? gameState.lastDice.join(',') : null
@@ -265,6 +265,24 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       prevDiceStrRef.current = diceStr
       setDiceRollKey(k => k + 1)
     }
+  }, [diceStr])
+
+  // Dice zoom: when new dice result arrives, zoom into board center (where dice are shown)
+  const [zoomToDice, setZoomToDice] = useState(false)
+  const zoomToDiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevDiceForZoomRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!diceStr || diceStr === prevDiceForZoomRef.current) return
+    if (loadZoomMode() === 'off') return
+    const pid = stateRef.current.turn?.activePlayerId
+    if (pid && !shouldZoomForPlayer(pid)) return
+    prevDiceForZoomRef.current = diceStr
+    userZoomedOutRef.current = false
+    setZoomToDice(true)
+    if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
+    // Hold until token animation takes over (cleared by animatingPlayers effect)
+    // Fallback timer in case animation never fires (e.g. jail, no movement)
+    zoomToDiceTimerRef.current = setTimeout(() => setZoomToDice(false), 1200)
   }, [diceStr])
 
   // Manual pinch-to-zoom state
@@ -398,13 +416,22 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       if (pos !== undefined) setZoomedSpot(pos)
     }
 
+    if (nowSize > 0 && prevSize === 0) {
+      // Token starts moving: hand off from dice zoom to token-follow zoom
+      setZoomToDice(false)
+      if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
+    }
+
     if (nowSize === 0 && prevSize > 0) {
       // Animation ended: zoom out after delay
       zoomOutTimerRef.current = setTimeout(() => setZoomedSpot(null), ZOOM_OUT_DELAY_MS)
     }
   }, [animatingPlayers])
 
-  useEffect(() => () => { if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current) }, [])
+  useEffect(() => () => {
+    if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
+    if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
+  }, [])
 
   // Reset zoom immediately when the active player changes (next turn started)
   const activePlayerId = state.turn?.activePlayerId
@@ -505,6 +532,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   if (hasPinch) {
     boardStyle.transform = `translate(${pinch.tx}%, ${pinch.ty}%) scale(${pinch.scale})`
     boardStyle.transition = 'none'
+  } else if (zoomToDice) {
+    // Zoom to board center where the dice are displayed (no translation = centered zoom)
+    boardStyle.transform = `scale(${ZOOM_SCALE})`
   } else if (zoomedSpot !== null) {
     boardStyle.transform = computeZoomTransform(zoomedSpot)
   }
