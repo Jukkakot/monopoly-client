@@ -22,8 +22,13 @@ const ZOOM_OUT_DELAY_MS = 900
 
 const DICE_CENTER_SENTINEL = -1  // sentinel: zoom to board center (dice area)
 
+// Vertical offset that brings the dice area (top portion of center flex column)
+// into the visual center of the board. Derived from: ty = (0.5 - dice_y) * scale * 100
+// where dice_y ≈ 0.33 (dice sit roughly 1/3 down from the board top).
+const DICE_ZOOM_TY = 42
+
 function computeZoomTransform(spotIndex: number): string {
-  if (spotIndex === DICE_CENTER_SENTINEL) return `scale(${ZOOM_SCALE})`
+  if (spotIndex === DICE_CENTER_SENTINEL) return `translate(0%, ${DICE_ZOOM_TY}%) scale(${ZOOM_SCALE})`
   const { row, col } = indexToGridPos(spotIndex)
   const tx = -ZOOM_SCALE * (col - 6) / 11 * 100
   const ty = -ZOOM_SCALE * (row - 6) / 11 * 100
