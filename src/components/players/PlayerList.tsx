@@ -195,11 +195,15 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
     }
   }, [state.players])
 
-  // Sort players: me first, then by seat index
+  // Sort players: me first (or host first if spectating), then by seat index
   const myId = gs.myPlayerId
   const sortedPlayers = [...state.players].sort((a, b) => {
     if (a.playerId === myId) return -1
     if (b.playerId === myId) return 1
+    if (!myId) {
+      if (a.playerId === state.hostPlayerId) return -1
+      if (b.playerId === state.hostPlayerId) return 1
+    }
     const sa = state.seats.find(s => s.playerId === a.playerId)?.seatIndex ?? 99
     const sb = state.seats.find(s => s.playerId === b.playerId)?.seatIndex ?? 99
     return sa - sb
