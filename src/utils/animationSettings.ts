@@ -25,7 +25,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     jailBlockMax: 120,
     cardBlockMin: 60,
     cardBlockMax: 120,
-    diceToMoveDelayMs: 300,
+    diceToMoveDelayMs: 1050,  // 550 anim + 400 settled + 100 preview
   },
   normal: {
     stepMs: 390,
@@ -37,7 +37,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     jailBlockMax: 2000,
     cardBlockMin: 500,
     cardBlockMax: 1400,
-    diceToMoveDelayMs: 900,
+    diceToMoveDelayMs: 1400,  // 550 anim + 400 settled + 450 preview
   },
   slow: {
     stepMs: 750,
@@ -49,7 +49,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     jailBlockMax: 4000,
     cardBlockMin: 900,
     cardBlockMax: 2500,
-    diceToMoveDelayMs: 1500,
+    diceToMoveDelayMs: 2100,  // 550 anim + 400 settled + 1150 preview
   },
 }
 

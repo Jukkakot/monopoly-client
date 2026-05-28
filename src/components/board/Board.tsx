@@ -292,11 +292,26 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
     if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
     setZoomedSpot(DICE_CENTER_SENTINEL)
-    // Fallback: release block if token animation never fires (jail, etc.)
+    // Three-phase chain (timings sum to diceToMoveDelayMs):
+    //   phase 1 ~550ms: dice animation plays (DICE_ANIM_MS, hardcoded in AnimatedDice)
+    //   phase 2  400ms: settled dice value visible (SETTLED_HOLD)
+    //   phase 3   rest: preview player's starting square
+    //   → first token step fires at diceToMoveDelayMs
+    const DICE_ANIM_MS = 550
+    const SETTLED_HOLD = 400
+    const transitionAt = DICE_ANIM_MS + SETTLED_HOLD   // 950ms: switch from dice to player
+    const movDelay = getAnimationConfig(loadAnimationSpeed()).diceToMoveDelayMs
     zoomToDiceTimerRef.current = setTimeout(() => {
+      zoomToDiceTimerRef.current = null
       diceZoomBlockRef.current = false
-      setZoomedSpot(prev => prev === DICE_CENTER_SENTINEL ? null : prev)
-    }, 1400)
+      const player = pid ? stateRef.current.players.find(p => p.playerId === pid) : null
+      if (player !== undefined) setZoomedSpot(player?.boardIndex ?? null)
+      // Fallback: zoom out if no movement follows (jail, etc.)
+      zoomToDiceTimerRef.current = setTimeout(() => {
+        zoomToDiceTimerRef.current = null
+        setZoomedSpot(null)
+      }, Math.max(400, movDelay - transitionAt) + 800)
+    }, transitionAt)
   }, [diceStr])
 
   // Manual pinch-to-zoom state
