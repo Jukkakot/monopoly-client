@@ -1006,7 +1006,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
       <Btn label={t.sendOfferBtn}
         onClick={() => sendCmd({ type: 'SubmitTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
-        variant="primary" />
+        variant="primary"
+        disabled={myOffer.moneyAmount === 0 && myOffer.propertyIds.length === 0 && myRequest.moneyAmount === 0 && myRequest.propertyIds.length === 0} />
       <Btn label={t.cancelBtn}
         onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
         variant="danger" />
