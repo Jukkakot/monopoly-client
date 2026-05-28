@@ -9,7 +9,7 @@ import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimati
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
-import { loadDiceZoomEnabled } from '../../utils/animationSettings'
+import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../../utils/animationSettings'
 import { AnimatedDice } from '../common/DiceDisplay'
 import { getCardText } from '../../i18n/cards'
 
@@ -292,11 +292,21 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
     if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
     setZoomedSpot(DICE_CENTER_SENTINEL)
-    // Fallback: release block if token animation never fires (jail, etc.)
+    // At (diceToMoveDelayMs - 300ms): hand off to player's position so zoom settles there
+    // before the token actually starts moving (300ms preview of starting square).
+    const movDelay = getAnimationConfig(loadAnimationSpeed()).diceToMoveDelayMs
+    const previewAt = Math.max(100, movDelay - 300)
     zoomToDiceTimerRef.current = setTimeout(() => {
+      zoomToDiceTimerRef.current = null
       diceZoomBlockRef.current = false
-      setZoomedSpot(prev => prev === DICE_CENTER_SENTINEL ? null : prev)
-    }, 1400)
+      const player = pid ? stateRef.current.players.find(p => p.playerId === pid) : null
+      if (player !== undefined) setZoomedSpot(player?.boardIndex ?? null)
+      // Fallback timer if no movement follows (jail, etc.)
+      zoomToDiceTimerRef.current = setTimeout(() => {
+        zoomToDiceTimerRef.current = null
+        setZoomedSpot(null)
+      }, 1800)
+    }, previewAt)
   }, [diceStr])
 
   // Manual pinch-to-zoom state
