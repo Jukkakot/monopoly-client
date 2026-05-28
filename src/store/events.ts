@@ -143,7 +143,18 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
       }
       case 'TRADE_ACCEPTED': {
         const p2 = players.find(p => p.playerId === pid2)
-        events.push(ev('🤝', t.tradeAccepted(name, p2?.name ?? '?'), [pid, pid2], 'accepted'))
+        const offeredParts = [
+          e.data.offeredProps ? e.data.offeredProps.split(',').map(id => SPOTS.find(s => s.id === id)?.name ?? id).join(', ') : '',
+          e.data.offeredMoney ? `€${e.data.offeredMoney}` : '',
+        ].filter(Boolean).join(' + ')
+        const requestedParts = [
+          e.data.requestedProps ? e.data.requestedProps.split(',').map(id => SPOTS.find(s => s.id === id)?.name ?? id).join(', ') : '',
+          e.data.requestedMoney ? `€${e.data.requestedMoney}` : '',
+        ].filter(Boolean).join(' + ')
+        const details = offeredParts || requestedParts
+          ? ' · ' + [offeredParts, requestedParts].filter(Boolean).join(' ↔ ')
+          : ''
+        events.push(ev('🤝', t.tradeAccepted(name, p2?.name ?? '?') + details, [pid, pid2], 'accepted'))
         break
       }
       case 'TRADE_DECLINED': {

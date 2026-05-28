@@ -158,8 +158,17 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   // SPECTATOR (no player credentials — bot-only game watcher)
   if (!myPlayerId) {
+    const trade = state.tradeState
+    const tradeInfo = trade
+      ? (() => {
+          const a = state.players.find(p => p.playerId === trade.initiatorPlayerId)?.name ?? '?'
+          const b = state.players.find(p => p.playerId === trade.recipientPlayerId)?.name ?? '?'
+          return `🤝 ${a} ↔ ${b}`
+        })()
+      : null
     return (
       <div className={styles.panel}>
+        {tradeInfo && <div className={styles.infoBox}>{tradeInfo}</div>}
         <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
         <Btn label={t.endGameBtn} onClick={() => cmd('AbortGame')} variant="danger" />
       </div>
