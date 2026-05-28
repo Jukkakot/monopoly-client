@@ -354,63 +354,114 @@
   transform: scale(1.08);
 }
 
-/* ── Card overlay anchored toward board center from the token ── */
+/* ── Card speech bubble anchored at token's board cell ── */
 .cardBubbleAnchor {
   position: absolute;
-  pointer-events: none;
+  width: 0;
+  height: 0;
   z-index: 200;
-  /* anchor is centered on calculated point; card + tail center on it */
+  /* pointer-events set inline; left/top set inline */
 }
 
-/* Card is centered on the anchor point */
+/* Card is positioned via individual CSS translate/left/top relative to anchor */
 .cardBubble {
-  position: relative;
-  width: clamp(82px, 17vw, 148px);
+  position: absolute;
+  width: clamp(90px, 18vw, 155px);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;  /* allow ::after tail to extend outside */
   box-shadow:
-    0 10px 36px rgba(0,0,0,0.55),
-    0 3px 10px rgba(0,0,0,0.3),
+    0 8px 28px rgba(0,0,0,0.55),
+    0 2px 8px rgba(0,0,0,0.3),
     inset 0 0 0 1px rgba(255,255,255,0.15);
   display: flex;
   flex-direction: column;
-  transform: translate(-50%, -50%);
-  animation: cardDeal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardDeal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Speech-bubble tail on the card pointing toward the token */
+/* ── Tail direction → card placement relative to anchor (token center) ── */
+/* tailBottom: token on bottom row → card sits ABOVE the token */
+.tailBottom .cardBubble {
+  bottom: 12px;
+  left: 50%;
+  translate: -50% 0;
+  transform-origin: 50% 100%;
+}
+/* tailTop: token on top row → card sits BELOW the token */
+.tailTop .cardBubble {
+  top: 12px;
+  left: 50%;
+  translate: -50% 0;
+  transform-origin: 50% 0%;
+}
+/* tailRight: token on right col → card sits LEFT of the token */
+.tailRight .cardBubble {
+  right: 12px;
+  top: 50%;
+  translate: 0 -50%;
+  transform-origin: 100% 50%;
+}
+/* tailLeft: token on left col → card sits RIGHT of the token */
+.tailLeft .cardBubble {
+  left: 12px;
+  top: 50%;
+  translate: 0 -50%;
+  transform-origin: 0% 50%;
+}
+
+/* ── Tail triangles ── */
 .cardBubble::after {
   content: '';
   position: absolute;
   width: 0;
   height: 0;
-  border: clamp(6px, 1vw, 10px) solid transparent;
 }
 
-/* Token is above → tail on top edge of card */
-.bubbleAbove .cardBubble::after {
-  top: -1px;
-  border-top: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+/* tailBottom → tail points DOWN at bottom of card */
+.tailBottom .cardBubble::after {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top: 10px solid var(--card-color);
   border-bottom: none;
 }
-.bubbleAbove.tailRight .cardBubble::after { left: 20%; }
-.bubbleAbove.tailLeft  .cardBubble::after { right: 20%; left: auto; }
 
-/* Token is below → tail on bottom edge of card */
-.bubbleBelow .cardBubble::after {
-  bottom: -1px;
-  border-bottom: clamp(8px, 1.2vw, 12px) solid var(--card-color);
+/* tailTop → tail points UP at top of card */
+.tailTop .cardBubble::after {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-bottom: 10px solid var(--card-color);
   border-top: none;
 }
-.bubbleBelow.tailRight .cardBubble::after { left: 20%; }
-.bubbleBelow.tailLeft  .cardBubble::after { right: 20%; left: auto; }
+
+/* tailRight → tail points RIGHT on right side of card */
+.tailRight .cardBubble::after {
+  right: -10px;
+  top: 30%;
+  transform: translateY(-50%);
+  border: 10px solid transparent;
+  border-left: 10px solid var(--card-color);
+  border-right: none;
+}
+
+/* tailLeft → tail points LEFT on left side of card */
+.tailLeft .cardBubble::after {
+  left: -10px;
+  top: 30%;
+  transform: translateY(-50%);
+  border: 10px solid transparent;
+  border-right: 10px solid var(--card-color);
+  border-left: none;
+}
 
 /* Chance = orange, Community = teal-blue */
 .cardChance  { --card-color: #e65100; border: 2px solid #e65100; }
 .cardCommunity { --card-color: #1565c0; border: 2px solid #1565c0; }
 
-.cardChance .cardBubbleHeader  { background: linear-gradient(160deg, #e65100 0%, #bf360c 100%); }
-.cardCommunity .cardBubbleHeader { background: linear-gradient(160deg, #1565c0 0%, #0d47a1 100%); }
+.cardChance .cardBubbleHeader  { background: linear-gradient(160deg, #e65100 0%, #bf360c 100%); border-radius: 6px 6px 0 0; }
+.cardCommunity .cardBubbleHeader { background: linear-gradient(160deg, #1565c0 0%, #0d47a1 100%); border-radius: 6px 6px 0 0; }
 
 .cardBubbleHeader {
   padding: clamp(5px, 1vw, 9px) clamp(6px, 1.2vw, 12px);
@@ -437,6 +488,7 @@
 
 .cardBubbleBody {
   background: #fffdf0;
+  border-radius: 0 0 6px 6px;
   padding: clamp(6px, 1.2vw, 12px) clamp(6px, 1.2vw, 10px);
   display: flex;
   flex-direction: column;
@@ -446,7 +498,7 @@
 }
 
 .cardBubbleText {
-  font-size: clamp(0.58rem, 1.05vw, 0.84rem);
+  font-size: clamp(0.6rem, 1.1vw, 0.88rem);
   color: #1a1a1a;
   font-weight: 700;
   line-height: 1.35;
@@ -468,17 +520,7 @@
 }
 
 @keyframes cardDeal {
-  0%   {
-    transform: scale(0.5) rotateX(50deg) rotateZ(-6deg);
-    opacity: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  55%  {
-    transform: scale(1.06) rotateX(-3deg) rotateZ(1.5deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotateX(0deg) rotateZ(0deg);
-    opacity: 1;
-  }
+  0%   { scale: 0.55; opacity: 0; }
+  60%  { scale: 1.06; opacity: 1; }
+  100% { scale: 1;    opacity: 1; }
 }

@@ -243,7 +243,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardJumpingPlayers = useCardJumpingPlayers()
   const steppingPlayers = useSteppingPlayers()
   const animatingPlayers = useAnimatingPlayers()
-  const { state: gameState } = useGame()
+  const { state: gameState, sendCmd } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
 
@@ -476,21 +476,24 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
-  // Position the card bubble toward board center from the token so it never clips
+  // Position card bubble AT the token's cell; tail direction from which board edge the token is on
   const cardBubblePos = useMemo(() => {
     if (!cardBubbleText || !activeTurnPlayer) return null
     const displayIdx = animatedPositions.get(activeTurnPlayer.playerId) ?? activeTurnPlayer.boardIndex
     const { row, col } = indexToGridPos(displayIdx)
-    const tx = (col - 0.5) / 11
-    const ty = (row - 0.5) / 11
-    // Place anchor 45% of the way from center toward the token — always well inside the board
-    const bubbleX = 0.5 + 0.45 * (tx - 0.5)
-    const bubbleY = 0.5 + 0.45 * (ty - 0.5)
-    // Tail direction: which side of the card faces the token
-    const inTop = ty < 0.5
-    const inLeft = tx < 0.5
-    return { left: `${bubbleX * 100}%`, top: `${bubbleY * 100}%`, inTop, inLeft }
+    const x = `${(col - 0.5) / 11 * 100}%`
+    const y = `${(row - 0.5) / 11 * 100}%`
+    // Determine tail direction: which edge of the board is the token on?
+    // Tail points FROM card TOWARD token (i.e., toward the edge)
+    let tailDir: 'top' | 'bottom' | 'left' | 'right'
+    if (row === 11)      tailDir = 'bottom'  // bottom row → card above, tail points down
+    else if (row === 1)  tailDir = 'top'     // top row → card below, tail points up
+    else if (col === 11) tailDir = 'right'   // right col → card left, tail points right
+    else                 tailDir = 'left'    // left col → card right, tail points left
+    return { x, y, tailDir }
   }, [cardBubbleText, activeTurnPlayer, animatedPositions])
+
+  const isMyCardAck = isCardAck && state.turn?.activePlayerId === gameState.myPlayerId
 
   const selectedSpot = selectedSpotId ? SPOTS.find(s => s.id === selectedSpotId) : null
   const selectedGroupType = selectedSpot?.streetType
@@ -557,27 +560,28 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
           <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
       </div>
-      {cardBubblePos && cardBubbleText && (
-        <div
-          className={[
-            styles.cardBubbleAnchor,
-            cardBubblePos.inTop  ? styles.bubbleBelow : styles.bubbleAbove,
-            cardBubblePos.inLeft ? styles.tailRight   : styles.tailLeft,
-          ].join(' ')}
-          style={{ left: cardBubblePos.left, top: cardBubblePos.top }}
-        >
-          <div className={`${styles.cardBubble} ${isChanceCard ? styles.cardChance : styles.cardCommunity}`}>
-            <div className={styles.cardBubbleHeader}>
-              <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
-              <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
-            </div>
-            <div className={styles.cardBubbleBody}>
-              <span className={styles.cardBubbleText}>{cardBubbleText}</span>
-              <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+      {cardBubblePos && cardBubbleText && (() => {
+        const tailCls = { top: styles.tailTop, bottom: styles.tailBottom, left: styles.tailLeft, right: styles.tailRight }[cardBubblePos.tailDir]
+        const colorCls = isChanceCard ? styles.cardChance : styles.cardCommunity
+        return (
+          <div
+            className={`${styles.cardBubbleAnchor} ${tailCls}`}
+            style={{ left: cardBubblePos.x, top: cardBubblePos.y, pointerEvents: isMyCardAck ? 'all' : 'none', cursor: isMyCardAck ? 'pointer' : 'default' }}
+            onClick={isMyCardAck ? () => sendCmd({ type: 'AcknowledgeCard', sessionId: state.sessionId, actorPlayerId: gameState.myPlayerId! }) : undefined}
+          >
+            <div className={`${styles.cardBubble} ${colorCls}`}>
+              <div className={styles.cardBubbleHeader}>
+                <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
+                <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
+              </div>
+              <div className={styles.cardBubbleBody}>
+                <span className={styles.cardBubbleText}>{cardBubbleText}</span>
+                <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
     {(zoomedSpot !== null || hasPinch) && (
       <button className={styles.zoomOutBtn} onClick={() => {
