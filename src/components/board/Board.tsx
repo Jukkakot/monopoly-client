@@ -17,7 +17,7 @@ import { getCardText } from '../../i18n/cards'
 const EMPTY_PLAYERS: PlayerSnapshot[] = []
 
 const ZOOM_SCALE = 2.5
-const ZOOM_OUT_DELAY_MS = 2500
+const ZOOM_OUT_DELAY_MS = 900
 
 function computeZoomTransform(spotIndex: number): string {
   const { row, col } = indexToGridPos(spotIndex)
@@ -253,6 +253,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const userZoomedOutRef = useRef(false)
   const stateRef = useRef(state)
   const prevAnimatingSizeRef = useRef(0)
+  const prevActivePlayerRef = useRef<string | null | undefined>(null)
   useEffect(() => { stateRef.current = state }, [state])
 
   // Track dice rolls for animation
@@ -404,6 +405,18 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   }, [animatingPlayers])
 
   useEffect(() => () => { if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current) }, [])
+
+  // Reset zoom immediately when the active player changes (next turn started)
+  const activePlayerId = state.turn?.activePlayerId
+  useEffect(() => {
+    const prev = prevActivePlayerRef.current
+    prevActivePlayerRef.current = activePlayerId
+    if (prev !== null && prev !== undefined && prev !== activePlayerId) {
+      if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
+      userZoomedOutRef.current = false
+      setZoomedSpot(null)
+    }
+  }, [activePlayerId])
 
   void zoomMode // triggers re-render when setting changes so shouldZoomForPlayer stays fresh
 
