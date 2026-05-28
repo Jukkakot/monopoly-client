@@ -352,6 +352,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const joinSession = useCallback((sessionId: string) => {
     dispatch({ type: 'SET_SESSION', sessionId })
     retryCount.current = 0
+    versionRef.current = 0
     try { localStorage.setItem('monopoly_last_session', sessionId) } catch { /* ignore */ }
     const botSpeed = loadBotSpeed()
     applySessionSettings(sessionId, { botSpeed })
@@ -410,7 +411,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const es = new EventSource(versionRef.current > 0 ? `${url}?lastEventId=${versionRef.current}` : url)
       esRef.current = es
 
+      // Guard: if no SSE message arrives within 8s the initial snapshot was silently
+      // dropped by the backend (race between keepAlive setup and first sendEvent).
+      // Reset version and reconnect so the backend sends a fresh initial snapshot.
+      let firstMessageReceived = false
+      const noDataTimer = setTimeout(() => {
+        if (!firstMessageReceived && !cancelled) {
+          es.close()
+          esRef.current = null
+          versionRef.current = 0
+          retryCount.current = 0
+          connect()
+        }
+      }, 8000)
+
       es.onmessage = (e) => {
+        if (!firstMessageReceived) {
+          firstMessageReceived = true
+          clearTimeout(noDataTimer)
+        }
         try {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
           const clientReceivedMs = Date.now()
@@ -447,6 +466,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
 
       es.onerror = () => {
+        clearTimeout(noDataTimer)
         es.close()
         esRef.current = null
         if (cancelled) return
