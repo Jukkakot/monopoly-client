@@ -211,7 +211,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={styles.panel}>
         {turn?.lastDice && (
           <div className={styles.diceResult}>
-            <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+            <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28}  />
           </div>
         )}
       </div>
@@ -285,7 +285,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             </div>
             {turn?.lastDice && phase === 'WAITING_FOR_END_TURN' && (
               <div className={styles.diceResult}>
-                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
+                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28}  />
               </div>
             )}
             {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
@@ -341,7 +341,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           <>
             {consecutiveDoubles > 0 && turn?.lastDice && (
               <div className={styles.diceResult}>
-                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={32} showSum />
+                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={32}  />
               </div>
             )}
             {consecutiveDoubles > 0 && (
@@ -395,7 +395,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           <>
             {lastDice && (
               <div className={styles.diceResult}>
-                <AnimatedDice dice={lastDice} rollKey={diceRollKey} size={32} showSum />
+                <AnimatedDice dice={lastDice} rollKey={diceRollKey} size={32}  />
               </div>
             )}
             {showJailEscapeNote && (

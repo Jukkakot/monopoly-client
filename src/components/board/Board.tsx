@@ -543,7 +543,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       })}
       <div className={styles.center}>
         <OwnershipEdgeBarsM properties={displayState.properties} seats={displayState.seats} />
-        <AnimatedDice dice={gameState.lastDice} rollKey={diceRollKey} showSum className={styles.diceArea} />
+        <AnimatedDice dice={gameState.lastDice} rollKey={diceRollKey} className={styles.diceArea} />
         <div className={styles.centerLogo}>Monopoly</div>
         <div className={styles.centerSub}>Helsinki Edition</div>
         {activeTurnPlayer && state.status !== 'GAME_OVER' && (
