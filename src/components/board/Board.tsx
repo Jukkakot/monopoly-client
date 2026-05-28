@@ -288,6 +288,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     prevDiceForZoomRef.current = diceStr
     userZoomedOutRef.current = false
     diceZoomBlockRef.current = true
+    animStartPosRef.current = null  // reset so lazy-init fires on first animatedPositions fire
     if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
     if (zoomToDiceTimerRef.current) clearTimeout(zoomToDiceTimerRef.current)
     setZoomedSpot(DICE_CENTER_SENTINEL)
@@ -401,7 +402,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   }
 
   // Follow the active player's token step by step during animation.
-  // Also detects the first REAL step (pos != startPos) to release the dice-zoom block.
+  // When diceZoomBlockRef is active, we do a lazy-init of animStartPosRef on the
+  // very first fire (so we don't depend on animation-start effect running first).
+  // The block is released only when pos actually differs from the recorded start pos.
   useEffect(() => {
     if (userZoomedOutRef.current) return
     if (animatingPlayers.size === 0) return
@@ -412,16 +415,20 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (pos === undefined) return
 
     if (diceZoomBlockRef.current) {
-      // Still in dice zoom phase — only release when position actually changes from start
-      if (pos === animStartPosRef.current) return  // no real movement yet
-      // First real step fired: release block and hand off to token zoom
+      if (animStartPosRef.current === null) {
+        // First fire with dice zoom active — record current displayed pos as baseline
+        animStartPosRef.current = pos
+      }
+      if (pos === animStartPosRef.current) return  // token hasn't moved yet, keep dice zoom
+      // First real step: release block and hand off to token zoom
       diceZoomBlockRef.current = false
+      animStartPosRef.current = null
       if (zoomToDiceTimerRef.current) { clearTimeout(zoomToDiceTimerRef.current); zoomToDiceTimerRef.current = null }
     }
     setZoomedSpot(pos)
   }, [animatedPositions, animatingPlayers])
 
-  // Detect animation start/end
+  // Detect animation start/end — only resets state, zoom is handled above
   useEffect(() => {
     const nowSize = animatingPlayers.size
     const prevSize = prevAnimatingSizeRef.current
@@ -430,18 +437,19 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (nowSize > 0 && prevSize === 0) {
       userZoomedOutRef.current = false
       if (zoomOutTimerRef.current) clearTimeout(zoomOutTimerRef.current)
-      const pid = stateRef.current.turn?.activePlayerId
-      if (!pid || !animatingPlayers.has(pid)) return
-      if (!shouldZoomForPlayer(pid)) return
-      // Record settled position so we know when the first real step fires
-      const startPos = animatedPositions.get(pid)
-        ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex
-      animStartPosRef.current = startPos ?? null
-      // Only set zoom immediately if dice zoom is not active
-      if (!diceZoomBlockRef.current && startPos !== undefined) setZoomedSpot(startPos)
+      // If no dice zoom is active, start following immediately from the settled pos
+      if (!diceZoomBlockRef.current) {
+        const pid = stateRef.current.turn?.activePlayerId
+        if (pid && animatingPlayers.has(pid) && shouldZoomForPlayer(pid)) {
+          const startPos = animatedPositions.get(pid)
+            ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex
+          if (startPos !== undefined) setZoomedSpot(startPos)
+        }
+      }
     }
 
     if (nowSize === 0 && prevSize > 0) {
+      animStartPosRef.current = null
       zoomOutTimerRef.current = setTimeout(() => setZoomedSpot(null), ZOOM_OUT_DELAY_MS)
     }
   }, [animatingPlayers])
