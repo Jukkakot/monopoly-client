@@ -393,9 +393,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       const touch = e.touches[0]
       const maxT = 50 * (g.startScale - 1)
       const newTx = Math.max(-maxT, Math.min(maxT,
-        g.startTx + (touch.clientX - g.startTouchX) / g.boardW * 100 / g.startScale))
+        g.startTx + (touch.clientX - g.startTouchX) / g.boardW * 100))
       const newTy = Math.max(-maxT, Math.min(maxT,
-        g.startTy + (touch.clientY - g.startTouchY) / g.boardH * 100 / g.startScale))
+        g.startTy + (touch.clientY - g.startTouchY) / g.boardH * 100))
       setPinch({ scale: g.startScale, tx: newTx, ty: newTy })
     }
   }
