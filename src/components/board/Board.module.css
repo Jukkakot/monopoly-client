@@ -43,10 +43,10 @@
 
 @media (max-width: 767px) {
   .board {
-    /* Both dimensions capped to the dragged height so the board is always square.
-       --board-max-size is set on the container in AppLayout. */
-    width: min(100%, var(--board-max-size, 100vmin));
-    height: min(100%, var(--board-max-size, 100vmin));
+    /* Always square: both dimensions = min(viewport-width, dragged-height).
+       Using 100vw (not 100%) so height is also bounded by the viewport width. */
+    width: min(100vw, var(--board-max-size, 100vmin));
+    height: min(100vw, var(--board-max-size, 100vmin));
     max-width: none;
     max-height: none;
   }
