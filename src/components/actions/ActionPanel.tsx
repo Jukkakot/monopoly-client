@@ -205,29 +205,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return <TradeSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
-  // While any token is moving — hold all phase-sensitive UI until arrival
+  // While any token is moving — status is shown in the header bar; just show dice result here
   if (tokenAnimating) {
-    if (!isMyTurn) {
-      const activePlayer = state.players.find(p => p.playerId === activeId)
-      const activeSeat = state.seats.find(s => s.playerId === activeId)
-      return (
-        <div className={styles.panel}>
-          {turn?.lastDice && (
-            <div className={styles.diceResult}>
-              <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
-            </div>
-          )}
-          <div className={`${styles.infoBox} ${styles.moving}`} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
-            <div className={styles.movingDots}>
-              <span />
-              <span />
-              <span />
-            </div>
-            {activePlayer?.name ?? '?'} …
-          </div>
-        </div>
-      )
-    }
     return (
       <div className={styles.panel}>
         {turn?.lastDice && (
@@ -235,14 +214,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28} showSum />
           </div>
         )}
-        <div className={`${styles.infoBox} ${styles.moving}`}>
-          <div className={styles.movingDots}>
-            <span />
-            <span />
-            <span />
-          </div>
-          {t.movingToken}
-        </div>
       </div>
     )
   }
@@ -273,15 +244,19 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            <div className={styles.infoBox} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
-              📍 <strong>{spot?.name ?? p.propertyDisplayName}</strong><br />
-              {t.priceLabel(p.price)}
+            <div className={styles.propBuyCard} style={color ? { borderLeft: `4px solid ${color}` } : {}}>
+              <span className={styles.propBuyName}>{spot?.name ?? p.propertyDisplayName}</span>
+              <span className={styles.propBuyPrice}>{t.priceLabel(p.price)}</span>
             </div>
-            {!canAfford && (
-              <div className={styles.warningBox}>{t.insufficientFunds}</div>
-            )}
-            <Btn label={isTouchDevice ? t.buyBtn(p.price) : t.buyBtnKbd(p.price)} disabled={!canAfford} onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="primary" />
-            <Btn label={isTouchDevice ? t.skipToAuction : t.skipToAuctionKbd} onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })} variant="ghost" />
+            {!canAfford && <div className={styles.warningBox}>{t.insufficientFunds}</div>}
+            <div className={styles.btnRow}>
+              <Btn label={t.buyBtn(p.price)} disabled={!canAfford}
+                onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
+                variant="primary" />
+              <Btn label={t.skipToAuction}
+                onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
+                variant="ghost" />
+            </div>
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />

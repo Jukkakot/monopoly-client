@@ -77,10 +77,10 @@
 
 .btn {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: none;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
   transition: filter 0.15s, transform 0.1s;
@@ -954,18 +954,52 @@
   flex-shrink: 0;
 }
 
+/* ── Compact property purchase card ── */
+.propBuyCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.propBuyName {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.propBuyPrice {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #2e7d32;
+  flex-shrink: 0;
+}
+
 /* ── Mobile compaction ── */
 @media (max-width: 767px) {
-  .panel { gap: 6px; }
+  .panel { gap: 5px; }
 
   .btn {
-    padding: 10px 14px;
-    font-size: 0.9rem;
+    padding: 9px 12px;
+    font-size: 0.85rem;
   }
 
   .infoBox {
-    padding: 8px 10px;
-    font-size: 0.83rem;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+  }
+
+  .diceResult {
+    padding: 6px 8px;
   }
 
   .myStats { display: none; }

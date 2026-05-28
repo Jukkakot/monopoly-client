@@ -3,6 +3,8 @@ import styles from './Header.module.css'
 import OverflowMenu from '../menu/OverflowMenu'
 import { loadSoundConfig, saveSoundConfig } from '../menu/SoundSettings'
 import { useT, useLang, useLangToggle } from '../../i18n/LanguageContext'
+import { useGame } from '../../store/GameContext'
+import { useIsAnimating } from '../../hooks/useTokenAnimation'
 
 interface Props {
   isSpectator?: boolean
@@ -13,6 +15,8 @@ export default function Header({ isSpectator }: Props) {
   const lang = useLang()
   const toggleLang = useLangToggle()
   const [muted, setMuted] = useState(() => loadSoundConfig().volume === 0)
+  const { state } = useGame()
+  const tokenAnimating = useIsAnimating()
 
   useEffect(() => {
     const cfg = loadSoundConfig()
@@ -26,10 +30,25 @@ export default function Header({ isSpectator }: Props) {
     setMuted(newVol === 0)
   }
 
+  const snap = state.snapshot
+  const activePlayer = snap?.players.find(p => p.playerId === snap?.turn?.activePlayerId)
+  const activeSeat = snap?.seats.find(s => s.playerId === snap?.turn?.activePlayerId)
+
   return (
     <header className={styles.header}>
       <div className={styles.logo} title="Monopoly Helsinki">MH</div>
-      <div className={styles.turnInfo} />
+      <div className={styles.turnInfo}>
+        {tokenAnimating && activePlayer && (
+          <div className={styles.movingStatus}>
+            <div className={styles.movingDots}>
+              <span /><span /><span />
+            </div>
+            <span className={styles.movingName} style={{ color: activeSeat?.tokenColorHex ?? 'rgba(255,255,255,0.9)' }}>
+              {activePlayer.name}
+            </span>
+          </div>
+        )}
+      </div>
       <div className={styles.controls}>
         {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
         <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>

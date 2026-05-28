@@ -66,25 +66,7 @@
 .mobileHeader {
   flex-shrink: 0;
   touch-action: pan-x;
-  cursor: row-resize;
   position: relative;
-}
-
-/* Subtle drag indicator — three small dots centered at top of the header */
-.mobileHeader::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  box-shadow:
-    -10px 0 0 rgba(255, 255, 255, 0.5),
-     10px 0 0 rgba(255, 255, 255, 0.5);
-  pointer-events: none;
 }
 
 .playerCashBar {

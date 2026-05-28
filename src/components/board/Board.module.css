@@ -43,7 +43,9 @@
 
 @media (max-width: 767px) {
   .board {
-    /* Board fills its container — height is controlled by the draggable portrait handle */
+    /* Always square: bounded by viewport width AND available height (leaving room for UI) */
+    width: min(100vw, calc(100svh - 158px));
+    height: min(100vw, calc(100svh - 158px));
     max-width: 100%;
     max-height: 100%;
   }
