@@ -50,8 +50,8 @@ export default function Header({ isSpectator }: Props) {
             </span>
             {lastDice && (
               <span className={styles.movingDice}>
-                <DieFace value={lastDice[0]} size={16} />
-                <DieFace value={lastDice[1]} size={16} />
+                <DieFace value={lastDice[0]} size={22} />
+                <DieFace value={lastDice[1]} size={22} />
               </span>
             )}
           </div>

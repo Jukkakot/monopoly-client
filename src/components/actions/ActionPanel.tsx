@@ -7,7 +7,6 @@ import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
-import { AnimatedDice } from '../common/DiceDisplay'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -77,17 +76,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
-
-  // Track dice roll key for animation
-  const [diceRollKey, setDiceRollKey] = useState(0)
-  const prevDiceStrRef = useRef<string | null>(null)
-  const diceStr = turn?.lastDice ? turn.lastDice.join(',') : null
-  useEffect(() => {
-    if (diceStr && diceStr !== prevDiceStrRef.current) {
-      prevDiceStrRef.current = diceStr
-      setDiceRollKey(k => k + 1)
-    }
-  }, [diceStr])
 
   // Track rent payment: record cash when my turn starts (WAITING_FOR_ROLL), detect drop on end
   const [visibleRent, setVisibleRent] = useState<{ amount: number; ownerName: string } | null>(null)
@@ -205,18 +193,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return <TradeSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
-  // While any token is moving — status is shown in the header bar; just show dice result here
-  if (tokenAnimating) {
-    return (
-      <div className={styles.panel}>
-        {turn?.lastDice && (
-          <div className={styles.diceResult}>
-            <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28}  />
-          </div>
-        )}
-      </div>
-    )
-  }
+  // While any token is moving — status shown in header bar, nothing needed here
+  if (tokenAnimating) return null
 
   // Debt
   if (state.activeDebt) {
@@ -283,11 +261,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 </span>
               </div>
             </div>
-            {turn?.lastDice && phase === 'WAITING_FOR_END_TURN' && (
-              <div className={styles.diceResult}>
-                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={28}  />
-              </div>
-            )}
             {phase === 'WAITING_FOR_DECISION' && state.pendingDecision && (
               <div className={styles.infoBox}>
                 📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
@@ -339,11 +312,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            {consecutiveDoubles > 0 && turn?.lastDice && (
-              <div className={styles.diceResult}>
-                <AnimatedDice dice={turn.lastDice} rollKey={diceRollKey} size={32}  />
-              </div>
-            )}
             {consecutiveDoubles > 0 && (
               <div className={`${styles.infoBox} ${styles.doubles}`}>
                 {t.doublesRoll}
