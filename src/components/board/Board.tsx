@@ -521,21 +521,37 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
-  // Position card bubble AT the token's cell; tail direction from which board edge the token is on
+  // Position card bubble at the INNER EDGE of the token's cell so the tail
+  // visually attaches to the board spot border, not just the cell center.
   const cardBubblePos = useMemo(() => {
     if (!cardBubbleText || !activeTurnPlayer) return null
     const displayIdx = animatedPositions.get(activeTurnPlayer.playerId) ?? activeTurnPlayer.boardIndex
     const { row, col } = indexToGridPos(displayIdx)
-    const x = `${(col - 0.5) / 11 * 100}%`
-    const y = `${(row - 0.5) / 11 * 100}%`
-    // Determine tail direction: which edge of the board is the token on?
-    // Tail points FROM card TOWARD token (i.e., toward the edge)
+    const cellW = 1 / 11  // one cell as fraction of board
+
     let tailDir: 'top' | 'bottom' | 'left' | 'right'
-    if (row === 11)      tailDir = 'bottom'  // bottom row → card above, tail points down
-    else if (row === 1)  tailDir = 'top'     // top row → card below, tail points up
-    else if (col === 11) tailDir = 'right'   // right col → card left, tail points right
-    else                 tailDir = 'left'    // left col → card right, tail points left
-    return { x, y, tailDir }
+    let ax: number  // anchor x (0–1)
+    let ay: number  // anchor y (0–1)
+
+    if (row === 11) {
+      tailDir = 'bottom'
+      ax = (col - 0.5) * cellW        // cell center horizontally
+      ay = (row - 1) * cellW           // TOP edge of bottom row = inner border
+    } else if (row === 1) {
+      tailDir = 'top'
+      ax = (col - 0.5) * cellW
+      ay = row * cellW                 // BOTTOM edge of top row = inner border
+    } else if (col === 11) {
+      tailDir = 'right'
+      ax = (col - 1) * cellW           // LEFT edge of right col = inner border
+      ay = (row - 0.5) * cellW
+    } else {
+      tailDir = 'left'
+      ax = col * cellW                 // RIGHT edge of left col = inner border
+      ay = (row - 0.5) * cellW
+    }
+
+    return { x: `${ax * 100}%`, y: `${ay * 100}%`, tailDir }
   }, [cardBubbleText, activeTurnPlayer, animatedPositions])
 
   const isMyCardAck = isCardAck && state.turn?.activePlayerId === gameState.myPlayerId
