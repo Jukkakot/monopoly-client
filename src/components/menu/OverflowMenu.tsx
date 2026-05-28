@@ -208,7 +208,14 @@ export default function OverflowMenu() {
               <>
                 <div className={styles.divider} />
                 <button className={`${styles.menuItem} ${styles.danger}`}
-                  onClick={() => { setOpen(false); navigate('/') }}>
+                  onClick={() => {
+                    setOpen(false)
+                    // Notify other players before navigating — only when actively participating
+                    if (myPlayerId && snapshot.status === 'IN_PROGRESS') {
+                      sendCmd({ type: 'LeaveGame', sessionId: sid, actorPlayerId: myPlayerId })
+                    }
+                    navigate('/')
+                  }}>
                   {t.leaveGameBtn}
                 </button>
               </>

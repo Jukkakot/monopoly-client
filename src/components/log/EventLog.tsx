@@ -19,6 +19,7 @@ const ICON_CLASS: Record<string, string> = {
   '🤝': styles.typeTrade,
   '🚫': styles.typeTrade,
   '💀': styles.typeBankrupt,
+  '🚪': styles.typeBankrupt,
   '🎊': styles.typeGameOver,
   '💰': styles.typeBuy,
   '💸': styles.typeRent,
@@ -34,7 +35,7 @@ const FILTER_ICONS: Record<FilterGroup, Set<string>> = {
   property: new Set(['🏠', '🔨']),
   build:    new Set(['🏗', '🏚', '🏦', '💳']),
   trade:    new Set(['🤝', '🚫']),
-  jail:     new Set(['⛓', '🔓', '💀', '🃏', '🎊', '🏆']),
+  jail:     new Set(['⛓', '🔓', '💀', '🚪', '🃏', '🎊', '🏆']),
 }
 
 const FILTER_LABELS: Record<FilterGroup, string> = {

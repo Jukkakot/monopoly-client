@@ -141,6 +141,10 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         events.push(ev('💀', t.wentBankrupt(name), [pid]))
         break
       }
+      case 'PLAYER_LEFT': {
+        events.push(ev('🚪', t.playerLeft(name), [pid]))
+        break
+      }
       case 'TRADE_ACCEPTED': {
         const p2 = players.find(p => p.playerId === pid2)
         const offeredParts = [
