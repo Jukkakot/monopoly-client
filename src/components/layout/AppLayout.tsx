@@ -242,7 +242,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         {/* Board: portrait = top section (hidden on non-board tabs); landscape = always-visible left column */}
         <div
           className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}
-          style={isMobile && !isLandscape ? { height: mobileBoardHeight } : undefined}
+          style={isMobile && !isLandscape ? { height: mobileBoardHeight, '--board-max-size': `${mobileBoardHeight}px` } as React.CSSProperties : undefined}
         >
           {isMobile && board}
         </div>
