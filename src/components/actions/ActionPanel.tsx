@@ -122,21 +122,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevPhaseRef.current = phase
   }, [phase, isMyTurn, me?.cash, me?.boardIndex, activeId, myPlayerId, state.properties, state.players])
 
-  // Auto-advance on doubles — skip the redundant "roll again" button
-  const doublesAutoAdvancedRef = useRef(false)
-  useEffect(() => {
-    if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') {
-      doublesAutoAdvancedRef.current = false
-      return
-    }
-    if ((turn?.consecutiveDoubles ?? 0) === 0) return
-    if (tokenAnimating) return
-    if (visibleRent && !rentDismissed) return
-    if (doublesAutoAdvancedRef.current) return
-    doublesAutoAdvancedRef.current = true
-    cmd('EndTurn')
-  }, [isMyTurn, phase, turn?.consecutiveDoubles, tokenAnimating, visibleRent, rentDismissed])
-
   function TabBar() {
     if (!hasPropActions) return null
     const mortgagedCount = myProps.filter(p => p.mortgaged).length
@@ -390,12 +375,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 <button className={styles.cardPopupOk} onClick={() => setRentDismissed(true)}>{t.cardOkBtn}</button>
               </div>
             )}
-            {!hasDoubles && (
-              <div className={styles.btnRow}>
-                <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
-                <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-              </div>
-            )}
+            <div className={styles.btnRow}>
+              <Btn
+                label={hasDoubles
+                  ? (isTouchDevice ? t.rollAgainBtn : t.rollAgainBtnKbd)
+                  : (isTouchDevice ? t.endTurn : t.endTurnKbd)}
+                onClick={() => cmd('EndTurn')}
+                variant="primary"
+              />
+              {!hasDoubles && <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />}
+            </div>
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
