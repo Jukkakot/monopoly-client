@@ -600,6 +600,8 @@
 .propCheckMortgaged { opacity: 0.75; }
 .propCheckMortgaged .propCheckName { text-decoration: line-through; }
 
+.tradePropMortgaged { opacity: 0.6; text-decoration: line-through; }
+
 .propMortgagedTag {
   font-size: 0.65rem;
   color: #b71c1c;
