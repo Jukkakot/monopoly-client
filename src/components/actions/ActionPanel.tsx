@@ -454,7 +454,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
   const t = useT()
   const sid = state.sessionId
   const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId)
-  const [mortgageOpen, setMortgageOpen] = useState(false)
+  const [mortgageOpen, setMortgageOpen] = useState(true)
   if (myProps.length === 0) return null
 
   // Find completed color groups
@@ -570,19 +570,18 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                     onClick={() => mortgagedProps.forEach(prop =>
                       sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }))} />
                 )}
-                <div className={styles.tradePropWrap}>
-                  {sortedProps.map(prop => {
+                {(() => {
+                  const free = sortedProps.filter(p => !p.mortgaged)
+                  const pledged = sortedProps.filter(p => p.mortgaged)
+                  const renderChip = (prop: typeof sortedProps[0]) => {
                     const spot = SPOTS.find(s => s.id === prop.propertyId)
                     if (!spot) return null
                     const color = STREET_COLORS[spot.streetType] ?? '#888'
                     const mortgageVal = spot.price ? Math.floor(spot.price / 2) : null
                     const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
-                    const label = prop.mortgaged
-                      ? `${t.redeemBtn} €${redeemCost}`
-                      : `${t.mortgageBtn} +€${mortgageVal}`
                     return (
                       <button key={prop.propertyId}
-                        className={`${styles.tradePropChip} ${prop.mortgaged ? styles.mortgageChipRedeemable : ''}`}
+                        className={styles.tradePropChip}
                         style={{
                           background: prop.mortgaged ? '#ffebee' : color + '25',
                           borderColor: prop.mortgaged ? '#e57373' : color,
@@ -590,11 +589,29 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                         }}
                         onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}>
                         {spot.name}
-                        <span className={styles.tradePropPrice}> {label.split(' ').slice(1).join(' ')}</span>
+                        <span className={styles.tradePropPrice}>
+                          {prop.mortgaged ? ` lunasta €${redeemCost}` : ` +€${mortgageVal}`}
+                        </span>
                       </button>
                     )
-                  })}
-                </div>
+                  }
+                  return (
+                    <>
+                      {free.length > 0 && (
+                        <>
+                          <div className={styles.debtChipLabel} style={{ color: '#555' }}>Panttaa</div>
+                          <div className={styles.tradePropWrap}>{free.map(renderChip)}</div>
+                        </>
+                      )}
+                      {pledged.length > 0 && (
+                        <>
+                          <div className={styles.debtChipLabel} style={{ color: '#b71c1c' }}>Pantattu — lunasta</div>
+                          <div className={styles.tradePropWrap}>{pledged.map(renderChip)}</div>
+                        </>
+                      )}
+                    </>
+                  )
+                })()}
               </>
             )}
           </>
