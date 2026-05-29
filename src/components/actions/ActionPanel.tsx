@@ -637,6 +637,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.panel}>
       {/* Property header */}
+      <div className={styles.debtChipLabel}>Huutokaupattavana</div>
       <div className={styles.auctionPropHeader}>
         <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
           🔨 {spot?.name ?? auction.propertyId}{spotPrice > 0 ? ` — €${spotPrice}` : ''}
