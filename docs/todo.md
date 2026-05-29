@@ -28,7 +28,13 @@
 - pystytä axiom mcp
 - vieläkin pelaajien napit jää esim kiinteistön omistuksen väriviivan alle.
 
-## validoi / testaa
+## muut, ei kategorisoitu vielä
 
-- **Siirry lähimmälle laitokselle -kortti**: Tarkista miten tämän kuuluisi toimia ja validoi toteutus.
-- zoomi menee hyvvin nyt nopat -> pelaaja ja sit pelaaja liikkuu. mutta se käy tos liikkumisen alkamisen jälkeen jossain nykäsemässä ja palaa sit takasin? mikä ihmeen nykäsy tää on. vai onko pelaajan liikkelle lähdön ja joku zoomin ajoitus pielessä? taitaa riittää et heitetään noppaa -> viive x -> sit lähdetään seuraan pelaajaa ja kun on päädytty pelaajalle niin seurataan sitävaan kunnes liike pysähtyy. ja joku muu viive huolehtii sen et nopanheiton jälkeen on x viive enenku pelaaja lähtee liikkeelle.... tää on nyut jotenkin liianvaikee saada iokein tämä rytmi.
+- Botti vois ottaa huomioon että se voi panttaa kiinteistöjä tai myydä taloja sun muuta et se saa rahaa jos se haluis kovasti jonkun kiinteistön. talojen myynti ei nyt koskaan ole kannattavaa tosin.
+- tarkista talojen myyntihinnat, onko ne oikein?
+- Velan maksamisessa näkyy kiinteistöt nyt hyvin. Ne pitää vielä vaan ryhmittää värin mukaan _> toteuta tää.
+- toteuta kauppa-näkymään kiinteistöt saman näköisiksi kuin velan maksussa.
+- kun mobiilin "raha palkissa" painaa pelaajaa, niin vois avvautua joku popup tiivvistelmä tästä pelaajasta. missä nyt näkyy just nimi, raha, kiinteistöt jne.
+- odotushuone paranteluja tehtävä..
+
+
