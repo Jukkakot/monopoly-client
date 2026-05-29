@@ -1037,18 +1037,23 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             : spot?.price ?? null
           return (
             <button key={prop.propertyId}
-              className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
+              className={styles.tradePropChip}
               style={{
-                background: included ? color + '55' : color + '20',
-                borderColor: color,
-                outline: included ? `2px solid ${color}` : undefined,
+                background: prop.mortgaged
+                  ? (included ? '#ffcdd2' : '#ffebee')
+                  : (included ? color + '55' : color + '20'),
+                borderColor: prop.mortgaged ? '#e57373' : color,
+                outline: included ? `2px solid ${prop.mortgaged ? '#e57373' : color}` : undefined,
                 outlineOffset: included ? '1px' : undefined,
               }}
               onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
-              {included ? '✓ ' : ''}{spot?.name ?? prop.propertyId}
+              {included ? '✓ ' : ''}
+              <span style={prop.mortgaged ? { textDecoration: 'line-through', opacity: 0.7 } : undefined}>
+                {spot?.name ?? prop.propertyId}
+              </span>
               {displayPrice !== null && (
-                <span className={styles.tradePropPrice}>
-                  {prop.mortgaged ? ` P€${displayPrice}` : ` €${displayPrice}`}
+                <span className={styles.tradePropPrice} style={prop.mortgaged ? { color: '#c62828' } : undefined}>
+                  {prop.mortgaged ? ` 🔒P€${displayPrice}` : ` €${displayPrice}`}
                 </span>
               )}
             </button>
@@ -1087,8 +1092,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
               ? <span className={styles.tradeMoneyAmt}>€{myOffer.moneyAmount}</span>
               : <span className={styles.tradeMoneyEmpty}>— ei rahaa —</span>}
             <div className={styles.moneyBtns}>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount < 50}>−50</button>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount < 10}>−10</button>
+              {myOffer.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount < 50}>−50</button>}
+              {myOffer.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount < 10}>−10</button>}
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
             </div>
@@ -1107,8 +1112,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
               ? <span className={styles.tradeMoneyAmt}>€{myRequest.moneyAmount}</span>
               : <span className={styles.tradeMoneyEmpty}>— ei rahaa —</span>}
             <div className={styles.moneyBtns}>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount < 50}>−50</button>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount < 10}>−10</button>
+              {myRequest.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount < 50}>−50</button>}
+              {myRequest.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount < 10}>−10</button>}
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
             </div>
