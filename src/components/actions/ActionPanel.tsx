@@ -549,6 +549,12 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
           const mv = spot?.price ? Math.floor(spot.price / 2) : 0
           return sum + Math.ceil(mv * 1.1)
         }, 0)
+        const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
+        const sortedProps = [...mortgageProps].sort((a, b) => {
+          const ta = SPOTS.find(s => s.id === a.propertyId)?.streetType ?? ''
+          const tb = SPOTS.find(s => s.id === b.propertyId)?.streetType ?? ''
+          return (TYPE_ORDER.indexOf(ta) ?? 99) - (TYPE_ORDER.indexOf(tb) ?? 99)
+        })
         return (
           <>
             <button className={styles.sectionToggle} onClick={() => setMortgageOpen(v => !v)}>
@@ -556,49 +562,41 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
               {mortgagedCount > 0 && <span className={styles.sectionBadge}>{mortgagedCount} pantattu</span>}
               <span className={styles.sectionChevron}>{mortgageOpen ? '▴' : '▾'}</span>
             </button>
-            {mortgageOpen && (() => {
-              const groups = new Map<string, typeof mortgageProps>()
-              for (const prop of mortgageProps) {
-                const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
-                const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
-              }
-              return (
-                <>
-                  {mortgagedCount >= 2 && (
-                    <Btn label={t.redeemAllBtn(totalRedeemCost)} variant="info"
-                      disabled={myCash < totalRedeemCost}
-                      onClick={() => mortgagedProps.forEach(prop =>
-                        sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }))} />
-                  )}
-                  {Array.from(groups.entries()).map(([type, groupProps]) => (
-                    <div key={type} className={styles.buildGroup}>
-                      {groupProps.map(prop => {
-                        const spot = SPOTS.find(s => s.id === prop.propertyId)
-                        if (!spot) return null
-                        const color = STREET_COLORS[spot.streetType]
-                        const mortgageVal = spot.price ? Math.floor(spot.price / 2) : null
-                        const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
-                        return (
-                          <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
-                            <span className={styles.buildName}>{spot.name}</span>
-                            {prop.mortgaged && redeemCost && (
-                              <span className={styles.mortgageVal}>€{redeemCost}</span>
-                            )}
-                            {!prop.mortgaged && mortgageVal && (
-                              <span className={styles.mortgageVal}>+€{mortgageVal}</span>
-                            )}
-                            <button className={styles.buildBtn}
-                              onClick={() => sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                              {prop.mortgaged ? t.redeemBtn : t.mortgageBtn}
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ))}
-                </>
-              )
-            })()}
+            {mortgageOpen && (
+              <>
+                {mortgagedCount >= 2 && (
+                  <Btn label={t.redeemAllBtn(totalRedeemCost)} variant="info"
+                    disabled={myCash < totalRedeemCost}
+                    onClick={() => mortgagedProps.forEach(prop =>
+                      sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }))} />
+                )}
+                <div className={styles.tradePropWrap}>
+                  {sortedProps.map(prop => {
+                    const spot = SPOTS.find(s => s.id === prop.propertyId)
+                    if (!spot) return null
+                    const color = STREET_COLORS[spot.streetType] ?? '#888'
+                    const mortgageVal = spot.price ? Math.floor(spot.price / 2) : null
+                    const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
+                    const label = prop.mortgaged
+                      ? `${t.redeemBtn} €${redeemCost}`
+                      : `${t.mortgageBtn} +€${mortgageVal}`
+                    return (
+                      <button key={prop.propertyId}
+                        className={`${styles.tradePropChip} ${prop.mortgaged ? styles.mortgageChipRedeemable : ''}`}
+                        style={{
+                          background: prop.mortgaged ? '#ffebee' : color + '25',
+                          borderColor: prop.mortgaged ? '#e57373' : color,
+                          color: prop.mortgaged ? '#b71c1c' : '#111',
+                        }}
+                        onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}>
+                        {spot.name}
+                        <span className={styles.tradePropPrice}> {label.split(' ').slice(1).join(' ')}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
           </>
         )
       })()}
