@@ -364,11 +364,12 @@
 
 .auctionBidStatus {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   padding: 6px 10px;
   background: #f5f5f5;
   border-radius: 7px;
+  flex-wrap: wrap;
 }
 
 .auctionBidStatusLabel {
@@ -397,6 +398,18 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: #555;
+}
+
+.auctionBidLeaderChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px 2px 4px;
+  border-radius: 10px;
+  border: 1.5px solid;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .auctionListPriceTag {

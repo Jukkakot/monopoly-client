@@ -646,14 +646,23 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
       {/* Current bid status */}
       {(() => {
         const leader = auction.leadingPlayerId ? state.players.find(p => p.playerId === auction.leadingPlayerId) : null
+        const leaderSeat = auction.leadingPlayerId ? state.seats.find(s => s.playerId === auction.leadingPlayerId) : null
+        const leaderColor = leaderSeat?.tokenColorHex ?? '#888'
+        const leaderName = iAmLeading ? 'sinä' : (leader?.name ?? '?')
         return (
           <div className={styles.auctionBidStatus}>
             <span className={styles.auctionBidStatusLabel}>Korkein tarjous</span>
-            <span className={styles.auctionBidStatusAmt}>
-              {auction.currentBid > 0
-                ? <>€{auction.currentBid}<span className={styles.auctionBidLeaderName}> · {iAmLeading ? 'sinä' : (leader?.name ?? '?')}</span></>
-                : '— ei tarjouksia'}
-            </span>
+            {auction.currentBid > 0 ? (
+              <span className={styles.auctionBidStatusAmt}>€{auction.currentBid}</span>
+            ) : (
+              <span className={styles.auctionBidStatusAmt}>— ei tarjouksia</span>
+            )}
+            {auction.currentBid > 0 && (
+              <span className={styles.auctionBidLeaderChip} style={{ background: leaderColor + '28', borderColor: leaderColor, color: leaderColor }}>
+                <span className={styles.auctionPlayerDot} style={{ background: leaderColor }} />
+                {leaderName}
+              </span>
+            )}
           </div>
         )
       })()}
