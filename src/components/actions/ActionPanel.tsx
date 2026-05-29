@@ -678,7 +678,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           const color = seat?.tokenColorHex ?? '#888'
           return (
             <div key={id}
-              className={`${styles.auctionPlayerRow} ${passed ? styles.auctionPlayerRowPassed : ''}`}
+              className={`${styles.auctionPlayerRow} ${passed ? styles.auctionPlayerRowPassed : ''} ${isActor && !passed ? styles.auctionPlayerRowActor : ''}`}
               style={{ borderLeftColor: color, background: isLeader ? color + '22' : color + '0a' }}
             >
               <div className={styles.auctionPlayerDot} style={{ background: passed ? '#ccc' : color }} />

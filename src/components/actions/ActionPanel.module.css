@@ -455,6 +455,19 @@
   opacity: 0.45;
 }
 
+.auctionPlayerRowActor {
+  padding: 7px 10px;
+  border-left-width: 4px;
+}
+.auctionPlayerRowActor .auctionPlayerName {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.auctionPlayerRowActor .auctionPlayerDot {
+  width: 13px;
+  height: 13px;
+}
+
 .auctionPlayerDot {
   width: 10px;
   height: 10px;
