@@ -743,11 +743,12 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
             {[10, 50, 100].map(delta => {
               const total = auction.currentBid + delta
               const canAfford = myCash >= total
+              const enabled = isMyTurnToBid && canAfford
               return (
                 <button key={delta} className={styles.moneyBtnPlus}
                   style={{ flex: 1, padding: '6px 4px', lineHeight: 1.3 }}
-                  disabled={!canAfford}
-                  title={!canAfford ? `Ei varaa — kassassa vain €${myCash}` : undefined}
+                  disabled={!enabled}
+                  title={!isMyTurnToBid ? 'Ei sinun vuorosi' : !canAfford ? `Ei varaa — kassassa vain €${myCash}` : undefined}
                   onClick={() => placeBid(total)}>
                   <div className={styles.bidQuickLabel}>korotus +{delta}</div>
                   <div className={styles.bidQuickTotal}>€{total}</div>
@@ -764,7 +765,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               onChange={e => setCustomBid(e.target.value)}
             />
             <button className={`${styles.btn} ${styles.info}`} style={{ width: 'auto', padding: '8px 14px' }}
-              disabled={(() => { const b = parseInt(customBid); return !customBid || b < minBid || b > myCash })()}
+              disabled={!isMyTurnToBid || (() => { const b = parseInt(customBid); return !customBid || b < minBid || b > myCash })()}
               onClick={() => { const b = parseInt(customBid); if (b >= minBid && b <= myCash) placeBid(b) }}>
               {t.placeBidBtn}
             </button>
