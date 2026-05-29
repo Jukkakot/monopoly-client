@@ -250,56 +250,47 @@
 .propGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 6px;
+  gap: 4px;
 }
 
 .propGroup {
   display: contents;
 }
 
-.propRow {
-  display: flex;
+.propChip {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.78rem;
-  color: #333;
-  padding: 1px 3px;
-  flex: 0 1 auto;
-  min-width: 0;
-  max-width: 160px;
-}
-
-.propRowClickable {
-  cursor: pointer;
-  border-radius: 4px;
-  padding: 2px 4px;
-  margin: 0 -4px;
-}
-
-.propRowClickable:hover {
-  background: #e8f5e9;
-}
-
-.propDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.propName {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  gap: 3px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #111;
   white-space: nowrap;
-  color: #444;
+  line-height: 1.2;
+  background: none;
+  cursor: default;
+  transition: filter 0.1s;
 }
 
-.propNameMortgaged {
-  text-decoration: line-through;
-  color: #aaa;
+.propChipClickable {
+  cursor: pointer;
 }
+.propChipClickable:hover { filter: brightness(0.9); }
+
+.propChipMortgaged {
+  background: #ffebee !important;
+  border-color: #e57373 !important;
+  color: #c62828;
+}
+
+/* keep old names for anything still referencing them */
+.propRow { display: none; }
+.propRowClickable { display: none; }
+.propDot { display: none; }
+.propName { display: none; }
+.propNameMortgaged { display: none; }
 
 .propBuildings {
   display: flex;

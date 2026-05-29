@@ -87,33 +87,39 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>{t.mortgagedStat(mortgagedCount)}</span>}
           </div>
       <div className={styles.propGrid}>
-      {Array.from(groups.entries()).map(([type, props]) => {
-        const color = STREET_COLORS[type]
-        return (
-          <div key={type} className={styles.propGroup}>
-            {props.map(prop => {
-              const spot = SPOTS.find(s => s.id === prop.propertyId)
-              return (
-                <div key={prop.propertyId} className={`${styles.propRow} ${onSpotClick ? styles.propRowClickable : ''}`}
-                  onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
-                  <span className={styles.propDot} style={{ background: color ?? '#aaa' }} />
-                  <span className={`${styles.propName} ${prop.mortgaged ? styles.propNameMortgaged : ''}`}>{spot?.name ?? prop.propertyId}</span>
-                  <span className={styles.propBuildings}>
-                    {prop.mortgaged
-                      ? <span className={styles.mortgaged}>P</span>
-                      : prop.hotelCount > 0
-                        ? <span className={styles.hotel}>H</span>
-                        : Array.from({ length: prop.houseCount }).map((_, i) =>
-                            <span key={i} className={styles.house} />
-                          )
-                    }
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        )
-      })}
+        {(() => {
+          const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
+          const sorted = [...ownedProps].sort((a, b) => {
+            const ta = SPOTS.find(s => s.id === a.propertyId)?.streetType ?? ''
+            const tb = SPOTS.find(s => s.id === b.propertyId)?.streetType ?? ''
+            return (TYPE_ORDER.indexOf(ta) ?? 99) - (TYPE_ORDER.indexOf(tb) ?? 99)
+          })
+          const free = sorted.filter(p => !p.mortgaged)
+          const pledged = sorted.filter(p => p.mortgaged)
+          const renderChip = (prop: typeof sorted[0]) => {
+            const spot = SPOTS.find(s => s.id === prop.propertyId)
+            const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
+            return (
+              <button key={prop.propertyId}
+                className={`${styles.propChip} ${prop.mortgaged ? styles.propChipMortgaged : ''} ${onSpotClick ? styles.propChipClickable : ''}`}
+                style={prop.mortgaged ? undefined : { background: color + '28', borderColor: color }}
+                onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
+                <span style={prop.mortgaged ? { textDecoration: 'line-through', opacity: 0.7 } : undefined}>
+                  {spot?.name ?? prop.propertyId}
+                </span>
+                {prop.hotelCount > 0 && <span className={styles.hotel}>H</span>}
+                {prop.houseCount > 0 && Array.from({ length: prop.houseCount }).map((_, i) => <span key={i} className={styles.house} />)}
+                {prop.mortgaged && <span style={{ fontSize: '0.62rem' }}>🔒</span>}
+              </button>
+            )
+          }
+          return (
+            <>
+              {free.map(renderChip)}
+              {pledged.length > 0 && pledged.map(renderChip)}
+            </>
+          )
+        })()}
       </div>
         </>
       )}
