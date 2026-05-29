@@ -435,8 +435,8 @@ const fi: T = {
   auctionActorWaiting: (name) => `⏳ ${name} tekee tarjouksen…`,
   auctionConfirmWin: '🏆 Vahvista voitto',
   placeBidBtn: 'Tarjoa',
-  passAuctionBtn: '🚫 Passi',
-  passAuctionBtnKbd: '🚫 Passi  [P]',
+  passAuctionBtn: '🚫 Luovuta',
+  passAuctionBtnKbd: '🚫 Luovuta  [P]',
   waitingForOthers: '⏳ Odotetaan muita pelaajia…',
   waitingForDebt: (name: string) => `⏳ ${name} maksaa velkaa…`,
 

@@ -686,7 +686,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               <span className={styles.auctionPlayerRight}>
                 {isLeader && <span className={styles.auctionLeadBid}>€{auction.currentBid}</span>}
                 {isActor && !passed && <span className={styles.auctionActorTag}>vuorossa</span>}
-                {passed && <span className={styles.auctionPassTag}>luopui</span>}
+                {passed && <span className={styles.auctionPassTag}>luovutti</span>}
               </span>
             </div>
           )
@@ -734,7 +734,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               {t.placeBidBtn}
             </button>
           </div>
-          <Btn label="🚫 Passi — luovun huutokaupasta"
+          <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
             variant="ghost" />
         </>
