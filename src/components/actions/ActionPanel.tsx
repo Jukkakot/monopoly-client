@@ -639,19 +639,24 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
       {/* Property header */}
       <div className={styles.auctionPropHeader}>
         <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
-          🔨 {spot?.name ?? auction.propertyId}
+          🔨 {spot?.name ?? auction.propertyId}{spotPrice > 0 ? ` — €${spotPrice}` : ''}
         </span>
-        {spotPrice > 0 && <span className={styles.auctionListPriceTag}>Listahinta €{spotPrice}</span>}
       </div>
 
       {/* Current bid status */}
-      <div className={styles.auctionBidStatus}>
-        <span className={styles.auctionBidStatusLabel}>Korkein tarjous</span>
-        <span className={styles.auctionBidStatusAmt}>
-          {auction.currentBid > 0 ? `€${auction.currentBid}` : '— ei tarjouksia'}
-          {iAmLeading && <span className={styles.auctionYouLeadTag}> sinä johdat</span>}
-        </span>
-      </div>
+      {(() => {
+        const leader = auction.leadingPlayerId ? state.players.find(p => p.playerId === auction.leadingPlayerId) : null
+        return (
+          <div className={styles.auctionBidStatus}>
+            <span className={styles.auctionBidStatusLabel}>Korkein tarjous</span>
+            <span className={styles.auctionBidStatusAmt}>
+              {auction.currentBid > 0
+                ? <>€{auction.currentBid}<span className={styles.auctionBidLeaderName}> · {iAmLeading ? 'sinä' : (leader?.name ?? '?')}</span></>
+                : '— ei tarjouksia'}
+            </span>
+          </div>
+        )
+      })()}
 
       {/* Player list */}
       <div className={styles.auctionPlayerList}>

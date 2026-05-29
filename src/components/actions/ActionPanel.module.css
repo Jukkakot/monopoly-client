@@ -393,6 +393,12 @@
   margin-left: 4px;
 }
 
+.auctionBidLeaderName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+}
+
 .auctionListPriceTag {
   font-size: 0.75rem;
   color: #5d4037;
