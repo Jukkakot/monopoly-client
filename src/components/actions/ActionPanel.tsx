@@ -686,6 +686,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               <span className={styles.auctionPlayerName}>{player?.name ?? '?'}</span>
               <span className={styles.auctionPlayerRight}>
                 {isLeader && <span className={styles.auctionLeadBid}>€{auction.currentBid}</span>}
+                {isLeader && <span className={styles.auctionLeadTag}>johtaa</span>}
                 {isActor && !passed && <span className={styles.auctionActorTag}>vuorossa</span>}
                 {passed && <span className={styles.auctionPassTag}>luovutti</span>}
               </span>

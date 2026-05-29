@@ -497,6 +497,17 @@
   color: #2e7d32;
 }
 
+.auctionLeadTag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 .auctionActorTag {
   font-size: 0.65rem;
   font-weight: 700;
