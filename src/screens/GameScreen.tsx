@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { playDiceRoll, playButtonClick } from '../utils/sounds'
 import { loadSoundConfig, saveSoundConfig } from '../components/menu/SoundSettings'
 import AppLayout from '../components/layout/AppLayout'
 import Header from '../components/layout/Header'
-import Board from '../components/board/Board'
+import Board, { markCardAcknowledged } from '../components/board/Board'
 import PlayerList from '../components/players/PlayerList'
 import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
@@ -74,6 +74,8 @@ export default function GameScreen() {
     return () => { document.title = 'Monopoly Helsinki' }
   }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, state.snapshot?.status])
 
+  const lastSpaceRef = useRef(0)
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!state.snapshot || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
     const snap = state.snapshot
@@ -84,13 +86,21 @@ export default function GameScreen() {
 
     if (e.key === ' ' || e.code === 'Space') {
       e.preventDefault()
+      // Debounce: ignore repeat events and rapid re-presses (hold-down spamming)
+      const now = Date.now()
+      if (e.repeat || now - lastSpaceRef.current < 600) return
+      lastSpaceRef.current = now
+
       if (isMyTurn && turn?.phase === 'WAITING_FOR_ROLL') {
         playDiceRoll()
         sendCmd({ type: 'RollDice', sessionId: snap.sessionId, actorPlayerId: myId })
       } else if (isMyTurn && turn?.phase === 'WAITING_FOR_END_TURN' && (turn?.consecutiveDoubles ?? 0) === 0) {
-        // Only fire EndTurn from keyboard when auto-advance isn't handling it (consecutiveDoubles>0 means auto-advance fires)
         playButtonClick()
         sendCmd({ type: 'EndTurn', sessionId: snap.sessionId, actorPlayerId: myId })
+      } else if (isMyTurn && turn?.phase === 'WAITING_FOR_CARD_ACK') {
+        playButtonClick()
+        markCardAcknowledged()
+        sendCmd({ type: 'AcknowledgeCard', sessionId: snap.sessionId, actorPlayerId: myId })
       }
     }
     if (e.key === 'b' || e.key === 'B') {
