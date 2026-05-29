@@ -30,11 +30,6 @@
 
 ## muut, ei kategorisoitu vielä
 
-- Botti vois ottaa huomioon että se voi panttaa kiinteistöjä tai myydä taloja sun muuta et se saa rahaa jos se haluis kovasti jonkun kiinteistön. talojen myynti ei nyt koskaan ole kannattavaa tosin.
-- tarkista talojen myyntihinnat, onko ne oikein?
-- Velan maksamisessa näkyy kiinteistöt nyt hyvin. Ne pitää vielä vaan ryhmittää värin mukaan _> toteuta tää.
-- toteuta kauppa-näkymään kiinteistöt saman näköisiksi kuin velan maksussa.
-- kun mobiilin "raha palkissa" painaa pelaajaa, niin vois avvautua joku popup tiivvistelmä tästä pelaajasta. missä nyt näkyy just nimi, raha, kiinteistöt jne.
 - odotushuone paranteluja tehtävä..
 
 
