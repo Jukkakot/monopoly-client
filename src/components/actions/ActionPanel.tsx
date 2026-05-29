@@ -630,12 +630,19 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
     setCustomBid('')
   }
 
+  const spotColor = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
+
   return (
     <div className={styles.panel}>
-      <div className={styles.auctionHeader}>
-        <span className={styles.auctionTitle}>🔨 {spot?.name ?? auction.propertyId}</span>
+      {/* Property header — chip style matching debt panel */}
+      <div className={styles.auctionPropHeader}>
+        <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
+          🔨 {spot?.name ?? auction.propertyId}
+        </span>
         {spotPrice > 0 && <span className={styles.auctionListPriceTag}>🏷 €{spotPrice}</span>}
       </div>
+
+      {/* Player list */}
       <div className={styles.auctionPlayerList}>
         {auction.eligiblePlayerIds.map(id => {
           const player = state.players.find(p => p.playerId === id)
@@ -645,10 +652,9 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           const isActor = id === auction.currentActorPlayerId && auction.status === 'ACTIVE'
           const color = seat?.tokenColorHex ?? '#888'
           return (
-            <div
-              key={id}
-              className={`${styles.auctionPlayerRow} ${passed ? styles.auctionPlayerRowPassed : ''} ${isLeader ? styles.auctionPlayerRowLeader : ''}`}
-              style={isLeader ? { borderLeftColor: color, background: `${color}1a` } : undefined}
+            <div key={id}
+              className={`${styles.auctionPlayerRow} ${passed ? styles.auctionPlayerRowPassed : ''}`}
+              style={{ borderLeftColor: color, background: isLeader ? color + '22' : color + '0a' }}
             >
               <div className={styles.auctionPlayerDot} style={{ background: passed ? '#ccc' : color }} />
               <span className={styles.auctionPlayerName}>{player?.name ?? '?'}</span>
@@ -661,31 +667,30 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           )
         })}
       </div>
+
       {!isEligible && currentActor && auction.status === 'ACTIVE' && (
-        <div className={styles.infoBox}>
-          {t.auctionActorWaiting(currentActor.name)}
-        </div>
+        <div className={styles.infoBox}>{t.auctionActorWaiting(currentActor.name)}</div>
       )}
+
       {auction.status === 'WON_PENDING_RESOLUTION' ? (
-        <button className={`${styles.btn} ${styles.secondary}`}
-          onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}>
-          {t.auctionConfirmWin}
-        </button>
+        <Btn label={t.auctionConfirmWin}
+          onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
+          variant="secondary" />
       ) : isEligible ? (
         <>
-          <div className={styles.bidRow}>
+          {/* Quick-bid buttons — same style as trade +money buttons */}
+          <div className={styles.moneyBtns} style={{ gap: 6 }}>
             {[10, 50, 100].map(delta => (
-              <button key={delta} className={styles.bidQuick}
+              <button key={delta} className={styles.moneyBtnPlus}
+                style={{ flex: 1, padding: '7px 4px', fontSize: '0.82rem' }}
                 onClick={() => placeBid(auction.currentBid + delta)}>
-                {!isTouchDevice && delta === 10 ? '+10  [↑]' : `+${delta}`}
+                {!isTouchDevice && delta === 10 ? '+10 [↑]' : `+${delta}`}
               </button>
             ))}
           </div>
           <div className={styles.bidInput}>
             <input
-              type="number"
-              inputMode="numeric"
-              pattern="[0-9]*"
+              type="number" inputMode="numeric" pattern="[0-9]*"
               placeholder={`min €${minBid}`}
               value={customBid}
               onChange={e => setCustomBid(e.target.value)}
@@ -695,10 +700,9 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               {t.placeBidBtn}
             </button>
           </div>
-          <button className={`${styles.btn} ${styles.ghost}`}
-            onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}>
-            {isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd}
-          </button>
+          <Btn label={isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd}
+            onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
+            variant="ghost" />
         </>
       ) : (
         <div className={styles.infoBox}>{t.waitingForOthers}</div>
