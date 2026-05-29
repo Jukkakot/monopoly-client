@@ -632,44 +632,20 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
 
   const spotColor = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
   const isMyTurnToBid = auction.currentActorPlayerId === myPlayerId && auction.status === 'ACTIVE'
-  const iAmLeading = auction.leadingPlayerId === myPlayerId
+
   const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
 
   return (
     <div className={styles.panel}>
-      {/* Property header */}
-      {auction.status !== 'WON_PENDING_RESOLUTION' && (
-        <div className={styles.debtChipLabel}>Huutokaupattavana</div>
-      )}
+      {/* Property header — label inline left of chip */}
       <div className={styles.auctionPropHeader}>
+        {auction.status !== 'WON_PENDING_RESOLUTION' && (
+          <span className={styles.auctionInlineLabel}>🔨 Huutokaupattavana</span>
+        )}
         <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
-          🔨 {spot?.name ?? auction.propertyId}{spotPrice > 0 ? ` — €${spotPrice}` : ''}
+          {spot?.name ?? auction.propertyId}{spotPrice > 0 ? ` — €${spotPrice}` : ''}
         </span>
       </div>
-
-      {/* Current bid status */}
-      {(() => {
-        const leader = auction.leadingPlayerId ? state.players.find(p => p.playerId === auction.leadingPlayerId) : null
-        const leaderSeat = auction.leadingPlayerId ? state.seats.find(s => s.playerId === auction.leadingPlayerId) : null
-        const leaderColor = leaderSeat?.tokenColorHex ?? '#888'
-        const leaderName = iAmLeading ? 'sinä' : (leader?.name ?? '?')
-        return (
-          <div className={styles.auctionBidStatus}>
-            <span className={styles.auctionBidStatusLabel}>Korkein tarjous</span>
-            {auction.currentBid > 0 ? (
-              <span className={styles.auctionBidStatusAmt}>€{auction.currentBid}</span>
-            ) : (
-              <span className={styles.auctionBidStatusAmt}>— ei tarjouksia</span>
-            )}
-            {auction.currentBid > 0 && (
-              <span className={styles.auctionBidLeaderChip} style={{ background: leaderColor + '28', borderColor: leaderColor, color: leaderColor }}>
-                <span className={styles.auctionPlayerDot} style={{ background: leaderColor }} />
-                {leaderName}
-              </span>
-            )}
-          </div>
-        )
-      })()}
 
       {/* Player list */}
       <div className={styles.auctionPlayerList}>
