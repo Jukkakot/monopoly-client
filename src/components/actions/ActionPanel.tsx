@@ -122,6 +122,31 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     prevPhaseRef.current = phase
   }, [phase, isMyTurn, me?.cash, me?.boardIndex, activeId, myPlayerId, state.properties, state.players])
 
+  // Auto-advance on doubles: when phase=WAITING_FOR_END_TURN with consecutiveDoubles>0,
+  // skip the "roll again" button and advance automatically.
+  //
+  // The 100ms delay is intentional: the snapshot drain loop runs at 60ms intervals, so any
+  // snapshot that was queued BEHIND this WAITING_FOR_END_TURN (e.g. a WAITING_FOR_ROLL from
+  // a direct landing) will be applied before the timer fires. The stateRef re-check then reads
+  // the updated phase, aborting the EndTurn if the backend already moved on.
+  const autoAdvanceStateRef = useRef({ isMyTurn: false, phase: undefined as string | undefined, consecutiveDoubles: 0, canEndTurn: false, tokenAnimating: false, hasVisibleRent: false })
+  autoAdvanceStateRef.current = { isMyTurn, phase, consecutiveDoubles: turn?.consecutiveDoubles ?? 0, canEndTurn: turn?.canEndTurn ?? false, tokenAnimating, hasVisibleRent: !!(visibleRent && !rentDismissed) }
+
+  useEffect(() => {
+    if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') return
+    if ((turn?.consecutiveDoubles ?? 0) === 0) return
+    if (!(turn?.canEndTurn ?? false)) return
+    if (tokenAnimating) return
+    if (visibleRent && !rentDismissed) return
+    const timer = setTimeout(() => {
+      const s = autoAdvanceStateRef.current
+      if (s.isMyTurn && s.phase === 'WAITING_FOR_END_TURN' && s.consecutiveDoubles > 0 && s.canEndTurn && !s.tokenAnimating && !s.hasVisibleRent) {
+        sendCmd({ type: 'EndTurn', sessionId: sid, actorPlayerId: myPlayerId })
+      }
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [isMyTurn, phase, turn?.consecutiveDoubles, turn?.canEndTurn, tokenAnimating, visibleRent, rentDismissed])
+
   function TabBar() {
     if (!hasPropActions) return null
     const mortgagedCount = myProps.filter(p => p.mortgaged).length
@@ -375,16 +400,12 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 <button className={styles.cardPopupOk} onClick={() => setRentDismissed(true)}>{t.cardOkBtn}</button>
               </div>
             )}
-            <div className={styles.btnRow}>
-              <Btn
-                label={hasDoubles
-                  ? (isTouchDevice ? t.rollAgainBtn : t.rollAgainBtnKbd)
-                  : (isTouchDevice ? t.endTurn : t.endTurnKbd)}
-                onClick={() => cmd('EndTurn')}
-                variant="primary"
-              />
-              {!hasDoubles && <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />}
-            </div>
+            {!hasDoubles && (
+              <div className={styles.btnRow}>
+                <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
+                <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+              </div>
+            )}
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
