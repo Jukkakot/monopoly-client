@@ -1011,7 +1011,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
     <div className={styles.panel}>
       <div className={styles.tradeColumns}>
         {/* Left: what I give */}
-        <div className={styles.tradeCol}>
+        <div className={styles.tradeCol} style={mySeat ? { background: mySeat.tokenColorHex + '14', borderRadius: 8, padding: '6px 6px 8px' } : undefined}>
           <div className={styles.tradeColHeader} style={mySeat ? { background: mySeat.tokenColorHex + '30', borderColor: mySeat.tokenColorHex } : undefined}>
             <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill={mySeat?.tokenColorHex ?? '#888'} /></svg>
             <span>{t.youOfferLabel}</span>
@@ -1031,7 +1031,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         </div>
 
         {/* Right: what I request */}
-        <div className={styles.tradeCol}>
+        <div className={styles.tradeCol} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '14', borderRadius: 8, padding: '6px 6px 8px' } : undefined}>
           <div className={styles.tradeColHeader} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '30', borderColor: partnerSeat.tokenColorHex } : undefined}>
             <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill={partnerSeat?.tokenColorHex ?? '#888'} /></svg>
             <span>{partner?.name?.split(' ')[0] ?? t.youRequestLabel}</span>
