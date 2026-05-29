@@ -984,47 +984,42 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
   function renderProps(props: typeof myProps, offerSide: boolean, offerData: typeof myOffer) {
     const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
-    const groups = new Map<string, typeof props>()
-    for (const prop of props) {
-      const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
-      const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
-    }
-    const sorted = [...groups.entries()].sort(([a], [b]) => {
-      const ai = TYPE_ORDER.indexOf(a); const bi = TYPE_ORDER.indexOf(b)
+    const sorted = [...props].sort((a, b) => {
+      const ta = SPOTS.find(s => s.id === a.propertyId)?.streetType ?? 'OTHER'
+      const tb = SPOTS.find(s => s.id === b.propertyId)?.streetType ?? 'OTHER'
+      const ai = TYPE_ORDER.indexOf(ta); const bi = TYPE_ORDER.indexOf(tb)
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
     })
-    return sorted.map(([type, groupProps]) => {
-      const color = STREET_COLORS[type] ?? '#888'
-      return (
-        <div key={type} className={styles.debtColorGroup} style={{ borderLeftColor: color }}>
-          {groupProps.map(prop => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            const included = offerData.propertyIds.includes(prop.propertyId)
-            const displayPrice = prop.mortgaged && spot?.price
-              ? Math.floor(spot.price / 2)
-              : spot?.price ?? null
-            return (
-              <button key={prop.propertyId}
-                className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
-                style={{
-                  background: included ? color + '55' : color + '20',
-                  borderColor: color,
-                  outline: included ? `2px solid ${color}` : undefined,
-                  outlineOffset: included ? '1px' : undefined,
-                }}
-                onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
-                {included ? '✓ ' : ''}{spot?.name ?? prop.propertyId}
-                {displayPrice !== null && (
-                  <span className={styles.tradePropPrice}>
-                    {prop.mortgaged ? ` P€${displayPrice}` : ` €${displayPrice}`}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      )
-    })
+    return (
+      <div className={styles.tradePropWrap}>
+        {sorted.map(prop => {
+          const spot = SPOTS.find(s => s.id === prop.propertyId)
+          const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
+          const included = offerData.propertyIds.includes(prop.propertyId)
+          const displayPrice = prop.mortgaged && spot?.price
+            ? Math.floor(spot.price / 2)
+            : spot?.price ?? null
+          return (
+            <button key={prop.propertyId}
+              className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
+              style={{
+                background: included ? color + '55' : color + '20',
+                borderColor: color,
+                outline: included ? `2px solid ${color}` : undefined,
+                outlineOffset: included ? '1px' : undefined,
+              }}
+              onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
+              {included ? '✓ ' : ''}{spot?.name ?? prop.propertyId}
+              {displayPrice !== null && (
+                <span className={styles.tradePropPrice}>
+                  {prop.mortgaged ? ` P€${displayPrice}` : ` €${displayPrice}`}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    )
   }
 
   return (
