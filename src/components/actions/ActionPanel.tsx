@@ -760,7 +760,10 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         </div>
       </div>
       {debt.allowedActions.includes('PAY_DEBT_NOW') && (
-        <Btn label={t.payDebtBtn} onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="info" />
+        <Btn label={t.payDebtBtn}
+          disabled={debt.currentCash < debt.amountRemaining}
+          onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
+          variant="info" />
       )}
       {debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
         const mortgageables = state.properties
