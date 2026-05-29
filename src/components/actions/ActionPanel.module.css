@@ -362,6 +362,37 @@
   flex-wrap: wrap;
 }
 
+.auctionBidStatus {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f5f5f5;
+  border-radius: 7px;
+}
+
+.auctionBidStatusLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.auctionBidStatusAmt {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.auctionYouLeadTag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #2e7d32;
+  margin-left: 4px;
+}
+
 .auctionListPriceTag {
   font-size: 0.75rem;
   color: #5d4037;

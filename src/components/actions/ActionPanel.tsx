@@ -631,15 +631,26 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   }
 
   const spotColor = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
+  const isMyTurnToBid = auction.currentActorPlayerId === myPlayerId && auction.status === 'ACTIVE'
+  const iAmLeading = auction.leadingPlayerId === myPlayerId
 
   return (
     <div className={styles.panel}>
-      {/* Property header — chip style matching debt panel */}
+      {/* Property header */}
       <div className={styles.auctionPropHeader}>
         <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
           🔨 {spot?.name ?? auction.propertyId}
         </span>
-        {spotPrice > 0 && <span className={styles.auctionListPriceTag}>🏷 €{spotPrice}</span>}
+        {spotPrice > 0 && <span className={styles.auctionListPriceTag}>Listahinta €{spotPrice}</span>}
+      </div>
+
+      {/* Current bid status */}
+      <div className={styles.auctionBidStatus}>
+        <span className={styles.auctionBidStatusLabel}>Korkein tarjous</span>
+        <span className={styles.auctionBidStatusAmt}>
+          {auction.currentBid > 0 ? `€${auction.currentBid}` : '— ei tarjouksia'}
+          {iAmLeading && <span className={styles.auctionYouLeadTag}> sinä johdat</span>}
+        </span>
       </div>
 
       {/* Player list */}
@@ -661,7 +672,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               <span className={styles.auctionPlayerRight}>
                 {isLeader && <span className={styles.auctionLeadBid}>€{auction.currentBid}</span>}
                 {isActor && !passed && <span className={styles.auctionActorTag}>vuorossa</span>}
-                {passed && <span className={styles.auctionPassTag}>passi</span>}
+                {passed && <span className={styles.auctionPassTag}>luopui</span>}
               </span>
             </div>
           )
@@ -678,20 +689,28 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           variant="secondary" />
       ) : isEligible ? (
         <>
-          {/* Quick-bid buttons — same style as trade +money buttons */}
+          {/* Bid label */}
+          <div className={styles.debtChipLabel} style={{ color: isMyTurnToBid ? '#1b5e20' : '#888' }}>
+            {isMyTurnToBid ? 'Tarjoa — sinun vuorosi' : 'Tarjoa'}
+          </div>
+          {/* Quick-bid buttons showing the resulting total */}
           <div className={styles.moneyBtns} style={{ gap: 6 }}>
-            {[10, 50, 100].map(delta => (
-              <button key={delta} className={styles.moneyBtnPlus}
-                style={{ flex: 1, padding: '7px 4px', fontSize: '0.82rem' }}
-                onClick={() => placeBid(auction.currentBid + delta)}>
-                {!isTouchDevice && delta === 10 ? '+10 [↑]' : `+${delta}`}
-              </button>
-            ))}
+            {[10, 50, 100].map(delta => {
+              const total = auction.currentBid + delta
+              return (
+                <button key={delta} className={styles.moneyBtnPlus}
+                  style={{ flex: 1, padding: '6px 4px', fontSize: '0.78rem', lineHeight: 1.3 }}
+                  onClick={() => placeBid(total)}>
+                  <div style={{ fontSize: '0.68rem', opacity: 0.7 }}>+{delta}</div>
+                  <div style={{ fontWeight: 800 }}>€{total}</div>
+                </button>
+              )
+            })}
           </div>
           <div className={styles.bidInput}>
             <input
               type="number" inputMode="numeric" pattern="[0-9]*"
-              placeholder={`min €${minBid}`}
+              placeholder={`vapaa tarjous (min €${minBid})`}
               value={customBid}
               onChange={e => setCustomBid(e.target.value)}
             />
@@ -700,7 +719,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               {t.placeBidBtn}
             </button>
           </div>
-          <Btn label={isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd}
+          <Btn label="🚫 Passi — luovun huutokaupasta"
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
             variant="ghost" />
         </>
