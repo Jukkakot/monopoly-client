@@ -142,6 +142,11 @@ export function useTokenAnimation(): Map<string, number> {
   const localAnimatingRef = useRef(new Set<string>())
   const prevInJailRef = useRef<Map<string, boolean>>(new Map())
   const prevCardKeyRef = useRef<string | null>(null)
+  // Set when a MOVE_BACK_3 card is first seen; cleared once the backward steps are queued.
+  // Needed because the card key appears in the WAITING_FOR_CARD_ACK snapshot (player not yet
+  // moved), then is unchanged in the follow-up snapshot (player moved) — so cardKeyChanged is
+  // false by the time we need to animate, and without this flag it falls through to forward walk.
+  const pendingBackThreeRef = useRef(false)
 
   useEffect(() => {
     if (!snapshot) return
@@ -150,6 +155,7 @@ export function useTokenAnimation(): Map<string, number> {
                            snapshot.lastCardKey !== prevCardKeyRef.current
     const isCardMove = cardKeyChanged && isMovementCard(snapshot.lastCardKey)
     const isCardBackThree = isCardMove && isBackThreeCard(snapshot.lastCardKey)
+    if (isCardBackThree) pendingBackThreeRef.current = true
 
     for (const player of snapshot.players) {
       if (player.bankrupt || player.eliminated) continue
@@ -193,8 +199,12 @@ export function useTokenAnimation(): Map<string, number> {
         continue
       }
 
-      // Back-3 card: step backward one at a time
-      if (isCardBackThree) {
+      // Back-3 card: step backward one at a time.
+      // pendingBackThreeRef is set on the WAITING_FOR_CARD_ACK snapshot where cardKeyChanged=true
+      // but currentIdx === settledIdx (no movement yet). Here, when the player actually moves,
+      // cardKeyChanged is false (same key) so we rely on the persisted flag.
+      if (pendingBackThreeRef.current) {
+        pendingBackThreeRef.current = false
         const steps: number[] = []
         let pos = settledIdx
         while (pos !== currentIdx) {

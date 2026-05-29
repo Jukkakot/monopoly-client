@@ -310,7 +310,6 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     const transitionAt = DICE_ANIM_MS + SETTLED_HOLD   // 950ms: switch from dice to player
     const movDelay = getAnimationConfig(loadAnimationSpeed()).diceToMoveDelayMs
     zoomToDiceTimerRef.current = setTimeout(() => {
-      zoomToDiceTimerRef.current = null
       diceZoomBlockRef.current = false
       // Use animatedPositionsRef (current displayed position = start square) so the zoom
       // previews where the token IS, not where it's going (snapshot already has final pos).
