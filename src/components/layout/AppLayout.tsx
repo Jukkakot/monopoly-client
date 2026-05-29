@@ -356,12 +356,12 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                         {props.map(prop => {
                           const spot = SPOTS.find(s => s.id === prop.propertyId)
                           return (
-                            <div key={prop.propertyId} className={styles.playerPopupPropRow}>
+                            <div key={prop.propertyId} className={styles.playerPopupPropRow} style={prop.mortgaged ? { opacity: 0.55 } : undefined}>
                               <span className={styles.playerPopupPropDot} style={{ background: color }} />
                               <span className={`${styles.playerPopupPropName} ${prop.mortgaged ? styles.playerPopupMortgaged : ''}`}>{spot?.name ?? prop.propertyId}</span>
                               {prop.hotelCount > 0 && <span className={styles.playerPopupHotel}>🏨</span>}
                               {prop.houseCount > 0 && <span className={styles.playerPopupHouses}>{'🏠'.repeat(prop.houseCount)}</span>}
-                              {prop.mortgaged && <span className={styles.playerPopupMortgagedTag}>P</span>}
+                              {prop.mortgaged && <span className={styles.playerPopupMortgagedTag}>🔒</span>}
                             </div>
                           )
                         })}

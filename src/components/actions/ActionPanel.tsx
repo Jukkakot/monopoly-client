@@ -583,9 +583,9 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                       <button key={prop.propertyId}
                         className={styles.tradePropChip}
                         style={{
-                          background: prop.mortgaged ? '#ffebee' : color + '25',
-                          borderColor: prop.mortgaged ? '#e57373' : color,
-                          color: prop.mortgaged ? '#b71c1c' : '#111',
+                          background: color + '25',
+                          borderColor: color,
+                          opacity: prop.mortgaged ? 0.55 : 1,
                         }}
                         onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}>
                         {spot.name}
@@ -1036,9 +1036,10 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         <button key={prop.propertyId}
           className={styles.tradePropChip}
           style={{
-            background: prop.mortgaged ? (included ? '#ffcdd2' : '#ffebee') : (included ? color + '55' : color + '20'),
-            borderColor: prop.mortgaged ? '#e57373' : color,
-            outline: included ? `2px solid ${prop.mortgaged ? '#e57373' : color}` : undefined,
+            background: included ? color + '55' : color + '20',
+            borderColor: color,
+            outline: included ? `2px solid ${color}` : undefined,
+            opacity: prop.mortgaged ? 0.55 : 1,
             outlineOffset: included ? '1px' : undefined,
           }}
           onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
@@ -1047,7 +1048,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             {spot?.name ?? prop.propertyId}
           </span>
           {displayPrice !== null && (
-            <span className={styles.tradePropPrice} style={prop.mortgaged ? { color: '#c62828' } : undefined}>
+            <span className={styles.tradePropPrice}>
               {prop.mortgaged ? ` 🔒P€${displayPrice}` : ` €${displayPrice}`}
             </span>
           )}

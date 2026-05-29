@@ -101,8 +101,8 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
             return (
               <button key={prop.propertyId}
-                className={`${styles.propChip} ${prop.mortgaged ? styles.propChipMortgaged : ''} ${onSpotClick ? styles.propChipClickable : ''}`}
-                style={prop.mortgaged ? undefined : { background: color + '28', borderColor: color }}
+                className={`${styles.propChip} ${onSpotClick ? styles.propChipClickable : ''}`}
+                style={{ background: color + '28', borderColor: color, opacity: prop.mortgaged ? 0.55 : 1 }}
                 onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
                 <span style={prop.mortgaged ? { textDecoration: 'line-through', opacity: 0.7 } : undefined}>
                   {spot?.name ?? prop.propertyId}
