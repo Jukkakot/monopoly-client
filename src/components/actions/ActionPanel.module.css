@@ -400,6 +400,15 @@
   color: #555;
 }
 
+.auctionNoFunds {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c62828;
+  background: #ffebee;
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
 .bidQuickLabel {
   font-size: 0.6rem;
   opacity: 0.65;

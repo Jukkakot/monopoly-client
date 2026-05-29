@@ -710,6 +710,11 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           <div className={styles.debtChipLabel} style={{ color: isMyTurnToBid ? '#1b5e20' : '#888' }}>
             {isMyTurnToBid ? 'Tarjoa — sinun vuorosi' : 'Tarjoa'}
           </div>
+          {myCash < minBid && (
+            <div className={styles.auctionNoFunds}>
+              💸 Kassassa vain €{myCash} — et pysty tarjoamaan enempää
+            </div>
+          )}
           {/* Quick-bid buttons showing the resulting total */}
           <div className={styles.moneyBtns} style={{ gap: 6 }}>
             {[10, 50, 100].map(delta => {
@@ -743,7 +748,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           </div>
           <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
-            variant="ghost" />
+            variant="danger" />
         </>
       ) : (
         <div className={styles.infoBox}>{t.waitingForOthers}</div>
