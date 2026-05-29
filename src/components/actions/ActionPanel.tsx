@@ -1009,13 +1009,6 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
   return (
     <div className={styles.panel}>
-      <div className={styles.infoBox}>
-        {t.tradeTitle(partner?.name ?? '?')}
-        {partnerSeat && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 6 }}>
-          <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill={partnerSeat.tokenColorHex} /></svg>
-        </span>}
-      </div>
-
       <div className={styles.tradeColumns}>
         {/* Left: what I give */}
         <div className={styles.tradeCol}>
