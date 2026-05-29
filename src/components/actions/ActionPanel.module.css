@@ -400,6 +400,34 @@
   color: #555;
 }
 
+.auctionWonBox {
+  border: 2px solid;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auctionWonTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1b5e20;
+}
+
+.auctionWonDetail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.auctionWonPrice {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1b5e20;
+}
+
 .auctionNoFunds {
   font-size: 0.78rem;
   font-weight: 600;

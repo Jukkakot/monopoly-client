@@ -638,7 +638,9 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.panel}>
       {/* Property header */}
-      <div className={styles.debtChipLabel}>Huutokaupattavana</div>
+      {auction.status !== 'WON_PENDING_RESOLUTION' && (
+        <div className={styles.debtChipLabel}>Huutokaupattavana</div>
+      )}
       <div className={styles.auctionPropHeader}>
         <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
           🔨 {spot?.name ?? auction.propertyId}{spotPrice > 0 ? ` — €${spotPrice}` : ''}
@@ -701,9 +703,30 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
       )}
 
       {auction.status === 'WON_PENDING_RESOLUTION' ? (
-        <Btn label={t.auctionConfirmWin}
-          onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
-          variant="secondary" />
+        <>
+          {(() => {
+            const winner = state.players.find(p => p.playerId === auction.leadingPlayerId)
+            const winnerSeat = state.seats.find(s => s.playerId === auction.leadingPlayerId)
+            const isMe = auction.leadingPlayerId === myPlayerId
+            const color = winnerSeat?.tokenColorHex ?? '#888'
+            return (
+              <div className={styles.auctionWonBox} style={{ borderColor: color, background: color + '18' }}>
+                <div className={styles.auctionWonTitle}>
+                  {isMe ? '🏆 Voitit huutokaupan!' : `🏆 ${winner?.name ?? '?'} voitti`}
+                </div>
+                <div className={styles.auctionWonDetail}>
+                  <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor }}>
+                    {spot?.name ?? auction.propertyId}
+                  </span>
+                  <span className={styles.auctionWonPrice}>€{auction.currentBid}</span>
+                </div>
+              </div>
+            )
+          })()}
+          <Btn label={t.auctionConfirmWin}
+            onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
+            variant="primary" />
+        </>
       ) : isEligible ? (
         <>
           {/* Bid label */}
