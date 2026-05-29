@@ -633,6 +633,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
   const spotColor = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
   const isMyTurnToBid = auction.currentActorPlayerId === myPlayerId && auction.status === 'ACTIVE'
   const iAmLeading = auction.leadingPlayerId === myPlayerId
+  const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
 
   return (
     <div className={styles.panel}>
@@ -713,13 +714,16 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           <div className={styles.moneyBtns} style={{ gap: 6 }}>
             {[10, 50, 100].map(delta => {
               const total = auction.currentBid + delta
+              const canAfford = myCash >= total
               return (
                 <button key={delta} className={styles.moneyBtnPlus}
                   style={{ flex: 1, padding: '6px 4px', lineHeight: 1.3 }}
+                  disabled={!canAfford}
+                  title={!canAfford ? `Ei varaa — kassassa vain €${myCash}` : undefined}
                   onClick={() => placeBid(total)}>
                   <div className={styles.bidQuickLabel}>korotus +{delta}</div>
                   <div className={styles.bidQuickTotal}>€{total}</div>
-                  <div className={styles.bidQuickLabel}>tarjous</div>
+                  <div className={styles.bidQuickLabel}>{canAfford ? 'tarjous' : `kassassa €${myCash}`}</div>
                 </button>
               )
             })}
@@ -732,7 +736,8 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               onChange={e => setCustomBid(e.target.value)}
             />
             <button className={`${styles.btn} ${styles.info}`} style={{ width: 'auto', padding: '8px 14px' }}
-              onClick={() => { const b = parseInt(customBid); if (b >= minBid) placeBid(b) }}>
+              disabled={(() => { const b = parseInt(customBid); return !customBid || b < minBid || b > myCash })()}
+              onClick={() => { const b = parseInt(customBid); if (b >= minBid && b <= myCash) placeBid(b) }}>
               {t.placeBidBtn}
             </button>
           </div>
