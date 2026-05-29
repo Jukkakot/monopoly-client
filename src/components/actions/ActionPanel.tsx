@@ -992,6 +992,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   // Include mortgaged but exclude properties with buildings (can't trade those)
   const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && p.houseCount === 0 && p.hotelCount === 0)
   const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && p.houseCount === 0 && p.hotelCount === 0)
+  const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
 
 
   function editMoney(offeredSide: boolean, delta: number) {
@@ -1099,8 +1100,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             <div className={styles.moneyBtns}>
               {myOffer.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount < 50}>−50</button>}
               {myOffer.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount < 10}>−10</button>}
-              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
-              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
+              <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 10 > myCash} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 50 > myCash} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
             </div>
           </div>
           {renderProps(myProps, myOfferSide, myOffer)}
