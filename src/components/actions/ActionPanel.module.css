@@ -517,8 +517,22 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
+}
+
+.tradeColHeader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .tradeColTitle {
@@ -533,12 +547,21 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 6px 8px;
+  padding: 5px 8px;
   background: #f5f5f5;
   border-radius: 6px;
+}
+
+.tradeMoneyAmt {
   font-size: 1rem;
   font-weight: 700;
   color: #222;
+}
+
+.tradeMoneyEmpty {
+  font-size: 0.72rem;
+  color: #aaa;
+  font-style: italic;
 }
 
 .moneyBtns {
@@ -549,17 +572,46 @@
 .moneyBtns button {
   flex: 1;
   padding: 4px 2px;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   font-weight: 700;
-  border: 1.5px solid #bbb;
+  border: 1.5px solid;
   border-radius: 4px;
-  background: #fff;
   cursor: pointer;
-  color: #333;
 }
 
-.moneyBtns button:hover { background: #f0f0f0; }
-.moneyBtns button:disabled { opacity: 0.35; cursor: default; }
+.moneyBtnMinus {
+  border-color: #e57373 !important;
+  background: #fff5f5;
+  color: #c62828;
+}
+.moneyBtnMinus:hover { background: #ffebee; }
+.moneyBtnPlus {
+  border-color: #81c784 !important;
+  background: #f1f8e9;
+  color: #2e7d32;
+}
+.moneyBtnPlus:hover { background: #e8f5e9; }
+
+.moneyBtns button:disabled { opacity: 0.3; cursor: default; }
+
+/* Value balance indicator */
+.tradeBalance {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+}
+.tradeBalanceEven { background: #e8f5e9; color: #2e7d32; }
+.tradeBalancePos  { background: #e3f2fd; color: #1565c0; }
+.tradeBalanceNeg  { background: #fff3e0; color: #e65100; }
+
+/* Send + cancel on one row */
+.tradeActions {
+  display: flex;
+  gap: 6px;
+}
+.tradeActions > * { flex: 1; }
 
 .propCheck {
   display: flex;

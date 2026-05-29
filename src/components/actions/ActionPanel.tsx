@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
@@ -121,31 +121,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     }
     prevPhaseRef.current = phase
   }, [phase, isMyTurn, me?.cash, me?.boardIndex, activeId, myPlayerId, state.properties, state.players])
-
-  // Auto-advance on doubles: when phase=WAITING_FOR_END_TURN with consecutiveDoubles>0,
-  // skip the "roll again" button and advance automatically.
-  //
-  // The 100ms delay is intentional: the snapshot drain loop runs at 60ms intervals, so any
-  // snapshot that was queued BEHIND this WAITING_FOR_END_TURN (e.g. a WAITING_FOR_ROLL from
-  // a direct landing) will be applied before the timer fires. The stateRef re-check then reads
-  // the updated phase, aborting the EndTurn if the backend already moved on.
-  const autoAdvanceStateRef = useRef({ isMyTurn: false, phase: undefined as string | undefined, consecutiveDoubles: 0, canEndTurn: false, tokenAnimating: false, hasVisibleRent: false })
-  autoAdvanceStateRef.current = { isMyTurn, phase, consecutiveDoubles: turn?.consecutiveDoubles ?? 0, canEndTurn: turn?.canEndTurn ?? false, tokenAnimating, hasVisibleRent: !!(visibleRent && !rentDismissed) }
-
-  useEffect(() => {
-    if (!isMyTurn || phase !== 'WAITING_FOR_END_TURN') return
-    if ((turn?.consecutiveDoubles ?? 0) === 0) return
-    if (!(turn?.canEndTurn ?? false)) return
-    if (tokenAnimating) return
-    if (visibleRent && !rentDismissed) return
-    const timer = setTimeout(() => {
-      const s = autoAdvanceStateRef.current
-      if (s.isMyTurn && s.phase === 'WAITING_FOR_END_TURN' && s.consecutiveDoubles > 0 && s.canEndTurn && !s.tokenAnimating && !s.hasVisibleRent) {
-        sendCmd({ type: 'EndTurn', sessionId: sid, actorPlayerId: myPlayerId })
-      }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [isMyTurn, phase, turn?.consecutiveDoubles, turn?.canEndTurn, tokenAnimating, visibleRent, rentDismissed])
 
   function TabBar() {
     if (!hasPropActions) return null
@@ -382,9 +357,8 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   // WAITING_FOR_END_TURN
   if (phase === 'WAITING_FOR_END_TURN') {
-    const hasDoubles = (turn?.consecutiveDoubles ?? 0) > 0
     const lastDice = turn?.lastDice
-    const showJailEscapeNote = !hasDoubles && !me?.inJail && lastDice?.[0] === lastDice?.[1] && lastDice?.[0] != null
+    const showJailEscapeNote = !me?.inJail && lastDice?.[0] === lastDice?.[1] && lastDice?.[0] != null
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
@@ -400,12 +374,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 <button className={styles.cardPopupOk} onClick={() => setRentDismissed(true)}>{t.cardOkBtn}</button>
               </div>
             )}
-            {!hasDoubles && (
-              <div className={styles.btnRow}>
-                <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
-                <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
-              </div>
-            )}
+            <div className={styles.btnRow}>
+              <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
+              <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+            </div>
           </>
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
@@ -955,8 +927,6 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && p.houseCount === 0 && p.hotelCount === 0)
   const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && p.houseCount === 0 && p.hotelCount === 0)
 
-  const myPlayer = state.players.find(p => p.playerId === myPlayerId)
-  const partnerPlayer = state.players.find(p => p.playerId === partnerId)
 
   function editMoney(offeredSide: boolean, delta: number) {
     const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
@@ -1022,6 +992,21 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
     )
   }
 
+  // Value balance: positive = I'm getting more than I give
+  const myOfferValue = myOffer.moneyAmount + myOffer.propertyIds.reduce((s, id) => {
+    const spot = SPOTS.find(sp => sp.id === id)
+    const prop = state.properties.find(p => p.propertyId === id)
+    return s + (prop?.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? 0)
+  }, 0)
+  const myRequestValue = myRequest.moneyAmount + myRequest.propertyIds.reduce((s, id) => {
+    const spot = SPOTS.find(sp => sp.id === id)
+    const prop = state.properties.find(p => p.propertyId === id)
+    return s + (prop?.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? 0)
+  }, 0)
+  const balanceDiff = myRequestValue - myOfferValue
+  const isEmpty = myOffer.moneyAmount === 0 && myOffer.propertyIds.length === 0
+    && myRequest.moneyAmount === 0 && myRequest.propertyIds.length === 0
+
   return (
     <div className={styles.panel}>
       <div className={styles.infoBox}>
@@ -1030,50 +1015,68 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill={partnerSeat.tokenColorHex} /></svg>
         </span>}
       </div>
-      <div className={styles.tradeCashRow}>
-        <span>{t.tradeCashLabel(myPlayer?.cash ?? 0)}</span>
-        <span>{t.tradeCashLabel(partnerPlayer?.cash ?? 0)} {partner?.name?.split(' ')[0]}</span>
-      </div>
 
       <div className={styles.tradeColumns}>
         {/* Left: what I give */}
-        <div className={styles.tradeCol} style={mySeat ? { background: mySeat.tokenColorHex + '18', borderRadius: 8 } : undefined}>
-          <div className={styles.tradeColTitle}>{t.youOfferLabel}</div>
+        <div className={styles.tradeCol}>
+          <div className={styles.tradeColHeader} style={mySeat ? { background: mySeat.tokenColorHex + '30', borderColor: mySeat.tokenColorHex } : undefined}>
+            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill={mySeat?.tokenColorHex ?? '#888'} /></svg>
+            <span>{t.youOfferLabel}</span>
+          </div>
           <div className={styles.tradeMoney}>
-            <span>€{myOffer.moneyAmount}</span>
+            {myOffer.moneyAmount > 0
+              ? <span className={styles.tradeMoneyAmt}>€{myOffer.moneyAmount}</span>
+              : <span className={styles.tradeMoneyEmpty}>— ei rahaa —</span>}
             <div className={styles.moneyBtns}>
-              <button onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount < 50}>−50</button>
-              <button onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount < 10}>−10</button>
-              <button onClick={() => editMoney(myOfferSide, 10)}>+10</button>
-              <button onClick={() => editMoney(myOfferSide, 50)}>+50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount < 50}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount < 10}>−10</button>
+              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
             </div>
           </div>
           {renderProps(myProps, myOfferSide, myOffer)}
         </div>
 
         {/* Right: what I request */}
-        <div className={styles.tradeCol} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '18', borderRadius: 8 } : undefined}>
-          <div className={styles.tradeColTitle}>{t.youRequestLabel}</div>
+        <div className={styles.tradeCol}>
+          <div className={styles.tradeColHeader} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '30', borderColor: partnerSeat.tokenColorHex } : undefined}>
+            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill={partnerSeat?.tokenColorHex ?? '#888'} /></svg>
+            <span>{partner?.name?.split(' ')[0] ?? t.youRequestLabel}</span>
+          </div>
           <div className={styles.tradeMoney}>
-            <span>€{myRequest.moneyAmount}</span>
+            {myRequest.moneyAmount > 0
+              ? <span className={styles.tradeMoneyAmt}>€{myRequest.moneyAmount}</span>
+              : <span className={styles.tradeMoneyEmpty}>— ei rahaa —</span>}
             <div className={styles.moneyBtns}>
-              <button onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount < 50}>−50</button>
-              <button onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount < 10}>−10</button>
-              <button onClick={() => editMoney(myRequestSide, 10)}>+10</button>
-              <button onClick={() => editMoney(myRequestSide, 50)}>+50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount < 50}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount < 10}>−10</button>
+              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
             </div>
           </div>
           {renderProps(partnerProps, myRequestSide, myRequest)}
         </div>
       </div>
 
-      <Btn label={t.sendOfferBtn}
-        onClick={() => sendCmd({ type: 'SubmitTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
-        variant="primary"
-        disabled={myOffer.moneyAmount === 0 && myOffer.propertyIds.length === 0 && myRequest.moneyAmount === 0 && myRequest.propertyIds.length === 0} />
-      <Btn label={t.cancelBtn}
-        onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
-        variant="danger" />
+      {!isEmpty && (myOfferValue > 0 || myRequestValue > 0) && (
+        <div className={`${styles.tradeBalance} ${balanceDiff > 0 ? styles.tradeBalancePos : balanceDiff < 0 ? styles.tradeBalanceNeg : styles.tradeBalanceEven}`}>
+          {balanceDiff === 0
+            ? '⚖️ Tasapuolinen'
+            : balanceDiff > 0
+              ? `↑ Saat €${balanceDiff} enemmän`
+              : `↓ Annat €${Math.abs(balanceDiff)} enemmän`}
+        </div>
+      )}
+
+      <div className={styles.tradeActions}>
+        <Btn label={t.sendOfferBtn}
+          onClick={() => sendCmd({ type: 'SubmitTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
+          variant="primary"
+          disabled={isEmpty} />
+        <Btn label={t.cancelBtn}
+          onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
+          variant="danger" />
+      </div>
     </div>
   )
 }
