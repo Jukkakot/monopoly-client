@@ -68,6 +68,12 @@ export const SPOTS: SpotDef[] = [
   { id: 'DB2',          streetType: 'DARK_BLUE', name: 'Katajanokka (A)',  price: 400, isProperty: true },
 ]
 
+// House purchase price per color group (selling price = housePrice / 2)
+export const HOUSE_PRICES: Partial<Record<StreetType, number>> = {
+  BROWN: 50, LIGHT_BLUE: 50, PURPLE: 100, ORANGE: 100,
+  RED: 150, YELLOW: 150, GREEN: 200, DARK_BLUE: 200,
+}
+
 // Map spotId -> board index
 export const SPOT_INDEX: Record<string, number> = Object.fromEntries(
   SPOTS.map((s, i) => [s.id, i])

@@ -4,7 +4,7 @@ import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
 import { getCardText } from '../../i18n/cards'
 import { useT } from '../../i18n/LanguageContext'
-import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 
@@ -812,7 +812,8 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
               {Array.from(groups.entries()).filter(([, props]) => props.length > 1).map(([type, props]) => {
                 const spot = SPOTS.find(s => s.id === props[0].propertyId)
                 const color = STREET_COLORS[type] ?? '#888'
-                const proceeds = spot?.price ? Math.floor(spot.price / 2 / 2) * props.length : null
+                const housePrice = HOUSE_PRICES[type as keyof typeof HOUSE_PRICES] ?? 0
+                const proceeds = housePrice > 0 ? Math.floor(housePrice / 2) * props.length : null
                 return (
                   <button key={`set-${props[0].propertyId}`} className={styles.debtChip}
                     style={{ background: color + '30', borderColor: color }}
@@ -825,7 +826,8 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
               {builtProps.map(prop => {
                 const spot = SPOTS.find(s => s.id === prop.propertyId)
                 const color = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
-                const proceeds = spot?.price ? Math.floor(spot.price / 2 / 2) : null
+                const housePrice = spot ? (HOUSE_PRICES[spot.streetType as keyof typeof HOUSE_PRICES] ?? 0) : 0
+                const proceeds = housePrice > 0 ? Math.floor(housePrice / 2) : null
                 const buildingType = prop.hotelCount > 0 ? t.hotelLabel : t.houseLabel
                 return (
                   <button key={prop.propertyId} className={styles.debtChip}
