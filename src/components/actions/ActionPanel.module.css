@@ -309,6 +309,15 @@
   gap: 6px;
 }
 
+.debtColorGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-left: 6px;
+  border-left: 3px solid transparent;
+  margin-bottom: 2px;
+}
+
 .debtChipLabel {
   font-size: 0.72rem;
   font-weight: 700;

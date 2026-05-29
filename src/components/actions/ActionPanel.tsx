@@ -769,23 +769,37 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         const mortgageables = state.properties
           .filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
         if (mortgageables.length === 0) return null
+        const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
+        const groups = new Map<string, typeof mortgageables>()
+        for (const prop of mortgageables) {
+          const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
+          const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
+        }
+        const sorted = [...groups.entries()].sort(([a], [b]) => {
+          const ai = TYPE_ORDER.indexOf(a); const bi = TYPE_ORDER.indexOf(b)
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+        })
         return (
           <>
             <div className={styles.debtChipLabel}>{t.debtMortgageGroupTitle}</div>
-            <div className={styles.debtChipRow}>
-              {mortgageables.map(prop => {
-                const spot = SPOTS.find(s => s.id === prop.propertyId)
-                const color = spot ? STREET_COLORS[spot.streetType] : '#888'
-                const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
-                return (
-                  <button key={prop.propertyId} className={styles.debtChip}
-                    style={{ background: (color ?? '#888') + '30', borderColor: color ?? '#888' }}
-                    onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
-                    {spot?.name ?? prop.propertyId}{mortgageVal ? ` +€${mortgageVal}` : ''}
-                  </button>
-                )
-              })}
-            </div>
+            {sorted.map(([type, props]) => {
+              const color = STREET_COLORS[type] ?? '#888'
+              return (
+                <div key={type} className={styles.debtColorGroup} style={{ borderLeftColor: color }}>
+                  {props.map(prop => {
+                    const spot = SPOTS.find(s => s.id === prop.propertyId)
+                    const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
+                    return (
+                      <button key={prop.propertyId} className={styles.debtChip}
+                        style={{ background: color + '30', borderColor: color }}
+                        onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
+                        {spot?.name ?? prop.propertyId}{mortgageVal ? ` +€${mortgageVal}` : ''}
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })}
           </>
         )
       })()}
