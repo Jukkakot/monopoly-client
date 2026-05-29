@@ -170,7 +170,7 @@ function BoardSpot(props: Props) {
       spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} steppingPlayers={steppingPlayers} /> :
       spot.id === 'FREE_PARKING' ? <ParkingCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} /> :
                                    <GoJailCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} />
-    return <div className={styles.cornerWrapper} style={gridStyle}>{inner}</div>
+    return <div className={styles.cornerWrapper} style={players.length > 0 ? { ...gridStyle, zIndex: 5 } : gridStyle}>{inner}</div>
   }
 
   const isStreet = spot.streetType !== 'RAILROAD' && spot.streetType !== 'UTILITY'
@@ -197,7 +197,7 @@ function BoardSpot(props: Props) {
   return (
     <div
       className={`${styles.spotWrapper} ${typeClass} ${onClick ? styles.clickable : ''} ${highlightClass} ${property?.mortgaged ? styles.mortgagedSpot : ''}`}
-      style={gridStyle}
+      style={players.length > 0 ? { ...gridStyle, zIndex: 5 } : gridStyle}
       onClick={onClick}
       data-spot-id={spot.id}
     >
