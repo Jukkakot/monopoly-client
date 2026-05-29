@@ -600,7 +600,29 @@
 .propCheckMortgaged { opacity: 0.75; }
 .propCheckMortgaged .propCheckName { text-decoration: line-through; }
 
-.tradePropMortgaged { opacity: 0.6; text-decoration: line-through; }
+.tradePropMortgaged { opacity: 0.65; text-decoration: line-through; }
+
+.tradePropChip {
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1.5px solid currentColor;
+  cursor: pointer;
+  color: #111;
+  line-height: 1.2;
+  text-align: left;
+  transition: filter 0.12s;
+  white-space: nowrap;
+}
+.tradePropChip:hover  { filter: brightness(0.9); }
+.tradePropChip:active { filter: brightness(0.75); }
+
+.tradePropPrice {
+  font-size: 0.65rem;
+  opacity: 0.75;
+  font-weight: 500;
+}
 
 .propMortgagedTag {
   font-size: 0.65rem;

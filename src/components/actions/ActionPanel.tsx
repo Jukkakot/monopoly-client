@@ -1000,9 +1000,12 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           {groupProps.map(prop => {
             const spot = SPOTS.find(s => s.id === prop.propertyId)
             const included = offerData.propertyIds.includes(prop.propertyId)
+            const displayPrice = prop.mortgaged && spot?.price
+              ? Math.floor(spot.price / 2)
+              : spot?.price ?? null
             return (
               <button key={prop.propertyId}
-                className={`${styles.debtChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
+                className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
                 style={{
                   background: included ? color + '55' : color + '20',
                   borderColor: color,
@@ -1011,7 +1014,11 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
                 }}
                 onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
                 {included ? '✓ ' : ''}{spot?.name ?? prop.propertyId}
-                {prop.mortgaged && <span className={styles.propMortgagedTag}> {t.mortgagedInTrade}</span>}
+                {displayPrice !== null && (
+                  <span className={styles.tradePropPrice}>
+                    {prop.mortgaged ? ` P€${displayPrice}` : ` €${displayPrice}`}
+                  </span>
+                )}
               </button>
             )
           })}
