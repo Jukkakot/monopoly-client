@@ -74,7 +74,20 @@ export default function GameScreen() {
     return () => { document.title = 'Monopoly Helsinki' }
   }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId, state.snapshot?.status])
 
-  const lastSpaceRef = useRef(0)
+  // Tracks whether a space-triggered command is in-flight.
+  // Cleared when the snapshot phase/actor changes (backend confirmed the action).
+  const spacePendingRef = useRef(false)
+  const lastSpacePhaseRef = useRef('')
+
+  // Clear the pending flag whenever the relevant part of state changes
+  useEffect(() => {
+    const snap = state.snapshot
+    const key = `${snap?.turn?.activePlayerId}:${snap?.turn?.phase}`
+    if (key !== lastSpacePhaseRef.current) {
+      lastSpacePhaseRef.current = key
+      spacePendingRef.current = false
+    }
+  }, [state.snapshot?.turn?.phase, state.snapshot?.turn?.activePlayerId])
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!state.snapshot || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
@@ -86,18 +99,19 @@ export default function GameScreen() {
 
     if (e.key === ' ' || e.code === 'Space') {
       e.preventDefault()
-      // Debounce: ignore repeat events and rapid re-presses (hold-down spamming)
-      const now = Date.now()
-      if (e.repeat || now - lastSpaceRef.current < 600) return
-      lastSpaceRef.current = now
+      // Block until the previous space command is confirmed by a state change
+      if (spacePendingRef.current) return
 
       if (isMyTurn && turn?.phase === 'WAITING_FOR_ROLL') {
+        spacePendingRef.current = true
         playDiceRoll()
         sendCmd({ type: 'RollDice', sessionId: snap.sessionId, actorPlayerId: myId })
       } else if (isMyTurn && turn?.phase === 'WAITING_FOR_END_TURN' && (turn?.consecutiveDoubles ?? 0) === 0) {
+        spacePendingRef.current = true
         playButtonClick()
         sendCmd({ type: 'EndTurn', sessionId: snap.sessionId, actorPlayerId: myId })
       } else if (isMyTurn && turn?.phase === 'WAITING_FOR_CARD_ACK') {
+        spacePendingRef.current = true
         playButtonClick()
         markCardAcknowledged()
         sendCmd({ type: 'AcknowledgeCard', sessionId: snap.sessionId, actorPlayerId: myId })
