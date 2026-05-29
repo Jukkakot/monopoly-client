@@ -2,6 +2,7 @@ import styles from './AppLayout.module.css'
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+import { SPOTS, STREET_COLORS } from '../../types/spots'
 
 type AnimDir = 'right' | 'left'
 
@@ -78,6 +79,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState<AnimDir>('right')
   const [boardEntering, setBoardEntering] = useState(false)
+  const [cashPopupPlayerId, setCashPopupPlayerId] = useState<string | null>(null)
   const dragStartX = useRef<number | null>(null)
   const dragStartW = useRef<number>(sidebarWidth)
 
@@ -271,6 +273,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                         isMe ? styles.cashChipMe : '',
                         p.bankrupt ? styles.cashChipBankrupt : '',
                       ].join(' ')}
+                      onClick={() => setCashPopupPlayerId(p.playerId)}
                     >
                       <span className={styles.cashDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
                       <span className={styles.cashName}>{p.name}</span>
@@ -316,6 +319,61 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           </nav>
         </div>
       </div>
+
+      {/* ── Mobile: player summary popup ── */}
+      {cashPopupPlayerId && snap && (() => {
+        const player = snap.players.find(p => p.playerId === cashPopupPlayerId)
+        const seat = snap.seats.find(s => s.playerId === cashPopupPlayerId)
+        if (!player) return null
+        const ownedProps = snap.properties.filter(p => p.ownerPlayerId === cashPopupPlayerId)
+        const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
+        const groups = new Map<string, typeof ownedProps>()
+        for (const prop of ownedProps) {
+          const key = SPOTS.find(s => s.id === prop.propertyId)?.streetType ?? 'OTHER'
+          const arr = groups.get(key) ?? []; arr.push(prop); groups.set(key, arr)
+        }
+        const sorted = [...groups.entries()].sort(([a], [b]) => {
+          const ai = TYPE_ORDER.indexOf(a); const bi = TYPE_ORDER.indexOf(b)
+          return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
+        })
+        return (
+          <div className={styles.playerPopupOverlay} onClick={() => setCashPopupPlayerId(null)}>
+            <div className={styles.playerPopup} onClick={e => e.stopPropagation()}>
+              <div className={styles.playerPopupHeader}>
+                <span className={styles.playerPopupDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
+                <span className={styles.playerPopupName}>{player.name}</span>
+                <span className={styles.playerPopupCash}>€{player.cash}</span>
+                <button className={styles.playerPopupClose} onClick={() => setCashPopupPlayerId(null)}>✕</button>
+              </div>
+              {ownedProps.length === 0 ? (
+                <div className={styles.playerPopupNoProps}>{t.noPropertiesMsg}</div>
+              ) : (
+                <div className={styles.playerPopupProps}>
+                  {sorted.map(([type, props]) => {
+                    const color = STREET_COLORS[type] ?? '#888'
+                    return (
+                      <div key={type} className={styles.playerPopupGroup} style={{ borderLeftColor: color }}>
+                        {props.map(prop => {
+                          const spot = SPOTS.find(s => s.id === prop.propertyId)
+                          return (
+                            <div key={prop.propertyId} className={styles.playerPopupPropRow}>
+                              <span className={styles.playerPopupPropDot} style={{ background: color }} />
+                              <span className={`${styles.playerPopupPropName} ${prop.mortgaged ? styles.playerPopupMortgaged : ''}`}>{spot?.name ?? prop.propertyId}</span>
+                              {prop.hotelCount > 0 && <span className={styles.playerPopupHotel}>🏨</span>}
+                              {prop.houseCount > 0 && <span className={styles.playerPopupHouses}>{'🏠'.repeat(prop.houseCount)}</span>}
+                              {prop.mortgaged && <span className={styles.playerPopupMortgagedTag}>P</span>}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
