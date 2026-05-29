@@ -529,6 +529,20 @@
   text-align: center;
 }
 
+.cardBubbleOkBtn {
+  margin-top: 6px;
+  padding: 4px 12px;
+  background: var(--card-color, #555);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: clamp(0.48rem, 0.9vw, 0.72rem);
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  letter-spacing: 0.3px;
+}
+
 @keyframes cardDeal {
   0%   { scale: 0.55; opacity: 0; }
   60%  { scale: 1.06; opacity: 1; }

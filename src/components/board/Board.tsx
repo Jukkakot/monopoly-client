@@ -591,6 +591,51 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   const isMyCardAck = isCardAck && state.turn?.activePlayerId === gameState.myPlayerId
 
+  // Bot cards flash too quickly — keep them visible for a minimum duration.
+  const BOT_CARD_MIN_MS = 2500
+  const cardShownAtRef = useRef<number | null>(null)
+  const cardWasMineRef = useRef(false)
+  const lingerInfoRef = useRef<{
+    text: string; isChance: boolean; typeLabel: string; icon: string; playerName: string
+    pos: { x: string; y: string; tailDir: 'top' | 'bottom' | 'left' | 'right' }
+  } | null>(null)
+  const [lingerActive, setLingerActive] = useState(false)
+  const lingerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Save bot card display info during render so linger can restore it after phase changes
+  if (isCardAck && !isMyCardAck && cardBubbleText && cardBubblePos && activeTurnPlayer) {
+    lingerInfoRef.current = {
+      text: cardBubbleText,
+      isChance: isChanceCard,
+      typeLabel: cardBubbleTypeLabel,
+      icon: cardBubbleIcon,
+      playerName: activeTurnPlayer.name,
+      pos: cardBubblePos,
+    }
+  }
+
+  useEffect(() => {
+    if (isCardAck) {
+      cardShownAtRef.current = Date.now()
+      cardWasMineRef.current = isMyCardAck
+      if (lingerTimerRef.current) { clearTimeout(lingerTimerRef.current); lingerTimerRef.current = null }
+      setLingerActive(false)
+    } else if (cardShownAtRef.current !== null) {
+      if (!cardWasMineRef.current && lingerInfoRef.current) {
+        const remaining = BOT_CARD_MIN_MS - (Date.now() - cardShownAtRef.current)
+        if (remaining > 0) {
+          setLingerActive(true)
+          lingerTimerRef.current = setTimeout(() => { setLingerActive(false); lingerTimerRef.current = null }, remaining)
+        }
+      }
+      cardShownAtRef.current = null
+    }
+  }, [isCardAck])
+
+  const displayCard = (isCardAck && cardBubbleText && cardBubblePos && activeTurnPlayer)
+    ? { text: cardBubbleText, isChance: isChanceCard, typeLabel: cardBubbleTypeLabel, icon: cardBubbleIcon, playerName: activeTurnPlayer.name, pos: cardBubblePos }
+    : (lingerActive && !isCardAck && lingerInfoRef.current ? lingerInfoRef.current : null)
+
   const selectedSpot = selectedSpotId ? SPOTS.find(s => s.id === selectedSpotId) : null
   const selectedGroupType = selectedSpot?.streetType
   const NON_HIGHLIGHTABLE = new Set(['CORNER', 'COMMUNITY', 'CHANCE', 'TAX'])
@@ -656,23 +701,30 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
           <div className={styles.centerTurnCount}>{t.roundLabel(gameState.turnCount)}</div>
         )}
       </div>
-      {cardBubblePos && cardBubbleText && (() => {
-        const tailCls = { top: styles.tailTop, bottom: styles.tailBottom, left: styles.tailLeft, right: styles.tailRight }[cardBubblePos.tailDir]
-        const colorCls = isChanceCard ? styles.cardChance : styles.cardCommunity
+      {displayCard && (() => {
+        const { text, isChance, typeLabel, icon, playerName, pos } = displayCard
+        const tailCls = { top: styles.tailTop, bottom: styles.tailBottom, left: styles.tailLeft, right: styles.tailRight }[pos.tailDir]
+        const colorCls = isChance ? styles.cardChance : styles.cardCommunity
         const ackCmd = isMyCardAck
           ? () => sendCmd({ type: 'AcknowledgeCard', sessionId: state.sessionId, actorPlayerId: gameState.myPlayerId! })
           : undefined
         return (<>
           {isMyCardAck && <div className={styles.cardDismissOverlay} onClick={ackCmd} />}
-          <div className={`${styles.cardBubbleAnchor} ${tailCls}`} style={{ left: cardBubblePos.x, top: cardBubblePos.y }}>
+          <div className={`${styles.cardBubbleAnchor} ${tailCls}`} style={{ left: pos.x, top: pos.y }}>
             <div className={`${styles.cardBubble} ${colorCls}`} onClick={ackCmd} style={{ cursor: isMyCardAck ? 'pointer' : 'default' }}>
               <div className={styles.cardBubbleHeader}>
-                <span className={styles.cardBubbleType}>{cardBubbleTypeLabel}</span>
-                <span className={styles.cardBubbleIcon}>{cardBubbleIcon}</span>
+                <span className={styles.cardBubbleType}>{typeLabel}</span>
+                <span className={styles.cardBubbleIcon}>{icon}</span>
               </div>
               <div className={styles.cardBubbleBody}>
-                <span className={styles.cardBubbleText}>{cardBubbleText}</span>
-                <span className={styles.cardBubblePlayer}>{activeTurnPlayer?.name ?? '?'}</span>
+                <span className={styles.cardBubbleText}>{text}</span>
+                <span className={styles.cardBubblePlayer}>{playerName}</span>
+                {isMyCardAck && (
+                  <button className={styles.cardBubbleOkBtn}
+                    onClick={e => { e.stopPropagation(); ackCmd?.() }}>
+                    {t.cardOkBtn}
+                  </button>
+                )}
               </div>
             </div>
           </div>
