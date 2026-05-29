@@ -822,7 +822,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         <Btn label={t.payDebtBtn}
           disabled={debt.currentCash < debt.amountRemaining}
           onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
-          variant="info" />
+          variant="primary" />
       )}
       {debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
         const mortgageables = state.properties
@@ -838,27 +838,25 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           const ai = TYPE_ORDER.indexOf(a); const bi = TYPE_ORDER.indexOf(b)
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
         })
+        const flatProps = sorted.flatMap(([, props]) => props)
         return (
           <>
             <div className={styles.debtChipLabel}>{t.debtMortgageGroupTitle}</div>
-            {sorted.map(([type, props]) => {
-              const color = STREET_COLORS[type] ?? '#888'
-              return (
-                <div key={type} className={styles.debtColorGroup} style={{ borderLeftColor: color }}>
-                  {props.map(prop => {
-                    const spot = SPOTS.find(s => s.id === prop.propertyId)
-                    const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
-                    return (
-                      <button key={prop.propertyId} className={styles.debtChip}
-                        style={{ background: color + '30', borderColor: color }}
-                        onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
-                        {spot?.name ?? prop.propertyId}{mortgageVal ? ` +€${mortgageVal}` : ''}
-                      </button>
-                    )
-                  })}
-                </div>
-              )
-            })}
+            <div className={styles.tradePropWrap}>
+              {flatProps.map(prop => {
+                const spot = SPOTS.find(s => s.id === prop.propertyId)
+                const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
+                const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
+                return (
+                  <button key={prop.propertyId} className={styles.tradePropChip}
+                    style={{ background: color + '28', borderColor: color }}
+                    onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
+                    {spot?.name ?? prop.propertyId}
+                    {mortgageVal && <span className={styles.tradePropPrice}> +€{mortgageVal}</span>}
+                  </button>
+                )
+              })}
+            </div>
           </>
         )
       })()}
