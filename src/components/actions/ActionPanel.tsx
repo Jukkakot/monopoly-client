@@ -713,10 +713,11 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               const total = auction.currentBid + delta
               return (
                 <button key={delta} className={styles.moneyBtnPlus}
-                  style={{ flex: 1, padding: '6px 4px', fontSize: '0.78rem', lineHeight: 1.3 }}
+                  style={{ flex: 1, padding: '6px 4px', lineHeight: 1.3 }}
                   onClick={() => placeBid(total)}>
-                  <div style={{ fontSize: '0.68rem', opacity: 0.7 }}>+{delta}</div>
-                  <div style={{ fontWeight: 800 }}>€{total}</div>
+                  <div className={styles.bidQuickLabel}>korotus +{delta}</div>
+                  <div className={styles.bidQuickTotal}>€{total}</div>
+                  <div className={styles.bidQuickLabel}>tarjous</div>
                 </button>
               )
             })}
