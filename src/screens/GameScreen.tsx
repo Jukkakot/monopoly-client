@@ -102,7 +102,12 @@ export default function GameScreen() {
       // Block until the previous space command is confirmed by a state change
       if (spacePendingRef.current) return
 
-      if (isMyTurn && turn?.phase === 'WAITING_FOR_ROLL') {
+      if (isMyTurn && turn?.phase === 'WAITING_FOR_DECISION' && snap.pendingDecision) {
+        spacePendingRef.current = true
+        playButtonClick()
+        const dec = snap.pendingDecision
+        sendCmd({ type: 'BuyProperty', sessionId: snap.sessionId, actorPlayerId: myId, decisionId: dec.decisionId, propertyId: dec.payload.propertyId })
+      } else if (isMyTurn && turn?.phase === 'WAITING_FOR_ROLL') {
         spacePendingRef.current = true
         playDiceRoll()
         sendCmd({ type: 'RollDice', sessionId: snap.sessionId, actorPlayerId: myId })
