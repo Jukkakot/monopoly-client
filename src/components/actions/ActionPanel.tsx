@@ -1026,40 +1026,45 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       const ai = TYPE_ORDER.indexOf(ta); const bi = TYPE_ORDER.indexOf(tb)
       return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
     })
+    const free = sorted.filter(p => !p.mortgaged)
+    const pledged = sorted.filter(p => p.mortgaged)
+    const renderChip = (prop: typeof sorted[0]) => {
+      const spot = SPOTS.find(s => s.id === prop.propertyId)
+      const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
+      const included = offerData.propertyIds.includes(prop.propertyId)
+      const displayPrice = prop.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? null
+      return (
+        <button key={prop.propertyId}
+          className={styles.tradePropChip}
+          style={{
+            background: prop.mortgaged ? (included ? '#ffcdd2' : '#ffebee') : (included ? color + '55' : color + '20'),
+            borderColor: prop.mortgaged ? '#e57373' : color,
+            outline: included ? `2px solid ${prop.mortgaged ? '#e57373' : color}` : undefined,
+            outlineOffset: included ? '1px' : undefined,
+          }}
+          onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
+          {included ? '✓ ' : ''}
+          <span style={prop.mortgaged ? { textDecoration: 'line-through', opacity: 0.7 } : undefined}>
+            {spot?.name ?? prop.propertyId}
+          </span>
+          {displayPrice !== null && (
+            <span className={styles.tradePropPrice} style={prop.mortgaged ? { color: '#c62828' } : undefined}>
+              {prop.mortgaged ? ` 🔒P€${displayPrice}` : ` €${displayPrice}`}
+            </span>
+          )}
+        </button>
+      )
+    }
     return (
-      <div className={styles.tradePropWrap}>
-        {sorted.map(prop => {
-          const spot = SPOTS.find(s => s.id === prop.propertyId)
-          const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
-          const included = offerData.propertyIds.includes(prop.propertyId)
-          const displayPrice = prop.mortgaged && spot?.price
-            ? Math.floor(spot.price / 2)
-            : spot?.price ?? null
-          return (
-            <button key={prop.propertyId}
-              className={styles.tradePropChip}
-              style={{
-                background: prop.mortgaged
-                  ? (included ? '#ffcdd2' : '#ffebee')
-                  : (included ? color + '55' : color + '20'),
-                borderColor: prop.mortgaged ? '#e57373' : color,
-                outline: included ? `2px solid ${prop.mortgaged ? '#e57373' : color}` : undefined,
-                outlineOffset: included ? '1px' : undefined,
-              }}
-              onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
-              {included ? '✓ ' : ''}
-              <span style={prop.mortgaged ? { textDecoration: 'line-through', opacity: 0.7 } : undefined}>
-                {spot?.name ?? prop.propertyId}
-              </span>
-              {displayPrice !== null && (
-                <span className={styles.tradePropPrice} style={prop.mortgaged ? { color: '#c62828' } : undefined}>
-                  {prop.mortgaged ? ` 🔒P€${displayPrice}` : ` €${displayPrice}`}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
+      <>
+        {free.length > 0 && <div className={styles.tradePropWrap}>{free.map(renderChip)}</div>}
+        {pledged.length > 0 && (
+          <>
+            <div className={styles.tradeMortgagedDivider}>🔒 Pantatut</div>
+            <div className={styles.tradePropWrap}>{pledged.map(renderChip)}</div>
+          </>
+        )}
+      </>
     )
   }
 

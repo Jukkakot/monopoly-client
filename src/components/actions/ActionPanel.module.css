@@ -756,6 +756,17 @@
 
 .tradePropMortgaged { opacity: 0.65; text-decoration: line-through; }
 
+.tradeMortgagedDivider {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #c62828;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding-top: 2px;
+  border-top: 1px solid #ffcdd2;
+  margin-top: 2px;
+}
+
 .tradePropWrap {
   display: flex;
   flex-wrap: wrap;
