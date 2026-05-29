@@ -13,6 +13,11 @@ import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../
 import { AnimatedDice } from '../common/DiceDisplay'
 import { getCardText } from '../../i18n/cards'
 
+// Module-level flag: set by any path that sends AcknowledgeCard so the bubble
+// hides immediately without waiting for the SSE round-trip.
+let _cardAcknowledgedLocally = false
+export function markCardAcknowledged() { _cardAcknowledgedLocally = true }
+
 // Stable empty array so spots without players get the same reference every render,
 // allowing React.memo(BoardSpot) to bail out without reference-creating ?? [].
 const EMPTY_PLAYERS: PlayerSnapshot[] = []
@@ -616,6 +621,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   useEffect(() => {
     if (isCardAck) {
+      // New card appeared — reset the local-dismiss flag
+      _cardAcknowledgedLocally = false
       cardShownAtRef.current = Date.now()
       cardWasMineRef.current = isMyCardAck
       if (lingerTimerRef.current) { clearTimeout(lingerTimerRef.current); lingerTimerRef.current = null }
@@ -632,7 +639,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
   }, [isCardAck])
 
-  const displayCard = (isCardAck && cardBubbleText && cardBubblePos && activeTurnPlayer)
+  const displayCard = (isCardAck && !_cardAcknowledgedLocally && cardBubbleText && cardBubblePos && activeTurnPlayer)
     ? { text: cardBubbleText, isChance: isChanceCard, typeLabel: cardBubbleTypeLabel, icon: cardBubbleIcon, playerName: activeTurnPlayer.name, pos: cardBubblePos }
     : (lingerActive && !isCardAck && lingerInfoRef.current ? lingerInfoRef.current : null)
 
@@ -706,7 +713,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         const tailCls = { top: styles.tailTop, bottom: styles.tailBottom, left: styles.tailLeft, right: styles.tailRight }[pos.tailDir]
         const colorCls = isChance ? styles.cardChance : styles.cardCommunity
         const ackCmd = isMyCardAck
-          ? () => sendCmd({ type: 'AcknowledgeCard', sessionId: state.sessionId, actorPlayerId: gameState.myPlayerId! })
+          ? () => { markCardAcknowledged(); sendCmd({ type: 'AcknowledgeCard', sessionId: state.sessionId, actorPlayerId: gameState.myPlayerId! }) }
           : undefined
         return (<>
           {isMyCardAck && <div className={styles.cardDismissOverlay} onClick={ackCmd} />}

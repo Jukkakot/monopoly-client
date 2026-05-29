@@ -7,6 +7,7 @@ import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
+import { markCardAcknowledged } from '../board/Board'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -277,7 +278,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     if (isMyTurn) {
       return (
         <div className={`${styles.panel} ${styles.myTurnPanel}`}
-          onClick={() => cmd('AcknowledgeCard')} style={{ cursor: 'pointer' }}>
+          onClick={() => { markCardAcknowledged(); cmd('AcknowledgeCard') }} style={{ cursor: 'pointer' }}>
           <div className={styles.cardPopup}>
             <span className={styles.cardPopupIcon}>🃏</span>
             <span className={styles.cardPopupText}>{cardText ?? '🃏'}</span>
