@@ -8,7 +8,6 @@
 - globaaliin ohjeisiin pitäs lisätä, että pidä aina huoli sitä että mikää komponentti ei clippaannu pois näkyviltä.
 - **Notifikaatioiden hallinta**: Ratkaise miten toimitaan kun notifikaatioita tulee paljon. "Sinun vuorosi" -notifikaatio oletuksena pois päältä. (P3)
 - **Huutokaupan UI**: Selkeytä mitä mikäkin elementti tarkoittaa. Harkitse "all in" -nappia. (P3)
-- **Kiinteistöt pelilaudalla väriryhmittäin**: Ihmispelaajan omistamat kiinteistöt näkyvät laudalla ryhmiteltynä värin mukaan — kiinnitystila ruksilla, talot/hotelli kiinteistön päällä. (P4)
 - **Odotushuone — logon valinta**: Liittyessä pitäisi voida valita token, väri ja nimi. (P3)
 - **Lunasta/panttaa — visuaalinen erottelu**: "Kiinteistöt"-välilehdellä lunasta- ja panttaa-napit erottuvat selkeämmin — esim. lunasta vihreä, panttaa punainen. (P3)
 - **Ilmoitusasetukset**: Mahdollisuus säätää mitkä ruutunotifikaatiot näkyvät. (P4)
