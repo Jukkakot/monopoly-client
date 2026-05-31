@@ -541,12 +541,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   // Token shapes come from localStorage and sessionId — stable for a session's lifetime.
   const tokenShapes = useMemo(() => {
     const map = new Map<string, TokenShape>()
-    const savedShapes = loadTokenShapes(state.sessionId)
+    const savedShapes = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
     for (const seat of state.seats) {
       map.set(seat.playerId, savedShapes[seat.seatIndex] ?? 'circle')
     }
     return map
-  }, [state.sessionId])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.sessionId, state.seats])
 
   const activeTurnPlayer = state.turn
     ? state.players.find(p => p.playerId === state.turn!.activePlayerId)

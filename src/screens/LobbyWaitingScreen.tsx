@@ -6,6 +6,10 @@ import type { ClientSessionSnapshot, SeatState } from '../types/api'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './LobbyWaitingScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
+import { TokenSvg } from '../components/board/TokenSvg'
+import { ALL_SHAPES, savePlayerTokenShape, type TokenShape } from '../utils/tokenShapes'
+
+const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
 
 export default function LobbyWaitingScreen() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -18,6 +22,11 @@ export default function LobbyWaitingScreen() {
   const [hostPlayerId, setHostPlayerId] = useState<string | null>(null)
   const [name, setName] = useState(() => {
     try { return localStorage.getItem('monopoly_last_name') ?? '' } catch { return '' }
+  })
+  const [color, setColor] = useState(() => PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)])
+  const [tokenShape, setTokenShape] = useState<TokenShape>(() => {
+    const shapes = ALL_SHAPES.map(s => s.key) as TokenShape[]
+    return shapes[Math.floor(Math.random() * shapes.length)]
   })
   const [myPlayerId] = useState<string | null>(() => {
     try { return sessionStorage.getItem(`monopoly_player_${sessionId}`) } catch { return null }
@@ -71,11 +80,13 @@ export default function LobbyWaitingScreen() {
     setError(null)
     setJoining(true)
     try {
-      const res = await joinLobby(sessionId, name.trim())
+      const res = await joinLobby(sessionId, name.trim(), color)
       try { sessionStorage.setItem(`monopoly_player_${sessionId}`, res.playerId) } catch {}
       try { sessionStorage.setItem(`monopoly_token_${sessionId}`, res.playerToken) } catch {}
       try { localStorage.setItem(`monopoly_token_${sessionId}_${res.playerId}`, res.playerToken) } catch {}
       try { localStorage.setItem('monopoly_last_name', name.trim()) } catch {}
+      // Save chosen token shape so the game screen picks it up
+      savePlayerTokenShape(sessionId, res.playerId, tokenShape)
       // Reload to pick up the new credentials from sessionStorage
       window.location.reload()
     } catch {
@@ -213,6 +224,22 @@ export default function LobbyWaitingScreen() {
               >
                 {joining ? '…' : t.joinBtnLabel}
               </button>
+            </div>
+            <div className={styles.colorRow}>
+              {PRESET_COLORS.map(c => (
+                <button key={c} className={`${styles.colorDot} ${color === c ? styles.colorDotSelected : ''}`}
+                  style={{ background: c }} onClick={() => setColor(c)} />
+              ))}
+            </div>
+            <div className={styles.shapeRow}>
+              {ALL_SHAPES.map(s => (
+                <button key={s.key}
+                  className={`${styles.shapeBtn} ${tokenShape === s.key ? styles.shapeBtnSelected : ''}`}
+                  style={tokenShape === s.key ? { borderColor: color } : {}}
+                  onClick={() => setTokenShape(s.key as TokenShape)}>
+                  <TokenSvg color={tokenShape === s.key ? color : '#bbb'} shape={s.key as TokenShape} size={20} />
+                </button>
+              ))}
             </div>
           </div>
         )}
