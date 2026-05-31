@@ -66,6 +66,7 @@
   background: #c2dfc0;
   display: flex;
   align-items: center;
+  z-index: 0;
   justify-content: center;
   flex-direction: column;
   gap: 4px;
