@@ -29,3 +29,4 @@ dist-ssr
 CLAUDE.md
 docs/*
 .playwright-mcp/
+docs/todo.md
