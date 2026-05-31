@@ -88,6 +88,7 @@ interface GameState {
   turnCount: number
   netWorthHistory: Map<string, number[]>
   lastSeenEventId: number
+  sseFrozen: boolean
 }
 
 type Action =
@@ -96,6 +97,8 @@ type Action =
   | { type: 'SET_SNAPSHOT'; snapshot: ClientSessionSnapshot }
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
   | { type: 'SET_COMMAND_ERROR'; message: string | null }
+  | { type: 'SET_SSE_FROZEN'; frozen: boolean }
+  | { type: 'INJECT_DEBUG_SNAPSHOT'; snapshot: SessionState }
 
 function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, existing: string | null = null): string | null {
   if (sessionId) {
@@ -250,6 +253,10 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, connectionStatus: action.status }
     case 'SET_COMMAND_ERROR':
       return { ...state, commandError: action.message }
+    case 'SET_SSE_FROZEN':
+      return { ...state, sseFrozen: action.frozen }
+    case 'INJECT_DEBUG_SNAPSHOT':
+      return { ...state, snapshot: action.snapshot, prevSnapshot: state.snapshot }
     default:
       return state
   }
@@ -260,6 +267,9 @@ interface GameContextValue {
   joinSession: (sessionId: string) => void
   leaveSession: () => void
   sendCmd: (command: object) => Promise<void>
+  freezeSSE: () => void
+  unfreezeSSE: () => void
+  injectDebugSnapshot: (snapshot: SessionState) => void
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -279,6 +289,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     turnCount: 0,
     netWorthHistory: new Map(),
     lastSeenEventId: -1,
+    sseFrozen: false,
   })
 
   const retryCount = useRef(0)
@@ -377,6 +388,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const freezeSSE = useCallback(() => {
+    esRef.current?.close()
+    esRef.current = null
+    dispatch({ type: 'SET_SSE_FROZEN', frozen: true })
+  }, [])
+
+  const unfreezeSSE = useCallback(() => {
+    dispatch({ type: 'SET_SSE_FROZEN', frozen: false })
+  }, [])
+
+  const injectDebugSnapshot = useCallback((snapshot: SessionState) => {
+    dispatch({ type: 'INJECT_DEBUG_SNAPSHOT', snapshot })
+  }, [])
+
   const sendCmd = useCallback(async (command: object) => {
     if (!state.sessionId) return
     try {
@@ -399,7 +424,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.sessionId])
 
   useEffect(() => {
-    if (!state.sessionId) return
+    if (!state.sessionId || state.sseFrozen) return
     let cancelled = false
     let timeoutId: ReturnType<typeof setTimeout>
 
@@ -504,10 +529,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       esRef.current?.close()
       esRef.current = null
     }
-  }, [state.sessionId])
+  }, [state.sessionId, state.sseFrozen])
 
   return (
-    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd }}>
+    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd, freezeSSE, unfreezeSSE, injectDebugSnapshot }}>
       {children}
     </GameContext.Provider>
   )

@@ -17,6 +17,7 @@ import GameOverOverlay from '../components/effects/GameOverOverlay'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './GameScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
+import { useDebugMode } from '../debug/useDebugMode'
 
 export default function GameScreen() {
   const t = useT()
@@ -38,7 +39,7 @@ export default function GameScreen() {
   const [showHelp, setShowHelp] = useState(false)
   const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
-  const isDebugMode = new URLSearchParams(window.location.search).has('debug')
+  const isDebugMode = useDebugMode()
 
   // Auto-clear debug player selection when the active player changes
   const activePlayerId = state.snapshot?.turn?.activePlayerId
@@ -215,6 +216,10 @@ export default function GameScreen() {
   const myPlayerId = effectivePlayerId
   const isGameOver = state.snapshot.status === 'GAME_OVER'
 
+  // Lazily import DebugPanel so Vite can dead-code-eliminate it in production builds.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const DebugPanel = import.meta.env.DEV ? require('../debug/DebugPanel').default : null
+
   return (
     <>
       {isGameOver && <Confetti />}
@@ -228,6 +233,9 @@ export default function GameScreen() {
         />
       )}
       {showHelp && <KeyboardHelp onClose={() => setShowHelp(false)} />}
+      {import.meta.env.DEV && isDebugMode && DebugPanel && sessionId && (
+        <DebugPanel sessionId={sessionId} />
+      )}
       <AppLayout
         header={
           <Header
