@@ -222,6 +222,7 @@ export interface T {
   needMorePlayers: (have: number, total: number) => string
   startFailedErr: string
   joinFailedErr: string
+  nameTakenErr: string
   readyBtn: string
   cancelReadyBtn: string
   readyCount: (ready: number, total: number) => string
@@ -603,6 +604,7 @@ const fi: T = {
   needMorePlayers: (have, total) => `Tarvitaan vähintään 2 pelaajaa (${have}/${total})`,
   startFailedErr: 'Pelin aloitus epäonnistui.',
   joinFailedErr: 'Liittyminen epäonnistui — odotushuone täynnä tai peli jo aloitettu.',
+  nameTakenErr: 'Tämä nimi on jo käytössä — valitse toinen.',
   readyBtn: 'Olen valmis',
   cancelReadyBtn: 'Peru valmius',
   readyCount: (ready, total) => `${ready}/${total} valmis`,
@@ -994,6 +996,7 @@ const en: T = {
   needMorePlayers: (have, total) => `Need at least 2 players (${have}/${total})`,
   startFailedErr: 'Failed to start game.',
   joinFailedErr: 'Join failed — waiting room full or game already started.',
+  nameTakenErr: 'This name is already in use — please choose another.',
   readyBtn: 'Ready',
   cancelReadyBtn: 'Cancel ready',
   readyCount: (ready, total) => `${ready}/${total} ready`,

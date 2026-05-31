@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { joinLobby, addLobbyBot, removeLobbyBot, setLobbyReady, sseUrl } from '../api/sessionApi'
+import { joinLobby, addLobbyBot, removeLobbyBot, setLobbyReady, sseUrl, LobbyJoinError } from '../api/sessionApi'
 import type { ClientSessionSnapshot, SeatState } from '../types/api'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './LobbyWaitingScreen.module.css'
@@ -89,8 +89,8 @@ export default function LobbyWaitingScreen() {
       savePlayerTokenShape(sessionId, res.playerId, tokenShape)
       // Reload to pick up the new credentials from sessionStorage
       window.location.reload()
-    } catch {
-      setError(t.joinFailedErr)
+    } catch (e) {
+      setError(e instanceof LobbyJoinError && e.code === 'name_taken' ? t.nameTakenErr : t.joinFailedErr)
       setJoining(false)
     }
   }
@@ -226,10 +226,16 @@ export default function LobbyWaitingScreen() {
               </button>
             </div>
             <div className={styles.colorRow}>
-              {PRESET_COLORS.map(c => (
-                <button key={c} className={`${styles.colorDot} ${color === c ? styles.colorDotSelected : ''}`}
-                  style={{ background: c }} onClick={() => setColor(c)} />
-              ))}
+              {PRESET_COLORS.map(c => {
+                const taken = seats.some(s => s.tokenColorHex?.toUpperCase() === c.toUpperCase())
+                return (
+                  <button key={c}
+                    className={`${styles.colorDot} ${color === c ? styles.colorDotSelected : ''} ${taken ? styles.colorDotTaken : ''}`}
+                    style={{ background: c }}
+                    title={taken ? 'Varattu' : c}
+                    onClick={() => setColor(c)} />
+                )
+              })}
             </div>
             <div className={styles.shapeRow}>
               {ALL_SHAPES.map(s => (

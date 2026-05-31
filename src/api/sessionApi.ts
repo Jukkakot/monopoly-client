@@ -58,15 +58,26 @@ export async function createLobby(hostName: string, hostColor?: string): Promise
   })
 }
 
+export class LobbyJoinError extends Error {
+  readonly code: string
+  constructor(code: string, message: string) { super(message); this.code = code }
+}
+
 export async function joinLobby(sessionId: string, name: string, color?: string): Promise<{
   playerId: string
   seatId: string
   tokenColorHex: string
   playerToken: string
 }> {
-  return fetchJson(`${BASE}/sessions/${sessionId}/join`, {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/join`, {
     method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ name, color }),
   })
+  if (!res.ok) {
+    const body: { error?: string; message?: string } = await res.json().catch(() => ({}))
+    logger.error('API request failed', { url: `/sessions/${sessionId}/join`, status: res.status, method: 'POST' })
+    throw new LobbyJoinError(body.error ?? 'unknown', body.message ?? `Backend returned ${res.status}`)
+  }
+  return res.json()
 }
 
 export async function addLobbyBot(sessionId: string, hostToken: string): Promise<{ seatId: string; name: string }> {
