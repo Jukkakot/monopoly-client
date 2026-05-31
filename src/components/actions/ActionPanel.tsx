@@ -8,6 +8,7 @@ import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
+import { retriggerBot } from '../../api/sessionApi'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -244,7 +245,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (!isMyTurn) {
     const activePlayer = state.players.find(p => p.playerId === activeId)
     const activeSeat = state.seats.find(s => s.playerId === activeId)
+    const isBot = activeSeat?.seatKind === 'BOT'
     const isAfk = turnSeconds >= 30
+    const botStuck = isBot && turnSeconds >= 15
 
     return (
       <div className={styles.panel}>
@@ -263,6 +266,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <div className={styles.infoBox}>
                 📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
               </div>
+            )}
+            {botStuck && (
+              <Btn label={t.retriggerBotBtn} variant="secondary"
+                onClick={() => retriggerBot(sid)} />
             )}
           </>
         ) : (

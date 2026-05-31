@@ -246,6 +246,7 @@ export interface T {
   // ActionPanel — spectator
   spectatorMsg: string
   endGameBtn: string
+  retriggerBotBtn: string
 
   // ── GameOverOverlay ──────────────────────────────────────────────────────────
   gameOverScreenTitle: string
@@ -622,6 +623,7 @@ const fi: T = {
   startBotsBtn: 'Aloita bottipeli',
   spectatorMsg: 'Olet katsojana',
   endGameBtn: '🛑 Lopeta peli',
+  retriggerBotBtn: '▶ Jatka botti',
 
   // GameOverOverlay
   gameOverScreenTitle: 'Peli päättyi!',
@@ -1014,6 +1016,7 @@ const en: T = {
   startBotsBtn: 'Start bot game',
   spectatorMsg: 'You are a spectator',
   endGameBtn: '🛑 End game',
+  retriggerBotBtn: '▶ Unstick bot',
 
   // GameOverOverlay
   gameOverScreenTitle: 'Game over!',

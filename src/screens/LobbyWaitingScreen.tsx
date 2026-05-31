@@ -37,6 +37,16 @@ export default function LobbyWaitingScreen() {
   const [hostToken] = useState<string | null>(() => {
     try { return localStorage.getItem(`monopoly_host_${sessionId}`) } catch { return null }
   })
+  // Auto-pick a non-taken color when the seat list updates (avoids submitting with a taken color)
+  useEffect(() => {
+    if (alreadyJoined) return
+    const takenColors = seats.map(s => s.tokenColorHex?.toUpperCase())
+    if (takenColors.includes(color.toUpperCase())) {
+      const free = PRESET_COLORS.find(c => !takenColors.includes(c.toUpperCase()))
+      if (free) setColor(free)
+    }
+  }, [seats]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const [joining, setJoining] = useState(false)
   const [settingReady, setSettingReady] = useState(false)
   const [addingBot, setAddingBot] = useState(false)
@@ -90,7 +100,13 @@ export default function LobbyWaitingScreen() {
       // Reload to pick up the new credentials from sessionStorage
       window.location.reload()
     } catch (e) {
-      setError(e instanceof LobbyJoinError && e.code === 'name_taken' ? t.nameTakenErr : t.joinFailedErr)
+      if (e instanceof LobbyJoinError) {
+        if (e.code === 'name_taken') setError(t.nameTakenErr)
+        else if (e.code === 'color_taken') setError(t.colorUsedByOther)
+        else setError(t.joinFailedErr)
+      } else {
+        setError(t.joinFailedErr)
+      }
       setJoining(false)
     }
   }
@@ -233,7 +249,8 @@ export default function LobbyWaitingScreen() {
                     className={`${styles.colorDot} ${color === c ? styles.colorDotSelected : ''} ${taken ? styles.colorDotTaken : ''}`}
                     style={{ background: c }}
                     title={taken ? 'Varattu' : c}
-                    onClick={() => setColor(c)} />
+                    disabled={taken}
+                    onClick={() => !taken && setColor(c)} />
                 )
               })}
             </div>

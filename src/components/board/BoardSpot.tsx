@@ -228,10 +228,10 @@ function BoardSpot(props: Props) {
 
       <div className={styles.label}>{spot.name}</div>
       {spot.price && <div className={styles.price}>€{spot.price}</div>}
-
-      {/* Tokens rendered last so they're always on top */}
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} cardJumpingPlayers={cardJumpingPlayers} steppingPlayers={steppingPlayers} />
     </div>
+    {/* Tokens rendered outside the rotated .spot so they sit in spotWrapper's stacking
+        context and are never clipped or obscured by the color bar. */}
+    <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} cardJumpingPlayers={cardJumpingPlayers} steppingPlayers={steppingPlayers} />
     </div>
   )
 }

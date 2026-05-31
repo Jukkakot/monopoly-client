@@ -145,6 +145,13 @@ export interface SessionSettings {
   botSpeed?: 'fast' | 'normal' | 'slow'
 }
 
+export async function retriggerBot(sessionId: string): Promise<void> {
+  const hostToken = (() => { try { return localStorage.getItem(`monopoly_host_${sessionId}`) ?? '' } catch { return '' } })()
+  await fetch(`${BASE}/sessions/${sessionId}/bot/retrigger`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ hostToken }),
+  })
+}
+
 export async function applySessionSettings(sessionId: string, settings: SessionSettings): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/settings`, {
     method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(settings),
