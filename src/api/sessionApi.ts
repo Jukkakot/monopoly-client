@@ -1,4 +1,4 @@
-import type { CreateSessionRequest, CommandResult, SessionSummary } from '../types/api'
+import type { CreateSessionRequest, CommandResult, SessionSummary, SessionState, ClientSessionSnapshot } from '../types/api'
 import { logger } from '../utils/logger'
 import { randomBotName } from '../utils/playerNames'
 import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
@@ -149,6 +149,48 @@ export async function retriggerBot(sessionId: string): Promise<void> {
   const hostToken = (() => { try { return localStorage.getItem(`monopoly_host_${sessionId}`) ?? '' } catch { return '' } })()
   await fetch(`${BASE}/sessions/${sessionId}/bot/retrigger`, {
     method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ hostToken }),
+  })
+}
+
+/** Fetches the current snapshot for a session. Returns null if session not found. */
+export async function fetchSnapshot(sessionId: string): Promise<SessionState | null> {
+  const res = await fetch(`${BASE}/sessions/${sessionId}/snapshot`)
+  if (!res.ok) return null
+  const snap: ClientSessionSnapshot = await res.json()
+  return snap.state ?? null
+}
+
+export interface DebugStateImport {
+  players?: Array<{
+    playerId: string
+    cash?: number
+    boardIndex?: number
+    inJail?: boolean
+    bankrupt?: boolean
+    getOutOfJailCards?: number
+    ownedPropertyIds?: string[]
+  }>
+  properties?: Array<{
+    propertyId: string
+    ownerPlayerId?: string    // empty string = clear owner
+    mortgaged?: boolean
+    houseCount?: number
+    hotelCount?: number
+  }>
+  turn?: {
+    activePlayerId?: string
+    phase?: string
+    consecutiveDoubles?: number
+    lastDice?: [number, number] | null
+  }
+  clearDebt?: boolean
+  clearDecision?: boolean
+  clearAuction?: boolean
+}
+
+export async function importDebugState(sessionId: string, patch: DebugStateImport): Promise<{ applied: boolean }> {
+  return fetchJson(`${BASE}/sessions/${sessionId}/debug/state`, {
+    method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(patch),
   })
 }
 

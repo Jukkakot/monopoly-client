@@ -184,3 +184,11 @@
   font-size: 11px;
   color: #888;
 }
+
+.msgBar {
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #8d8;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  word-break: break-all;
+}
