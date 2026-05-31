@@ -70,6 +70,15 @@
   background: #eee;
 }
 
+.sectionLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: -2px;
+}
+
 .toggleRow {
   display: flex;
   align-items: center;

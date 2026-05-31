@@ -4,6 +4,7 @@ import type { GameEvent } from '../../store/events'
 import styles from './FlashBanner.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
+import { loadNotifConfig, notifIconsFromConfig } from '../menu/SoundSettings'
 
 interface BannerItem {
   event: GameEvent
@@ -45,6 +46,7 @@ export default function FlashBanner() {
     if (!animating && pendingMyTurn.current) {
       const { playerId, msg } = pendingMyTurn.current
       pendingMyTurn.current = null
+      if (!loadNotifConfig().yourTurn) return
       const syntheticEvent: GameEvent = {
         id: _localId--,
         timestamp: Date.now(),
@@ -60,10 +62,7 @@ export default function FlashBanner() {
     if (!state.myPlayerId || state.events.length === 0) return
 
     const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
-    // On mobile: skip card-drawn (shown in action panel), bought-property (user-initiated), trade-declined (minor)
-    const NOTIFY_ICONS = isTouchDevice
-      ? new Set(['🎊', '⛓', '🔓', '💀', '🔨', '🤝', '💰', '💸', '🏆'])
-      : new Set(['🎊', '🃏', '⛓', '🔓', '💀', '🔨', '🤝', '🚫', '🏠', '💰', '💸', '🏆'])
+    const NOTIFY_ICONS = notifIconsFromConfig(loadNotifConfig(), isTouchDevice)
     const newEvents = state.events.filter(e =>
       !seenIds.current.has(e.id) &&
       !e.historical &&

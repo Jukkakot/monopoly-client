@@ -37,6 +37,7 @@ function usePingRtt(): number | null {
 }
 
 const LS_KEY = 'sound-settings'
+const NOTIF_LS_KEY = 'notif-settings'
 
 export interface SoundConfig {
   volume: number
@@ -58,6 +59,52 @@ export function saveSoundConfig(cfg: SoundConfig) {
   try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)) } catch { /* ignore */ }
 }
 
+export interface NotifConfig {
+  yourTurn: boolean      // ⭐
+  rent: boolean          // 💸💰
+  debt: boolean          // ⛓🔓💀
+  auction: boolean       // 🔨
+  trade: boolean         // 🤝🚫
+  building: boolean      // 🏠
+  cards: boolean         // 🃏
+  celebration: boolean   // 🎊🏆
+}
+
+const NOTIF_DEFAULT: NotifConfig = {
+  yourTurn: false,
+  rent: true,
+  debt: true,
+  auction: true,
+  trade: true,
+  building: true,
+  cards: true,
+  celebration: true,
+}
+
+export function loadNotifConfig(): NotifConfig {
+  try {
+    const raw = localStorage.getItem(NOTIF_LS_KEY)
+    return raw ? { ...NOTIF_DEFAULT, ...JSON.parse(raw) } : NOTIF_DEFAULT
+  } catch { return NOTIF_DEFAULT }
+}
+
+export function saveNotifConfig(cfg: NotifConfig) {
+  try { localStorage.setItem(NOTIF_LS_KEY, JSON.stringify(cfg)) } catch { /* ignore */ }
+}
+
+export function notifIconsFromConfig(cfg: NotifConfig, isTouchDevice: boolean): Set<string> {
+  const icons = new Set<string>()
+  if (cfg.yourTurn) icons.add('⭐')
+  if (cfg.celebration) { icons.add('🎊'); icons.add('🏆') }
+  if (cfg.debt) { icons.add('⛓'); icons.add('🔓'); icons.add('💀') }
+  if (cfg.auction) icons.add('🔨')
+  if (cfg.trade) { icons.add('🤝'); if (!isTouchDevice) icons.add('🚫') }
+  if (cfg.building && !isTouchDevice) icons.add('🏠')
+  if (cfg.rent) { icons.add('💰'); icons.add('💸') }
+  if (cfg.cards && !isTouchDevice) icons.add('🃏')
+  return icons
+}
+
 interface Props {
   onClose: () => void
   onBotSpeedChange?: (speed: BotSpeed) => void
@@ -66,6 +113,7 @@ interface Props {
 export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
   const t = useT()
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
+  const [notif, setNotif] = useState<NotifConfig>(loadNotifConfig)
   const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
   const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
   const [zoomMode, setZoomMode] = useState<ZoomMode>(loadZoomMode)
@@ -73,6 +121,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
   const rtt = usePingRtt()
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
+  useEffect(() => { saveNotifConfig(notif) }, [notif])
 
   function handleAnimSpeed(speed: AnimationSpeed) {
     setAnimSpeed(speed)
@@ -189,6 +238,32 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
           className={styles.checkbox}
         />
       </label>
+
+      <div className={styles.divider} />
+
+      <div className={styles.sectionLabel}>Ruutu-ilmoitukset</div>
+      {([
+        { key: 'yourTurn',    label: 'Sinun vuorosi', desc: '⭐ Ilmoitus kun oma vuoro alkaa' },
+        { key: 'rent',        label: 'Vuokrat',        desc: '💸 Maksetut ja saadut vuokrat' },
+        { key: 'debt',        label: 'Velat',          desc: '⛓ Velka, lunastus, konkurssi' },
+        { key: 'auction',     label: 'Huutokauppa',    desc: '🔨 Huutokauppailmoitukset' },
+        { key: 'trade',       label: 'Kauppa',         desc: '🤝 Kaupankäynti-ilmoitukset' },
+        { key: 'building',    label: 'Rakentaminen',   desc: '🏠 Talot ja hotellit' },
+        { key: 'cards',       label: 'Kortit',         desc: '🃏 Sattuma- ja yhteiskassakorteista' },
+        { key: 'celebration', label: 'Juhla',          desc: '🎊 Voitto ja erikoistapahtumat' },
+      ] as const).map(({ key, label, desc }) => (
+        <label key={key} className={styles.toggleRow}>
+          <div className={styles.toggleInfo}>
+            <span className={styles.label}>{label}</span>
+            <span className={styles.desc}>{desc}</span>
+          </div>
+          <input type="checkbox"
+            checked={notif[key]}
+            onChange={e => setNotif(p => ({ ...p, [key]: e.target.checked }))}
+            className={styles.checkbox}
+          />
+        </label>
+      ))}
 
       <button className={styles.saveBtn} onClick={onClose}>{t.saveBtn}</button>
     </div>
