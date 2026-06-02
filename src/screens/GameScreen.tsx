@@ -224,6 +224,7 @@ export default function GameScreen() {
 
   return (
     <>
+      <span data-testid="game-status" data-status={state.snapshot.status} style={{ display: 'none' }} />
       {isGameOver && <Confetti />}
       {isGameOver && <GameOverOverlay state={state.snapshot} />}
       <FlashBanner />

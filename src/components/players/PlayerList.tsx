@@ -276,7 +276,8 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                   {rankEmoji && activePlayers.length > 1 && (
                     <span className={styles.rankEmoji}>{rankEmoji}</span>
                   )}
-                  <div className={`${styles.cash} ${flash === 'up' ? styles.cashUp : flash === 'down' ? styles.cashDown : ''}`}>
+                  <div className={`${styles.cash} ${flash === 'up' ? styles.cashUp : flash === 'down' ? styles.cashDown : ''}`}
+                    data-testid={`player-${seat?.seatIndex ?? turnIdx}-cash`}>
                     €{player.cash}
                   </div>
                 </div>

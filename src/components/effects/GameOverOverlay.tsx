@@ -44,7 +44,7 @@ export default function GameOverOverlay({ state }: Props) {
                 size={40}
               />
             )}
-            <span className={styles.winnerName}>{t.wonLabel(winner.name)}</span>
+            <span className={styles.winnerName} data-testid="game-over-winner">{t.wonLabel(winner.name)}</span>
           </div>
         )}
 

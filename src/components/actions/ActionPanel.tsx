@@ -49,15 +49,17 @@ interface Props {
 }
 
 
-function Btn({ label, onClick, variant = 'primary', disabled, colorHex }: {
+function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId }: {
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary' | 'danger' | 'neutral' | 'info' | 'ghost'
   disabled?: boolean
   colorHex?: string
+  testId?: string
 }) {
   return (
     <button className={`${styles.btn} ${styles[variant]}`} disabled={disabled}
+      data-testid={testId}
       style={colorHex ? { borderLeftColor: colorHex, borderLeftWidth: 4, borderLeftStyle: 'solid' } : undefined}
       onClick={() => { playButtonClick(); onClick() }}>
       {label}
@@ -157,10 +159,16 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           return `🤝 ${a} ↔ ${b}`
         })()
       : null
+    const activePlayerName = state.players.find(p => p.playerId === activeId)?.name
     return (
       <div className={styles.panel}>
         {tradeInfo && <div className={styles.infoBox}>{tradeInfo}</div>}
         <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
+        {activePlayerName && phase && (
+          <div className={styles.infoBox}>
+            <span data-testid="current-phase">⏳ {activePlayerName} — {t.phases[phase] ?? phase}</span>
+          </div>
+        )}
         {botStuckGlobal && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
@@ -236,7 +244,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             <div className={styles.btnRow}>
               <Btn label={t.buyBtn(p.price)} disabled={!canAfford}
                 onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
-                variant="primary" />
+                variant="primary" testId="action-buy" />
               <Btn label={t.skipToAuction}
                 onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
                 variant="ghost" />
@@ -261,7 +269,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           <>
             <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
               <div className={styles.turnWaiting}>
-                <span>⏳ {activePlayer?.name ?? '?'} — {t.phases[phase ?? ''] ?? phase}</span>
+                <span data-testid="current-phase">⏳ {activePlayer?.name ?? '?'} — {t.phases[phase ?? ''] ?? phase}</span>
                 <span className={`${styles.turnTimer} ${isAfk ? styles.turnTimerAfk : ''}`}>
                   {turnSeconds}s{isAfk ? ' ⚠️' : ''}
                 </span>
@@ -365,7 +373,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               )
             })()}
             <div className={styles.btnRow}>
-              <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" />
+              <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" testId="action-roll" />
               <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
             </div>
           </>
@@ -400,7 +408,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               </div>
             )}
             <div className={styles.btnRow}>
-              <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" />
+              <Btn label={isTouchDevice ? t.endTurn : t.endTurnKbd} onClick={() => cmd('EndTurn')} variant="primary" testId="action-end-turn" />
               <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
             </div>
           </>
