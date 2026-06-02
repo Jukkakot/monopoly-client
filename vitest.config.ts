@@ -8,6 +8,7 @@ export default defineConfig({
     hookTimeout: 10_000,
     reporters: ['verbose'],
     pool: 'threads',
-    maxWorkers: 4,
+    maxWorkers: 2,
+    retry: 1,
   },
 })
