@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import type { SessionState } from '../types/api'
@@ -123,8 +123,12 @@ export default function DebugPanel({ sessionId }: Props) {
   const [busy, setBusy] = useState(false)
   const [forceD1, setForceD1] = useState(1)
   const [forceD2, setForceD2] = useState(1)
+  const [diceActive, setDiceActive] = useState(false)   // override is pending on backend
+  const [persistDice, setPersistDice] = useState(false)
   const [forceChance, setForceChance] = useState('')
   const [forceCommunity, setForceCommunity] = useState('')
+  const prevLastDice = useRef<string>('')
+  const prevLastCard = useRef<string>('')
 
   const scenarios = scenarioNames()
 
@@ -218,13 +222,33 @@ export default function DebugPanel({ sessionId }: Props) {
     injectDebugSnapshot(injected)
   }
 
+  // Detect when forced dice was consumed (lastDice changed after we set an override)
+  useEffect(() => {
+    const key = JSON.stringify(state.snapshot?.turn?.lastDice)
+    if (key === prevLastDice.current) return
+    prevLastDice.current = key
+    if (!diceActive) return
+    if (persistDice) {
+      // Re-arm immediately
+      importDebugState(sessionId, { nextDice: [forceD1, forceD2] }).catch(() => {})
+    } else {
+      setDiceActive(false)
+    }
+  }, [state.snapshot?.turn?.lastDice]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Detect when a forced card was consumed (lastCardKey changed)
+  useEffect(() => {
+    const key = state.snapshot?.lastCardKey ?? ''
+    if (key === prevLastCard.current) return
+    prevLastCard.current = key
+    if (key.startsWith('chance:')) setForceChance('')
+    if (key.startsWith('community:')) setForceCommunity('')
+  }, [state.snapshot?.lastCardKey])
+
   async function sendOverride(patch: DebugStateImport) {
     try {
-      const result = await importDebugState(sessionId, patch)
-      showMsg(result.applied ? '✓ Asetettu' : '✗ Ei hyväksytty')
-    } catch (e) {
-      showMsg(`✗ ${String(e)}`)
-    }
+      await importDebugState(sessionId, patch)
+    } catch { /* silent — fire and forget */ }
   }
 
   void getCardText  // imported for potential future use
@@ -314,45 +338,66 @@ export default function DebugPanel({ sessionId }: Props) {
       <section className={styles.section}>
         <div className={styles.sectionTitle}>PAKOTA SEURAAVA</div>
 
+        {/* Dice */}
         <div className={styles.diceRow}>
           <span className={styles.diceLabel}>🎲</span>
-          {([forceD1, forceD2] as const).map((_val, i) => (
-            <select key={i} className={styles.diceSelect}
+          {([forceD1, forceD2] as const).map((_v, i) => (
+            <select key={i} className={`${styles.diceSelect} ${diceActive ? styles.diceActive : ''}`}
               value={i === 0 ? forceD1 : forceD2}
-              onChange={e => i === 0 ? setForceD1(+e.target.value) : setForceD2(+e.target.value)}>
+              onChange={e => {
+                const v = +e.target.value
+                const d1 = i === 0 ? v : forceD1
+                const d2 = i === 1 ? v : forceD2
+                if (i === 0) setForceD1(v); else setForceD2(v)
+                setDiceActive(true)
+                sendOverride({ nextDice: [d1, d2] })
+              }}>
               {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           ))}
-          <span className={styles.diceSum}>={forceD1 + forceD2}</span>
-          <button className={styles.btn} onClick={() => sendOverride({ nextDice: [forceD1, forceD2] })}>
-            Aseta
-          </button>
+          <span className={`${styles.diceSum} ${diceActive ? styles.diceSumActive : ''}`}>
+            ={forceD1 + forceD2}
+          </span>
+          <label className={styles.persistLabel}>
+            <input type="checkbox" checked={persistDice}
+              onChange={e => setPersistDice(e.target.checked)} />
+            🔁
+          </label>
+          {diceActive && (
+            <button className={styles.diceReset} title="Peruuta pakko"
+              onClick={() => { setDiceActive(false); /* no backend clear needed — next natural roll will just be random */ }}>
+              ✕
+            </button>
+          )}
         </div>
+        {diceActive && <div className={styles.diceHint}>⚡ heitetään kerran{persistDice ? ' (pysyvä)' : ''}</div>}
 
+        {/* Chance card */}
         <div className={styles.cardRow}>
           <span className={styles.diceLabel}>🃏 Sattuma</span>
-          <select className={`${styles.select} ${styles.cardSelect}`} value={forceChance}
-            onChange={e => setForceChance(e.target.value)}>
-            <option value="">— valitse —</option>
+          <select className={`${styles.select} ${forceChance ? styles.cardActive : ''}`}
+            value={forceChance}
+            onChange={e => {
+              setForceChance(e.target.value)
+              if (e.target.value) sendOverride({ nextChanceCard: e.target.value })
+            }}>
+            <option value="">— ei pakotusta —</option>
             {CHANCE_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
           </select>
-          <button className={styles.btn} disabled={!forceChance}
-            onClick={() => sendOverride({ nextChanceCard: forceChance })}>
-            Aseta
-          </button>
         </div>
 
+        {/* Community card */}
         <div className={styles.cardRow}>
           <span className={styles.diceLabel}>🃏 Yhteiskassa</span>
-          <select className={`${styles.select} ${styles.cardSelect}`} value={forceCommunity}
-            onChange={e => setForceCommunity(e.target.value)}>
-            <option value="">— valitse —</option>
+          <select className={`${styles.select} ${forceCommunity ? styles.cardActive : ''}`}
+            value={forceCommunity}
+            onChange={e => {
+              setForceCommunity(e.target.value)
+              if (e.target.value) sendOverride({ nextCommunityCard: e.target.value })
+            }}>
+            <option value="">— ei pakotusta —</option>
             {COMMUNITY_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
           </select>
-          <button className={styles.btn} disabled={!forceCommunity}
-            onClick={() => sendOverride({ nextCommunityCard: forceCommunity })}>
-            Aseta
-          </button>
         </div>
       </section>
 
