@@ -43,7 +43,7 @@ export default function GameScreen() {
   const [showHelp, setShowHelp] = useState(false)
   const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
-  const isDebugMode = useDebugMode()
+  const [isDebugMode, toggleDebugMode] = useDebugMode()
 
   // Auto-clear debug player selection when the active player changes
   const activePlayerId = state.snapshot?.turn?.activePlayerId
@@ -139,6 +139,8 @@ export default function GameScreen() {
         playButtonClick()
         const dec = snap.pendingDecision
         sendCmd({ type: 'DeclineProperty', sessionId: snap.sessionId, actorPlayerId: myId, decisionId: dec.decisionId, propertyId: dec.payload.propertyId })
+      } else if (import.meta.env.DEV) {
+        toggleDebugMode()
       }
     }
     if (e.key === 'p' || e.key === 'P') {
@@ -175,7 +177,7 @@ export default function GameScreen() {
       const newVol = cfg.volume > 0 ? 0 : 80
       saveSoundConfig({ ...cfg, volume: newVol })
     }
-  }, [state.snapshot, state.myPlayerId, selectedSpotId, highlightGroupType, sendCmd])
+  }, [state.snapshot, state.myPlayerId, selectedSpotId, highlightGroupType, sendCmd, toggleDebugMode])
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
