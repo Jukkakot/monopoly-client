@@ -77,8 +77,10 @@
   overflow-x: hidden;
 }
 
-.scrollBody::-webkit-scrollbar { width: 4px; }
-.scrollBody::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.scrollBody::-webkit-scrollbar { width: 5px; }
+.scrollBody::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); }
+.scrollBody::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 3px; }
+.scrollBody::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
 .section {
   padding: 8px 10px;
@@ -112,6 +114,26 @@
   letter-spacing: 0.8px;
   color: #888;
   text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sectionTitle:hover { color: #bbb; }
+
+.collapseArrow {
+  font-size: 9px;
+  color: #666;
+  flex-shrink: 0;
+  width: 10px;
+}
+
+.activeBadge {
+  font-size: 9px;
+  margin-left: auto;
+  opacity: 0.8;
 }
 
 .hint {
@@ -305,9 +327,11 @@
 }
 
 .msgBar {
-  padding: 6px 10px;
+  padding: 5px 10px;
   font-size: 11px;
   color: #8d8;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   word-break: break-all;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.3);
 }

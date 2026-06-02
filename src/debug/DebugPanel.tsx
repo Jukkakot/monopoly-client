@@ -110,6 +110,15 @@ interface Props {
   sessionId: string
 }
 
+const SECTIONS = ['scenarios', 'capture', 'force', 'sse'] as const
+type SectionKey = typeof SECTIONS[number]
+const SECTION_LABELS: Record<SectionKey, string> = {
+  scenarios: 'SKENAARIOT',
+  capture:   'CAPTURE',
+  force:     'PAKOTA SEURAAVA',
+  sse:       'SSE-INJEKTIO (offline)',
+}
+
 export default function DebugPanel({ sessionId }: Props) {
   const { state, freezeSSE, unfreezeSSE, injectDebugSnapshot } = useGame()
   const navigate = useNavigate()
@@ -129,6 +138,17 @@ export default function DebugPanel({ sessionId }: Props) {
   const [forceCommunity, setForceCommunity] = useState('')
   const prevLastDice = useRef<string>('')
   const prevLastCard = useRef<string>('')
+  // Collapsed state per section, persisted in localStorage
+  const [collapsed, setCollapsed] = useState<Partial<Record<SectionKey, boolean>>>(() => {
+    try { return JSON.parse(localStorage.getItem('debug_panel_collapsed') ?? '{}') } catch { return {} }
+  })
+  function toggleSection(key: SectionKey) {
+    setCollapsed(c => {
+      const next = { ...c, [key]: !c[key] }
+      try { localStorage.setItem('debug_panel_collapsed', JSON.stringify(next)) } catch { /* ignore */ }
+      return next
+    })
+  }
   // Always-current ref so the lastDice effect never has stale closures
 
   // Drag state — persisted in localStorage
@@ -294,8 +314,21 @@ export default function DebugPanel({ sessionId }: Props) {
 
   async function sendOverride(patch: DebugStateImport) {
     try {
-      await importDebugState(sessionId, patch)
-    } catch { /* silent — fire and forget */ }
+      const result = await importDebugState(sessionId, patch)
+      if (!result.applied) { showMsg('✗ Ei hyväksytty'); return }
+      // Retrigger bot so it re-reads the fresh state (including any dice override)
+      // before its scheduled action fires.
+      if (patch.nextDice) {
+        await retriggerBot(sessionId).catch(() => {})
+        showMsg(`⚡ noppa ${patch.nextDice[0]}+${patch.nextDice[1]}=${patch.nextDice[0]+patch.nextDice[1]} asetettu`)
+      } else if (patch.nextChanceCard) {
+        showMsg(`🃏 sattuma: ${patch.nextChanceCard}`)
+      } else if (patch.nextCommunityCard) {
+        showMsg(`🃏 yhteiskassa: ${patch.nextCommunityCard}`)
+      }
+    } catch (e) {
+      showMsg(`✗ ${String(e)}`)
+    }
   }
 
   void getCardText  // imported for potential future use
@@ -320,148 +353,158 @@ export default function DebugPanel({ sessionId }: Props) {
       </div>
 
       <div className={styles.scrollBody}>
-      {/* Scenario selector */}
-      <section className={styles.section}>
-        <div className={styles.sectionTitle}>SKENAARIOT</div>
-        {scenarios.length === 0
-          ? <div className={styles.hint}>Ei skenaarioita — käytä Capture ↓</div>
-          : (
-            <select className={styles.select} value={selected} onChange={e => setSelected(e.target.value)}>
-              <option value="">— valitse —</option>
-              {scenarios.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          )
-        }
-        <button
-          className={styles.btn}
-          onClick={handleLoadIntoGame}
-          disabled={!selected || busy || !state.snapshot}
-          title="Lataa valittu skenaario käynnissä olevaan sessioon"
-        >
-          ▶ Lataa peliin
-        </button>
-        <button
-          className={styles.btn}
-          onClick={handleNewGameFromScenario}
-          disabled={!selected || busy}
-          title="Luo uusi botti-sessio ja importoi skenaario siihen"
-        >
-          ⊕ Uusi peli skenaarista
-        </button>
-      </section>
 
-      {/* Capture */}
+      {/* ── Scenarios ────────────────────────────────────────────────────── */}
       <section className={styles.section}>
-        <div className={styles.sectionTitle}>CAPTURE</div>
-        <input
-          className={styles.input}
-          placeholder="nimi (esim. velka-tilanne)"
-          value={captureName}
-          onChange={e => setCaptureName(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleCapture()}
-          maxLength={60}
-        />
-        <button
-          className={styles.btn}
-          onClick={handleCapture}
-          disabled={!state.snapshot}
-        >
-          📸 Tallenna skenaarioksi
-        </button>
-      </section>
-
-      {/* Offline injection */}
-      <section className={styles.section}>
-        <div className={styles.sectionTitle}>SNAPSHOT-INJEKTIO (offline)</div>
-        <div className={styles.freezeRow}>
-          <button
-            className={`${styles.btn} ${state.sseFrozen ? styles.btnDanger : ''}`}
-            onClick={() => state.sseFrozen ? unfreezeSSE() : freezeSSE()}
-          >
-            {state.sseFrozen ? '▶ Sulata SSE' : '⏸ Jäädytä SSE'}
-          </button>
-          <span className={`${styles.statusDot} ${state.sseFrozen ? styles.dotFrozen : styles.dotLive}`} />
-          <span className={styles.statusLabel}>{state.sseFrozen ? 'jäädytetty' : 'live'}</span>
+        <div className={styles.sectionTitle} onClick={() => toggleSection('scenarios')}>
+          <span className={styles.collapseArrow}>{collapsed.scenarios ? '▸' : '▾'}</span>
+          {SECTION_LABELS.scenarios}
         </div>
-        <button className={styles.btn} onClick={handleInject} disabled={!selected}>
-          ▶ Injektoi valittu skenaario
-        </button>
+        {!collapsed.scenarios && (
+          <>
+            {scenarios.length === 0
+              ? <div className={styles.hint}>Ei skenaarioita — käytä Capture ↓</div>
+              : (
+                <select className={styles.select} value={selected} onChange={e => setSelected(e.target.value)}>
+                  <option value="">— valitse —</option>
+                  {scenarios.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              )
+            }
+            <button
+              className={styles.btn}
+              onClick={handleLoadIntoGame}
+              disabled={!selected || busy || !state.snapshot}
+              title="Lataa valittu skenaario käynnissä olevaan sessioon"
+            >▶ Lataa peliin</button>
+            <button
+              className={styles.btn}
+              onClick={handleNewGameFromScenario}
+              disabled={!selected || busy}
+              title="Luo uusi botti-sessio ja importoi skenaario siihen"
+            >⊕ Uusi peli skenaarista</button>
+          </>
+        )}
       </section>
 
-      {/* Force next roll / card */}
+      {/* ── Force next ───────────────────────────────────────────────────── */}
       <section className={styles.section}>
-        <div className={styles.sectionTitle}>PAKOTA SEURAAVA</div>
+        <div className={styles.sectionTitle} onClick={() => toggleSection('force')}>
+          <span className={styles.collapseArrow}>{collapsed.force ? '▸' : '▾'}</span>
+          {SECTION_LABELS.force}
+          {diceActive && <span className={styles.activeBadge}>⚡</span>}
+          {(forceChance || forceCommunity) && <span className={styles.activeBadge}>🃏</span>}
+        </div>
+        {!collapsed.force && (
+          <>
+            <div className={styles.diceRow}>
+              <span className={styles.diceLabel}>🎲</span>
+              {([diceD1, diceD2] as const).map((val, i) => (
+                <select key={i} className={`${styles.diceSelect} ${diceActive ? styles.diceActive : ''}`}
+                  value={val ?? ''}
+                  onChange={e => {
+                    const v = e.target.value === '' ? null : +e.target.value
+                    const d1 = i === 0 ? v : diceD1
+                    const d2 = i === 1 ? v : diceD2
+                    if (i === 0) setDiceD1(v); else setDiceD2(v)
+                    if (d1 !== null && d2 !== null) {
+                      setDiceActive(true)
+                      sendOverride({ nextDice: [d1, d2] })
+                    }
+                  }}>
+                  <option value="">—</option>
+                  {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              ))}
+              {diceD1 !== null && diceD2 !== null && (
+                <span className={`${styles.diceSum} ${diceActive ? styles.diceSumActive : ''}`}>
+                  ={diceD1 + diceD2}
+                </span>
+              )}
+              <label className={styles.persistLabel}>
+                <input type="checkbox" checked={persistDice} onChange={e => setPersistDice(e.target.checked)} />
+                🔁
+              </label>
+              {diceActive && (
+                <button className={styles.diceReset} title="Peruuta pakko"
+                  onClick={() => { setDiceActive(false); setDiceD1(null); setDiceD2(null) }}>✕</button>
+              )}
+            </div>
+            {diceActive && <div className={styles.diceHint}>⚡ heitetään{persistDice ? ' (pysyvä)' : ' kerran'}</div>}
 
-        {/* Dice */}
-        <div className={styles.diceRow}>
-          <span className={styles.diceLabel}>🎲</span>
-          {([diceD1, diceD2] as const).map((val, i) => (
-            <select key={i} className={`${styles.diceSelect} ${diceActive ? styles.diceActive : ''}`}
-              value={val ?? ''}
-              onChange={e => {
-                const v = e.target.value === '' ? null : +e.target.value
-                const d1 = i === 0 ? v : diceD1
-                const d2 = i === 1 ? v : diceD2
-                if (i === 0) setDiceD1(v); else setDiceD2(v)
-                if (d1 !== null && d2 !== null) {
-                  setDiceActive(true)
-                  sendOverride({ nextDice: [d1, d2] })
-                }
-              }}>
-              <option value="">—</option>
-              {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          ))}
-          {diceD1 !== null && diceD2 !== null && (
-            <span className={`${styles.diceSum} ${diceActive ? styles.diceSumActive : ''}`}>
-              ={diceD1 + diceD2}
-            </span>
-          )}
-          <label className={styles.persistLabel}>
-            <input type="checkbox" checked={persistDice}
-              onChange={e => setPersistDice(e.target.checked)} />
-            🔁
-          </label>
-          {diceActive && (
-            <button className={styles.diceReset} title="Peruuta pakko"
-              onClick={() => { setDiceActive(false); setDiceD1(null); setDiceD2(null) }}>
-              ✕
+            <div className={styles.cardRow}>
+              <span className={styles.diceLabel}>🃏 Sattuma</span>
+              <select className={`${styles.select} ${forceChance ? styles.cardActive : ''}`}
+                value={forceChance}
+                onChange={e => { setForceChance(e.target.value); if (e.target.value) sendOverride({ nextChanceCard: e.target.value }) }}>
+                <option value="">— ei pakotusta —</option>
+                {CHANCE_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+              </select>
+            </div>
+            <div className={styles.cardRow}>
+              <span className={styles.diceLabel}>🃏 Yhteiskassa</span>
+              <select className={`${styles.select} ${forceCommunity ? styles.cardActive : ''}`}
+                value={forceCommunity}
+                onChange={e => { setForceCommunity(e.target.value); if (e.target.value) sendOverride({ nextCommunityCard: e.target.value }) }}>
+                <option value="">— ei pakotusta —</option>
+                {COMMUNITY_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+              </select>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* ── Capture ──────────────────────────────────────────────────────── */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle} onClick={() => toggleSection('capture')}>
+          <span className={styles.collapseArrow}>{collapsed.capture ? '▸' : '▾'}</span>
+          {SECTION_LABELS.capture}
+        </div>
+        {!collapsed.capture && (
+          <>
+            <input
+              className={styles.input}
+              placeholder="nimi (esim. velka-tilanne)"
+              value={captureName}
+              onChange={e => setCaptureName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleCapture()}
+              maxLength={60}
+            />
+            <button className={styles.btn} onClick={handleCapture} disabled={!state.snapshot}>
+              📸 Tallenna skenaarioksi
             </button>
-          )}
-        </div>
-        {diceActive && <div className={styles.diceHint}>⚡ heitetään{persistDice ? ' (pysyvä)' : ' kerran'}</div>}
-
-        {/* Chance card */}
-        <div className={styles.cardRow}>
-          <span className={styles.diceLabel}>🃏 Sattuma</span>
-          <select className={`${styles.select} ${forceChance ? styles.cardActive : ''}`}
-            value={forceChance}
-            onChange={e => {
-              setForceChance(e.target.value)
-              if (e.target.value) sendOverride({ nextChanceCard: e.target.value })
-            }}>
-            <option value="">— ei pakotusta —</option>
-            {CHANCE_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
-          </select>
-        </div>
-
-        {/* Community card */}
-        <div className={styles.cardRow}>
-          <span className={styles.diceLabel}>🃏 Yhteiskassa</span>
-          <select className={`${styles.select} ${forceCommunity ? styles.cardActive : ''}`}
-            value={forceCommunity}
-            onChange={e => {
-              setForceCommunity(e.target.value)
-              if (e.target.value) sendOverride({ nextCommunityCard: e.target.value })
-            }}>
-            <option value="">— ei pakotusta —</option>
-            {COMMUNITY_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
-          </select>
-        </div>
+          </>
+        )}
       </section>
 
-      {msg && <div className={styles.msgBar}>{msg}</div>}
+      {/* ── SSE / offline injection ───────────────────────────────────────── */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle} onClick={() => toggleSection('sse')}>
+          <span className={styles.collapseArrow}>{collapsed.sse ? '▸' : '▾'}</span>
+          {SECTION_LABELS.sse}
+          {state.sseFrozen && <span className={styles.activeBadge}>⏸</span>}
+        </div>
+        {!collapsed.sse && (
+          <>
+            <div className={styles.freezeRow}>
+              <button
+                className={`${styles.btn} ${state.sseFrozen ? styles.btnDanger : ''}`}
+                onClick={() => state.sseFrozen ? unfreezeSSE() : freezeSSE()}
+              >
+                {state.sseFrozen ? '▶ Sulata SSE' : '⏸ Jäädytä SSE'}
+              </button>
+              <span className={`${styles.statusDot} ${state.sseFrozen ? styles.dotFrozen : styles.dotLive}`} />
+              <span className={styles.statusLabel}>{state.sseFrozen ? 'jäädytetty' : 'live'}</span>
+            </div>
+            <button className={styles.btn} onClick={handleInject} disabled={!selected}>
+              ▶ Injektoi valittu skenaario
+            </button>
+          </>
+        )}
+      </section>
+
       </div>{/* end scrollBody */}
+      {msg && <div className={styles.msgBar}>{msg}</div>}
       <div
         className={styles.resizeHandle}
         onMouseDown={e => { resizeRef.current = { mx: e.clientX, my: e.clientY, sw: size.w, sh: size.h }; e.preventDefault(); e.stopPropagation() }}
