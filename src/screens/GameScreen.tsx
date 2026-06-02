@@ -266,6 +266,7 @@ export default function GameScreen() {
                   return (
                     <button
                       key={p.playerId}
+                      data-testid={`debug-player-${seat?.seatIndex ?? 0}`}
                       className={`${styles.debugPlayer} ${isSelected ? styles.debugPlayerSelected : ''} ${isActive ? styles.debugPlayerActive : ''}`}
                       onClick={() => setDebugPlayerId(p.playerId)}
                       style={{ borderColor: seat?.tokenColorHex ?? '#888' }}

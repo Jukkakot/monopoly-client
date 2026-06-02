@@ -834,7 +834,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
   const canPay = debt.allowedActions.includes('PAY_DEBT_NOW')
 
   return (
-    <div className={styles.panel}>
+    <div className={styles.panel} data-testid="debt-panel">
       <div className={styles.debtCard}>
         <div className={styles.debtCardHeader}>
           <span className={styles.debtCardHeaderIcon}>⚠️</span>
@@ -859,7 +859,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         <Btn label={t.payDebtBtn}
           disabled={debt.currentCash < debt.amountRemaining}
           onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
-          variant="primary" />
+          variant="primary" testId="action-pay-debt" />
       )}
       {debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
         const mortgageables = state.properties

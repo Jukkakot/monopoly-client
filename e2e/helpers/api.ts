@@ -80,3 +80,43 @@ export async function retrigger(sid: string): Promise<void> {
 export async function deleteSession(sid: string): Promise<void> {
   await fetch(`${BASE}/sessions/${sid}`, { method: 'DELETE' })
 }
+
+export interface HumanSession {
+  sid: string
+  humanPlayerId: string
+  humanPlayerToken: string
+}
+
+/**
+ * Creates a 2-player session (1 human + 1 bot) via the lobby flow:
+ *   POST /sessions (lobbyMode) → POST /sessions/{id}/lobby/bots → POST /sessions/{id}/lobby/ready
+ *
+ * The human player is at seat index 0.  Marking the human ready auto-starts the game
+ * (backend starts when all humans are ready and total >= 2).
+ * The returned playerToken must be stored in sessionStorage (`monopoly_token_${sid}`)
+ * before navigating so that GameContext can send authorized commands on behalf of the human player.
+ */
+export async function createHumanBotSession(): Promise<HumanSession> {
+  const r1 = await fetch(`${BASE}/sessions`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ lobbyMode: true, seatCount: 2 }),
+  })
+  if (!r1.ok) throw new Error(`createHumanBotSession: POST /sessions failed ${r1.status}`)
+  const { sessionId: sid, hostToken, playerId: humanPlayerId, playerToken: humanPlayerToken } = await r1.json()
+
+  // Add a bot (seat 1)
+  const r2 = await fetch(`${BASE}/sessions/${sid}/lobby/bots`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ hostToken }),
+  })
+  if (!r2.ok) throw new Error(`createHumanBotSession: addBot failed ${r2.status}`)
+
+  // Mark human as ready → backend auto-starts when all humans are ready
+  const r3 = await fetch(`${BASE}/sessions/${sid}/lobby/ready`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ playerId: humanPlayerId, playerToken: humanPlayerToken, ready: true }),
+  })
+  if (!r3.ok) throw new Error(`createHumanBotSession: lobbyReady failed ${r3.status}`)
+
+  return { sid, humanPlayerId, humanPlayerToken }
+}
