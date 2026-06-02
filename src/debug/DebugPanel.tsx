@@ -115,7 +115,10 @@ export default function DebugPanel({ sessionId }: Props) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState('')
-  const [captureName, setCaptureName] = useState('')
+  const [captureName, setCaptureName] = useState(() => {
+    const now = new Date()
+    return `scenario-${now.getMonth()+1}${now.getDate()}-${now.getHours()}${String(now.getMinutes()).padStart(2,'0')}`
+  })
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [forceD1, setForceD1] = useState(1)
@@ -138,12 +141,14 @@ export default function DebugPanel({ sessionId }: Props) {
   // ── Capture ──────────────────────────────────────────────────────────────────
 
   async function handleCapture() {
-    if (!state.snapshot || !captureName.trim()) return
+    const name = captureName.trim() || `scenario-${Date.now()}`
+    if (!state.snapshot) return
+    setCaptureName(name)
     try {
       const res = await fetch('/__debug/save-scenario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: captureName.trim(), state: state.snapshot }),
+        body: JSON.stringify({ name, state: state.snapshot }),
       })
       const data: { ok: boolean; file?: string; error?: string } = await res.json()
       showMsg(data.ok ? `✓ ${data.file}` : `✗ ${data.error}`)
@@ -281,7 +286,7 @@ export default function DebugPanel({ sessionId }: Props) {
         <button
           className={styles.btn}
           onClick={handleCapture}
-          disabled={!captureName.trim() || !state.snapshot}
+          disabled={!state.snapshot}
         >
           📸 Tallenna skenaarioksi
         </button>
