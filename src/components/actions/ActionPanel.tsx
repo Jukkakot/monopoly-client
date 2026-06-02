@@ -132,10 +132,12 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     return (
       <div className={styles.tabBar}>
         <button className={`${styles.tab} ${activeTab === 'action' ? styles.tabActive : ''}`}
+          data-testid="tab-action"
           onClick={() => setActiveTab('action')}>
           {t.actionTabLabel}
         </button>
         <button className={`${styles.tab} ${activeTab === 'properties' ? styles.tabActive : ''}`}
+          data-testid="tab-properties"
           onClick={() => setActiveTab('properties')}>
           {t.propertiesTabLabel}
           {mortgagedCount > 0 && <span className={styles.tabBadge}>{mortgagedCount}</span>}
@@ -559,11 +561,13 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                       </div>
                       {canSell && (
                         <button className={`${styles.buildBtn} ${styles.sellBtn}`}
+                          data-testid={`action-sell-house-${prop.propertyId}`}
                           onClick={() => sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                           −🏠
                         </button>
                       )}
                       <button className={styles.buildBtn} disabled={!canBuy}
+                        data-testid={`action-buy-house-${prop.propertyId}`}
                         onClick={() => sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                         +🏠
                       </button>
