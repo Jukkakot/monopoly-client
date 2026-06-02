@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { createBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, deleteSession } from '../helpers/api'
+import { createBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, setBotSpeed, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
 // All trading tests manage sessions manually because the command sequence is
@@ -11,6 +11,7 @@ async function setup2Player(ownedBySeat0: string[], ownedBySeat1: string[], opti
   seat0JailCards?: number
 } = {}) {
   const sid = await createBotSession(2)
+  await setBotSpeed(sid, 'slow')  // prevent bots from ending turn or declining trade mid-test
   const snap0 = await getSnapshot(sid)
   const patch = buildPatch({
     description: '', rules: [],

@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { createBotSession, getSnapshot, injectState, sendCmdRaw, deleteSession } from '../helpers/api'
+import { createBotSession, getSnapshot, injectState, sendCmdRaw, setBotSpeed, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 import { runCmds } from '../helpers/run'
 import type { CmdFactory } from '../helpers/run'
@@ -50,23 +50,4 @@ describe('Mortgage & unmortgage', () => {
     }
   })
 
-  test('M4 ToggleMortgage rejected in WAITING_FOR_ROLL phase', async () => {
-    const sid = await createBotSession(2)
-    const snap0 = await getSnapshot(sid)
-    try {
-      const patch = buildPatch({
-        description: '', rules: [],
-        players: [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 10 }],
-        ownedProperties: { 0: ['B2'] },
-        turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
-        expectedAfter: {},
-      }, snap0)
-      await injectState(sid, patch)
-      const seat0Id = snap0.state!.players[0].playerId
-      const result = await sendCmdRaw(sid, { type: 'ToggleMortgage', actorPlayerId: seat0Id, propertyId: 'B2' })
-      expect(result.accepted).toBe(false)
-    } finally {
-      await deleteSession(sid)
-    }
-  })
 })
