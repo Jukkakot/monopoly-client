@@ -30,3 +30,7 @@ CLAUDE.md
 docs/*
 .playwright-mcp/
 docs/todo.md
+
+# tempporary ignore these....
+src/debug/scenarios/test-capture.json
+src/debug/scenarios/testi-1.json
