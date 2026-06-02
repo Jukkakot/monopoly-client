@@ -130,6 +130,36 @@ export default function DebugPanel({ sessionId }: Props) {
   const prevLastDice = useRef<string>('')
   const prevLastCard = useRef<string>('')
   // Always-current ref so the lastDice effect never has stale closures
+
+  // Drag state
+  const [pos, setPos] = useState(() => ({
+    x: Math.max(8, window.innerWidth - 276),
+    y: Math.max(8, window.innerHeight - 560),
+  }))
+  const [size, setSize] = useState({ w: 260, h: 520 })
+  const dragRef = useRef<{ mx: number; my: number; px: number; py: number } | null>(null)
+  const resizeRef = useRef<{ mx: number; my: number; sw: number; sh: number } | null>(null)
+
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      if (dragRef.current) {
+        setPos({
+          x: Math.max(0, dragRef.current.px + e.clientX - dragRef.current.mx),
+          y: Math.max(0, dragRef.current.py + e.clientY - dragRef.current.my),
+        })
+      }
+      if (resizeRef.current) {
+        setSize({
+          w: Math.max(220, resizeRef.current.sw + e.clientX - resizeRef.current.mx),
+          h: Math.max(180, resizeRef.current.sh + e.clientY - resizeRef.current.my),
+        })
+      }
+    }
+    function onUp() { dragRef.current = null; resizeRef.current = null }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+  }, [])
   const diceCtx = useRef({ d1: null as number | null, d2: null as number | null, persist: false })
   diceCtx.current = { d1: diceD1, d2: diceD2, persist: persistDice }
 
@@ -265,12 +295,19 @@ export default function DebugPanel({ sessionId }: Props) {
   }
 
   return (
-    <div className={styles.panel}>
-      <div className={styles.header}>
+    <div
+      className={styles.panel}
+      style={{ left: pos.x, top: pos.y, width: size.w, height: size.h }}
+    >
+      <div
+        className={styles.header}
+        onMouseDown={e => { dragRef.current = { mx: e.clientX, my: e.clientY, px: pos.x, py: pos.y }; e.preventDefault() }}
+      >
         <span className={styles.headerTitle}>🐛 DEBUG</span>
         <button className={styles.closeBtn} onClick={() => setOpen(false)}>✕</button>
       </div>
 
+      <div className={styles.scrollBody}>
       {/* Scenario selector */}
       <section className={styles.section}>
         <div className={styles.sectionTitle}>SKENAARIOT</div>
@@ -412,6 +449,11 @@ export default function DebugPanel({ sessionId }: Props) {
       </section>
 
       {msg && <div className={styles.msgBar}>{msg}</div>}
+      </div>{/* end scrollBody */}
+      <div
+        className={styles.resizeHandle}
+        onMouseDown={e => { resizeRef.current = { mx: e.clientX, my: e.clientY, sw: size.w, sh: size.h }; e.preventDefault(); e.stopPropagation() }}
+      />
     </div>
   )
 }

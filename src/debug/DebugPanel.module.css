@@ -24,18 +24,19 @@
 
 .panel {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 260px;
-  background: rgba(20, 20, 20, 0.95);
+  background: rgba(20, 20, 20, 0.97);
   color: #e8e8e8;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
   z-index: 9999;
   font-size: 12px;
   backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  min-width: 220px;
+  min-height: 180px;
 }
 
 .header {
@@ -45,7 +46,11 @@
   padding: 8px 10px;
   background: rgba(255, 255, 255, 0.07);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
 }
+.header:active { cursor: grabbing; }
 
 .headerTitle {
   font-size: 12px;
@@ -66,6 +71,15 @@
 
 .closeBtn:hover { color: #fff; }
 
+.scrollBody {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scrollBody::-webkit-scrollbar { width: 4px; }
+.scrollBody::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
 .section {
   padding: 8px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -76,6 +90,20 @@
 
 .section:last-child {
   border-bottom: none;
+}
+
+.resizeHandle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  cursor: se-resize;
+  /* small diagonal lines indicator */
+  background:
+    linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.2) 30%, rgba(255,255,255,0.2) 40%, transparent 40%),
+    linear-gradient(135deg, transparent 55%, rgba(255,255,255,0.2) 55%, rgba(255,255,255,0.2) 65%, transparent 65%),
+    linear-gradient(135deg, transparent 80%, rgba(255,255,255,0.2) 80%, rgba(255,255,255,0.2) 90%, transparent 90%);
 }
 
 .sectionTitle {
@@ -104,7 +132,8 @@
 }
 
 .select option {
-  background: #222;
+  background: #1e1e1e;
+  color: #e8e8e8;
 }
 
 .input {
@@ -202,14 +231,20 @@
 }
 
 .diceSelect {
-  width: 38px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  width: 42px;
+  background: #1e1e1e;
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 4px;
   color: #e8e8e8;
   padding: 3px 2px;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;
   text-align: center;
+}
+
+.diceSelect option {
+  background: #1e1e1e;
+  color: #e8e8e8;
 }
 
 .diceActive {
