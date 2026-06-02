@@ -12,7 +12,7 @@
     "deploy": "gh-pages -d dist",
     "test:rules": "vitest run",
     "test:rules:watch": "vitest",
-    "test:ui": "playwright test"
+    "test:ui": "playwright test --config=e2e/playwright.config.ts"
   },
   "dependencies": {
     "@axiomhq/js": "^1.6.1",
