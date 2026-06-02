@@ -5,7 +5,17 @@ import type { SessionState } from '../types/api'
 import type { DebugStateImport } from '../api/sessionApi'
 import { importDebugState, fetchSnapshot, createBotsOnlySession, retriggerBot } from '../api/sessionApi'
 import { getCardText } from '../i18n/cards'
+import { SPOTS, STREET_COLORS, type StreetType } from '../types/spots'
 import styles from './DebugPanel.module.css'
+
+// Buyable properties grouped by color, in board order
+const PROPERTY_GROUPS: { type: StreetType; color: string; spots: typeof SPOTS }[] = (
+  ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY'] as StreetType[]
+).map(type => ({
+  type,
+  color: STREET_COLORS[type] ?? '#888',
+  spots: SPOTS.filter(s => s.isProperty && s.streetType === type),
+})).filter(g => g.spots.length > 0)
 
 // Card keys as stored in the deck (no bundle prefix). Label = short Finnish description.
 const CHANCE_CARDS: { key: string; label: string }[] = [
@@ -110,14 +120,18 @@ interface Props {
   sessionId: string
 }
 
-const SECTIONS = ['scenarios', 'capture', 'force', 'sse'] as const
+const SECTIONS = ['scenarios', 'capture', 'force', 'sse', 'players', 'properties'] as const
 type SectionKey = typeof SECTIONS[number]
 const SECTION_LABELS: Record<SectionKey, string> = {
-  scenarios: 'SKENAARIOT',
-  capture:   'CAPTURE',
-  force:     'PAKOTA SEURAAVA',
-  sse:       'SSE-INJEKTIO (offline)',
+  scenarios:  'SKENAARIOT',
+  capture:    'CAPTURE',
+  force:      'PAKOTA SEURAAVA',
+  sse:        'SSE-INJEKTIO (offline)',
+  players:    'PELAAJAT',
+  properties: 'KIINTEISTÖT',
 }
+
+const CASH_STEPS = [50, 100, 500] as const
 
 export default function DebugPanel({ sessionId }: Props) {
   const { state, freezeSSE, unfreezeSSE, injectDebugSnapshot } = useGame()
@@ -149,6 +163,9 @@ export default function DebugPanel({ sessionId }: Props) {
       return next
     })
   }
+  // Property editor
+  const [editingPropId, setEditingPropId] = useState<string | null>(null)
+
   // Always-current ref so the lastDice effect never has stale closures
 
   // Drag state — persisted in localStorage
@@ -333,6 +350,44 @@ export default function DebugPanel({ sessionId }: Props) {
 
   void getCardText  // imported for potential future use
 
+  // ── Player helpers ────────────────────────────────────────────────────────
+
+  async function adjustCash(playerId: string, currentCash: number, delta: number) {
+    const newCash = Math.max(0, currentCash + delta)
+    try {
+      await importDebugState(sessionId, { players: [{ playerId, cash: newCash }] })
+      showMsg(`${delta > 0 ? '+' : ''}${delta} → €${newCash}`)
+    } catch (e) { showMsg(`✗ ${String(e)}`) }
+  }
+
+  async function setPosition(playerId: string, boardIndex: number) {
+    try {
+      await importDebugState(sessionId, { players: [{ playerId, boardIndex }] })
+      const name = SPOTS[boardIndex]?.name ?? `#${boardIndex}`
+      showMsg(`→ ${name}`)
+    } catch (e) { showMsg(`✗ ${String(e)}`) }
+  }
+
+  // ── Property helpers ──────────────────────────────────────────────────────
+
+  function getPropState(propId: string) {
+    return state.snapshot?.properties.find(p => p.propertyId === propId)
+  }
+
+  function getOwnerName(ownerId: string | null | undefined): string {
+    if (!ownerId) return '—'
+    const p = state.snapshot?.players.find(p => p.playerId === ownerId)
+    return p ? p.name.slice(0, 8) : '?'
+  }
+
+  async function patchProperty(propId: string, patch: {
+    ownerPlayerId?: string; mortgaged?: boolean; houseCount?: number; hotelCount?: number
+  }) {
+    try {
+      await importDebugState(sessionId, { properties: [{ propertyId: propId, ...patch }] })
+    } catch (e) { showMsg(`✗ ${String(e)}`) }
+  }
+
   if (!open) {
     return (
       <button className={styles.fab} onClick={() => setOpen(true)} title="Debug panel">🐛</button>
@@ -500,6 +555,131 @@ export default function DebugPanel({ sessionId }: Props) {
               ▶ Injektoi valittu skenaario
             </button>
           </>
+        )}
+      </section>
+
+      {/* ── Players ──────────────────────────────────────────────────────── */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle} onClick={() => toggleSection('players')}>
+          <span className={styles.collapseArrow}>{collapsed.players ? '▸' : '▾'}</span>
+          {SECTION_LABELS.players}
+        </div>
+        {!collapsed.players && state.snapshot && (
+          <div className={styles.playerList}>
+            {state.snapshot.players.filter(p => !p.bankrupt && !p.eliminated).map(player => (
+              <div key={player.playerId} className={styles.playerDebugRow}>
+                <div className={styles.playerDebugName}>{player.name}</div>
+                <div className={styles.playerDebugCash}>€{player.cash}</div>
+                <div className={styles.cashBtnGroup}>
+                  {CASH_STEPS.map(step => (
+                    <button key={`-${step}`} className={`${styles.cashBtn} ${styles.cashMinus}`}
+                      onClick={() => adjustCash(player.playerId, player.cash, -step)}>
+                      -{step}
+                    </button>
+                  ))}
+                  {CASH_STEPS.map(step => (
+                    <button key={`+${step}`} className={`${styles.cashBtn} ${styles.cashPlus}`}
+                      onClick={() => adjustCash(player.playerId, player.cash, step)}>
+                      +{step}
+                    </button>
+                  ))}
+                </div>
+                <div className={styles.posRow}>
+                  <span className={styles.posLabel}>📍</span>
+                  <select
+                    className={styles.posSelect}
+                    value={player.boardIndex}
+                    onChange={e => setPosition(player.playerId, +e.target.value)}
+                  >
+                    {SPOTS.map((s, i) => (
+                      <option key={i} value={i}>{i}: {s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── Properties ───────────────────────────────────────────────────── */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle} onClick={() => toggleSection('properties')}>
+          <span className={styles.collapseArrow}>{collapsed.properties ? '▸' : '▾'}</span>
+          {SECTION_LABELS.properties}
+        </div>
+        {!collapsed.properties && state.snapshot && (
+          <div className={styles.propList}>
+            {PROPERTY_GROUPS.map(group => (
+              <div key={group.type} className={styles.propGroup}>
+                <div className={styles.propGroupHeader} style={{ borderLeftColor: group.color }}>
+                  <span className={styles.propGroupDot} style={{ background: group.color }} />
+                  <span className={styles.propGroupLabel}>{group.type}</span>
+                </div>
+                {group.spots.map(spot => {
+                  const ps = getPropState(spot.id)
+                  const isEditing = editingPropId === spot.id
+                  const isStreet = spot.streetType !== 'RAILROAD' && spot.streetType !== 'UTILITY'
+                  return (
+                    <div key={spot.id}>
+                      <div
+                        className={`${styles.propRow} ${isEditing ? styles.propRowActive : ''}`}
+                        onClick={() => setEditingPropId(isEditing ? null : spot.id)}
+                      >
+                        <span className={styles.propName}>{spot.name}</span>
+                        <span className={styles.propOwner}>{getOwnerName(ps?.ownerPlayerId)}</span>
+                        <span className={styles.propBuildings}>
+                          {ps?.hotelCount ? '🏨' : ps?.houseCount ? '🏠'.repeat(ps.houseCount) : ''}
+                          {ps?.mortgaged ? <span className={styles.propMortgagedTag}>M</span> : null}
+                        </span>
+                      </div>
+                      {isEditing && (
+                        <div className={styles.propEditor}>
+                          <select
+                            className={styles.propSelect}
+                            value={ps?.ownerPlayerId ?? ''}
+                            onChange={e => patchProperty(spot.id, { ownerPlayerId: e.target.value })}
+                          >
+                            <option value="">— ei omistajaa —</option>
+                            {state.snapshot!.players.map(p => (
+                              <option key={p.playerId} value={p.playerId}>{p.name}</option>
+                            ))}
+                          </select>
+                          {isStreet && (
+                            <div className={styles.houseRow}>
+                              {[0,1,2,3,4].map(n => (
+                                <button
+                                  key={n}
+                                  className={`${styles.houseBtn} ${ps?.houseCount === n && !ps?.hotelCount ? styles.houseBtnActive : ''}`}
+                                  onClick={() => patchProperty(spot.id, { houseCount: n, hotelCount: 0 })}
+                                >
+                                  {n === 0 ? '∅' : n}🏠
+                                </button>
+                              ))}
+                              <button
+                                className={`${styles.houseBtn} ${ps?.hotelCount ? styles.houseBtnActive : ''}`}
+                                onClick={() => patchProperty(spot.id, { houseCount: 0, hotelCount: ps?.hotelCount ? 0 : 1 })}
+                              >
+                                🏨
+                              </button>
+                            </div>
+                          )}
+                          <label className={styles.propMortgageLabel}>
+                            <input
+                              type="checkbox"
+                              checked={ps?.mortgaged ?? false}
+                              onChange={e => patchProperty(spot.id, { mortgaged: e.target.checked })}
+                            />
+                            pantattu
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
