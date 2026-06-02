@@ -495,7 +495,8 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
     if (!spot) return false
     return !prop.mortgaged && completedGroups.has(spot.streetType) && prop.hotelCount === 0 && !mortgagedGroups.has(spot.streetType)
   })
-  const mortgageable = myProps.filter(p => !p.mortgaged && buildableProps.every(b => b.propertyId !== p.propertyId) || p.mortgaged)
+  // Mortgage section only shows properties with no buildings (can't mortgage a built property)
+  const mortgageable = myProps.filter(p => p.houseCount === 0 && p.hotelCount === 0)
 
   if (buildableProps.length === 0 && mortgageable.length === 0) return null
 
@@ -518,8 +519,11 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                   const color = STREET_COLORS[spot.streetType]
                   const typeGroup = myProps.filter(p => SPOTS.find(ss => ss.id === p.propertyId)?.streetType === spot.streetType)
                   const maxLevel = Math.max(...typeGroup.map(p => p.hotelCount > 0 ? 5 : p.houseCount))
+                  const minLevel = Math.min(...typeGroup.map(p => p.hotelCount > 0 ? 5 : p.houseCount))
                   const myLevel = prop.hotelCount > 0 ? 5 : prop.houseCount
                   const canSell = myLevel > 0 && myLevel >= maxLevel
+                  // Even-build rule: can only add a house to the property at the current minimum level
+                  const canBuy = myLevel === minLevel
                   return (
                     <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
                       <span className={styles.buildName}>{spot.name}</span>
@@ -533,7 +537,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                           −🏠
                         </button>
                       )}
-                      <button className={styles.buildBtn}
+                      <button className={styles.buildBtn} disabled={!canBuy}
                         onClick={() => sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
                         +🏠
                       </button>
@@ -886,8 +890,15 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           <>
             <div className={styles.debtChipLabel}>{t.debtSellBuildingTitle}</div>
             <div className={styles.debtChipRow}>
-              {/* Sell one round from an entire color group */}
-              {Array.from(groups.entries()).filter(([, props]) => props.length > 1).map(([type, props]) => {
+              {/* Sell one round from an entire color group.
+                  Only show when ALL owned properties in the group have buildings;
+                  otherwise individual sells are the only valid moves. */}
+              {Array.from(groups.entries()).map(([type, props]) => {
+                const allOwnedOfType = state.properties.filter(p =>
+                  p.ownerPlayerId === debt.debtorPlayerId &&
+                  SPOTS.find(s => s.id === p.propertyId)?.streetType === type
+                )
+                if (props.length < 2 || props.length !== allOwnedOfType.length) return null
                 const spot = SPOTS.find(s => s.id === props[0].propertyId)
                 const color = STREET_COLORS[type] ?? '#888'
                 const housePrice = HOUSE_PRICES[type as keyof typeof HOUSE_PRICES] ?? 0

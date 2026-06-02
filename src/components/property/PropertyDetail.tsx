@@ -66,7 +66,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
   const sid = state.sessionId
 
   function openTrade() {
-    if (!owner || !myPlayerId) return
+    if (!owner || !myPlayerId || state.tradeState) return
     // Pre-select the viewed property on the "request" side of the trade
     const isMyPropLocal = prop?.ownerPlayerId === myPlayerId
     setPendingTradeProperty(spotId, isMyPropLocal /* offeredSide */)
@@ -266,7 +266,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
                 {t.redeemBtn}
               </button>
             )}
-            {isOthersProp && (
+            {isOthersProp && !state.tradeState && (
               <button className={`${styles.btn} ${styles.primary}`} onClick={openTrade}>
                 {t.tradeBtnPD}
               </button>
