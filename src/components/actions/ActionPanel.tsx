@@ -143,6 +143,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   }
 
 
+  const activeSeatForStuck = state.seats.find(s => s.playerId === activeId)
+  const isBotTurn = activeSeatForStuck?.seatKind === 'BOT'
+  const botStuckGlobal = isBotTurn && turnSeconds >= 15
+
   // SPECTATOR (no player credentials — bot-only game watcher)
   if (!myPlayerId) {
     const trade = state.tradeState
@@ -157,6 +161,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={styles.panel}>
         {tradeInfo && <div className={styles.infoBox}>{tradeInfo}</div>}
         <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
+        {botStuckGlobal && (
+          <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
+        )}
         <Btn label={t.endGameBtn} onClick={() => cmd('AbortGame')} variant="danger" />
       </div>
     )
@@ -245,9 +252,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (!isMyTurn) {
     const activePlayer = state.players.find(p => p.playerId === activeId)
     const activeSeat = state.seats.find(s => s.playerId === activeId)
-    const isBot = activeSeat?.seatKind === 'BOT'
     const isAfk = turnSeconds >= 30
-    const botStuck = isBot && turnSeconds >= 15
 
     return (
       <div className={styles.panel}>
@@ -267,7 +272,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 📍 <strong>{SPOTS.find(s => s.id === state.pendingDecision!.payload.propertyId)?.name ?? state.pendingDecision.payload.propertyDisplayName}</strong> — €{state.pendingDecision.payload.price}
               </div>
             )}
-            {botStuck && (
+            {botStuckGlobal && (
               <Btn label={t.retriggerBotBtn} variant="secondary"
                 onClick={() => retriggerBot(sid)} />
             )}
@@ -278,6 +283,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       </div>
     )
   }
+
+  // In debug mode the effectivePlayerId may be a bot — show retrigger in the "my turn" panels too
+  // so the user can unstick a bot without having to click a different player in the debug bar.
+  const isDebugBot = isBotTurn && isMyTurn
 
   // WAITING_FOR_CARD_ACK — player must acknowledge the drawn card before effect is applied
   if (phase === 'WAITING_FOR_CARD_ACK') {
@@ -317,6 +326,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
         {activeTab === 'action' ? (
+          isDebugBot ? (
+            // Debug mode: actual human behind the wheel is a bot; offer retrigger instead of manual controls
+            <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
+          ) : (
           <>
             {consecutiveDoubles > 0 && (
               <div className={`${styles.infoBox} ${styles.doubles}`}>
@@ -356,6 +369,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
             </div>
           </>
+          )
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         )}
@@ -371,6 +385,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
         {activeTab === 'action' ? (
+          isDebugBot ? (
+            <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
+          ) : (
           <>
             {showJailEscapeNote && (
               <div className={styles.infoBox}>{t.jailEscapeDoubles}</div>
@@ -387,6 +404,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
             </div>
           </>
+          )
         ) : (
           <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
         )}
