@@ -121,14 +121,17 @@ export default function DebugPanel({ sessionId }: Props) {
   })
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
-  const [forceD1, setForceD1] = useState(1)
-  const [forceD2, setForceD2] = useState(1)
-  const [diceActive, setDiceActive] = useState(false)   // override is pending on backend
+  const [diceD1, setDiceD1] = useState<number | null>(null)
+  const [diceD2, setDiceD2] = useState<number | null>(null)
+  const [diceActive, setDiceActive] = useState(false)
   const [persistDice, setPersistDice] = useState(false)
   const [forceChance, setForceChance] = useState('')
   const [forceCommunity, setForceCommunity] = useState('')
   const prevLastDice = useRef<string>('')
   const prevLastCard = useRef<string>('')
+  // Always-current ref so the lastDice effect never has stale closures
+  const diceCtx = useRef({ d1: null as number | null, d2: null as number | null, persist: false })
+  diceCtx.current = { d1: diceD1, d2: diceD2, persist: persistDice }
 
   const scenarios = scenarioNames()
 
@@ -228,11 +231,13 @@ export default function DebugPanel({ sessionId }: Props) {
     if (key === prevLastDice.current) return
     prevLastDice.current = key
     if (!diceActive) return
-    if (persistDice) {
-      // Re-arm immediately
-      importDebugState(sessionId, { nextDice: [forceD1, forceD2] }).catch(() => {})
+    const { d1, d2, persist } = diceCtx.current
+    if (persist && d1 !== null && d2 !== null) {
+      importDebugState(sessionId, { nextDice: [d1, d2] }).catch(() => {})
     } else {
       setDiceActive(false)
+      setDiceD1(null)
+      setDiceD2(null)
     }
   }, [state.snapshot?.turn?.lastDice]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -341,23 +346,28 @@ export default function DebugPanel({ sessionId }: Props) {
         {/* Dice */}
         <div className={styles.diceRow}>
           <span className={styles.diceLabel}>🎲</span>
-          {([forceD1, forceD2] as const).map((_v, i) => (
+          {([diceD1, diceD2] as const).map((val, i) => (
             <select key={i} className={`${styles.diceSelect} ${diceActive ? styles.diceActive : ''}`}
-              value={i === 0 ? forceD1 : forceD2}
+              value={val ?? ''}
               onChange={e => {
-                const v = +e.target.value
-                const d1 = i === 0 ? v : forceD1
-                const d2 = i === 1 ? v : forceD2
-                if (i === 0) setForceD1(v); else setForceD2(v)
-                setDiceActive(true)
-                sendOverride({ nextDice: [d1, d2] })
+                const v = e.target.value === '' ? null : +e.target.value
+                const d1 = i === 0 ? v : diceD1
+                const d2 = i === 1 ? v : diceD2
+                if (i === 0) setDiceD1(v); else setDiceD2(v)
+                if (d1 !== null && d2 !== null) {
+                  setDiceActive(true)
+                  sendOverride({ nextDice: [d1, d2] })
+                }
               }}>
+              <option value="">—</option>
               {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           ))}
-          <span className={`${styles.diceSum} ${diceActive ? styles.diceSumActive : ''}`}>
-            ={forceD1 + forceD2}
-          </span>
+          {diceD1 !== null && diceD2 !== null && (
+            <span className={`${styles.diceSum} ${diceActive ? styles.diceSumActive : ''}`}>
+              ={diceD1 + diceD2}
+            </span>
+          )}
           <label className={styles.persistLabel}>
             <input type="checkbox" checked={persistDice}
               onChange={e => setPersistDice(e.target.checked)} />
@@ -365,12 +375,12 @@ export default function DebugPanel({ sessionId }: Props) {
           </label>
           {diceActive && (
             <button className={styles.diceReset} title="Peruuta pakko"
-              onClick={() => { setDiceActive(false); /* no backend clear needed — next natural roll will just be random */ }}>
+              onClick={() => { setDiceActive(false); setDiceD1(null); setDiceD2(null) }}>
               ✕
             </button>
           )}
         </div>
-        {diceActive && <div className={styles.diceHint}>⚡ heitetään kerran{persistDice ? ' (pysyvä)' : ''}</div>}
+        {diceActive && <div className={styles.diceHint}>⚡ heitetään{persistDice ? ' (pysyvä)' : ' kerran'}</div>}
 
         {/* Chance card */}
         <div className={styles.cardRow}>
