@@ -1,143 +1,162 @@
 # monopoly-client
 
-Helsinki-teemainen moninpeli-Monopoly — React/TypeScript SPA. Kaikki pelitila tulee backendiltä; asiakasohjelma on puhtaasti reaktiivinen.
+Helsinki-themed multiplayer Monopoly — React/TypeScript SPA. All game state comes from the backend; the client is purely reactive.
 
 **Live:** https://jukkakot.github.io/monopoly-client/  
 **Backend:** https://monopoly-backend-bv41.onrender.com
 
 ---
 
-## Pikastartti
+## Quick start
 
 ```bash
-# 1. Asenna riippuvuudet
+# 1. Install dependencies
 npm install
 
-# 2. Kopioi ympäristömuuttujat ja aseta backend-URL
+# 2. Copy environment variables and set the backend URL
 cp .env.example .env.local
-# muokkaa VITE_API_BASE tarvittaessa
+# edit VITE_API_BASE if needed
 
-# 3. Käynnistä kehityspalvelin
+# 3. Start the dev server
 npm run dev   # → http://localhost:5173
 ```
 
 ---
 
-## Komennot
+## Commands
 
-| Komento | Kuvaus |
+| Command | Description |
 |---|---|
-| `npm run dev` | Vite-kehityspalvelin (HMR, localhost:5173) |
-| `npm run build` | TypeScript-tarkistus + tuotantobuild → `dist/` |
+| `npm run dev` | Vite dev server (HMR, localhost:5173) |
+| `npm run build` | TypeScript check + production build → `dist/` |
 | `npm run lint` | ESLint |
-| `npm run deploy` | Build + julkaisu GitHub Pagesiin |
-| `npm run test:rules` | Vitest-sääntötestit (integraatio vs. live-backend) |
-| `npm run test:ui` | Playwright E2E -testit |
+| `npm run deploy` | Build + publish to GitHub Pages |
+| `npm run test:rules` | Vitest rule tests (integration against live backend) |
+| `npm run test:ui` | Playwright E2E tests |
 
 ---
 
-## Ympäristömuuttujat
+## Environment variables
 
-| Muuttuja | Oletus | Kuvaus |
+| Variable | Default | Description |
 |---|---|---|
-| `VITE_API_BASE` | `http://localhost:8080` | Backend-URL |
-| `VITE_AXIOM_TOKEN` | — | Axiom-lokkaus (valinnainen) |
-| `VITE_AXIOM_DATASET` | — | Axiom-dataset (valinnainen) |
+| `VITE_API_BASE` | `http://localhost:8080` | Backend URL |
+| `VITE_AXIOM_TOKEN` | — | Axiom logging (optional) |
+| `VITE_AXIOM_DATASET` | — | Axiom dataset (optional) |
 
 ---
 
-## Arkkitehtuuri
+## Architecture
 
 React 19 + TypeScript SPA (Vite, HashRouter).
 
-### Tietovirta
+### Data flow
 
-```
-EventSource  GET /sessions/{id}/events
-     │
-     ▼
-GameContext  (useReducer, src/store/GameContext.tsx)
-     │
-     ├── useGame()  ─────────────────── komponentit lukevat tilan
-     │
-     └── sendCmd()  POST /sessions/{id}/command
-```
+```mermaid
+flowchart LR
+    BE("Backend\nSSE stream")
+    GC("GameContext\nuseReducer")
+    HOOK("useGame()\nhook")
+    UI("Components\nActionPanel · Board · …")
+    CMD("sendCmd()\nPOST /command")
 
-1. `GameContext` pitää kaiken tilan `useReducer`-koukkuna.
-2. `EventSource` yhdistää `GET /sessions/{id}/events`-SSE-virtaan ja vastaanottaa versioituja `ClientSessionSnapshot`-tapahtumia.
-3. Katkennut yhteys reconnektoituu eksponentiaalisella peruutuksella `lastEventId`:llä.
-4. Kaikki pelaajan toiminnot ovat `POST /sessions/{id}/command` -kutsuja `sendCmd()`-kautta.
-5. Komponentit lukevat tilan `useGame()`-koukin kautta — ei paikallista pelitilaa muualla.
-
-### Näyttövirta
-
-```
-/          →  SessionListScreen    (liity olemassa olevaan)
-/lobby     →  LobbyScreen          (konfiguroi + luo sessio)
-/game/:id  →  GameScreen → AppLayout (lauta + sivupalkki)
+    BE -- "ClientSessionSnapshot\n(versioned)" --> GC
+    GC -- "state" --> HOOK
+    HOOK --> UI
+    UI -- "user action" --> CMD
+    CMD -- "accepted command" --> BE
 ```
 
-### Avaintiedostot
+1. `GameContext` holds all state in a `useReducer`.
+2. An `EventSource` connects to `GET /sessions/{id}/events` and receives versioned `ClientSessionSnapshot` events.
+3. Reconnection uses exponential backoff with `lastEventId` for resumption.
+4. All player actions are `POST /sessions/{id}/command` calls via `sendCmd()`.
+5. Components read state through the `useGame()` hook — no local game state anywhere else.
 
-| Tiedosto | Kuvaus |
+### Screen flow
+
+```mermaid
+flowchart TD
+    ROOT("/ — SessionListScreen\njoin existing game")
+    LOBBY("/lobby — LobbyScreen\nconfigure + create session")
+    GAME("/game/:id — GameScreen\nAppLayout: board + sidebar")
+
+    ROOT -- "create new" --> LOBBY
+    ROOT -- "join" --> GAME
+    LOBBY -- "start game" --> GAME
+    GAME -- "game over / leave" --> ROOT
+```
+
+### Key files
+
+| File | Description |
 |---|---|
-| `src/store/GameContext.tsx` | Kaikki pelitila, SSE-yhteys, `sendCmd` |
-| `src/types/api.ts` | Kaikki backend-tyypitykset (40+ rajapintaa) |
-| `src/types/spots.ts` | Staattinen laudan määrittely (40 Helsinki-ruutua) |
-| `src/components/actions/ActionPanel.tsx` | Vaihepohjainen toimintopaneeli |
+| `src/store/GameContext.tsx` | All game state, SSE connection, `sendCmd` |
+| `src/types/api.ts` | All backend-facing types (40+ interfaces) |
+| `src/types/spots.ts` | Static board definition (40 Helsinki spots) |
+| `src/components/actions/ActionPanel.tsx` | Phase-driven action panel |
 
-### ActionPanel-vaiheet
+### ActionPanel phases
 
-`ActionPanel` renderöi eri painikeryhmiä `TurnState.phase`-arvon mukaan:
+`ActionPanel` renders different button groups based on `TurnState.phase`:
 
-| Vaihe | Toiminto |
+| Phase | Action |
 |---|---|
-| `WAITING_FOR_ROLL` | Nopanheitto / vankilapakoilu |
-| `WAITING_FOR_DECISION` | Osta tai hylkää kiinteistö |
-| `WAITING_FOR_AUCTION` | Huutokauppatarjous tai ohitus |
-| `RESOLVING_DEBT` | Velanmaksu, panttaus, myynti tai konkurssi |
-| `WAITING_FOR_END_TURN` | Rakenna, panttaa, kauppaa, lopeta vuoro |
+| `WAITING_FOR_ROLL` | Roll dice / jail escape |
+| `WAITING_FOR_DECISION` | Buy or decline property |
+| `WAITING_FOR_AUCTION` | Place auction bid or pass |
+| `RESOLVING_DEBT` | Pay debt, mortgage, sell buildings, or declare bankruptcy |
+| `WAITING_FOR_END_TURN` | Build, mortgage, trade, end turn |
 
 ---
 
-## Testaus
+## Testing
 
-### Sääntötestit (Vitest, integraatio)
+### Rule tests (Vitest, integration)
 
 ```bash
-npm run test:rules          # aja kertaalleen
-npm run test:rules:watch    # watch-tila
+npm run test:rules          # run once
+npm run test:rules:watch    # watch mode
 npm run test:rules:ui       # Vitest UI
 ```
 
-Testit sijaitsevat `e2e/rules/`-hakemistossa ja ajavat komentoja live-backendiä (tai `VITE_API_BASE`:lla määritettyä backendiä) vasten. Skenaariot ovat `e2e/scenarios/`.
+Tests live in `e2e/rules/` and run commands against the live backend (or whatever `VITE_API_BASE` points to). Scenarios are in `e2e/scenarios/`.
 
-### UI-testit (Playwright, E2E)
+### UI tests (Playwright, E2E)
 
 ```bash
 npm run test:ui              # headless
-npm run test:ui:headed       # selain näkyvissä
+npm run test:ui:headed       # browser visible
 npm run test:ui:debug        # Playwright UI
 ```
 
-Playwright käynnistää kehityspalvelimen automaattisesti ja odottaa backendin heräämistä (`e2e/globalSetup.ts`).
+Playwright starts the dev server automatically and waits for the backend to be ready (`e2e/globalSetup.ts`).
 
 ---
 
 ## CI/CD
 
-GitHub Actions (`deploy.yml`) ajaa jokaisella `master`-pushilla:
+GitHub Actions (`deploy.yml`) runs on every push to `master`:
 
-1. **test-rules** — Vitest-sääntötestit; estää deployn jos failaa
-2. **test-ui** — Playwright E2E; `continue-on-error: true` (ei estä deployta)
-3. **deploy** — build + GitHub Pages (riippuu vain `test-rules`:sta)
+```mermaid
+flowchart LR
+    PUSH(["git push\nmaster"])
+    TR["test-rules\nVitest — rule tests"]
+    TU["test-ui\nPlaywright E2E\n(continue-on-error)"]
+    DEP["deploy\nbuild + GitHub Pages"]
+
+    PUSH --> TR & TU
+    TR -- "✓ pass" --> DEP
+    TR -- "✗ fail" --> STOP(["❌ deploy blocked"])
+    TU -- "✗ fail\n(warning, not blocking)" --> DEP
+```
 
 ---
 
 ## Deployment
 
-Sovellus julkaistaan GitHub Pagesiin hakemistoon `/monopoly-client/` (asetettu `vite.config.ts`:ssä).
+The app is published to GitHub Pages at `/monopoly-client/` (configured in `vite.config.ts`).
 
 ```bash
-npm run deploy   # build + gh-pages -julkaisu
+npm run deploy   # build + gh-pages publish
 ```
