@@ -12,7 +12,10 @@
     "deploy": "gh-pages -d dist",
     "test:rules": "vitest run",
     "test:rules:watch": "vitest",
-    "test:ui": "playwright test --config=e2e/playwright.config.ts"
+    "test:rules:ui": "vitest --ui",
+    "test:ui": "playwright test --config=e2e/playwright.config.ts",
+    "test:ui:headed": "playwright test --config=e2e/playwright.config.ts --headed",
+    "test:ui:debug": "playwright test --config=e2e/playwright.config.ts --ui"
   },
   "dependencies": {
     "@axiomhq/js": "^1.6.1",
@@ -28,6 +31,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/ui": "^4.1.8",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
