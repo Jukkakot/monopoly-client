@@ -445,6 +445,7 @@ function TradeButtons({ state, myPlayerId, sendCmd }: {
     return (
       <div className={styles.tradeSection}>
         <button className={`${styles.btn} ${styles.neutral}`}
+          data-testid="action-open-trade"
           onClick={() => { playButtonClick(); sendCmd({ type: 'OpenTrade', sessionId: sid, actorPlayerId: myPlayerId, recipientPlayerId: only.playerId }) }}>
           {seat && <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: seat.tokenColorHex, marginRight: 6, verticalAlign: 'middle' }} />}
           {t.tradeWithBtn(only.name)}
@@ -1189,10 +1190,12 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         <Btn label={t.sendOfferBtn}
           onClick={() => sendCmd({ type: 'SubmitTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
           variant="primary"
-          disabled={isEmpty} />
+          disabled={isEmpty}
+          testId="action-submit-trade" />
         <Btn label={t.cancelBtn}
           onClick={() => sendCmd({ type: 'CancelTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })}
-          variant="danger" />
+          variant="danger"
+          testId="action-cancel-trade" />
       </div>
     </div>
   )
@@ -1246,9 +1249,9 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
         </div>
       </div>
 
-      <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" />
-      <Btn label={t.counterOfferBtn} onClick={() => sendCmd({ type: 'CounterTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" />
-      <Btn label={t.declineBtn} onClick={() => sendCmd({ type: 'DeclineTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" />
+      <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" testId="action-accept-trade" />
+      <Btn label={t.counterOfferBtn} onClick={() => sendCmd({ type: 'CounterTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" testId="action-counter-trade" />
+      <Btn label={t.declineBtn} onClick={() => sendCmd({ type: 'DeclineTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" testId="action-decline-trade" />
     </div>
   )
 }
