@@ -186,6 +186,7 @@ export interface DebugStateImport {
   clearDebt?: boolean
   clearDecision?: boolean
   clearAuction?: boolean
+  clearTrade?: boolean
 }
 
 export async function importDebugState(sessionId: string, patch: DebugStateImport): Promise<{ applied: boolean }> {

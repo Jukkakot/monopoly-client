@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import type { SessionState } from '../types/api'
 import type { DebugStateImport } from '../api/sessionApi'
-import { importDebugState, fetchSnapshot, createBotsOnlySession } from '../api/sessionApi'
+import { importDebugState, fetchSnapshot, createBotsOnlySession, retriggerBot } from '../api/sessionApi'
 import styles from './DebugPanel.module.css'
 
 // Resolved at dev-server startup; page refresh picks up newly captured files.
@@ -63,6 +63,7 @@ function buildDebugImport(scenario: SessionState, target: SessionState): DebugSt
     clearDebt: !scenario.activeDebt,
     clearDecision: !scenario.pendingDecision,
     clearAuction: !scenario.auctionState,
+    clearTrade: !scenario.tradeState,
   }
 }
 
@@ -117,6 +118,7 @@ export default function DebugPanel({ sessionId }: Props) {
     try {
       const patch = buildDebugImport(scenario, state.snapshot)
       const result = await importDebugState(sessionId, patch)
+      if (result.applied) await retriggerBot(sessionId).catch(() => {/* ignore if no bot */})
       showMsg(result.applied ? '✓ Tila ladattu' : '✗ Backend ei hyväksynyt')
     } catch (e) {
       showMsg(`✗ ${String(e)}`)
@@ -146,6 +148,7 @@ export default function DebugPanel({ sessionId }: Props) {
 
       const patch = buildDebugImport(scenario, newSnap)
       await importDebugState(newSid, patch)
+      await retriggerBot(newSid).catch(() => {/* ignore */})
 
       navigate(`/game/${newSid}?debug=1`)
     } catch (e) {
