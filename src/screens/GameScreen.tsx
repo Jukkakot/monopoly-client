@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { playDiceRoll, playButtonClick } from '../utils/sounds'
@@ -17,6 +17,10 @@ import GameOverOverlay from '../components/effects/GameOverOverlay'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './GameScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
+
+const DebugPanel = import.meta.env.DEV
+  ? lazy(() => import('../debug/DebugPanel'))
+  : null
 import { useDebugMode } from '../debug/useDebugMode'
 
 export default function GameScreen() {
@@ -216,10 +220,6 @@ export default function GameScreen() {
   const myPlayerId = effectivePlayerId
   const isGameOver = state.snapshot.status === 'GAME_OVER'
 
-  // Lazily import DebugPanel so Vite can dead-code-eliminate it in production builds.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const DebugPanel = import.meta.env.DEV ? require('../debug/DebugPanel').default : null
-
   return (
     <>
       {isGameOver && <Confetti />}
@@ -234,7 +234,9 @@ export default function GameScreen() {
       )}
       {showHelp && <KeyboardHelp onClose={() => setShowHelp(false)} />}
       {import.meta.env.DEV && isDebugMode && DebugPanel && sessionId && (
-        <DebugPanel sessionId={sessionId} />
+        <Suspense fallback={null}>
+          <DebugPanel sessionId={sessionId} />
+        </Suspense>
       )}
       <AppLayout
         header={
