@@ -3,6 +3,9 @@ import { runCmds, rollAs } from '../helpers/run'
 import type { CmdFactory } from '../helpers/run'
 import type { TestScenario } from '../helpers/scenario'
 
+// Board index reference (relevant spots)
+// 5=RR1, 7=CHANCE1, 12=U1, 15=RR2, 22=CHANCE2, 25=RR3, 28=U2, 35=RR4
+
 // Acknowledge the drawn card — required before effects are applied
 const ackCard: CmdFactory = ids => ({ type: 'AcknowledgeCard', actorPlayerId: ids[0] })
 
@@ -82,5 +85,68 @@ describe('Cards', () => {
     // 2-player game: seat0 collects €10 from seat1
     expect(snap.state?.players[0].cash).toBe(1500 + 10)
     expect(snap.state?.players[1].cash).toBe(1500 - 10)
+  })
+
+  test('8.7 MOVE_NEAREST RAILROAD → advances to nearest railroad ahead', async () => {
+    // From CHANCE1 (7), nearest railroad forward = RR2 at index 15
+    // RR2 is unowned → WAITING_FOR_DECISION, no GO bonus (15 > 7)
+    const scenario = chanceScenario('MOVE_NEAREST:0')
+    const snap = await runCmds(scenario, [rollAs(scenario), ackCard])
+    expect(snap.state?.players[0].boardIndex).toBe(15)  // RR2
+    expect(snap.state?.players[0].cash).toBe(1500)
+    expect(snap.state?.turn.phase).toBe('WAITING_FOR_DECISION')
+  })
+
+  test('8.8 MOVE_NEAREST UTILITY → advances to nearest utility ahead', async () => {
+    // From CHANCE1 (7), nearest utility forward = U1 at index 12
+    // U1 is unowned → WAITING_FOR_DECISION, no GO bonus (12 > 7)
+    const scenario = chanceScenario('MOVE_NEAREST:1')
+    const snap = await runCmds(scenario, [rollAs(scenario), ackCard])
+    expect(snap.state?.players[0].boardIndex).toBe(12)  // U1
+    expect(snap.state?.players[0].cash).toBe(1500)
+    expect(snap.state?.turn.phase).toBe('WAITING_FOR_DECISION')
+  })
+
+  test('8.9 MOVE_BACK_3 from CHANCE1 → lands on TAX1, pays €200', async () => {
+    // CHANCE1 is at index 7; 7-3=4 = TAX1 (Tulovero €200)
+    // Moving backward never crosses GO
+    const scenario = chanceScenario('MOVE_BACK_3:0')
+    const snap = await runCmds(scenario, [rollAs(scenario), ackCard])
+    expect(snap.state?.players[0].boardIndex).toBe(4)   // TAX1
+    expect(snap.state?.players[0].cash).toBe(1500 - 200)
+    expect(snap.state?.turn.phase).toBe('WAITING_FOR_END_TURN')
+  })
+
+  test('8.10 REPAIR_PROPERTIES: 2 houses + 1 hotel → pays €150 (2×25 + 1×100)', async () => {
+    // Chance REPAIR_PROPERTIES:0 values: 25/house, 100/hotel
+    // B1: 2 houses, B2: 1 hotel → 2×25 + 1×100 = 150
+    const scenario: TestScenario = {
+      description: 'REPAIR_PROPERTIES with 2 houses + 1 hotel',
+      rules: ['25/house 100/hotel'],
+      players: [
+        { cash: 1500, boardIndex: 4 },
+        { cash: 1500, boardIndex: 10 },
+      ],
+      ownedProperties: { 0: ['B1', 'B2'] },
+      propertyOverrides: { B1: { houseCount: 2 }, B2: { hotelCount: 1 } },
+      turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
+      forcedDice: [2, 1],
+      forcedChanceCard: 'REPAIR_PROPERTIES:0',
+      expectedAfter: {},
+    }
+    const snap = await runCmds(scenario, [rollAs(scenario), ackCard])
+    expect(snap.state?.players[0].cash).toBe(1500 - 150)
+    expect(snap.state?.turn.phase).toBe('WAITING_FOR_END_TURN')
+  })
+
+  test('8.11 MOVE to specific spot (not GO) → moves to RR1, collects GO bonus (passes GO)', async () => {
+    // MOVE:4 targets RR1 (index 5). Player is at CHANCE1 (7) when card takes effect.
+    // 5 < 7 → backend treats this as passing GO → cash +200.
+    // RR1 is unowned → WAITING_FOR_DECISION.
+    const scenario = chanceScenario('MOVE:4')
+    const snap = await runCmds(scenario, [rollAs(scenario), ackCard])
+    expect(snap.state?.players[0].boardIndex).toBe(5)   // RR1
+    expect(snap.state?.players[0].cash).toBe(1500 + 200)
+    expect(snap.state?.turn.phase).toBe('WAITING_FOR_DECISION')
   })
 })
