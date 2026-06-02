@@ -185,6 +185,50 @@
   color: #888;
 }
 
+.diceRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.diceRow .btn { flex-shrink: 0; margin-left: auto; }
+
+.diceLabel {
+  font-size: 11px;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.diceSelect {
+  width: 38px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #e8e8e8;
+  padding: 3px 2px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.diceSum {
+  font-size: 11px;
+  color: #8ad;
+  font-weight: 700;
+}
+
+.cardRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardRow .btn { align-self: flex-start; }
+
+.cardSelect {
+  width: 100%;
+}
+
 .msgBar {
   padding: 6px 10px;
   font-size: 11px;

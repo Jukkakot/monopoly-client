@@ -4,7 +4,46 @@ import { useGame } from '../store/GameContext'
 import type { SessionState } from '../types/api'
 import type { DebugStateImport } from '../api/sessionApi'
 import { importDebugState, fetchSnapshot, createBotsOnlySession, retriggerBot } from '../api/sessionApi'
+import { getCardText } from '../i18n/cards'
 import styles from './DebugPanel.module.css'
+
+// Card keys as stored in the deck (no bundle prefix). Label = short Finnish description.
+const CHANCE_CARDS: { key: string; label: string }[] = [
+  { key: 'GO_JAIL:0',            label: '⛓ Mene vankilaan' },
+  { key: 'OUT_OF_JAIL:0',        label: '🃏 Vapautuskortti' },
+  { key: 'MOVE:0',               label: '→ Katajanokka (A)' },
+  { key: 'MOVE:1',               label: '→ GO (+€200)' },
+  { key: 'MOVE:2',               label: '→ Tapiola' },
+  { key: 'MOVE:3',               label: '→ Vallila' },
+  { key: 'MOVE:4',               label: '→ Rautatieasema' },
+  { key: 'MOVE_NEAREST:0',       label: '🚂 Lähin asema ×2' },
+  { key: 'MOVE_NEAREST:1',       label: '⚡ Lähin laitos ×10' },
+  { key: 'MOVE_BACK_3:0',        label: '← 3 askelta taaksepäin' },
+  { key: 'MONEY:0',              label: '💰 +150 laina' },
+  { key: 'MONEY:1',              label: '💰 +50 osinko' },
+  { key: 'MONEY:2',              label: '💸 -15 sakko' },
+  { key: 'REPAIR_PROPERTIES:0',  label: '🏠 Korjaukset -25/talo' },
+  { key: 'ALL_PLAYERS_MONEY:0',  label: '💸 Maksa kaikille -50' },
+]
+
+const COMMUNITY_CARDS: { key: string; label: string }[] = [
+  { key: 'GO_JAIL:0',            label: '⛓ Mene vankilaan' },
+  { key: 'OUT_OF_JAIL:0',        label: '🃏 Vapautuskortti' },
+  { key: 'MOVE:0',               label: '→ GO (+€200)' },
+  { key: 'ALL_PLAYERS_MONEY:0',  label: '🎂 Kerää kaikilta +10' },
+  { key: 'REPAIR_PROPERTIES:0',  label: '🏠 Korjaukset -40/talo' },
+  { key: 'MONEY:0',              label: '💰 +200 pankkivirhe' },
+  { key: 'MONEY:1',              label: '💸 -50 lääkäri' },
+  { key: 'MONEY:2',              label: '💰 +50 osakkeet' },
+  { key: 'MONEY:3',              label: '💰 +100 loma' },
+  { key: 'MONEY:4',              label: '💰 +20 veronpalautus' },
+  { key: 'MONEY:5',              label: '💰 +100 henkivakuutus' },
+  { key: 'MONEY:6',              label: '💸 -100 sairaala' },
+  { key: 'MONEY:7',              label: '💸 -50 koulu' },
+  { key: 'MONEY:8',              label: '💰 +25 konsultointi' },
+  { key: 'MONEY:9',              label: '💰 +10 kauneuskilpailu' },
+  { key: 'MONEY:10',             label: '💰 +100 perintö' },
+]
 
 // Resolved at dev-server startup; page refresh picks up newly captured files.
 const scenarioModules = import.meta.glob('./scenarios/*.json', { eager: true }) as Record<string, { default: SessionState }>
@@ -79,6 +118,10 @@ export default function DebugPanel({ sessionId }: Props) {
   const [captureName, setCaptureName] = useState('')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
+  const [forceD1, setForceD1] = useState(1)
+  const [forceD2, setForceD2] = useState(1)
+  const [forceChance, setForceChance] = useState('')
+  const [forceCommunity, setForceCommunity] = useState('')
 
   const scenarios = scenarioNames()
 
@@ -170,6 +213,17 @@ export default function DebugPanel({ sessionId }: Props) {
     injectDebugSnapshot(injected)
   }
 
+  async function sendOverride(patch: DebugStateImport) {
+    try {
+      const result = await importDebugState(sessionId, patch)
+      showMsg(result.applied ? '✓ Asetettu' : '✗ Ei hyväksytty')
+    } catch (e) {
+      showMsg(`✗ ${String(e)}`)
+    }
+  }
+
+  void getCardText  // imported for potential future use
+
   if (!open) {
     return (
       <button className={styles.fab} onClick={() => setOpen(true)} title="Debug panel">🐛</button>
@@ -249,6 +303,52 @@ export default function DebugPanel({ sessionId }: Props) {
         <button className={styles.btn} onClick={handleInject} disabled={!selected}>
           ▶ Injektoi valittu skenaario
         </button>
+      </section>
+
+      {/* Force next roll / card */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle}>PAKOTA SEURAAVA</div>
+
+        <div className={styles.diceRow}>
+          <span className={styles.diceLabel}>🎲</span>
+          {([forceD1, forceD2] as const).map((_val, i) => (
+            <select key={i} className={styles.diceSelect}
+              value={i === 0 ? forceD1 : forceD2}
+              onChange={e => i === 0 ? setForceD1(+e.target.value) : setForceD2(+e.target.value)}>
+              {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          ))}
+          <span className={styles.diceSum}>={forceD1 + forceD2}</span>
+          <button className={styles.btn} onClick={() => sendOverride({ nextDice: [forceD1, forceD2] })}>
+            Aseta
+          </button>
+        </div>
+
+        <div className={styles.cardRow}>
+          <span className={styles.diceLabel}>🃏 Sattuma</span>
+          <select className={`${styles.select} ${styles.cardSelect}`} value={forceChance}
+            onChange={e => setForceChance(e.target.value)}>
+            <option value="">— valitse —</option>
+            {CHANCE_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+          </select>
+          <button className={styles.btn} disabled={!forceChance}
+            onClick={() => sendOverride({ nextChanceCard: forceChance })}>
+            Aseta
+          </button>
+        </div>
+
+        <div className={styles.cardRow}>
+          <span className={styles.diceLabel}>🃏 Yhteiskassa</span>
+          <select className={`${styles.select} ${styles.cardSelect}`} value={forceCommunity}
+            onChange={e => setForceCommunity(e.target.value)}>
+            <option value="">— valitse —</option>
+            {COMMUNITY_CARDS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
+          </select>
+          <button className={styles.btn} disabled={!forceCommunity}
+            onClick={() => sendOverride({ nextCommunityCard: forceCommunity })}>
+            Aseta
+          </button>
+        </div>
       </section>
 
       {msg && <div className={styles.msgBar}>{msg}</div>}

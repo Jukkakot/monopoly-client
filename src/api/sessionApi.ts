@@ -187,6 +187,9 @@ export interface DebugStateImport {
   clearDecision?: boolean
   clearAuction?: boolean
   clearTrade?: boolean
+  nextDice?: [number, number]
+  nextChanceCard?: string   // card key without bundle prefix, e.g. "GO_JAIL:0"
+  nextCommunityCard?: string
 }
 
 export async function importDebugState(sessionId: string, patch: DebugStateImport): Promise<{ applied: boolean }> {
