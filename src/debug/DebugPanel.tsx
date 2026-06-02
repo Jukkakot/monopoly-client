@@ -5,17 +5,12 @@ import type { SessionState } from '../types/api'
 import type { DebugStateImport } from '../api/sessionApi'
 import { importDebugState, fetchSnapshot, createBotsOnlySession, retriggerBot } from '../api/sessionApi'
 import { getCardText } from '../i18n/cards'
-import { SPOTS, STREET_COLORS, type StreetType } from '../types/spots'
+import { SPOTS, STREET_COLORS, indexToGridPos, type StreetType } from '../types/spots'
 import styles from './DebugPanel.module.css'
 
-// Buyable properties grouped by color, in board order
-const PROPERTY_GROUPS: { type: StreetType; color: string; spots: typeof SPOTS }[] = (
-  ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY'] as StreetType[]
-).map(type => ({
-  type,
-  color: STREET_COLORS[type] ?? '#888',
-  spots: SPOTS.filter(s => s.isProperty && s.streetType === type),
-})).filter(g => g.spots.length > 0)
+// Non-property spot background colors
+const CORNER_BG = '#1a1a1a'
+const NEUTRAL_BG = '#232323'
 
 // Card keys as stored in the deck (no bundle prefix). Label = short Finnish description.
 const CHANCE_CARDS: { key: string; label: string }[] = [
@@ -128,7 +123,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   force:      'PAKOTA SEURAAVA',
   sse:        'SSE-INJEKTIO (offline)',
   players:    'PELAAJAT',
-  properties: 'KIINTEISTÖT',
+  properties: 'KIINTEISTÖT (lauta)',
 }
 
 const CASH_STEPS = [50, 100, 500] as const
@@ -602,85 +597,114 @@ export default function DebugPanel({ sessionId }: Props) {
         )}
       </section>
 
-      {/* ── Properties ───────────────────────────────────────────────────── */}
+      {/* ── Mini board + property editor ────────────────────────────────── */}
       <section className={styles.section}>
         <div className={styles.sectionTitle} onClick={() => toggleSection('properties')}>
           <span className={styles.collapseArrow}>{collapsed.properties ? '▸' : '▾'}</span>
           {SECTION_LABELS.properties}
+          {editingPropId && <span className={styles.activeBadge}>✏</span>}
         </div>
-        {!collapsed.properties && state.snapshot && (
-          <div className={styles.propList}>
-            {PROPERTY_GROUPS.map(group => (
-              <div key={group.type} className={styles.propGroup}>
-                <div className={styles.propGroupHeader} style={{ borderLeftColor: group.color }}>
-                  <span className={styles.propGroupDot} style={{ background: group.color }} />
-                  <span className={styles.propGroupLabel}>{group.type}</span>
-                </div>
-                {group.spots.map(spot => {
-                  const ps = getPropState(spot.id)
+        {!collapsed.properties && state.snapshot && (() => {
+          const snap = state.snapshot!
+          const editSpot = editingPropId ? SPOTS.find(s => s.id === editingPropId) : null
+          const editPs = editingPropId ? getPropState(editingPropId) : null
+          const isStreet = editSpot && editSpot.streetType !== 'RAILROAD' && editSpot.streetType !== 'UTILITY'
+
+          return (
+            <>
+              {/* Mini board grid */}
+              <div className={styles.miniBoard}>
+                {SPOTS.map((spot, idx) => {
+                  const { row, col } = indexToGridPos(idx)
+                  const ps = spot.isProperty ? getPropState(spot.id) : null
+                  const ownerColor = ps?.ownerPlayerId
+                    ? snap.seats.find(s => s.playerId === ps.ownerPlayerId)?.tokenColorHex
+                    : null
+                  const bg = spot.isProperty
+                    ? (STREET_COLORS[spot.streetType as StreetType] ?? '#888')
+                    : (spot.streetType === 'CORNER' ? CORNER_BG : NEUTRAL_BG)
                   const isEditing = editingPropId === spot.id
-                  const isStreet = spot.streetType !== 'RAILROAD' && spot.streetType !== 'UTILITY'
                   return (
-                    <div key={spot.id}>
-                      <div
-                        className={`${styles.propRow} ${isEditing ? styles.propRowActive : ''}`}
-                        onClick={() => setEditingPropId(isEditing ? null : spot.id)}
-                      >
-                        <span className={styles.propName}>{spot.name}</span>
-                        <span className={styles.propOwner}>{getOwnerName(ps?.ownerPlayerId)}</span>
-                        <span className={styles.propBuildings}>
-                          {ps?.hotelCount ? '🏨' : ps?.houseCount ? '🏠'.repeat(ps.houseCount) : ''}
-                          {ps?.mortgaged ? <span className={styles.propMortgagedTag}>M</span> : null}
-                        </span>
-                      </div>
-                      {isEditing && (
-                        <div className={styles.propEditor}>
-                          <select
-                            className={styles.propSelect}
-                            value={ps?.ownerPlayerId ?? ''}
-                            onChange={e => patchProperty(spot.id, { ownerPlayerId: e.target.value })}
-                          >
-                            <option value="">— ei omistajaa —</option>
-                            {state.snapshot!.players.map(p => (
-                              <option key={p.playerId} value={p.playerId}>{p.name}</option>
-                            ))}
-                          </select>
-                          {isStreet && (
-                            <div className={styles.houseRow}>
-                              {[0,1,2,3,4].map(n => (
-                                <button
-                                  key={n}
-                                  className={`${styles.houseBtn} ${ps?.houseCount === n && !ps?.hotelCount ? styles.houseBtnActive : ''}`}
-                                  onClick={() => patchProperty(spot.id, { houseCount: n, hotelCount: 0 })}
-                                >
-                                  {n === 0 ? '∅' : n}🏠
-                                </button>
-                              ))}
-                              <button
-                                className={`${styles.houseBtn} ${ps?.hotelCount ? styles.houseBtnActive : ''}`}
-                                onClick={() => patchProperty(spot.id, { houseCount: 0, hotelCount: ps?.hotelCount ? 0 : 1 })}
-                              >
-                                🏨
-                              </button>
-                            </div>
-                          )}
-                          <label className={styles.propMortgageLabel}>
-                            <input
-                              type="checkbox"
-                              checked={ps?.mortgaged ?? false}
-                              onChange={e => patchProperty(spot.id, { mortgaged: e.target.checked })}
-                            />
-                            pantattu
-                          </label>
-                        </div>
+                    <div
+                      key={spot.id}
+                      className={`${styles.miniCell} ${spot.isProperty ? styles.miniCellProp : ''} ${isEditing ? styles.miniCellActive : ''}`}
+                      style={{
+                        gridRow: row,
+                        gridColumn: col,
+                        background: bg,
+                        opacity: spot.isProperty ? 1 : 0.45,
+                        outline: isEditing ? '2px solid #fff' : undefined,
+                        outlineOffset: '-2px',
+                      }}
+                      title={`${spot.name}${ownerColor ? ` — ${getOwnerName(ps?.ownerPlayerId)}` : ''}`}
+                      onClick={() => spot.isProperty && setEditingPropId(isEditing ? null : spot.id)}
+                    >
+                      {ownerColor && (
+                        <div className={styles.miniOwnerRing} style={{ borderColor: ownerColor }} />
+                      )}
+                      {ps?.mortgaged && <div className={styles.miniMTag}>M</div>}
+                      {!!ps?.hotelCount && <div className={styles.miniBuilding}>H</div>}
+                      {!ps?.hotelCount && !!ps?.houseCount && (
+                        <div className={styles.miniBuilding}>{ps.houseCount}</div>
                       )}
                     </div>
                   )
                 })}
               </div>
-            ))}
-          </div>
-        )}
+
+              {/* Inline editor for selected property */}
+              {editSpot && (
+                <div className={styles.propEditor}>
+                  <div className={styles.propEditorTitle}>
+                    <span
+                      className={styles.propEditorDot}
+                      style={{ background: STREET_COLORS[editSpot.streetType as StreetType] ?? '#888' }}
+                    />
+                    <strong>{editSpot.name}</strong>
+                    <button className={styles.propEditorClose} onClick={() => setEditingPropId(null)}>✕</button>
+                  </div>
+                  <select
+                    className={styles.propSelect}
+                    value={editPs?.ownerPlayerId ?? ''}
+                    onChange={e => patchProperty(editSpot.id, { ownerPlayerId: e.target.value })}
+                  >
+                    <option value="">— ei omistajaa —</option>
+                    {snap.players.map(p => (
+                      <option key={p.playerId} value={p.playerId}>{p.name}</option>
+                    ))}
+                  </select>
+                  {isStreet && (
+                    <div className={styles.houseRow}>
+                      {[0,1,2,3,4].map(n => (
+                        <button
+                          key={n}
+                          className={`${styles.houseBtn} ${editPs?.houseCount === n && !editPs?.hotelCount ? styles.houseBtnActive : ''}`}
+                          onClick={() => patchProperty(editSpot.id, { houseCount: n, hotelCount: 0 })}
+                        >
+                          {n === 0 ? '∅' : `${n}🏠`}
+                        </button>
+                      ))}
+                      <button
+                        className={`${styles.houseBtn} ${editPs?.hotelCount ? styles.houseBtnActive : ''}`}
+                        onClick={() => patchProperty(editSpot.id, { houseCount: 0, hotelCount: editPs?.hotelCount ? 0 : 1 })}
+                      >
+                        🏨
+                      </button>
+                    </div>
+                  )}
+                  <label className={styles.propMortgageLabel}>
+                    <input
+                      type="checkbox"
+                      checked={editPs?.mortgaged ?? false}
+                      onChange={e => patchProperty(editSpot.id, { mortgaged: e.target.checked })}
+                    />
+                    pantattu
+                  </label>
+                </div>
+              )}
+            </>
+          )
+        })()}
       </section>
 
       </div>{/* end scrollBody */}
