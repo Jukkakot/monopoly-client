@@ -109,4 +109,34 @@ describe('Buildings', () => {
       await deleteSession(sid)
     }
   })
+
+  test('4.8 bank house supply exhausted (32 houses on board) → building rejected', async () => {
+    const sid = await createBotSession(2)
+    const snap0 = await getSnapshot(sid)
+    try {
+      // BANK_HOUSE_SUPPLY = 32. Fill 8 properties with 4 houses each = 32 total.
+      // Seat 0 owns full BROWN monopoly with 0 houses — eligible to build but bank is empty.
+      const patch = buildPatch({
+        description: '', rules: [],
+        players: [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 10 }],
+        ownedProperties: {
+          0: ['B1', 'B2'],
+          1: ['LB1', 'LB2', 'LB3', 'P1', 'P2', 'P3', 'O1', 'O2'],
+        },
+        propertyOverrides: {
+          LB1: { houseCount: 4 }, LB2: { houseCount: 4 }, LB3: { houseCount: 4 },
+          P1:  { houseCount: 4 }, P2:  { houseCount: 4 }, P3:  { houseCount: 4 },
+          O1:  { houseCount: 4 }, O2:  { houseCount: 4 },
+        },
+        turn: { seat: 0, phase: 'WAITING_FOR_END_TURN' },
+        expectedAfter: {},
+      }, snap0)
+      await injectState(sid, patch)
+      const seat0Id = snap0.state!.players[0].playerId
+      const result = await sendCmdRaw(sid, { type: 'BuyBuildingRound', actorPlayerId: seat0Id, propertyId: 'B1' })
+      expect(result.accepted).toBe(false)
+    } finally {
+      await deleteSession(sid)
+    }
+  })
 })
