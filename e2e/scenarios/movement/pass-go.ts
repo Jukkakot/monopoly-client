@@ -1,20 +1,25 @@
 import type { TestScenario } from '../../helpers/scenario'
 
 /**
- * Player at index 37 (DB1/Keilaniemi), dice [2,1] = 3 → index 40%40 = 0 (GO).
- * Non-doubles → no extra turn. Landing on GO → collect €200 → WAITING_FOR_END_TURN.
- * DB1 is unowned but player starts there (doesn't trigger buying — only landing does).
+ * TRUE pass-through GO: seat 0 starts near end of board, rolls across GO,
+ * and lands on position 10 (JAIL/just-visiting) — a neutral, effect-free spot.
+ *
+ * Position 39 (DB2) + dice [6,5]=11 → 50 % 40 = 10 (JAIL/just-visiting).
+ * Crosses GO (position 0) on the way → +€200 bonus.
+ * Non-doubles (6 ≠ 5) → no extra turn.
  */
 export const passGoScenario: TestScenario = {
-  description: 'Player passes through GO and collects €200',
-  rules: ['landing on or passing GO = +€200', 'no action for non-property squares'],
+  description: 'Passing THROUGH GO (not landing on it) collects €200',
+  rules: ['passing GO = +€200'],
   players: [
-    { cash: 1200, boardIndex: 37 },  // seat 0: at DB1 (Keilaniemi)
-    { cash: 1500, boardIndex: 10 },  // seat 1: at jail / just visiting
+    { cash: 1500, boardIndex: 39 },  // seat 0: at DB2 (last property on board)
+    { cash: 1500, boardIndex: 20 },  // seat 1: at Free Parking
   ],
   turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
-  forcedDice: [2, 1],  // sum=3 (non-doubles) → 37+3=40 → 40%40=0 = GO
+  forcedDice: [6, 5],  // sum=11 (non-doubles) → 39+11=50 → 50%40=10 (JAIL/visiting)
   expectedAfter: {
+    phase: 'WAITING_FOR_END_TURN',
     playerCashDelta: { 0: +200 },
+    playerBoardIndex: { 0: 10 },
   },
 }

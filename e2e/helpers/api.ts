@@ -35,18 +35,29 @@ export async function injectState(sid: string, patch: object): Promise<void> {
   if (!data.applied) throw new Error('injectState: backend did not apply patch')
 }
 
-export async function sendCmd(sid: string, cmd: object): Promise<void> {
+export interface CommandResult {
+  accepted: boolean
+  rejections: string[]
+}
+
+export async function sendCmdRaw(sid: string, cmd: object): Promise<CommandResult> {
   const r = await fetch(`${BASE}/sessions/${sid}/command`, {
     method: 'POST',
     headers: jsonHeaders,
     body: JSON.stringify(cmd),
   })
-  if (!r.ok) {
+  // Backend returns 200 for accepted commands and 422 for rejected ones.
+  // Both have a valid CommandResult body — only other status codes are hard errors.
+  if (!r.ok && r.status !== 422) {
     const data = await r.json().catch(() => ({}))
-    throw new Error(`sendCmd failed: ${r.status} ${JSON.stringify(data)}`)
+    throw new Error(`sendCmd HTTP error: ${r.status} ${JSON.stringify(data)}`)
   }
-  const data = await r.json()
-  if (!data.accepted) throw new Error(`Command not accepted: ${JSON.stringify(data)}`)
+  return r.json()
+}
+
+export async function sendCmd(sid: string, cmd: object): Promise<void> {
+  const result = await sendCmdRaw(sid, cmd)
+  if (!result.accepted) throw new Error(`Command not accepted: ${JSON.stringify(result)}`)
 }
 
 export async function setBotSpeed(sid: string, speed: 'fast' | 'normal' | 'slow'): Promise<void> {
