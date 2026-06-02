@@ -24,6 +24,9 @@
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.15.0"
   },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "1.32.0"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
