@@ -247,7 +247,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                 variant="primary" testId="action-buy" />
               <Btn label={t.skipToAuction}
                 onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
-                variant="ghost" />
+                variant="ghost" testId="action-decline" />
             </div>
           </>
         ) : (
@@ -362,10 +362,10 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                   {hasButtons && (
                     <div className={styles.btnRow}>
                       {hasCard && (
-                        <Btn label={t.useJailCard(me.getOutOfJailCards, rounds)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" />
+                        <Btn label={t.useJailCard(me.getOutOfJailCards, rounds)} onClick={() => cmd('UseGetOutOfJailCard')} variant="secondary" testId="action-use-jail-card" />
                       )}
                       {canPay && (
-                        <Btn label={t.payJailFine(rounds)} onClick={() => cmd('PayJailFine')} variant="secondary" />
+                        <Btn label={t.payJailFine(rounds)} onClick={() => cmd('PayJailFine')} variant="secondary" testId="action-pay-jail-fine" />
                       )}
                     </div>
                   )}
@@ -800,7 +800,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           </div>
           <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
-            variant="danger" />
+            variant="danger" testId="action-pass-auction" />
         </>
       ) : (
         <div className={styles.infoBox}>{t.waitingForOthers}</div>

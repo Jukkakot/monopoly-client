@@ -5,6 +5,7 @@ import { doublesSecondConsecutiveScenario } from '../scenarios/doubles/doubles-s
 import { doublesPayRentExtraTurnScenario } from '../scenarios/doubles/doubles-pay-rent-extra-turn'
 import { doublesBuyPropertyExtraTurnScenario } from '../scenarios/doubles/doubles-buy-property-extra-turn'
 import { nonDoublesEndTurnScenario } from '../scenarios/doubles/non-doubles-end-turn'
+import { jailDoublesNoExtraTurnScenario } from '../scenarios/doubles/jail-doubles-no-extra-turn'
 
 describe('Doubles — extra turn mechanics', () => {
   test('D1 doubles on free parking → WAITING_FOR_ROLL (extra turn)', async () => {
@@ -50,5 +51,13 @@ describe('Doubles — extra turn mechanics', () => {
     expect(snap.state?.turn?.phase).toBe('WAITING_FOR_END_TURN')
     expect(snap.state?.turn?.canRoll).toBe(false)
     expect(snap.state?.players[0].boardIndex).toBe(20)
+  })
+
+  test('D6 jail doubles → escape but NO extra turn (WAITING_FOR_END_TURN)', async () => {
+    const snap = await runCmds(jailDoublesNoExtraTurnScenario, [rollAs(jailDoublesNoExtraTurnScenario)])
+    expect(snap.state?.players[0].inJail).toBe(false)
+    expect(snap.state?.players[0].boardIndex).toBe(16)
+    // Jail doubles are special: player escapes and moves but does not roll again
+    expect(snap.state?.turn?.phase).toBe('WAITING_FOR_END_TURN')
   })
 })
