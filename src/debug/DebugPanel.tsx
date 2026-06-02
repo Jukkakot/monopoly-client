@@ -131,14 +131,26 @@ export default function DebugPanel({ sessionId }: Props) {
   const prevLastCard = useRef<string>('')
   // Always-current ref so the lastDice effect never has stale closures
 
-  // Drag state
-  const [pos, setPos] = useState(() => ({
-    x: Math.max(8, window.innerWidth - 276),
-    y: Math.max(8, window.innerHeight - 560),
-  }))
-  const [size, setSize] = useState({ w: 260, h: 520 })
+  // Drag state — persisted in localStorage
+  const [pos, setPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const saved = localStorage.getItem('debug_panel_pos')
+      if (saved) return JSON.parse(saved)
+    } catch { /* ignore */ }
+    return { x: Math.max(8, window.innerWidth - 276), y: Math.max(8, window.innerHeight - 560) }
+  })
+  const [size, setSize] = useState<{ w: number; h: number }>(() => {
+    try {
+      const saved = localStorage.getItem('debug_panel_size')
+      if (saved) return JSON.parse(saved)
+    } catch { /* ignore */ }
+    return { w: 260, h: 520 }
+  })
   const dragRef = useRef<{ mx: number; my: number; px: number; py: number } | null>(null)
   const resizeRef = useRef<{ mx: number; my: number; sw: number; sh: number } | null>(null)
+
+  useEffect(() => { try { localStorage.setItem('debug_panel_pos', JSON.stringify(pos)) } catch { /* ignore */ } }, [pos])
+  useEffect(() => { try { localStorage.setItem('debug_panel_size', JSON.stringify(size)) } catch { /* ignore */ } }, [size])
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
