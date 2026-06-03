@@ -85,6 +85,7 @@ export interface HumanSession {
   sid: string
   humanPlayerId: string
   humanPlayerToken: string
+  hostToken: string
 }
 
 /**
@@ -118,7 +119,7 @@ export async function createHumanBotSession(): Promise<HumanSession> {
   })
   if (!r3.ok) throw new Error(`createHumanBotSession: lobbyReady failed ${r3.status}`)
 
-  return { sid, humanPlayerId, humanPlayerToken }
+  return { sid, humanPlayerId, humanPlayerToken, hostToken }
 }
 
 export interface TwoHumanSession {
