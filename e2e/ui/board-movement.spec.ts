@@ -79,6 +79,39 @@ test('free parking — no cash change, end-turn available', async ({ page }) => 
   }
 })
 
+test('go to jail corner → player jailed (jail badge visible)', async ({ page }) => {
+  const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
+  try {
+    await setBotSpeed(sid, 'slow')
+    const snap0 = await getSnapshot(sid)
+    const humanSeat = humanSeatOf(snap0, humanPlayerId)
+
+    // Human at position 27 (Y2/Leppävaara), dice [2,1]=3 → 30 = GO_TO_JAIL corner
+    await injectState(sid, buildPatch({
+      description: '', rules: [],
+      players: humanSeat === 0
+        ? [{ cash: 1500, boardIndex: 27 }, { cash: 1500, boardIndex: 0 }]
+        : [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 27 }],
+      turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
+      forcedDice: [2, 1],  // sum=3 → 27+3=30 = GO_TO_JAIL
+      expectedAfter: {},
+    }, snap0))
+
+    await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
+
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
+    await page.getByTestId('action-roll').first().click()
+
+    // Jail: cash unchanged, end-turn button appears (WAITING_FOR_END_TURN after jail)
+    await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.getByTestId(`player-${humanSeat}-cash`).first()).toContainText('1500', { timeout: 3000 })
+    // Jail badge "🔒3v" visible in player list (jailRoundsRemaining=3)
+    await expect(page.getByText('🔒3v').first()).toBeVisible({ timeout: 3000 })
+  } finally {
+    await deleteSession(sid)
+  }
+})
+
 test('spectator: player cash values all visible', async ({ page }) => {
   const sid = await createBotSession(3)
   try {
