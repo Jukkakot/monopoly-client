@@ -249,8 +249,8 @@
 
 .propGrid {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .propGroup {
@@ -258,20 +258,23 @@
 }
 
 .propChip {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 3px 6px;
-  border-radius: 6px;
-  border: 1.5px solid transparent;
-  font-size: 0.7rem;
+  gap: 5px;
+  padding: 3px 7px 3px 9px;
+  border-radius: 4px;
+  border: none;
+  border-left: 4px solid transparent;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #111;
+  color: #222;
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.4;
   background: none;
   cursor: default;
   transition: filter 0.1s;
+  text-align: left;
+  width: 100%;
 }
 
 .propChipClickable {
@@ -280,9 +283,8 @@
 .propChipClickable:hover { filter: brightness(0.9); }
 
 .propChipMortgaged {
-  background: #ffebee !important;
-  border-color: #e57373 !important;
-  color: #c62828;
+  opacity: 0.6;
+  text-decoration: line-through;
 }
 
 /* keep old names for anything still referencing them */
