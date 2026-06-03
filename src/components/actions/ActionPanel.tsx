@@ -964,7 +964,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         )
       })()}
       {debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
-        <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" />
+        <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" testId="action-declare-bankruptcy" />
       )}
     </div>
   )
