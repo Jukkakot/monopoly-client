@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { createLobby, createBotsOnlySession, addLobbyBot, startLobby } from '../api/sessionApi'
+import { createLobby, createBotsOnlySession, addLobbyBot, setLobbyReady } from '../api/sessionApi'
 import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
@@ -89,7 +89,7 @@ export default function LobbyScreen() {
         for (let i = 0; i < botCount; i++) {
           await addLobbyBot(result.sessionId, result.hostToken)
         }
-        await startLobby(result.sessionId)
+        await setLobbyReady(result.sessionId, result.playerId, result.playerToken, true)
         joinSession(result.sessionId)
         navigate(`/game/${result.sessionId}`)
       }
