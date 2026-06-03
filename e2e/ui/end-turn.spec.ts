@@ -113,6 +113,38 @@ test('income tax (position 4) → cash -200', async ({ page }) => {
   }
 })
 
+test('roll on own property → end-turn button (no decision panel)', async ({ page }) => {
+  const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
+  try {
+    await setBotSpeed(sid, 'slow')
+    const snap0 = await getSnapshot(sid)
+    const humanSeat = humanSeatOf(snap0, humanPlayerId)
+
+    // Human owns B2, dice [1,2]=3 → lands on B2 (own property) → WAITING_FOR_END_TURN directly
+    await injectState(sid, buildPatch({
+      description: '', rules: [],
+      players: humanSeat === 0
+        ? [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 10 }]
+        : [{ cash: 1500, boardIndex: 10 }, { cash: 1500, boardIndex: 0 }],
+      ownedProperties: { [humanSeat]: ['B2'] },
+      turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
+      forcedDice: [1, 2],  // sum=3 → 0+3=3 = B2 (own) → no decision
+      expectedAfter: {},
+    }, snap0))
+
+    await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
+
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
+    await page.getByTestId('action-roll').first().click()
+
+    // Own property → no buy/decline decision → goes straight to WAITING_FOR_END_TURN
+    await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.getByTestId('action-buy').first()).not.toBeVisible({ timeout: 2000 })
+  } finally {
+    await deleteSession(sid)
+  }
+})
+
 test('luxury tax (position 38) → cash -100', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
