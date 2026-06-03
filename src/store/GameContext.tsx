@@ -462,6 +462,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     function connect() {
       if (cancelled) return
       dispatch({ type: 'SET_CONNECTION', status: retryCount.current === 0 ? 'CONNECTING' : 'RECONNECTING' })
+      let throttleClose = false  // true when we deliberately close for back-pressure (suppress onerror reconnect)
 
       const url = sseUrl(state.sessionId!)
       const es = new EventSource(versionRef.current > 0 ? `${url}?lastEventId=${versionRef.current}` : url)
@@ -514,6 +515,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
             // naturally throttles via TCP buffer backpressure.
             if (pendingSnapshots.current.length >= QUEUE_THROTTLE_THRESHOLD && !autoThrottleFrozenRef.current) {
               autoThrottleFrozenRef.current = true
+              throttleClose = true  // tell onerror this was intentional
               es.close()
               esRef.current = null
               // Hard cap: drop oldest intermediate snapshots if queue overflows further
@@ -538,7 +540,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         clearTimeout(noDataTimer)
         es.close()
         esRef.current = null
-        if (cancelled) return
+        if (cancelled || throttleClose) return  // intentional close — drainPendingRef will reconnect
         // If the connection closes within 400ms of opening and no message arrived,
         // it almost certainly means the session doesn't exist (404). After 2 such
         // quick failures, stop retrying and go straight to FAILED.
