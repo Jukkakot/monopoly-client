@@ -492,6 +492,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
+          // GAME_OVER bypasses the animation queue so "lopeta peli" takes effect immediately
+          // regardless of how many queued snapshots are waiting.
+          if (snap.status === 'GAME_OVER') {
+            pendingSnapshots.current = []
+            settlingRef.current = false
+            dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
+            return
+          }
           // Queue snapshot if animation is running, queue has pending items, or we're still
           // in the settling window after a direct dispatch (animation useEffect not yet fired).
           if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0 || settlingRef.current) {
