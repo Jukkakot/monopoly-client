@@ -303,12 +303,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Briefly true after any direct dispatch — blocks incoming SSE snaps from bypassing the queue
   // before the animation useEffect has had a chance to set isAnyPlayerAnimating().
   const settlingRef = useRef(false)
+  // Back-pressure: when the snapshot queue grows this deep (e.g. instant-speed bot games),
+  // close the SSE stream so the OS TCP buffer fills up and the backend naturally throttles.
+  // The queue drains on its own; we reconnect when it empties (see drainPendingRef below).
+  const QUEUE_THROTTLE_THRESHOLD = 12
+  const QUEUE_THROTTLE_CAP = 25  // hard cap: drop oldest items if close hasn't drained yet
+  const autoThrottleFrozenRef = useRef(false)
+  const connectFnRef = useRef<() => void>(() => {})
   // Always points to latest closure — updated each render so refs and dispatch are fresh
   const drainPendingRef = useRef<() => void>(null!)
   drainPendingRef.current = () => {
     if (isAnyPlayerAnimating()) return
     const next = pendingSnapshots.current.shift()
-    if (!next) return
+    if (!next) {
+      // Queue fully drained — if SSE was auto-closed for back-pressure, reconnect now
+      if (autoThrottleFrozenRef.current && state.sessionId && !state.sseFrozen) {
+        autoThrottleFrozenRef.current = false
+        connectFnRef.current()
+      }
+      return
+    }
     settlingRef.current = true
     dispatch({ type: 'SET_SNAPSHOT', snapshot: next })
     // After a yield, check if this snapshot started an animation.
@@ -496,6 +510,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
           // in the settling window after a direct dispatch (animation useEffect not yet fired).
           if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0 || settlingRef.current) {
             pendingSnapshots.current.push(snap)
+            // Back-pressure: close the SSE stream when queue is too deep so the backend
+            // naturally throttles via TCP buffer backpressure.
+            if (pendingSnapshots.current.length >= QUEUE_THROTTLE_THRESHOLD && !autoThrottleFrozenRef.current) {
+              autoThrottleFrozenRef.current = true
+              es.close()
+              esRef.current = null
+              // Hard cap: drop oldest intermediate snapshots if queue overflows further
+              if (pendingSnapshots.current.length > QUEUE_THROTTLE_CAP) {
+                pendingSnapshots.current = pendingSnapshots.current.slice(-Math.floor(QUEUE_THROTTLE_CAP / 4))
+              }
+            }
           } else {
             settlingRef.current = true
             dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
@@ -535,6 +560,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    connectFnRef.current = connect
     connect()
 
     return () => {
@@ -542,6 +568,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       clearTimeout(timeoutId)
       esRef.current?.close()
       esRef.current = null
+      autoThrottleFrozenRef.current = false
     }
   }, [state.sessionId, state.sseFrozen])
 
