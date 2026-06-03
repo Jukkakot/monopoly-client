@@ -290,7 +290,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           {!logCollapsed && (
             <div className={styles.logWrapper}>{log}</div>
           )}
-          <div className={styles.actions}>{actions}</div>
+          {/* Only render actions on desktop — mobile renders its own instance below */}
+          {!isMobile && <div className={styles.actions}>{actions}</div>}
         </div>
       </div>
 
@@ -340,12 +341,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           )}
 
           <div className={styles.mobileSection}>
-            {/* Keep actions mounted so popup-dismiss state survives tab switches */}
-            <div className={[
+            {/* Only render actions on mobile — desktop renders its own instance above.
+                Keep mounted (not conditionally) so internal state survives tab switches. */}
+            {isMobile && <div className={[
               styles.mobilePadded,
               mobileTab !== 'board' ? styles.mobileHidden : '',
               boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
-            ].join(' ')}>{actions}</div>
+            ].join(' ')}>{actions}</div>}
             {mobileTab === 'players' && (
               <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
             )}
