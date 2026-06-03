@@ -165,7 +165,12 @@ export interface CreateSessionRequest {
   difficulties: BotDifficulty[]
 }
 
+export interface CommandRejection {
+  code: string
+  message: string
+}
+
 export interface CommandResult {
   accepted: boolean
-  rejections: string[]
+  rejections: CommandRejection[]
 }

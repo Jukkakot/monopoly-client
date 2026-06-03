@@ -37,7 +37,7 @@ export async function injectState(sid: string, patch: object): Promise<void> {
 
 export interface CommandResult {
   accepted: boolean
-  rejections: string[]
+  rejections: { code: string; message: string }[]
 }
 
 export async function sendCmdRaw(sid: string, cmd: object): Promise<CommandResult> {

@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react'
 import type { SessionState, ClientSessionSnapshot, PlayerSnapshot, PropertyStateSnapshot } from '../types/api'
+import { logger } from '../utils/logger'
 import { sendCommand, sseUrl, applySessionSettings } from '../api/sessionApi'
 import { loadBotSpeed } from '../utils/animationSettings'
 import { useEffect, useRef } from 'react'
@@ -414,12 +415,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const enriched = { ...command, ...(playerToken ? { playerToken } : {}), ...(hostToken ? { hostToken } : {}) }
       const result = await sendCommand(sid, enriched)
       if (!result.accepted && result.rejections.length > 0) {
-        dispatch({ type: 'SET_COMMAND_ERROR', message: result.rejections.join(' · ') })
-        setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
+        // Log rejection for debugging — these should not happen during normal play
+        // (the UI should prevent sending invalid commands in the first place)
+        const codes = result.rejections.map(r => r.code).join(', ')
+        const msgs = result.rejections.map(r => r.message).join(' · ')
+        logger.warn('Command rejected by backend', { codes, command: (command as { type?: string }).type })
+        window.__monopolyErrorLog?.push(`REJECTED [${codes}]: ${msgs}`)
+        // Only show user-visible error for explicit user-facing rejection messages,
+        // not for race-condition rejections that the UI should have prevented.
+        const userFacing = ['INSUFFICIENT_FUNDS', 'BUILDINGS_PRESENT', 'MORTGAGE_TOGGLE_FAILED']
+        const isUserFacing = result.rejections.some(r => userFacing.includes(r.code))
+        if (isUserFacing) {
+          dispatch({ type: 'SET_COMMAND_ERROR', message: msgs })
+          setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
+        }
       }
     } catch (err) {
       dispatch({ type: 'SET_COMMAND_ERROR', message: translations[getLang()].commandErrorMsg })
       setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
+      window.__monopolyErrorLog?.push(`NETWORK_ERROR: ${String(err)}`)
     }
   }, [state.sessionId])
 
