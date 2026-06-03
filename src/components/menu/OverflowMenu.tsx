@@ -42,6 +42,7 @@ export default function OverflowMenu() {
           <div onClick={e => e.stopPropagation()}>
             <SoundSettings
               onClose={() => setShowSound(false)}
+              isSpectator={!myPlayerId}
               onBotSpeedChange={(speed: BotSpeed) => {
                 if (state.sessionId) {
                   applySessionSettings(state.sessionId, { botSpeed: speed })

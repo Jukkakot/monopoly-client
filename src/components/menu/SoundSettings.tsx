@@ -108,9 +108,10 @@ export function notifIconsFromConfig(cfg: NotifConfig, isTouchDevice: boolean): 
 interface Props {
   onClose: () => void
   onBotSpeedChange?: (speed: BotSpeed) => void
+  isSpectator?: boolean
 }
 
-export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
+export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator = false }: Props) {
   const t = useT()
   const [cfg, setCfg] = useState<SoundConfig>(loadSoundConfig)
   const [notif, setNotif] = useState<NotifConfig>(loadNotifConfig)
@@ -219,11 +220,11 @@ export default function SoundSettings({ onClose, onBotSpeedChange }: Props) {
         <label className={styles.label}>{t.zoomModeLabel}</label>
         <select
           className={styles.select}
-          value={zoomMode}
+          value={isSpectator && zoomMode === 'own' ? 'all' : zoomMode}
           onChange={e => { saveZoomMode(e.target.value as ZoomMode); setZoomMode(e.target.value as ZoomMode) }}
         >
           <option value="off">{t.zoomModeOff}</option>
-          <option value="own">{t.zoomModeOwn}</option>
+          {!isSpectator && <option value="own">{t.zoomModeOwn}</option>}
           <option value="all">{t.zoomModeAll}</option>
         </select>
       </div>
