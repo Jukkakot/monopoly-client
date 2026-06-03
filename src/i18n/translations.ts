@@ -204,6 +204,8 @@ export interface T {
   colorsUniqueErr: string
   lobbyFailedErr: (e: string) => string
   sessionFailedErr: (e: string) => string
+  serverBusyErr: string
+  serverFullErr: string
   backBtn: string
   playerPlaceholder: (i: number) => string
 
@@ -587,6 +589,8 @@ const fi: T = {
   colorsUniqueErr: 'Jokaisella pelaajalla pitää olla eri väri.',
   lobbyFailedErr: (e) => `Odotushuoneen luonti epäonnistui: ${e}`,
   sessionFailedErr: (e) => `Sessio ei onnistunut: ${e}`,
+  serverBusyErr: 'Palvelin on juuri nyt kuormittunut — yritä hetken kuluttua uudelleen.',
+  serverFullErr: 'Palvelimella on jo maksimimäärä pelejä käynnissä — yritä myöhemmin uudelleen.',
   backBtn: 'Takaisin',
   playerPlaceholder: (i) => `Pelaaja ${i + 1}`,
 
@@ -980,6 +984,8 @@ const en: T = {
   colorsUniqueErr: 'Each player must have a unique color.',
   lobbyFailedErr: (e) => `Failed to create waiting room: ${e}`,
   sessionFailedErr: (e) => `Session failed: ${e}`,
+  serverBusyErr: 'The server is under heavy load right now — please try again in a moment.',
+  serverFullErr: 'The server has reached the maximum number of concurrent games — please try again later.',
   backBtn: 'Back',
   playerPlaceholder: (i) => `Player ${i + 1}`,
 

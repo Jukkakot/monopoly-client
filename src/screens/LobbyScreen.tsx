@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { createLobby, createBotsOnlySession, addLobbyBot, setLobbyReady } from '../api/sessionApi'
+import { createLobby, createBotsOnlySession, addLobbyBot, setLobbyReady, ApiError } from '../api/sessionApi'
 import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
@@ -14,6 +14,14 @@ import { useT } from '../i18n/LanguageContext'
 const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
 
 type Mode = 'playing' | 'spectating'
+
+function serverErrorMsg(e: unknown, t: ReturnType<typeof useT>): string {
+  if (e instanceof ApiError && e.status === 503) {
+    if (e.code === 'MAX_SESSIONS_REACHED') return t.serverFullErr
+    return t.serverBusyErr
+  }
+  return t.lobbyFailedErr(String(e))
+}
 
 export default function LobbyScreen() {
   const navigate = useNavigate()
@@ -64,7 +72,7 @@ export default function LobbyScreen() {
       joinSession(result.sessionId)
       navigate(`/lobby-wait/${result.sessionId}`)
     } catch (e) {
-      setError(t.lobbyFailedErr(String(e)))
+      setError(serverErrorMsg(e, t))
       setLoading(false)
     }
   }
@@ -94,7 +102,7 @@ export default function LobbyScreen() {
         navigate(`/game/${result.sessionId}`)
       }
     } catch (e) {
-      setError(t.lobbyFailedErr(String(e)))
+      setError(serverErrorMsg(e, t))
       setLoading(false)
     }
   }

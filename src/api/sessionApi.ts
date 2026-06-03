@@ -15,11 +15,23 @@ function pickDistinct<T>(pool: T[], count: number): T[] {
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
 
+export class ApiError extends Error {
+  readonly status: number
+  readonly code: string | null
+  constructor(status: number, code: string | null, message: string) {
+    super(message)
+    this.status = status
+    this.code = code
+  }
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init)
   if (!res.ok) {
-    logger.error('API request failed', { url, status: res.status, method: init?.method ?? 'GET' })
-    throw new Error(`Backend returned ${res.status}`)
+    let code: string | null = null
+    try { code = (await res.json()).error ?? null } catch {}
+    logger.error('API request failed', { url, status: res.status, code, method: init?.method ?? 'GET' })
+    throw new ApiError(res.status, code, `Backend returned ${res.status}`)
   }
   return res.json()
 }
