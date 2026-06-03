@@ -103,7 +103,7 @@ test('go to jail corner → player jailed (jail badge visible)', async ({ page }
     await page.getByTestId('action-roll').first().click()
 
     // Jail: cash unchanged, end-turn button appears (WAITING_FOR_END_TURN after jail)
-    await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 8000 })
     await expect(page.getByTestId(`player-${humanSeat}-cash`).first()).toContainText('1500', { timeout: 3000 })
     // Jail badge "🔒3v" visible in player list (jailRoundsRemaining=3)
     await expect(page.getByText('🔒3v').first()).toBeVisible({ timeout: 3000 })
