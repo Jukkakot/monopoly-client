@@ -120,3 +120,46 @@ export async function createHumanBotSession(): Promise<HumanSession> {
 
   return { sid, humanPlayerId, humanPlayerToken }
 }
+
+export interface TwoHumanSession {
+  sid: string
+  p1: { playerId: string; playerToken: string }
+  p2: { playerId: string; playerToken: string }
+}
+
+/**
+ * Creates a 2-human session via the lobby flow (no bots):
+ *   POST /sessions (lobbyMode) → POST /sessions/{id}/join → both mark ready → auto-start
+ *
+ * Seat indices are NOT guaranteed (p1 may be seat 0 or 1 — check snapshot).
+ * Commands require playerToken in the body: { type, actorPlayerId, playerToken, ...rest }
+ */
+export async function createTwoHumanSession(): Promise<TwoHumanSession> {
+  const r1 = await fetch(`${BASE}/sessions`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ lobbyMode: true, seatCount: 2 }),
+  })
+  if (!r1.ok) throw new Error(`createTwoHumanSession: POST /sessions failed ${r1.status}`)
+  const { sessionId: sid, playerId: p1Id, playerToken: p1Token } = await r1.json()
+
+  const r2 = await fetch(`${BASE}/sessions/${sid}/join`, {
+    method: 'POST', headers: jsonHeaders,
+    body: JSON.stringify({ name: 'Player2', color: '#1e88e5' }),
+  })
+  if (!r2.ok) throw new Error(`createTwoHumanSession: join failed ${r2.status}`)
+  const { playerId: p2Id, playerToken: p2Token } = await r2.json()
+
+  // Both mark ready — auto-starts when all humans are ready
+  await Promise.all([
+    fetch(`${BASE}/sessions/${sid}/lobby/ready`, {
+      method: 'POST', headers: jsonHeaders,
+      body: JSON.stringify({ playerId: p1Id, playerToken: p1Token, ready: true }),
+    }),
+    fetch(`${BASE}/sessions/${sid}/lobby/ready`, {
+      method: 'POST', headers: jsonHeaders,
+      body: JSON.stringify({ playerId: p2Id, playerToken: p2Token, ready: true }),
+    }),
+  ])
+
+  return { sid, p1: { playerId: p1Id, playerToken: p1Token }, p2: { playerId: p2Id, playerToken: p2Token } }
+}
