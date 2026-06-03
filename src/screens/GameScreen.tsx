@@ -226,7 +226,7 @@ export default function GameScreen() {
     <>
       <span data-testid="game-status" data-status={state.snapshot.status} style={{ display: 'none' }} />
       {isGameOver && <Confetti />}
-      {isGameOver && <GameOverOverlay state={state.snapshot} />}
+      {isGameOver && <GameOverOverlay state={state.prevSnapshot ?? state.snapshot} />}
       <FlashBanner />
       {selectedSpotId && (
         <PropertyDetail
