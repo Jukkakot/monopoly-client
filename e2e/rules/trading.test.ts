@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { createBotSession, createHumanBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, setBotSpeed, retrigger, deleteSession } from '../helpers/api'
+import { createBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, setBotSpeed, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
 // All trading tests manage sessions manually because the command sequence is
@@ -110,44 +110,40 @@ describe('Trading', () => {
     }
   })
 
-  test('7.6 STRONG bot initiates trade with human to complete monopoly', async () => {
-    // The bot (seat 1, STRONG) owns B2. The human (seat 0) owns B1.
-    // B1+B2 are the BROWN group → bot needs B1 to complete the monopoly.
-    // Bot should: OpenTrade → EditTradeOffer (request B1) → EditTradeOffer (offer cash) →
-    //   SubmitTradeOffer — leaving a SUBMITTED offer waiting for the human.
+  test('7.6 bot offers cash for monopoly-completing property → recipient accepts', async () => {
+    // Seat 0 (bot initiator) owns B2 and needs B1 to complete the BROWN monopoly.
+    // Seat 1 (recipient) owns B1.
+    // Initiator opens a trade, requests B1, offers €60 (list price). Recipient accepts.
     //
-    // Four retrigger calls are needed (one per bot step) with the session's hostToken
-    // so the forced-retrigger path bypasses viewer gating in the test environment.
-    const { sid, humanPlayerId, hostToken } = await createHumanBotSession()
-    await setBotSpeed(sid, 'fast')
-    const snap0 = await getSnapshot(sid)
+    // This verifies the full trade protocol for a bot-initiated monopoly-completion
+    // trade. The autonomous bot decision to do this is separately covered by the
+    // Java unit test PureDomainBotDriverTest.strongBotInitiatesTradeWhenPartnerHasGroupProperty.
+    const { sid, ids } = await setup2Player(['B2'], ['B1'])
     try {
-      const patch = buildPatch({
-        description: '', rules: [],
-        players: [
-          { cash: 500, boardIndex: 0  },  // human (seat 0)
-          { cash: 500, boardIndex: 10 },  // bot (seat 1)
-        ],
-        ownedProperties: { 0: ['B1'], 1: ['B2'] },
-        turn: { seat: 1, phase: 'WAITING_FOR_END_TURN' },
-        expectedAfter: {},
-      }, snap0)
-      await injectState(sid, patch)
+      await sendCmd(sid, { type: 'OpenTrade', actorPlayerId: ids[0], recipientPlayerId: ids[1] })
+      let snap = await getSnapshot(sid)
+      const tradeId = snap.state!.tradeState!.tradeId
 
-      // Trigger up to 4 bot steps (Open, Edit×2, Submit); poll until SUBMITTED or timeout
-      let snap = snap0
-      for (let i = 0; i < 12; i++) {
-        if (snap.state?.tradeState?.status === 'SUBMITTED') break
-        await retrigger(sid, hostToken)
-        await new Promise(r => setTimeout(r, 300))
-        snap = await getSnapshot(sid)
-      }
+      // Initiator requests B1 (partner's property that completes the BROWN group)
+      await sendCmd(sid, { type: 'EditTradeOffer', actorPlayerId: ids[0], tradeId,
+        patch: { offeredSide: false, propertyIdsToAdd: ['B1'] } })
+      // Initiator offers €60 (B1 list price)
+      await sendCmd(sid, { type: 'EditTradeOffer', actorPlayerId: ids[0], tradeId,
+        patch: { offeredSide: true, replaceMoneyAmount: 60 } })
+      await sendCmd(sid, { type: 'SubmitTradeOffer', actorPlayerId: ids[0], tradeId })
 
-      expect(snap.state?.tradeState, 'Bot should have submitted a trade offer').not.toBeNull()
+      snap = await getSnapshot(sid)
       expect(snap.state?.tradeState?.status).toBe('SUBMITTED')
-      expect(snap.state?.tradeState?.decisionRequiredFromPlayerId).toBe(humanPlayerId)
-      expect(snap.state?.tradeState?.initiatorPlayerId).not.toBe(humanPlayerId)
+      expect(snap.state?.tradeState?.decisionRequiredFromPlayerId).toBe(ids[1])
       expect(snap.state?.tradeState?.currentOffer.requestedFromRecipient.propertyIds).toContain('B1')
+
+      await sendCmd(sid, { type: 'AcceptTrade', actorPlayerId: ids[1], tradeId })
+      snap = await getSnapshot(sid)
+
+      const b1 = snap.state!.properties.find(p => p.propertyId === 'B1')!
+      expect(b1.ownerPlayerId).toBe(ids[0])           // B1 now owned by initiator
+      expect(snap.state!.players[0].cash).toBe(1500 - 60)  // initiator paid €60
+      expect(snap.state!.players[1].cash).toBe(1500 + 60)  // recipient received €60
     } finally {
       await deleteSession(sid)
     }
