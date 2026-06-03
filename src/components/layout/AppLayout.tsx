@@ -366,7 +366,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               >
                 {t.mobileTabs[tab]}
                 {tab === 'board' && isMyTurn && mobileTab !== 'board' && (
-                  <span className={styles.navAlert} />
+                  <span className={styles.navAlert} data-testid="mobile-board-alert" />
                 )}
                 {tab === 'log' && unreadLog > 0 && mobileTab !== 'log' && (
                   <span className={styles.navBadge}>{unreadLog > 9 ? '9+' : unreadLog}</span>

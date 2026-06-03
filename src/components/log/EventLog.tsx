@@ -143,7 +143,7 @@ export default memo(function EventLog({ events, myPlayerId }: Props) {
   }
 
   return (
-    <div className={styles.logWrapper}>
+    <div className={styles.logWrapper} data-testid="event-log">
       <div className={styles.filterRow}>
         <button
           className={`${styles.filterBtn} ${activeFilters.size === 0 ? styles.filterActive : ''}`}
