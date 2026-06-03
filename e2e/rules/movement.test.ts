@@ -12,6 +12,7 @@ import { passGoScenario } from '../scenarios/movement/pass-go'
 import { landOnGoScenario } from '../scenarios/movement/land-on-go'
 import { incomeTaxScenario } from '../scenarios/movement/income-tax'
 import { luxuryTaxScenario } from '../scenarios/movement/luxury-tax'
+import { monopolyRentWithMortgageScenario } from '../scenarios/movement/monopoly-rent-with-mortgage'
 
 describe('Movement & landing effects', () => {
   test('1.1 unowned property → WAITING_FOR_DECISION', async () => {
@@ -83,5 +84,12 @@ describe('Movement & landing effects', () => {
   test('1.12 luxury tax (Ylellisyysvero) → -€100', async () => {
     const snap = await runCmds(luxuryTaxScenario, [rollAs(luxuryTaxScenario)])
     expect(snap.state?.players[0].cash).toBe(luxuryTaxScenario.players[0].cash - 100)
+  })
+
+  test('1.13 monopoly rent with mortgaged sibling → 2× rent still applies on unmortgaged property', async () => {
+    const snap = await runCmds(monopolyRentWithMortgageScenario, [rollAs(monopolyRentWithMortgageScenario)])
+    // Seat 1 owns B1+B2 (full monopoly). B1 is mortgaged. Seat 0 lands on B2 → 2× rent.
+    expect(snap.state?.players[0].cash).toBe(monopolyRentWithMortgageScenario.players[0].cash - 8)
+    expect(snap.state?.players[1].cash).toBe(monopolyRentWithMortgageScenario.players[1].cash + 8)
   })
 })
