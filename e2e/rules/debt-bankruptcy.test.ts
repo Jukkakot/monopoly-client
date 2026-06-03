@@ -185,24 +185,20 @@ describe('Debt & bankruptcy', () => {
     }
   })
 
-  test('6.8 bankruptcy to bank: properties stay unowned (deviation from official rules — no immediate auction)', async () => {
-    // DEVIATION from official rules: official Monopoly auctions bank-bankruptcy properties immediately.
-    // Current behaviour: properties become null and players can only buy them by landing on them.
-    // Backlog item in docs/todo.md: "Konkurssi pankille → kiinteistöt huutokauppaan"
-    //
-    // This test documents current behaviour for multiple owned properties including a mortgaged one.
-    // It also verifies that the surviving player can still win (GAME_OVER).
+  test('6.8 bankruptcy to bank in 2-player game → GAME_OVER immediately, no auction', async () => {
+    // In a 2-player game the only surviving player wins immediately when seat 0 goes bankrupt.
+    // No auction is started because GAME_OVER takes precedence.
+    // Properties are transferred to bank (null owner) with mortgage cleared.
     const sid = await createBotSession(2)
     const snap0 = await getSnapshot(sid)
     try {
       const patch = buildPatch({
         description: '', rules: [],
-        // seat 0: €1, owns B1 (unmortgaged) + B2 (mortgaged). Debt to bank.
         players: [{ cash: 1, boardIndex: 1 }, { cash: 1500, boardIndex: 10 }],
         ownedProperties: { 0: ['B1', 'B2'] },
         propertyOverrides: { B2: { mortgaged: true } },
         turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
-        forcedDice: [2, 1],  // 1+3=4 = TAX1 (€200 tax → debt to bank, seat 0 has €1)
+        forcedDice: [2, 1],  // 1+3=4 = TAX1 (€200 debt to bank)
         expectedAfter: {},
       }, snap0)
       await injectState(sid, patch)
@@ -210,23 +206,112 @@ describe('Debt & bankruptcy', () => {
 
       await sendCmd(sid, { type: 'RollDice', actorPlayerId: ids[0] })
       let snap = await getSnapshot(sid)
-      expect(snap.state?.turn?.phase).toBe('RESOLVING_DEBT')
       expect(snap.state?.activeDebt?.creditorType).toBe('BANK')
 
       await sendCmd(sid, { type: 'DeclareBankruptcy', actorPlayerId: ids[0], debtId: snap.state!.activeDebt!.debtId })
       snap = await getSnapshot(sid)
 
-      // Current behaviour: BOTH B1 and B2 become unowned (null) — no auction.
-      // Official rules would put them both up for auction immediately.
+      // GAME_OVER immediately — seat1 is the sole survivor
+      expect(snap.status).toBe('GAME_OVER')
+      expect(snap.state?.winnerPlayerId).toBe(ids[1])
+
+      // Properties unowned (bank), mortgage cleared — no auction was started
       const b1 = snap.state!.properties.find(p => p.propertyId === 'B1')!
       const b2 = snap.state!.properties.find(p => p.propertyId === 'B2')!
       expect(b1.ownerPlayerId).toBeNull()
       expect(b2.ownerPlayerId).toBeNull()
-      expect(b2.mortgaged).toBe(false)   // mortgage cleared when transferred to bank
+      expect(b2.mortgaged).toBe(false)
+      expect(snap.state?.auctionState).toBeNull()
+    } finally {
+      await deleteSession(sid)
+    }
+  })
 
-      // Game over — seat 1 is the only remaining player
-      expect(snap.status).toBe('GAME_OVER')
-      expect(snap.state?.winnerPlayerId).toBe(ids[1])
+  test('6.9 bankruptcy to bank in 3-player game → properties auctioned immediately', async () => {
+    // seat0: €1, owns B1 (unmortgaged) + B2 (mortgaged). Rolls into TAX1 (€200 debt to bank).
+    // seats 1+2 remain active after bankruptcy → game NOT over → B1 and B2 go to auction.
+    // Auction order: B1 first (arbitrary property order from gateway).
+    // seat1 bids €10 on B1, seat2 passes → seat1 wins B1. Then B2 auctions, seat2 bids €10,
+    // seat1 passes → seat2 wins B2.
+    const sid = await createBotSession(3)
+    const snap0 = await getSnapshot(sid)
+    try {
+      const patch = buildPatch({
+        description: '', rules: [],
+        players: [
+          { cash: 1,    boardIndex: 1  },
+          { cash: 1500, boardIndex: 10 },
+          { cash: 1500, boardIndex: 20 },
+        ],
+        ownedProperties: { 0: ['B1', 'B2'] },
+        propertyOverrides: { B2: { mortgaged: true } },
+        turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
+        forcedDice: [2, 1],  // 1+3=4 = TAX1 (€200 debt to bank)
+        expectedAfter: {},
+      }, snap0)
+      await injectState(sid, patch)
+      const ids = snap0.state!.players.map(p => p.playerId)
+
+      // Roll → RESOLVING_DEBT (bank creditor)
+      await sendCmd(sid, { type: 'RollDice', actorPlayerId: ids[0] })
+      let snap = await getSnapshot(sid)
+      expect(snap.state?.turn?.phase).toBe('RESOLVING_DEBT')
+      expect(snap.state?.activeDebt?.creditorType).toBe('BANK')
+
+      // Declare bankruptcy → first property should immediately go to auction
+      await sendCmd(sid, { type: 'DeclareBankruptcy', actorPlayerId: ids[0], debtId: snap.state!.activeDebt!.debtId })
+      snap = await getSnapshot(sid)
+      expect(snap.status).toBe('IN_PROGRESS')                   // game not over
+      expect(snap.state?.turn?.phase).toBe('WAITING_FOR_AUCTION')
+      expect(snap.state?.auctionState).not.toBeNull()
+      const firstAuctionPropertyId = snap.state!.auctionState!.propertyId
+      expect(['B1', 'B2']).toContain(firstAuctionPropertyId)
+      // mortgage must be cleared before auction (official rule)
+      const firstPropBeforeAuction = snap.state!.properties.find(p => p.propertyId === firstAuctionPropertyId)!
+      expect(firstPropBeforeAuction.mortgaged).toBe(false)
+
+      // Seat1 bids €10 on first property
+      const firstAuctionId = snap.state!.auctionState!.auctionId
+      await sendCmd(sid, { type: 'PlaceAuctionBid', actorPlayerId: ids[1], auctionId: firstAuctionId, amount: 10 })
+
+      // Seat2 passes → seat1 is sole remaining bidder → WON_PENDING_RESOLUTION
+      snap = await getSnapshot(sid)
+      const actor2 = snap.state!.auctionState!.currentActorPlayerId
+      await sendCmd(sid, { type: 'PassAuction', actorPlayerId: actor2, auctionId: firstAuctionId })
+      snap = await getSnapshot(sid)
+      expect(snap.state?.auctionState?.status).toBe('WON_PENDING_RESOLUTION')
+
+      // Finish first auction
+      await sendCmd(sid, { type: 'FinishAuctionResolution', actorPlayerId: ids[1], auctionId: firstAuctionId })
+      snap = await getSnapshot(sid)
+
+      // First property now owned by seat1
+      const firstProp = snap.state!.properties.find(p => p.propertyId === firstAuctionPropertyId)!
+      expect(firstProp.ownerPlayerId).toBe(ids[1])
+      expect(firstProp.mortgaged).toBe(false)
+
+      // Second property should now be in auction automatically
+      expect(snap.state?.turn?.phase).toBe('WAITING_FOR_AUCTION')
+      expect(snap.state?.auctionState).not.toBeNull()
+      const secondAuctionPropertyId = snap.state!.auctionState!.propertyId
+      expect(secondAuctionPropertyId).not.toBe(firstAuctionPropertyId)
+
+      // Seat1 passes on second, seat2 bids €10 → seat2 wins
+      const secondAuctionId = snap.state!.auctionState!.auctionId
+      const actor1 = snap.state!.auctionState!.currentActorPlayerId
+      await sendCmd(sid, { type: 'PassAuction', actorPlayerId: actor1, auctionId: secondAuctionId })
+      snap = await getSnapshot(sid)
+      await sendCmd(sid, { type: 'PlaceAuctionBid', actorPlayerId: snap.state!.auctionState!.currentActorPlayerId, auctionId: secondAuctionId, amount: 10 })
+      snap = await getSnapshot(sid)
+      await sendCmd(sid, { type: 'FinishAuctionResolution', actorPlayerId: ids[2], auctionId: secondAuctionId })
+      snap = await getSnapshot(sid)
+
+      // All auctions done — game continues normally
+      const secondProp = snap.state!.properties.find(p => p.propertyId === secondAuctionPropertyId)!
+      expect(secondProp.ownerPlayerId).toBe(ids[2])
+      expect(snap.status).toBe('IN_PROGRESS')
+      expect(snap.state?.auctionState).toBeNull()
+      expect(snap.state?.turn?.phase).toBe('WAITING_FOR_ROLL')
     } finally {
       await deleteSession(sid)
     }
