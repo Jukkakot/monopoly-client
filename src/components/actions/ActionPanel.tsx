@@ -891,6 +891,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
                 const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
                 return (
                   <button key={prop.propertyId} className={styles.tradePropChip}
+                    data-testid={`action-mortgage-for-debt-${prop.propertyId}`}
                     style={{ background: color + '28', borderColor: color }}
                     onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
                     {spot?.name ?? prop.propertyId}
