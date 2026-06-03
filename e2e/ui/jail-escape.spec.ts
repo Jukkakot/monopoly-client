@@ -18,6 +18,73 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
   return idx
 }
 
+test('go to jail: landing on Go To Jail corner sends player to jail', async ({ page }) => {
+  // Go To Jail (GOT OJ corner) is at board index 30.
+  // Human at index 27, dice [2,1]=3 → lands at 30 (non-doubles, so no extra roll).
+  const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
+  try {
+    await setBotSpeed(sid, 'slow')
+    const snap0 = await getSnapshot(sid)
+    const humanSeat = humanSeatOf(snap0, humanPlayerId)
+
+    await injectState(sid, buildPatch({
+      description: '', rules: [],
+      players: humanSeat === 0
+        ? [{ cash: 1500, boardIndex: 27 }, { cash: 1500, boardIndex: 5 }]
+        : [{ cash: 1500, boardIndex: 5 }, { cash: 1500, boardIndex: 27 }],
+      turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
+      forcedDice: [2, 1],   // sum=3, non-doubles → index 27+3=30 (Go To Jail)
+      expectedAfter: {},
+    }, snap0))
+
+    await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
+
+    await page.getByTestId('action-roll').first().click()
+
+    // Player is jailed — jail lock badge appears in player list
+    await expect(page.getByText('🔒').first()).toBeVisible({ timeout: 8000 })
+  } finally {
+    await deleteSession(sid)
+  }
+})
+
+test('doubles from jail → player escapes without paying fine, cash unchanged', async ({ page }) => {
+  // Rolling doubles while in jail releases the player for free.
+  // Key: no €50 fine is charged, and the jail badge disappears.
+  // Verified via API snapshot rather than UI buttons (backend auto-processes the move).
+  const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
+  try {
+    await setBotSpeed(sid, 'slow')
+    const snap0 = await getSnapshot(sid)
+    const humanSeat = humanSeatOf(snap0, humanPlayerId)
+
+    await injectState(sid, buildPatch({
+      description: '', rules: [],
+      players: humanSeat === 0
+        ? [{ cash: 1500, boardIndex: 10, inJail: true, jailRoundsRemaining: 2 }, { cash: 1500, boardIndex: 5 }]
+        : [{ cash: 1500, boardIndex: 5 }, { cash: 1500, boardIndex: 10, inJail: true, jailRoundsRemaining: 2 }],
+      turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
+      forcedDice: [5, 5],   // doubles → from jail(10) + 10 = index 20 (FREE_PARKING)
+      expectedAfter: {},
+    }, snap0))
+
+    await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
+
+    // Roll — doubles from jail
+    await page.getByTestId('action-roll').first().click()
+
+    // Player released — jail badge disappears from the player list
+    await expect(page.getByText('🔒').first()).not.toBeVisible({ timeout: 8000 })
+
+    // Cash still €1500 — no fine was paid for the jail escape
+    await expect(page.getByTestId(`player-${humanSeat}-cash`).first()).toContainText('1500', { timeout: 5000 })
+  } finally {
+    await deleteSession(sid)
+  }
+})
+
 test('use GOOJF card → jail card button disappears, roll button stays', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
