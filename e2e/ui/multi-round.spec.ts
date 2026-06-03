@@ -81,11 +81,13 @@ test('two consecutive turns: roll twice, end-turn appears after each', async ({ 
     // Bot takes jail turn; wait for human's roll button to reappear
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 10000 })
 
-    // Re-inject to reset position + forced dice for the second roll
+    // Re-inject to reset position + forced dice for the second roll.
+    // Re-injection changes boardIndex (B2→0) which triggers a token animation;
+    // action-roll may be absent while ActionPanel waits for the animation to finish.
     await injectState(sid, buildPatch(scenario, snap0))
 
     // Turn 2: roll again (→ B2, own) → end-turn visible
-    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 10000 })
     await page.getByTestId('action-roll').first().click()
     await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 8000 })
   } finally {
