@@ -624,6 +624,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                     return (
                       <button key={prop.propertyId}
                         className={styles.tradePropChip}
+                        data-testid={`mortgage-toggle-${prop.propertyId}`}
                         style={{
                           background: color + '25',
                           borderColor: color,
