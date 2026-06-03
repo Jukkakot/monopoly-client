@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { createBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, setBotSpeed, deleteSession } from '../helpers/api'
+import { createBotSession, createHumanBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, setBotSpeed, retrigger, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
 // All trading tests manage sessions manually because the command sequence is
@@ -105,6 +105,49 @@ describe('Trading', () => {
       expect(snap.state?.tradeState).toBeNull()           // trade closed
       const b1 = snap.state!.properties.find(p => p.propertyId === 'B1')!
       expect(b1.ownerPlayerId).toBe(ids[0])               // B1 still owned by seat0
+    } finally {
+      await deleteSession(sid)
+    }
+  })
+
+  test('7.6 STRONG bot initiates trade with human to complete monopoly', async () => {
+    // The bot (seat 1, STRONG) owns B2. The human (seat 0) owns B1.
+    // B1+B2 are the BROWN group → bot needs B1 to complete the monopoly.
+    // Bot should: OpenTrade → EditTradeOffer (request B1) → EditTradeOffer (offer cash) →
+    //   SubmitTradeOffer — leaving a SUBMITTED offer waiting for the human.
+    //
+    // Four retrigger calls are needed (one per bot step) with the session's hostToken
+    // so the forced-retrigger path bypasses viewer gating in the test environment.
+    const { sid, humanPlayerId, hostToken } = await createHumanBotSession()
+    await setBotSpeed(sid, 'fast')
+    const snap0 = await getSnapshot(sid)
+    try {
+      const patch = buildPatch({
+        description: '', rules: [],
+        players: [
+          { cash: 500, boardIndex: 0  },  // human (seat 0)
+          { cash: 500, boardIndex: 10 },  // bot (seat 1)
+        ],
+        ownedProperties: { 0: ['B1'], 1: ['B2'] },
+        turn: { seat: 1, phase: 'WAITING_FOR_END_TURN' },
+        expectedAfter: {},
+      }, snap0)
+      await injectState(sid, patch)
+
+      // Trigger up to 4 bot steps (Open, Edit×2, Submit); poll until SUBMITTED or timeout
+      let snap = snap0
+      for (let i = 0; i < 12; i++) {
+        if (snap.state?.tradeState?.status === 'SUBMITTED') break
+        await retrigger(sid, hostToken)
+        await new Promise(r => setTimeout(r, 300))
+        snap = await getSnapshot(sid)
+      }
+
+      expect(snap.state?.tradeState, 'Bot should have submitted a trade offer').not.toBeNull()
+      expect(snap.state?.tradeState?.status).toBe('SUBMITTED')
+      expect(snap.state?.tradeState?.decisionRequiredFromPlayerId).toBe(humanPlayerId)
+      expect(snap.state?.tradeState?.initiatorPlayerId).not.toBe(humanPlayerId)
+      expect(snap.state?.tradeState?.currentOffer.requestedFromRecipient.propertyIds).toContain('B1')
     } finally {
       await deleteSession(sid)
     }

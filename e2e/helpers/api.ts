@@ -68,12 +68,13 @@ export async function setBotSpeed(sid: string, speed: 'fast' | 'normal' | 'slow'
   })
 }
 
-export async function retrigger(sid: string): Promise<void> {
-  // hostToken '' works for bot-only sessions (validation skips when hostToken is null)
+export async function retrigger(sid: string, hostToken = ''): Promise<void> {
+  // hostToken '' works for bot-only sessions (validation skips when hostToken is null).
+  // Pass the actual hostToken for human+bot sessions created via createHumanBotSession.
   await fetch(`${BASE}/sessions/${sid}/bot/retrigger`, {
     method: 'POST',
     headers: jsonHeaders,
-    body: JSON.stringify({ hostToken: '' }),
+    body: JSON.stringify({ hostToken }),
   })
 }
 
