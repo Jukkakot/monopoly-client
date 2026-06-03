@@ -201,8 +201,21 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
     }
   }, [state.players])
 
-  // Sort players: me first (or host first if spectating), then by seat index
+  // Sort players:
+  // 1. "Me" always first (or host first if spectating with no myId)
+  // 2. Bankrupt/eliminated players at the bottom
+  // 3. All others in turn-rotation order starting from the current active player,
+  //    so you can always see who is up next.
   const myId = gs.myPlayerId
+  const seatIndexOf = (playerId: string) =>
+    state.seats.find(s => s.playerId === playerId)?.seatIndex ?? 99
+  const totalSeats = state.seats.length || 1
+  const activeSeatIdx = seatIndexOf(activeId ?? '')
+  // Rotation distance: 0 = currently active, 1 = next, etc.
+  const turnDistance = (playerId: string) => {
+    const idx = seatIndexOf(playerId)
+    return (idx - activeSeatIdx + totalSeats) % totalSeats
+  }
   const sortedPlayers = [...state.players].sort((a, b) => {
     if (a.playerId === myId) return -1
     if (b.playerId === myId) return 1
@@ -210,9 +223,12 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
       if (a.playerId === state.hostPlayerId) return -1
       if (b.playerId === state.hostPlayerId) return 1
     }
-    const sa = state.seats.find(s => s.playerId === a.playerId)?.seatIndex ?? 99
-    const sb = state.seats.find(s => s.playerId === b.playerId)?.seatIndex ?? 99
-    return sa - sb
+    const aBankrupt = a.bankrupt || a.eliminated
+    const bBankrupt = b.bankrupt || b.eliminated
+    if (aBankrupt && !bBankrupt) return 1
+    if (!aBankrupt && bBankrupt) return -1
+    if (aBankrupt && bBankrupt) return seatIndexOf(a.playerId) - seatIndexOf(b.playerId)
+    return turnDistance(a.playerId) - turnDistance(b.playerId)
   })
 
   return (
