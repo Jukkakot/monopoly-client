@@ -1243,6 +1243,61 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   )
 }
 
+// ── Trade offer visual helpers ─────────────────────────────────────────────
+
+type TradeSelection = { moneyAmount: number; propertyIds: string[] }
+
+function TradePropChip({ id }: { id: string }) {
+  const spot = SPOTS.find(s => s.id === id)
+  const color = spot?.streetType ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
+  return (
+    <div className={styles.tradePropChip}>
+      <div className={styles.tradePropChipBar} style={{ background: color }} />
+      <span className={styles.tradePropChipName}>{spot?.name ?? id}</span>
+      {spot?.price != null && <span className={styles.tradePropChipPrice}>€{spot.price}</span>}
+    </div>
+  )
+}
+
+function TradeMoneyChip({ amount }: { amount: number }) {
+  return (
+    <div className={styles.tradeMoneyChip}>
+      <span className={styles.tradeMoneyChipIcon}>€</span>
+      <span className={styles.tradeMoneyChipAmount}>{amount}</span>
+    </div>
+  )
+}
+
+function TradeSide({ label, side }: { label: string; side: TradeSelection }) {
+  const isEmpty = side.moneyAmount === 0 && side.propertyIds.length === 0
+  return (
+    <div className={styles.tradeOfferSide}>
+      <span className={styles.tradeOfferSideLabel}>{label}</span>
+      {isEmpty && <span className={styles.tradeEmptyNote}>—</span>}
+      {side.moneyAmount > 0 && <TradeMoneyChip amount={side.moneyAmount} />}
+      {side.propertyIds.map(id => <TradePropChip key={id} id={id} />)}
+    </div>
+  )
+}
+
+function TradeBalanceBar({ give, want }: { give: TradeSelection; want: TradeSelection }) {
+  const giveVal = give.moneyAmount + give.propertyIds.reduce((s, id) => s + (SPOTS.find(x => x.id === id)?.price ?? 0), 0)
+  const wantVal = want.moneyAmount + want.propertyIds.reduce((s, id) => s + (SPOTS.find(x => x.id === id)?.price ?? 0), 0)
+  if (giveVal === 0 && wantVal === 0) return null
+  const diff = giveVal - wantVal
+  const cls = diff > 0 ? styles.tradeBalanceGood : diff < 0 ? styles.tradeBalanceBad : styles.tradeBalanceNeutral
+  const icon = diff > 0 ? '↑' : diff < 0 ? '↓' : '⇄'
+  const label = diff > 0 ? `+€${diff} eduksesi` : diff < 0 ? `−€${Math.abs(diff)} tappiolla` : 'Tasadiili'
+  return (
+    <div className={`${styles.tradeBalance} ${cls}`}>
+      <span>{icon}</span>
+      <span>{label}</span>
+    </div>
+  )
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+
 function TradeSpectatorView({ state, statusMsg }: {
   state: SessionState; statusMsg?: string
 }) {
@@ -1252,43 +1307,14 @@ function TradeSpectatorView({ state, statusMsg }: {
   const recipient = state.players.find(p => p.playerId === trade.recipientPlayerId)
   const offer = trade.currentOffer
 
-  function propName(id: string) {
-    return SPOTS.find(s => s.id === id)?.name ?? id
-  }
-
-  const isEmpty = (side: typeof offer.offeredToRecipient) =>
-    side.moneyAmount === 0 && side.propertyIds.length === 0
-
   return (
     <div className={styles.panel}>
       <div className={styles.infoBox}>
         {t.tradeSpectatorBetween(initiator?.name ?? '?', recipient?.name ?? '?')}
       </div>
-      <div className={styles.offerBlock}>
-        <div className={styles.offerRow}>
-          <span className={styles.offerLabel}>{initiator?.name ?? '?'}</span>
-          <div className={styles.offerItems}>
-            {offer.offeredToRecipient.moneyAmount > 0 && (
-              <span className={styles.offerItem}>€{offer.offeredToRecipient.moneyAmount}</span>
-            )}
-            {offer.offeredToRecipient.propertyIds.map(id => (
-              <span key={id} className={styles.offerItem}>{propName(id)}</span>
-            ))}
-            {isEmpty(offer.offeredToRecipient) && <span style={{ fontSize: '0.8rem', color: '#aaa' }}>—</span>}
-          </div>
-        </div>
-        <div className={styles.offerRow}>
-          <span className={styles.offerLabel}>{recipient?.name ?? '?'}</span>
-          <div className={styles.offerItems}>
-            {offer.requestedFromRecipient.moneyAmount > 0 && (
-              <span className={styles.offerItem}>€{offer.requestedFromRecipient.moneyAmount}</span>
-            )}
-            {offer.requestedFromRecipient.propertyIds.map(id => (
-              <span key={id} className={styles.offerItem}>{propName(id)}</span>
-            ))}
-            {isEmpty(offer.requestedFromRecipient) && <span style={{ fontSize: '0.8rem', color: '#aaa' }}>—</span>}
-          </div>
-        </div>
+      <div className={styles.tradeOfferGrid}>
+        <TradeSide label={initiator?.name ?? '?'} side={offer.offeredToRecipient} />
+        <TradeSide label={recipient?.name ?? '?'} side={offer.requestedFromRecipient} />
       </div>
       {statusMsg && <div className={styles.infoBox} style={{ fontSize: '0.8rem' }}>{statusMsg}</div>}
     </div>
@@ -1304,44 +1330,16 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
   const offer = trade.currentOffer
 
-  function propName(id: string) {
-    return SPOTS.find(s => s.id === id)?.name ?? id
-  }
-
   return (
     <div className={styles.panel}>
       <div className={styles.infoBox}>{t.tradeOfferFrom(initiator?.name ?? '?')}</div>
 
-      <div className={styles.offerBlock}>
-        <div className={styles.offerRow}>
-          <span className={styles.offerLabel}>{t.theyOfferLabel}</span>
-          <div className={styles.offerItems}>
-            {offer.offeredToRecipient.moneyAmount > 0 && (
-              <span className={styles.offerItem}>€{offer.offeredToRecipient.moneyAmount}</span>
-            )}
-            {offer.offeredToRecipient.propertyIds.map(id => (
-              <span key={id} className={styles.offerItem}>{propName(id)}</span>
-            ))}
-            {offer.offeredToRecipient.moneyAmount === 0 && offer.offeredToRecipient.propertyIds.length === 0 && (
-              <span style={{ fontSize: '0.8rem', color: '#aaa' }}>—</span>
-            )}
-          </div>
-        </div>
-        <div className={styles.offerRow}>
-          <span className={styles.offerLabel}>{t.theyRequestLabel}</span>
-          <div className={styles.offerItems}>
-            {offer.requestedFromRecipient.moneyAmount > 0 && (
-              <span className={styles.offerItem}>€{offer.requestedFromRecipient.moneyAmount}</span>
-            )}
-            {offer.requestedFromRecipient.propertyIds.map(id => (
-              <span key={id} className={styles.offerItem}>{propName(id)}</span>
-            ))}
-            {offer.requestedFromRecipient.moneyAmount === 0 && offer.requestedFromRecipient.propertyIds.length === 0 && (
-              <span style={{ fontSize: '0.8rem', color: '#aaa' }}>—</span>
-            )}
-          </div>
-        </div>
+      <div className={styles.tradeOfferGrid}>
+        <TradeSide label={t.theyOfferLabel} side={offer.offeredToRecipient} />
+        <TradeSide label={t.theyRequestLabel} side={offer.requestedFromRecipient} />
       </div>
+
+      <TradeBalanceBar give={offer.offeredToRecipient} want={offer.requestedFromRecipient} />
 
       <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" testId="action-accept-trade" />
       <Btn label={t.counterOfferBtn} onClick={() => sendCmd({ type: 'CounterTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" testId="action-counter-trade" />
