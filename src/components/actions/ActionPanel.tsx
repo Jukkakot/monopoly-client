@@ -492,6 +492,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
   const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId)
   const [mortgageOpen, setMortgageOpen] = useState(true)
   if (myProps.length === 0) return null
+  const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
 
   // Find completed color groups
   const groupCounts = new Map<string, number>()
@@ -551,8 +552,9 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                   const minLevel = Math.min(...typeGroup.map(p => p.hotelCount > 0 ? 5 : p.houseCount))
                   const myLevel = prop.hotelCount > 0 ? 5 : prop.houseCount
                   const canSell = myLevel > 0 && myLevel >= maxLevel
-                  // Even-build rule: can only add a house to the property at the current minimum level
-                  const canBuy = myLevel === minLevel
+                  const housePrice = HOUSE_PRICES[spot.streetType as keyof typeof HOUSE_PRICES] ?? 0
+                  // Even-build rule + affordability check
+                  const canBuy = myLevel === minLevel && myCash >= housePrice
                   return (
                     <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
                       <span className={styles.buildName}>{spot.name}</span>
