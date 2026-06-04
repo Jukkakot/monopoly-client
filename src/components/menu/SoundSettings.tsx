@@ -229,16 +229,18 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
         </select>
       </div>
 
-      <label className={styles.toggleRow}>
-        <div className={styles.toggleInfo}>
-          <span className={styles.label}>Noppa-zoomi</span>
-          <span className={styles.desc}>Lauta zoomaa noppiin kun ne heitetään</span>
-        </div>
-        <input type="checkbox" checked={diceZoom}
-          onChange={e => { saveDiceZoomEnabled(e.target.checked); setDiceZoom(e.target.checked) }}
-          className={styles.checkbox}
-        />
-      </label>
+      {zoomMode !== 'off' && (
+        <label className={styles.toggleRow}>
+          <div className={styles.toggleInfo}>
+            <span className={styles.label}>Noppa-zoomi</span>
+            <span className={styles.desc}>Lauta zoomaa noppiin kun ne heitetään</span>
+          </div>
+          <input type="checkbox" checked={diceZoom}
+            onChange={e => { saveDiceZoomEnabled(e.target.checked); setDiceZoom(e.target.checked) }}
+            className={styles.checkbox}
+          />
+        </label>
+      )}
 
       <div className={styles.divider} />
 
