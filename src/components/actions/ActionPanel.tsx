@@ -716,7 +716,6 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
     setCustomBid('')
   }
 
-  const spotColor = spot ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
   const isMyTurnToBid = auction.currentActorPlayerId === myPlayerId && auction.status === 'ACTIVE'
 
   const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
@@ -728,9 +727,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
         {auction.status !== 'WON_PENDING_RESOLUTION' && (
           <span className={styles.auctionInlineLabel}>🔨 Huutokaupattavana</span>
         )}
-        <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor, fontSize: '0.9rem', fontWeight: 800 }}>
-          {spot?.name ?? auction.propertyId}{spotPrice > 0 ? ` — €${spotPrice}` : ''}
-        </span>
+        <PropertyChip id={auction.propertyId} rightText={spotPrice > 0 ? `€${spotPrice}` : undefined} />
       </div>
 
       {/* Player list */}
@@ -777,9 +774,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
                   {isMe ? '🏆 Voitit huutokaupan!' : `🏆 ${winner?.name ?? '?'} voitti`}
                 </div>
                 <div className={styles.auctionWonDetail}>
-                  <span className={styles.debtChip} style={{ background: spotColor + '30', borderColor: spotColor }}>
-                    {spot?.name ?? auction.propertyId}
-                  </span>
+                  <PropertyChip id={auction.propertyId} />
                   <span className={styles.auctionWonPrice}>€{auction.currentBid}</span>
                 </div>
               </div>
