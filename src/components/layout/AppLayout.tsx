@@ -2,7 +2,8 @@ import styles from './AppLayout.module.css'
 import { useState, useRef, useEffect, useCallback, type ReactNode } from 'react'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
-import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { SPOTS } from '../../types/spots'
+import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 
 type AnimDir = 'right' | 'left'
 
@@ -406,25 +407,17 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                 <div className={styles.playerPopupNoProps}>{t.noPropertiesMsg}</div>
               ) : (
                 <div className={styles.playerPopupProps}>
-                  {sorted.map(([type, props]) => {
-                    const color = STREET_COLORS[type] ?? '#888'
-                    return (
-                      <div key={type} className={styles.playerPopupGroup} style={{ borderLeftColor: color }}>
-                        {props.map(prop => {
-                          const spot = SPOTS.find(s => s.id === prop.propertyId)
-                          return (
-                            <div key={prop.propertyId} className={styles.playerPopupPropRow} style={prop.mortgaged ? { opacity: 0.55 } : undefined}>
-                              <span className={styles.playerPopupPropDot} style={{ background: color }} />
-                              <span className={`${styles.playerPopupPropName} ${prop.mortgaged ? styles.playerPopupMortgaged : ''}`}>{spot?.name ?? prop.propertyId}</span>
-                              {prop.hotelCount > 0 && <span className={styles.playerPopupHotel}>🏨</span>}
-                              {prop.houseCount > 0 && <span className={styles.playerPopupHouses}>{'🏠'.repeat(prop.houseCount)}</span>}
-                              {prop.mortgaged && <span className={styles.playerPopupMortgagedTag}>🔒</span>}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )
-                  })}
+                  <PropertyChipWrap>
+                    {sorted.flatMap(([, props]) =>
+                      props.map(prop => (
+                        <PropertyChip
+                          key={prop.propertyId}
+                          id={prop.propertyId}
+                          mortgaged={prop.mortgaged}
+                        />
+                      ))
+                    )}
+                  </PropertyChipWrap>
                 </div>
               )}
             </div>
