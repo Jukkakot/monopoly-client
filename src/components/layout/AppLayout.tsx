@@ -87,6 +87,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [logCollapsed, setLogCollapsed] = useState(() => {
     try { return localStorage.getItem('monopoly_log_collapsed') === '1' } catch { return false }
   })
+  const [actionsCollapsed, setActionsCollapsed] = useState(() => {
+    try { return localStorage.getItem('monopoly_actions_collapsed') === '1' } catch { return false }
+  })
   const [playersSplitPct, setPlayersSplitPct] = useState(() => {
     try { const v = parseInt(localStorage.getItem('monopoly_players_split') ?? ''); return isNaN(v) ? 40 : Math.max(15, Math.min(75, v)) } catch { return 40 }
   })
@@ -267,32 +270,43 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       <div className={styles.sideCol} style={{ flexBasis: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}>
         <div className={styles.sideHeader}>{header}</div>
         <div className={styles.sideSection} data-side-section>
-          <div className={styles.sideSectionHeader}
-            onClick={() => { const v = !playersCollapsed; setPlayersCollapsed(v); try { localStorage.setItem('monopoly_players_collapsed', v ? '1' : '0') } catch {} }}>
-            <span className={styles.sideSectionTitle}>👥 Pelaajat</span>
-            <span className={styles.sideSectionChevron}>{playersCollapsed ? '▸' : '▾'}</span>
+          <div className={styles.upperSections}>
+            <div className={styles.sideSectionHeader}
+              onClick={() => { const v = !playersCollapsed; setPlayersCollapsed(v); try { localStorage.setItem('monopoly_players_collapsed', v ? '1' : '0') } catch {} }}>
+              <span className={styles.sideSectionTitle}>👥 Pelaajat</span>
+              <span className={styles.sideSectionChevron}>{playersCollapsed ? '▸' : '▾'}</span>
+            </div>
+            {!playersCollapsed && (
+              <div className={styles.playersWrapper} style={{ flexBasis: `${playersSplitPct}%` }}>{players}</div>
+            )}
+            <div className={styles.sideDivider}
+              onMouseDown={!playersCollapsed && !logCollapsed ? e => {
+                splitDragRef.current = { startY: e.clientY, startPct: splitPctRef.current }
+                document.body.style.cursor = 'row-resize'
+                document.body.style.userSelect = 'none'
+              } : undefined}
+              style={!playersCollapsed && !logCollapsed ? { cursor: 'row-resize' } : undefined}
+            />
+            <div className={styles.sideSectionHeader}
+              onClick={() => { const v = !logCollapsed; setLogCollapsed(v); try { localStorage.setItem('monopoly_log_collapsed', v ? '1' : '0') } catch {} }}>
+              <span className={styles.sideSectionTitle}>📋 Tapahtumaloki</span>
+              <span className={styles.sideSectionChevron}>{logCollapsed ? '▸' : '▾'}</span>
+            </div>
+            {!logCollapsed && (
+              <div className={styles.logWrapper}>{log}</div>
+            )}
           </div>
-          {!playersCollapsed && (
-            <div className={styles.playersWrapper} style={{ flexBasis: `${playersSplitPct}%` }}>{players}</div>
+          {/* Actions: pinned to bottom, collapsible */}
+          {!isMobile && (
+            <div className={styles.actionsSection}>
+              <div className={styles.sideSectionHeader}
+                onClick={() => { const v = !actionsCollapsed; setActionsCollapsed(v); try { localStorage.setItem('monopoly_actions_collapsed', v ? '1' : '0') } catch {} }}>
+                <span className={styles.sideSectionTitle}>🎮 Toiminnot</span>
+                <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
+              </div>
+              {!actionsCollapsed && <div className={styles.actionsWrapper}>{actions}</div>}
+            </div>
           )}
-          <div className={styles.sideDivider}
-            onMouseDown={!playersCollapsed && !logCollapsed ? e => {
-              splitDragRef.current = { startY: e.clientY, startPct: splitPctRef.current }
-              document.body.style.cursor = 'row-resize'
-              document.body.style.userSelect = 'none'
-            } : undefined}
-            style={!playersCollapsed && !logCollapsed ? { cursor: 'row-resize' } : undefined}
-          />
-          <div className={styles.sideSectionHeader}
-            onClick={() => { const v = !logCollapsed; setLogCollapsed(v); try { localStorage.setItem('monopoly_log_collapsed', v ? '1' : '0') } catch {} }}>
-            <span className={styles.sideSectionTitle}>📋 Tapahtumaloki</span>
-            <span className={styles.sideSectionChevron}>{logCollapsed ? '▸' : '▾'}</span>
-          </div>
-          {!logCollapsed && (
-            <div className={styles.logWrapper}>{log}</div>
-          )}
-          {/* Only render actions on desktop — mobile renders its own instance below */}
-          {!isMobile && <div className={styles.actions}>{actions}</div>}
         </div>
       </div>
 
