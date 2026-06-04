@@ -562,12 +562,29 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
-  // Position card bubble at the INNER EDGE of the card spot's cell.
-  // Use the settled boardIndex (the actual Chance/Community square) — not the animated
-  // position — so the bubble always anchors to the square, never mid-animation.
+  // Find the Chance/Community square where the card was drawn.
+  // For non-move cards the player stays at the spot (boardIndex IS the spot).
+  // For move cards the player has already jumped to the destination — walk backwards
+  // (or forwards for MOVE_BACK_3) around the board until we hit the right spot type.
+  const CHANCE_SPOTS = new Set([7, 22, 36])
+  const COMMUNITY_SPOTS = new Set([2, 17, 33])
+  function findCardSpotIdx(destIdx: number, isChance: boolean, isBack3: boolean): number {
+    const targets = isChance ? CHANCE_SPOTS : COMMUNITY_SPOTS
+    if (targets.has(destIdx)) return destIdx           // already at the spot
+    const step = isBack3 ? 1 : -1                      // back-3 → walk forward to find spot
+    let pos = destIdx
+    for (let i = 0; i < 40; i++) {
+      pos = (pos + step + 40) % 40
+      if (targets.has(pos)) return pos
+    }
+    return destIdx
+  }
+
   const cardBubblePos = useMemo(() => {
     if (!cardBubbleText || !activeTurnPlayer) return null
-    const { row, col } = indexToGridPos(activeTurnPlayer.boardIndex)
+    const isBack3 = (state.lastCardKey ?? '').includes(':MOVE_BACK_3:')
+    const sourceIdx = findCardSpotIdx(activeTurnPlayer.boardIndex, isChanceCard, isBack3)
+    const { row, col } = indexToGridPos(sourceIdx)
     const cellW = 1 / 11  // one cell as fraction of board
 
     let tailDir: 'top' | 'bottom' | 'left' | 'right'
@@ -593,7 +610,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
 
     return { x: `${ax * 100}%`, y: `${ay * 100}%`, tailDir }
-  }, [cardBubbleText, activeTurnPlayer])
+  }, [cardBubbleText, activeTurnPlayer, isChanceCard, state.lastCardKey])
 
   const isMyCardAck = isCardAck && state.turn?.activePlayerId === gameState.myPlayerId
 
