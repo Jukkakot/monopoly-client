@@ -41,7 +41,7 @@ function debtScenario(humanSeat: number) {
 test('debt panel: mortgage button visible for owned unmortgaged property', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -62,7 +62,7 @@ test('debt panel: mortgage button visible for owned unmortgaged property', async
 test('debt panel: mortgage property → cash increases', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

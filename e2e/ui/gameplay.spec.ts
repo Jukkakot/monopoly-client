@@ -27,7 +27,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('roll button → end-turn button: ActionPanel päivittyy nopan heiton jälkeen', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat
@@ -57,7 +57,7 @@ test('roll button → end-turn button: ActionPanel päivittyy nopan heiton jälk
 test('buy button: Buy-nappi ostaa kiinteistön ja kassa pienenee', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -91,7 +91,7 @@ test('SSE tilainjektion kautta: injektoitu kassa ja faasi näkyy UI:ssa', async 
   // Uses the same pipeline as all other state changes: inject → SSE → GameContext → DOM.
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     // Navigate BEFORE inject so SSE is already connected when the update fires
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
@@ -117,7 +117,7 @@ test('SSE tilainjektion kautta: injektoitu kassa ja faasi näkyy UI:ssa', async 
 test('debt panel: velkapaneeli näkyy kun pelaajalla ei ole varaa vuokraan', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat

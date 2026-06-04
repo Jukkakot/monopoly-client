@@ -40,7 +40,7 @@ test('mobile: auction panel accessible after declining purchase', async ({ brows
   const ctx = await browser.newContext({ viewport: PORTRAIT, isMobile: true })
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -76,7 +76,7 @@ test('mobile: buy house via properties sub-tab', async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: PORTRAIT, isMobile: true })
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -117,7 +117,7 @@ test('mobile: chance card popup tap-to-acknowledge on phone screen', async ({ br
   const ctx = await browser.newContext({ viewport: PORTRAIT, isMobile: true })
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -156,7 +156,7 @@ test('mobile: game over winner overlay visible on phone screen', async ({ browse
   const ctx = await browser.newContext({ viewport: PORTRAIT, isMobile: true })
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat

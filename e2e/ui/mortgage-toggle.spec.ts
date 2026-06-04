@@ -26,7 +26,7 @@ async function goToPropertiesTab(page: Page) {
 test('mortgage property from properties tab → cash increases', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -65,7 +65,7 @@ test('mortgage property from properties tab → cash increases', async ({ page }
 test('unmortgage property from properties tab → cash decreases', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

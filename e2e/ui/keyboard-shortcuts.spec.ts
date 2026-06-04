@@ -44,7 +44,7 @@ function pressKey(page: Page, key: string) {
 test('keyboard: Space rolls dice in WAITING_FOR_ROLL', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -72,7 +72,7 @@ test('keyboard: Space rolls dice in WAITING_FOR_ROLL', async ({ page }) => {
 test('keyboard: Space ends turn in WAITING_FOR_END_TURN (no doubles)', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -101,7 +101,7 @@ test('keyboard: Space does NOT end turn when consecutiveDoubles > 0', async ({ p
   // After rolling doubles, Space should roll again (not end turn)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -133,7 +133,7 @@ test('keyboard: B key buys property in WAITING_FOR_DECISION', async ({ page }) =
   // Dice [1,2]=3 → B2 (Kruunuhaka, index 3, unowned) → pendingDecision set automatically.
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

@@ -22,7 +22,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('end turn → bot acts → human can roll again', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat
@@ -53,7 +53,7 @@ test('end turn → bot acts → human can roll again', async ({ page }) => {
 test('two consecutive turns: roll twice, end-turn appears after each', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

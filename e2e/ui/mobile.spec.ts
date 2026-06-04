@@ -46,7 +46,7 @@ test('mobile: spectator view loads correctly on phone screen', async ({ browser 
   const ctx = await newMobileCtx(browser)
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const page = await ctx.newPage()
     await page.goto(`/#/game/${sid}`)
 
@@ -67,7 +67,7 @@ test('mobile: roll button accessible on default board tab', async ({ browser }) 
   const ctx = await newMobileCtx(browser)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -96,7 +96,7 @@ test('mobile: players tab navigation shows player cash values', async ({ browser
   const ctx = await newMobileCtx(browser)
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const page = await ctx.newPage()
 
@@ -128,7 +128,7 @@ test('mobile: income tax deducted — visible via players tab', async ({ browser
   const ctx = await newMobileCtx(browser)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -164,7 +164,7 @@ test('mobile: debt panel visible when cannot pay rent', async ({ browser }) => {
   const ctx = await newMobileCtx(browser)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat

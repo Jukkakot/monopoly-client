@@ -21,7 +21,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('landing on railroad (1 owned) → rent €25 deducted', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat
@@ -54,7 +54,7 @@ test('landing on railroad (1 owned) → rent €25 deducted', async ({ page }) =
 test('landing on monopoly BROWN (no houses) → double rent €8 deducted', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const botSeat = 1 - humanSeat

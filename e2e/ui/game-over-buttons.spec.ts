@@ -39,7 +39,7 @@ async function reachGameOver(page: import('@playwright/test').Page, sid: string)
 test('game over: "Jatka katselemaan" dismisses overlay and stays on game screen', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 
@@ -59,7 +59,7 @@ test('game over: "Jatka katselemaan" dismisses overlay and stays on game screen'
 test('game over: "Takaisin etusivulle" navigates to session list', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 
@@ -78,7 +78,7 @@ test('game over: "Takaisin etusivulle" navigates to session list', async ({ page
 test('game over: rankings list shows all players', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 

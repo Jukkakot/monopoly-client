@@ -15,7 +15,7 @@ async function navigateAsPlayer0(page: Page, sid: string, playerId: string) {
 test('accept trade → ownership swaps visible in player list', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const [p0, p1] = snap0.state!.players.map(p => p.playerId)
 
@@ -51,7 +51,7 @@ test('accept trade → ownership swaps visible in player list', async ({ page })
 test('trade editing: submit button disabled when offer is empty', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await (await import('../helpers/api')).createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = snap0.state!.players.findIndex(p => p.playerId === humanPlayerId)
 

@@ -21,7 +21,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('buy 4 houses on BROWN monopoly: all buy buttons enabled, sell buttons appear', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -57,7 +57,7 @@ test('buy 4 houses on BROWN monopoly: all buy buttons enabled, sell buttons appe
 test('buy 5th house → converts to hotel, buy buttons disappear', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -94,7 +94,7 @@ test('buy 5th house → converts to hotel, buy buttons disappear', async ({ page
 test('sell house from 4-house property → sell button visible, cash +25', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

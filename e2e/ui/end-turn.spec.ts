@@ -21,7 +21,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('end-turn button → turn advances to opponent', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -52,7 +52,7 @@ test('end-turn button → turn advances to opponent', async ({ page }) => {
 test('rolling doubles → end-turn button appears (not roll again)', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -85,7 +85,7 @@ test('rolling doubles → end-turn button appears (not roll again)', async ({ pa
 test('income tax (position 4) → cash -200', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -116,7 +116,7 @@ test('income tax (position 4) → cash -200', async ({ page }) => {
 test('roll on own property → end-turn button (no decision panel)', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -148,7 +148,7 @@ test('roll on own property → end-turn button (no decision panel)', async ({ pa
 test('luxury tax (position 38) → cash -100', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

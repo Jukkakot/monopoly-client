@@ -5,7 +5,7 @@ import { buildPatch } from '../helpers/scenario'
 test('spectator: all player cash values visible (3-player game)', async ({ page }) => {
   const sid = await createBotSession(3)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
 
     await injectState(sid, buildPatch({
@@ -34,7 +34,7 @@ test('spectator: all player cash values visible (3-player game)', async ({ page 
 test('spectator: active phase indicator shows current player and phase', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
 
     await injectState(sid, buildPatch({
@@ -63,7 +63,7 @@ test('spectator: active phase indicator shows current player and phase', async (
 test('spectator: action buttons not visible', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 

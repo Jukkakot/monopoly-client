@@ -23,7 +23,7 @@ test('go to jail: landing on Go To Jail corner sends player to jail', async ({ p
   // Human at index 27, dice [2,1]=3 → lands at 30 (non-doubles, so no extra roll).
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -55,7 +55,7 @@ test('doubles from jail → player escapes without paying fine, cash unchanged',
   // Verified via API snapshot rather than UI buttons (backend auto-processes the move).
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -88,7 +88,7 @@ test('doubles from jail → player escapes without paying fine, cash unchanged',
 test('use GOOJF card → jail card button disappears, roll button stays', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -117,7 +117,7 @@ test('use GOOJF card → jail card button disappears, roll button stays', async 
 test('pay jail fine → fine button disappears, roll button stays, cash -50', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -148,7 +148,7 @@ test('pay jail fine → fine button disappears, roll button stays, cash -50', as
 test('jail last turn — only roll button visible (no fine, no card)', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

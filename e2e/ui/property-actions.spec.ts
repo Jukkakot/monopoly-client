@@ -35,7 +35,7 @@ function humanSeat(snap: Awaited<ReturnType<typeof getSnapshot>>, pid: string): 
 test('property actions: mortgage button visible for owned unmortgaged property', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -62,7 +62,7 @@ test('property actions: mortgage button visible for owned unmortgaged property',
 test('property actions: mortgage increases cash', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -97,7 +97,7 @@ test('property actions: mortgage increases cash', async ({ page }) => {
 test('property actions: build button visible for owned full monopoly', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -125,7 +125,7 @@ test('property actions: build button visible for owned full monopoly', async ({ 
 test('property actions: building a house from detail reduces cash', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -158,7 +158,7 @@ test('property actions: building a house from detail reduces cash', async ({ pag
 test('property actions: mortgage badge shown on PropertyDetail when property is mortgaged', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

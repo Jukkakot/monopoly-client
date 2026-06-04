@@ -36,7 +36,7 @@ function humanSeat(snap: Awaited<ReturnType<typeof getSnapshot>>, pid: string): 
 test('utility: PropertyDetail shows "4× nopat" when 1 utility owned', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -65,7 +65,7 @@ test('utility: PropertyDetail shows "4× nopat" when 1 utility owned', async ({ 
 test('utility: PropertyDetail shows "10× nopat" when both utilities owned', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -96,7 +96,7 @@ test('utility: landing on opponent-owned utility deducts rent automatically', as
   // Player has enough cash → auto-pays without debt panel.
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
     const botSeat = seat === 0 ? 1 : 0

@@ -10,7 +10,7 @@ import { buildPatch } from '../helpers/scenario'
 test('spectator sees active player and phase in action panel', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')  // bots wait before acting — won't interfere
+    await setBotSpeed(sid, 'fast')  // bots wait before acting — won't interfere
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 
@@ -32,7 +32,7 @@ test('spectator sees active player and phase in action panel', async ({ page }) 
 test('player cash values update in the player list', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 
@@ -58,7 +58,7 @@ test('player cash values update in the player list', async ({ page }) => {
 test('game over overlay appears with winner name after bankruptcy', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = snap0.state!.players.findIndex(p => p.playerId === humanPlayerId)
     const botSeat = 1 - humanSeat

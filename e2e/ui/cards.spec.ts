@@ -33,7 +33,7 @@ function humanSeat(snap: ReturnType<typeof Object.create>, pid: string): number 
 test('cards: chance card popup shown when it is the human player\'s turn', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -61,7 +61,7 @@ test('cards: chance card popup shown when it is the human player\'s turn', async
 test('cards: community chest card popup shown for human player', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -92,7 +92,7 @@ test('cards: acknowledge card advances to next phase', async ({ page }) => {
   // forcedChanceCard 'MONEY:0' is a simple give-money card.
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

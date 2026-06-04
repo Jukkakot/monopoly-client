@@ -55,7 +55,7 @@ test('event log: sidebar log section visible on desktop', async ({ page }) => {
 test('event log: dice roll creates log entry with player name and result', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
     const playerName = snap0.state!.players.find(p => p.playerId === humanPlayerId)!.name
@@ -86,7 +86,7 @@ test('event log: dice roll creates log entry with player name and result', async
 test('event log: income tax landing creates log entry', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -119,7 +119,7 @@ test('event log: income tax landing creates log entry', async ({ page }) => {
 test('event log: buy property creates log entry', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

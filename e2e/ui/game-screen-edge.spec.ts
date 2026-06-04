@@ -48,7 +48,7 @@ test('game screen: document title shows "Monopoly Helsinki" by default', async (
 test('game screen: title shows player turn during game', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken, hostToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = snap0.state!.seats.find(s => s.playerId === humanPlayerId)!.seatIndex
 
@@ -77,7 +77,7 @@ test('game screen: title shows player turn during game', async ({ page }) => {
 test('game screen: spectator "Lopeta peli" button visible in action panel', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto('/')
     await page.goto(`/#/game/${sid}`)
     await expect(page.locator('[class*=board]').first()).toBeVisible({ timeout: 8000 })

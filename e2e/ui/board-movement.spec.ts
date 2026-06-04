@@ -21,7 +21,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('pass GO → cash increases by €200', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -51,7 +51,7 @@ test('pass GO → cash increases by €200', async ({ page }) => {
 test('free parking — no cash change, end-turn available', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -82,7 +82,7 @@ test('free parking — no cash change, end-turn available', async ({ page }) => 
 test('go to jail corner → player jailed (jail badge visible)', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -115,7 +115,7 @@ test('go to jail corner → player jailed (jail badge visible)', async ({ page }
 test('spectator: player cash values all visible', async ({ page }) => {
   const sid = await createBotSession(3)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
 
     await injectState(sid, buildPatch({
@@ -144,7 +144,7 @@ test('spectator: player cash values all visible', async ({ page }) => {
 test('spectator: action-roll button not visible', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 

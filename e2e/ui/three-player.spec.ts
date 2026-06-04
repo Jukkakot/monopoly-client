@@ -46,7 +46,7 @@ test('three players: player list shows all 3 players', async ({ page }) => {
 test('three players: rankings update when one player loses cash', async ({ page }) => {
   const sid = await createBotSession(3)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
 
     // Inject distinct cash values: seat0=2000, seat1=1000, seat2=500
@@ -79,7 +79,7 @@ test('three players: rankings update when one player loses cash', async ({ page 
 test('three players: spectator sees all 3 cash values', async ({ page }) => {
   const sid = await createBotSession(3)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
 
     await injectState(sid, buildPatch({
@@ -106,7 +106,7 @@ test('three players: spectator sees all 3 cash values', async ({ page }) => {
 test('three players: human player (seat 0) has roll button, others do not', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = snap0.state!.seats.find(s => s.playerId === humanPlayerId)!.seatIndex
 
@@ -134,7 +134,7 @@ test('three players: human player (seat 0) has roll button, others do not', asyn
 test('three players: phase indicator shows active player name', async ({ page }) => {
   const sid = await createBotSession(3)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const players = snap0.state!.players
 

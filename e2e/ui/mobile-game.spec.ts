@@ -42,7 +42,7 @@ test('mobile: buy property — decision panel accessible on board tab', async ({
   const ctx = await newCtx(browser, PORTRAIT)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -82,7 +82,7 @@ test('mobile: end-turn button works and disappears on phone screen', async ({ br
   const ctx = await newCtx(browser, PORTRAIT)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -113,7 +113,7 @@ test('mobile: jail fine button accessible on phone screen', async ({ browser }) 
   const ctx = await newCtx(browser, PORTRAIT)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -147,7 +147,7 @@ test('mobile landscape: roll button accessible in landscape orientation', async 
   const ctx = await newCtx(browser, LANDSCAPE)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -181,7 +181,7 @@ test('mobile: log tab shows events after rolling dice', async ({ browser }) => {
   const ctx = await newCtx(browser, PORTRAIT)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()
@@ -220,7 +220,7 @@ test('mobile: board tab alert dot visible when on players tab during your turn',
   const ctx = await newCtx(browser, PORTRAIT)
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
     const page = await ctx.newPage()

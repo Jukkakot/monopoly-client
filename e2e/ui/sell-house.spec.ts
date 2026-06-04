@@ -36,7 +36,7 @@ function humanSeat(snap: Awaited<ReturnType<typeof getSnapshot>>, pid: string): 
 test('sell house: sell button visible when property has house and even-build rule met', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -66,7 +66,7 @@ test('sell house: sell button visible when property has house and even-build rul
 test('sell house: selling a house increases cash by half house cost', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -107,7 +107,7 @@ test('sell house: sell button NOT visible when house level below group maximum',
   // With B1=1, B2=2: maxLevelInGroup = 2 > myLevelHere=1 → CANNOT sell from B1 ✓
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

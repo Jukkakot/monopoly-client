@@ -68,7 +68,7 @@ for (const { label, vp, mobile } of VIEWPORTS) {
     test(`cash -200 after landing on TAX1 [${label}]`, async ({ page }) => {
       const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
       try {
-        await setBotSpeed(sid, 'slow')
+        await setBotSpeed(sid, 'fast')
         const snap0 = await getSnapshot(sid)
         const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -102,7 +102,7 @@ for (const { label, vp, mobile } of VIEWPORTS) {
     test(`buy B2 → cash -60, then end-turn available [${label}]`, async ({ page }) => {
       const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
       try {
-        await setBotSpeed(sid, 'slow')
+        await setBotSpeed(sid, 'fast')
         const snap0 = await getSnapshot(sid)
         const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -138,7 +138,7 @@ for (const { label, vp, mobile } of VIEWPORTS) {
     test(`end-turn button disappears after click [${label}]`, async ({ page }) => {
       const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
       try {
-        await setBotSpeed(sid, 'slow')
+        await setBotSpeed(sid, 'fast')
         const snap0 = await getSnapshot(sid)
         const humanSeat = humanSeatOf(snap0, humanPlayerId)
 

@@ -34,7 +34,7 @@ test('command error: rejected command shows error banner', async ({ page }) => {
   // with the wrong command type for the current phase.
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -76,7 +76,7 @@ test('command error: error banner appears when sendCmd rejects in UI', async ({ 
   // Simpler approach: inject into WAITING_FOR_ROLL and click a disabled button via evaluate.
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

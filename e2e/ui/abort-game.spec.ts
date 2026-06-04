@@ -35,7 +35,7 @@ function humanSeat(snap: Awaited<ReturnType<typeof getSnapshot>>, pid: string): 
 test('abort game: host sees enabled "Lopeta peli kaikilta" button', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken, hostToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 
@@ -89,7 +89,7 @@ test('abort game: non-host sees disabled "Lopeta peli kaikilta" button', async (
 test('abort game: aborting sends game to GAME_OVER state', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken, hostToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const seat = humanSeat(snap0, humanPlayerId)
 

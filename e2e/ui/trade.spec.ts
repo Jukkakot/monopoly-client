@@ -21,7 +21,7 @@ function humanSeatOf(snap: ClientSessionSnapshot, humanPlayerId: string): number
 test('open trade button visible in WAITING_FOR_END_TURN → trade editing UI appears', async ({ page }) => {
   const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
@@ -64,7 +64,7 @@ async function navigateAsPlayer0(page: Page, sid: string, playerId: string) {
 test('received trade offer → accept/decline buttons visible', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const ids = snap0.state!.players.map(p => p.playerId)
     const [p0, p1] = ids
@@ -98,7 +98,7 @@ test('received trade offer → accept/decline buttons visible', async ({ page })
 test('decline trade → buttons disappear, turn resumes', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
-    await setBotSpeed(sid, 'slow')
+    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const ids = snap0.state!.players.map(p => p.playerId)
     const [p0, p1] = ids
