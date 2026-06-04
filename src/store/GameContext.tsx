@@ -300,6 +300,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const sseTimings = useRef<Array<{ timestamp: number; version: number; delayMs?: number }>>([])
   const lastEventTimestamp = useRef<number | null>(null)
   const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
+  const prevPhaseRef = useRef<string | undefined>(undefined)
   // Briefly true after any direct dispatch — blocks incoming SSE snaps from bypassing the queue
   // before the animation useEffect has had a chance to set isAnyPlayerAnimating().
   const settlingRef = useRef(false)
@@ -414,7 +415,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         : undefined
       const enriched = { ...command, ...(playerToken ? { playerToken } : {}), ...(hostToken ? { hostToken } : {}) }
       const result = await sendCommand(sid, enriched)
-      if (!result.accepted && result.rejections.length > 0) {
+      if (result.accepted) {
+        logger.info('cmd', { type: cmdType, sessionId: sid })
+      } else if (result.rejections.length > 0) {
         // Log rejection for debugging — these should not happen during normal play
         // (the UI should prevent sending invalid commands in the first place)
         const codes = result.rejections.map(r => r.code).join(', ')
@@ -489,7 +492,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
           lastEventTimestamp.current = clientReceivedMs
           sseTimings.current.push({ timestamp: clientReceivedMs, version: snap.version, delayMs })
 
-          // if (delayMs !== undefined ) {
+          // Detect skipped snapshot versions (client fell behind or backend skipped one)
+          if (versionRef.current > 0 && snap.version > versionRef.current + 1) {
+            logger.warn('SSE version gap', { expected: versionRef.current + 1, got: snap.version, sessionId: state.sessionId })
+          }
+
+          // Log phase transitions — useful for tracing game flow in production
+          const newPhase = snap.state?.turn?.phase
+          if (newPhase && newPhase !== prevPhaseRef.current) {
+            logger.info('phase', { phase: newPhase, sessionId: state.sessionId, v: snap.version })
+            prevPhaseRef.current = newPhase
+          }
+
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
           // GAME_OVER bypasses the animation queue so "lopeta peli" takes effect immediately
