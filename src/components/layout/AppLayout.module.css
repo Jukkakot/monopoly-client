@@ -590,14 +590,21 @@
     overflow-y: auto;
   }
 
-  /* ── Actions: pinned to bottom, collapsible ── */
+  /* ── Actions: pinned to bottom, collapsible, resizable ── */
   .actionsSection {
     flex-shrink: 0;
-    border-top: 2px solid #a5d6a7;
     display: flex;
     flex-direction: column;
-    max-height: 55vh;
   }
+
+  .actionsDragHandle {
+    height: 5px;
+    background: #a5d6a7;
+    flex-shrink: 0;
+    cursor: row-resize;
+    transition: background 0.15s;
+  }
+  .actionsDragHandle:hover { background: #66bb6a; }
 
   .actionsWrapper {
     overflow-y: auto;

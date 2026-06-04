@@ -90,6 +90,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [actionsCollapsed, setActionsCollapsed] = useState(() => {
     try { return localStorage.getItem('monopoly_actions_collapsed') === '1' } catch { return false }
   })
+  const [actionsHeight, setActionsHeight] = useState(() => {
+    try { const v = parseInt(localStorage.getItem('monopoly_actions_height') ?? ''); return isNaN(v) ? 220 : Math.max(60, Math.min(600, v)) } catch { return 220 }
+  })
+  const actionsHeightRef = useRef(220)
+  const actionsDragRef = useRef<{ startY: number; startH: number } | null>(null)
+  useEffect(() => { actionsHeightRef.current = actionsHeight }, [actionsHeight])
+
   const [playersSplitPct, setPlayersSplitPct] = useState(() => {
     try { const v = parseInt(localStorage.getItem('monopoly_players_split') ?? ''); return isNaN(v) ? 40 : Math.max(15, Math.min(75, v)) } catch { return 40 }
   })
@@ -203,13 +210,29 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       document.body.style.userSelect = ''
       try { localStorage.setItem('monopoly_players_split', String(Math.round(splitPctRef.current))) } catch {}
     }
+    function onActionsMove(e: MouseEvent) {
+      if (!actionsDragRef.current) return
+      const delta = actionsDragRef.current.startY - e.clientY
+      const newH = Math.max(60, Math.min(600, actionsDragRef.current.startH + delta))
+      setActionsHeight(newH)
+    }
+    function onActionsUp() {
+      if (!actionsDragRef.current) return
+      actionsDragRef.current = null
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      try { localStorage.setItem('monopoly_actions_height', String(actionsHeightRef.current)) } catch {}
+    }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
     window.addEventListener('mousemove', onSplitMove)
     window.addEventListener('mouseup', onSplitUp)
+    window.addEventListener('mousemove', onActionsMove)
+    window.addEventListener('mouseup', onActionsUp)
     return () => {
       window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp)
       window.removeEventListener('mousemove', onSplitMove); window.removeEventListener('mouseup', onSplitUp)
+      window.removeEventListener('mousemove', onActionsMove); window.removeEventListener('mouseup', onActionsUp)
     }
   }, [])
 
@@ -296,15 +319,25 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               <div className={styles.logWrapper}>{log}</div>
             )}
           </div>
-          {/* Actions: pinned to bottom, collapsible */}
+          {/* Actions: pinned to bottom, collapsible, resizable */}
           {!isMobile && (
             <div className={styles.actionsSection}>
+              <div
+                className={styles.actionsDragHandle}
+                onMouseDown={e => {
+                  actionsDragRef.current = { startY: e.clientY, startH: actionsHeightRef.current }
+                  document.body.style.cursor = 'row-resize'
+                  document.body.style.userSelect = 'none'
+                }}
+              />
               <div className={styles.sideSectionHeader}
                 onClick={() => { const v = !actionsCollapsed; setActionsCollapsed(v); try { localStorage.setItem('monopoly_actions_collapsed', v ? '1' : '0') } catch {} }}>
                 <span className={styles.sideSectionTitle}>🎮 Toiminnot</span>
                 <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
               </div>
-              {!actionsCollapsed && <div className={styles.actionsWrapper}>{actions}</div>}
+              {!actionsCollapsed && (
+                <div className={styles.actionsWrapper} style={{ height: actionsHeight }}>{actions}</div>
+              )}
             </div>
           )}
         </div>
