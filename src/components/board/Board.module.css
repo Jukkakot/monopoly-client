@@ -3,6 +3,7 @@
   grid-template-columns: repeat(11, 1fr);
   grid-template-rows: repeat(11, 1fr);
   aspect-ratio: 1;
+  position: relative; /* containing block for cardBubbleAnchor and cardDismissOverlay */
 
   /* Responsive sizing: fill available width, but never taller than viewport */
   width: 100%;
