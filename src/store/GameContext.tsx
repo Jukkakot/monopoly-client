@@ -378,8 +378,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     versionRef.current = 0
   }, [])
   useEffect(() => {
-    // Expose SSE timings function globally for debugging
-    ; (window as any).exportSSETimings = () => {
+    window.exportSSETimings = () => {
       const data = sseTimings.current.map(t => ({
         delay: t.delayMs?.toFixed(0) ?? 'initial',
         version: t.version,
@@ -485,12 +484,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
           sseTimings.current.push({ timestamp: clientReceivedMs, version: snap.version, delayMs })
 
           // if (delayMs !== undefined ) {
-          //   console.log(`📡 SSE v${snap.version} received after ${delayMs.toFixed(0)}ms`)
-          // } else {
-          //   console.log(`📡 SSE v${snap.version} (first event)`)
-          // }
-
-
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
           // GAME_OVER bypasses the animation queue so "lopeta peli" takes effect immediately

@@ -1,6 +1,7 @@
-// Global test helper: accumulated error log readable by Playwright
-// Populated by GameContext when a command is rejected or a network error occurs.
-// Only active in browser environments where window is available.
+// Global test helpers populated by the app at runtime.
 declare interface Window {
+  /** Accumulated command rejection and network error log — readable by Playwright/E2E. */
   __monopolyErrorLog: string[]
+  /** Returns a JSON string of SSE inter-event timings for debugging bot game pacing. */
+  exportSSETimings: () => string
 }
