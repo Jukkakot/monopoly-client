@@ -460,6 +460,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       let firstMessageReceived = false
       const noDataTimer = setTimeout(() => {
         if (!firstMessageReceived && !cancelled) {
+          logger.warn('SSE no data within 8s — reconnecting', { sessionId: state.sessionId, version: versionRef.current })
           es.close()
           esRef.current = null
           versionRef.current = 0
@@ -473,6 +474,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
           firstMessageReceived = true
           quickFailCount = 0
           clearTimeout(noDataTimer)
+          if (retryCount.current === 0) {
+            logger.info('SSE connected', { sessionId: state.sessionId })
+          } else {
+            logger.info('SSE reconnected', { sessionId: state.sessionId, attempt: retryCount.current })
+          }
         }
         try {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
@@ -523,11 +529,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         if (!firstMessageReceived && Date.now() - connectTime < 400) {
           quickFailCount++
           if (quickFailCount >= 2) {
+            logger.warn('SSE failed: session not found', { sessionId: state.sessionId })
             dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
             return
           }
         }
         if (retryCount.current >= 5) {
+          logger.warn('SSE failed after retries', { sessionId: state.sessionId, attempts: retryCount.current })
           dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
           return
         }
