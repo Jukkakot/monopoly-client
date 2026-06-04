@@ -102,6 +102,7 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             return (
               <button key={prop.propertyId}
                 className={`${styles.propChip} ${onSpotClick ? styles.propChipClickable : ''} ${prop.mortgaged ? styles.propChipMortgaged : ''}`}
+                style={{ background: color + '22' }}
                 onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
                 <div className={styles.propChipBar} style={{ background: color }} />
                 <span className={styles.propChipName}>{spot?.name ?? prop.propertyId}</span>

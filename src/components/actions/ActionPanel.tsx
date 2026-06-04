@@ -659,6 +659,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                       <button key={prop.propertyId}
                         className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
                         data-testid={`mortgage-toggle-${prop.propertyId}`}
+                        style={{ background: color + '22' }}
                         onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}>
                         <div className={styles.tradePropChipBar} style={{ background: color }} />
                         <span className={styles.tradePropChipName}>{spot.name}</span>
@@ -923,6 +924,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
                 return (
                   <button key={prop.propertyId} className={styles.tradePropChip}
                     data-testid={`action-mortgage-for-debt-${prop.propertyId}`}
+                    style={{ background: color + '22' }}
                     onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
                     <div className={styles.tradePropChipBar} style={{ background: color }} />
                     <span className={styles.tradePropChipName}>{spot?.name ?? prop.propertyId}</span>
@@ -1122,6 +1124,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       return (
         <button key={prop.propertyId}
           className={`${styles.tradePropChip} ${included ? styles.tradePropChipSelected : ''} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
+          style={{ background: included ? color + '55' : color + '22' }}
           onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
           <div className={styles.tradePropChipBar} style={{ background: color }} />
           <span className={styles.tradePropChipName}>
@@ -1241,7 +1244,7 @@ function TradePropChip({ id }: { id: string }) {
   const spot = SPOTS.find(s => s.id === id)
   const color = spot?.streetType ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
   return (
-    <div className={styles.tradePropChip}>
+    <div className={styles.tradePropChip} style={{ background: color + '22' }}>
       <div className={styles.tradePropChipBar} style={{ background: color }} />
       <span className={styles.tradePropChipName}>{spot?.name ?? id}</span>
       {spot?.price != null && <span className={styles.tradePropChipPrice}>€{spot.price}</span>}
