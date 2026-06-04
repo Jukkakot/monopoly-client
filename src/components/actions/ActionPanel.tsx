@@ -657,17 +657,13 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                     const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
                     return (
                       <button key={prop.propertyId}
-                        className={styles.tradePropChip}
+                        className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
                         data-testid={`mortgage-toggle-${prop.propertyId}`}
-                        style={{
-                          background: color + '25',
-                          borderColor: color,
-                          opacity: prop.mortgaged ? 0.55 : 1,
-                        }}
                         onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}>
-                        {spot.name}
-                        <span className={styles.tradePropPrice}>
-                          {prop.mortgaged ? ` lunasta €${redeemCost}` : ` +€${mortgageVal}`}
+                        <div className={styles.tradePropChipBar} style={{ background: color }} />
+                        <span className={styles.tradePropChipName}>{spot.name}</span>
+                        <span className={styles.tradePropChipPrice}>
+                          {prop.mortgaged ? `lunasta €${redeemCost}` : `+€${mortgageVal}`}
                         </span>
                       </button>
                     )
@@ -927,10 +923,10 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
                 return (
                   <button key={prop.propertyId} className={styles.tradePropChip}
                     data-testid={`action-mortgage-for-debt-${prop.propertyId}`}
-                    style={{ background: color + '28', borderColor: color }}
                     onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
-                    {spot?.name ?? prop.propertyId}
-                    {mortgageVal && <span className={styles.tradePropPrice}> +€{mortgageVal}</span>}
+                    <div className={styles.tradePropChipBar} style={{ background: color }} />
+                    <span className={styles.tradePropChipName}>{spot?.name ?? prop.propertyId}</span>
+                    {mortgageVal && <span className={styles.tradePropChipPrice}>+€{mortgageVal}</span>}
                   </button>
                 )
               })}
@@ -1125,22 +1121,16 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       const displayPrice = prop.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? null
       return (
         <button key={prop.propertyId}
-          className={styles.tradePropChip}
-          style={{
-            background: included ? color + '55' : color + '20',
-            borderColor: color,
-            outline: included ? `2px solid ${color}` : undefined,
-            opacity: prop.mortgaged ? 0.55 : 1,
-            outlineOffset: included ? '1px' : undefined,
-          }}
+          className={`${styles.tradePropChip} ${included ? styles.tradePropChipSelected : ''} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
           onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
-          {included ? '✓ ' : ''}
-          <span style={prop.mortgaged ? { textDecoration: 'line-through', opacity: 0.7 } : undefined}>
+          <div className={styles.tradePropChipBar} style={{ background: color }} />
+          <span className={styles.tradePropChipName}>
+            {included && <span style={{ color: '#2e7d32', marginRight: 2 }}>✓</span>}
             {spot?.name ?? prop.propertyId}
           </span>
           {displayPrice !== null && (
-            <span className={styles.tradePropPrice}>
-              {prop.mortgaged ? ` 🔒P€${displayPrice}` : ` €${displayPrice}`}
+            <span className={styles.tradePropChipPrice}>
+              {prop.mortgaged ? `🔒€${displayPrice}` : `€${displayPrice}`}
             </span>
           )}
         </button>

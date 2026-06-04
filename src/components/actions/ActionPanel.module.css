@@ -769,25 +769,9 @@
 
 .tradePropWrap {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 4px;
 }
-
-.tradePropChip {
-  padding: 3px 6px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  border: 1.5px solid currentColor;
-  cursor: pointer;
-  color: #111;
-  line-height: 1.2;
-  text-align: left;
-  transition: filter 0.12s;
-  white-space: nowrap;
-}
-.tradePropChip:hover  { filter: brightness(0.9); }
-.tradePropChip:active { filter: brightness(0.75); }
 
 .tradePropPrice {
   font-size: 0.65rem;
@@ -935,6 +919,18 @@
   white-space: nowrap;
   display: flex;
   align-items: center;
+}
+
+button.tradePropChip {
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+button.tradePropChip:hover  { filter: brightness(0.94); }
+button.tradePropChip:active { filter: brightness(0.84); }
+
+.tradePropChipSelected {
+  outline: 2px solid #43a047;
+  outline-offset: -1px;
 }
 
 .tradeMoneyChip {

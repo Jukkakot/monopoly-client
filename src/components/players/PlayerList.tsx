@@ -102,14 +102,12 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             return (
               <button key={prop.propertyId}
                 className={`${styles.propChip} ${onSpotClick ? styles.propChipClickable : ''} ${prop.mortgaged ? styles.propChipMortgaged : ''}`}
-                style={{ borderLeftColor: color, background: color + '18' }}
                 onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
-                <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {spot?.name ?? prop.propertyId}
-                </span>
+                <div className={styles.propChipBar} style={{ background: color }} />
+                <span className={styles.propChipName}>{spot?.name ?? prop.propertyId}</span>
                 {prop.hotelCount > 0 && <span className={styles.hotel}>H</span>}
                 {prop.houseCount > 0 && Array.from({ length: prop.houseCount }).map((_, i) => <span key={i} className={styles.house} />)}
-                {prop.mortgaged && <span style={{ fontSize: '0.7rem', flexShrink: 0 }}>🔒</span>}
+                {prop.mortgaged && <span style={{ fontSize: '0.7rem', flexShrink: 0, padding: '0 5px', display: 'flex', alignItems: 'center' }}>🔒</span>}
               </button>
             )
           }
