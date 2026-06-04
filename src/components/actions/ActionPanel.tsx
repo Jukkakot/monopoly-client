@@ -154,19 +154,57 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // SPECTATOR (no player credentials — bot-only game watcher)
   if (!myPlayerId) {
     const activePlayerName = state.players.find(p => p.playerId === activeId)?.name
+    const activeSeat = state.seats.find(s => s.playerId === activeId)
+
+    let phaseContent: React.ReactNode
+    if (state.tradeState) {
+      phaseContent = <TradeSpectatorView state={state} />
+    } else if (state.auctionState) {
+      phaseContent = <AuctionSection state={state} myPlayerId={null} sendCmd={sendCmd} />
+    } else if (state.activeDebt) {
+      phaseContent = <DebtSection state={state} myPlayerId={null} sendCmd={sendCmd} />
+    } else if (phase === 'WAITING_FOR_CARD_ACK') {
+      const cardText = getCardText(state.lastCardKey ?? null, state.lastCardMessage ?? null)
+      phaseContent = (
+        <div className={`${styles.cardPopup} ${styles.cardPopupObserver}`}>
+          <span className={styles.cardPopupPlayer} style={activeSeat ? { color: activeSeat.tokenColorHex } : {}}>
+            {t.botDrawingCard(activePlayerName ?? '?')}
+          </span>
+          <span className={styles.cardPopupIcon}>🃏</span>
+          <span className={styles.cardPopupText}>{cardText ?? '?'}</span>
+        </div>
+      )
+    } else if (phase === 'WAITING_FOR_DECISION' && state.pendingDecision) {
+      const dec = state.pendingDecision
+      const spot = SPOTS.find(s => s.id === dec.payload.propertyId)
+      const color = spot ? STREET_COLORS[spot.streetType] : undefined
+      phaseContent = (
+        <>
+          <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+            <span data-testid="current-phase">⏳ {activePlayerName} — {t.phases[phase] ?? phase}</span>
+          </div>
+          <div className={styles.propBuyCard} style={color ? { borderLeftColor: color, borderLeftWidth: 7 } : {}}>
+            <span className={styles.propBuyName}>{spot?.name ?? dec.payload.propertyDisplayName}</span>
+            <span className={styles.propBuyPrice}>{t.priceLabel(dec.payload.price)}</span>
+          </div>
+        </>
+      )
+    } else {
+      phaseContent = (
+        <>
+          <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
+          {activePlayerName && phase && (
+            <div className={styles.infoBox} style={activeSeat ? { borderLeft: `4px solid ${activeSeat.tokenColorHex}` } : {}}>
+              <span data-testid="current-phase">⏳ {activePlayerName} — {t.phases[phase] ?? phase}</span>
+            </div>
+          )}
+        </>
+      )
+    }
+
     return (
       <div className={styles.panel}>
-        {state.tradeState
-          ? <TradeSpectatorView state={state} />
-          : <>
-              <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
-              {activePlayerName && phase && (
-                <div className={styles.infoBox}>
-                  <span data-testid="current-phase">⏳ {activePlayerName} — {t.phases[phase] ?? phase}</span>
-                </div>
-              )}
-            </>
-        }
+        {phaseContent}
         {botStuckGlobal && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
@@ -208,13 +246,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   // While any token is moving — status shown in header bar, nothing needed here
   if (tokenAnimating) return null
 
-  // Debt
+  // Debt — show full read-only debt card to non-debtors too, not just a text
   if (state.activeDebt) {
-    if (state.activeDebt.debtorPlayerId !== myPlayerId) {
-      const debtorName = state.players.find(p => p.playerId === state.activeDebt!.debtorPlayerId)?.name ?? '?'
-      return <div className={styles.infoBox}>{t.waitingForDebt(debtorName)}</div>
-    }
-    return <DebtSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+    return <DebtSection state={state}
+      myPlayerId={state.activeDebt.debtorPlayerId === myPlayerId ? myPlayerId : null}
+      sendCmd={sendCmd} />
   }
 
   // Auction
@@ -667,7 +703,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AuctionSection({ state, myPlayerId, sendCmd }: {
-  state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
+  state: SessionState; myPlayerId: string | null; sendCmd: (c: object) => void
 }) {
   const t = useT()
   const sid = state.sessionId
@@ -676,7 +712,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
 
   const spot = SPOTS.find(s => s.id === auction.propertyId)
   const minBid = auction.minimumNextBid > 0 ? auction.minimumNextBid : auction.currentBid + 10
-  const isEligible = auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
+  const isEligible = myPlayerId !== null && auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
   const currentActor = state.players.find(p => p.playerId === auction.currentActorPlayerId)
   const spotPrice = spot?.price ?? 0
 
@@ -739,7 +775,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
           {(() => {
             const winner = state.players.find(p => p.playerId === auction.leadingPlayerId)
             const winnerSeat = state.seats.find(s => s.playerId === auction.leadingPlayerId)
-            const isMe = auction.leadingPlayerId === myPlayerId
+            const isMe = myPlayerId !== null && auction.leadingPlayerId === myPlayerId
             const color = winnerSeat?.tokenColorHex ?? '#888'
             return (
               <div className={styles.auctionWonBox} style={{ borderColor: color, background: color + '18' }}>
@@ -755,9 +791,9 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
               </div>
             )
           })()}
-          <Btn label={t.auctionConfirmWin}
+          {myPlayerId !== null && <Btn label={t.auctionConfirmWin}
             onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
-            variant="primary" />
+            variant="primary" />}
         </>
       ) : isEligible ? (
         <>
@@ -826,7 +862,7 @@ function formatDebtReason(reason: string, creditorType: string, t: ReturnType<ty
 }
 
 function DebtSection({ state, myPlayerId, sendCmd }: {
-  state: SessionState; myPlayerId: string; sendCmd: (c: object) => void
+  state: SessionState; myPlayerId: string | null; sendCmd: (c: object) => void
 }) {
   const t = useT()
   const sid = state.sessionId
@@ -859,13 +895,13 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           )}
         </div>
       </div>
-      {debt.allowedActions.includes('PAY_DEBT_NOW') && (
+      {myPlayerId !== null && debt.allowedActions.includes('PAY_DEBT_NOW') && (
         <Btn label={t.payDebtBtn}
           disabled={debt.currentCash < debt.amountRemaining}
           onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
           variant="primary" testId="action-pay-debt" />
       )}
-      {debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
+      {myPlayerId !== null && debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
         const mortgageables = state.properties
           .filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
         if (mortgageables.length === 0) return null
@@ -902,7 +938,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           </>
         )
       })()}
-      {debt.allowedActions.includes('SELL_BUILDING') && (() => {
+      {myPlayerId !== null && debt.allowedActions.includes('SELL_BUILDING') && (() => {
         const builtProps = state.properties.filter(p =>
           p.ownerPlayerId === debt.debtorPlayerId && (p.houseCount > 0 || p.hotelCount > 0))
         if (builtProps.length === 0) return null
@@ -961,7 +997,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           </>
         )
       })()}
-      {debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
+      {myPlayerId !== null && debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
         <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" testId="action-declare-bankruptcy" />
       )}
     </div>
