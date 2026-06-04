@@ -3,16 +3,23 @@ import type { ClientSessionSnapshot } from '../../src/types/api'
 const BASE = process.env.VITE_API_BASE ?? 'https://monopoly-backend-bv41.onrender.com'
 const jsonHeaders = { 'Content-Type': 'application/json' }
 
+async function postWithRetry(url: string, body: object, maxRetries = 4): Promise<Response> {
+  let lastStatus = 0
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 3000 * attempt))
+    const r = await fetch(url, { method: 'POST', headers: jsonHeaders, body: JSON.stringify(body) })
+    if (r.status !== 503) return r
+    lastStatus = r.status
+  }
+  throw new Error(`createSession failed: ${lastStatus}`)
+}
+
 export async function createBotSession(count: 2 | 3 | 4 = 2): Promise<string> {
-  const r = await fetch(`${BASE}/sessions`, {
-    method: 'POST',
-    headers: jsonHeaders,
-    body: JSON.stringify({
-      names: ['A', 'B', 'C', 'D'].slice(0, count),
-      seatKinds: Array(count).fill('BOT'),
-      difficulties: Array(count).fill('STRONG'),
-      colors: ['#e53935', '#1e88e5', '#43a047', '#f9a825'].slice(0, count),
-    }),
+  const r = await postWithRetry(`${BASE}/sessions`, {
+    names: ['A', 'B', 'C', 'D'].slice(0, count),
+    seatKinds: Array(count).fill('BOT'),
+    difficulties: Array(count).fill('STRONG'),
+    colors: ['#e53935', '#1e88e5', '#43a047', '#f9a825'].slice(0, count),
   })
   if (!r.ok) throw new Error(`createSession failed: ${r.status}`)
   return (await r.json()).sessionId
@@ -99,10 +106,7 @@ export interface HumanSession {
  * before navigating so that GameContext can send authorized commands on behalf of the human player.
  */
 export async function createHumanBotSession(): Promise<HumanSession> {
-  const r1 = await fetch(`${BASE}/sessions`, {
-    method: 'POST', headers: jsonHeaders,
-    body: JSON.stringify({ lobbyMode: true, seatCount: 2 }),
-  })
+  const r1 = await postWithRetry(`${BASE}/sessions`, { lobbyMode: true, seatCount: 2 })
   if (!r1.ok) throw new Error(`createHumanBotSession: POST /sessions failed ${r1.status}`)
   const { sessionId: sid, hostToken, playerId: humanPlayerId, playerToken: humanPlayerToken } = await r1.json()
 
@@ -137,10 +141,7 @@ export interface TwoHumanSession {
  * Commands require playerToken in the body: { type, actorPlayerId, playerToken, ...rest }
  */
 export async function createTwoHumanSession(): Promise<TwoHumanSession> {
-  const r1 = await fetch(`${BASE}/sessions`, {
-    method: 'POST', headers: jsonHeaders,
-    body: JSON.stringify({ lobbyMode: true, seatCount: 2 }),
-  })
+  const r1 = await postWithRetry(`${BASE}/sessions`, { lobbyMode: true, seatCount: 2 })
   if (!r1.ok) throw new Error(`createTwoHumanSession: POST /sessions failed ${r1.status}`)
   const { sessionId: sid, playerId: p1Id, playerToken: p1Token } = await r1.json()
 
