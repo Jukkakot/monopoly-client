@@ -6,6 +6,7 @@ import { buildPatch } from '../helpers/scenario'
 async function navigateAsHuman(page: Page, sid: string, humanPlayerId: string, humanPlayerToken: string) {
   await page.goto('/')
   await page.evaluate(({ sid, playerId, token }) => {
+    localStorage.setItem('animation-speed', 'fast')  // prevent long animations in CI
     sessionStorage.setItem(`monopoly_player_${sid}`, playerId)
     sessionStorage.setItem(`monopoly_token_${sid}`, token)
   }, { sid, playerId: humanPlayerId, token: humanPlayerToken })

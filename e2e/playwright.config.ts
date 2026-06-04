@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './ui',
   globalSetup: './globalSetup.ts',
   retries: 1,
+  timeout: 60_000,
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173',
     trace: 'retain-on-failure',
