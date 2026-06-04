@@ -153,24 +153,20 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
 
   // SPECTATOR (no player credentials — bot-only game watcher)
   if (!myPlayerId) {
-    const trade = state.tradeState
-    const tradeInfo = trade
-      ? (() => {
-          const a = state.players.find(p => p.playerId === trade.initiatorPlayerId)?.name ?? '?'
-          const b = state.players.find(p => p.playerId === trade.recipientPlayerId)?.name ?? '?'
-          return `🤝 ${a} ↔ ${b}`
-        })()
-      : null
     const activePlayerName = state.players.find(p => p.playerId === activeId)?.name
     return (
       <div className={styles.panel}>
-        {tradeInfo && <div className={styles.infoBox}>{tradeInfo}</div>}
-        <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
-        {activePlayerName && phase && (
-          <div className={styles.infoBox}>
-            <span data-testid="current-phase">⏳ {activePlayerName} — {t.phases[phase] ?? phase}</span>
-          </div>
-        )}
+        {state.tradeState
+          ? <TradeSpectatorView state={state} />
+          : <>
+              <div className={styles.sectionTitle}>{t.spectatorMsg}</div>
+              {activePlayerName && phase && (
+                <div className={styles.infoBox}>
+                  <span data-testid="current-phase">⏳ {activePlayerName} — {t.phases[phase] ?? phase}</span>
+                </div>
+              )}
+            </>
+        }
         {botStuckGlobal && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
@@ -1003,6 +999,12 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
   const isCounterEditPhase = status === 'COUNTERED' && trade.editingPlayerId !== null && trade.editingPlayerId !== myPlayerId
   const waitingMsg = isCounterEditPhase ? t.tradeCounterEditing : t.tradeWaiting
   const canCancel = myPlayerId === trade.editingPlayerId
+  const isParticipant = myPlayerId === trade.initiatorPlayerId || myPlayerId === trade.recipientPlayerId
+
+  // Non-participant (e.g. 3rd player in a 3-player game) — show read-only view
+  if (!isParticipant) {
+    return <TradeSpectatorView state={state} statusMsg={waitingMsg} />
+  }
 
   return (
     <div className={styles.panel}>
@@ -1201,6 +1203,58 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           variant="danger"
           testId="action-cancel-trade" />
       </div>
+    </div>
+  )
+}
+
+function TradeSpectatorView({ state, statusMsg }: {
+  state: SessionState; statusMsg?: string
+}) {
+  const t = useT()
+  const trade = state.tradeState!
+  const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
+  const recipient = state.players.find(p => p.playerId === trade.recipientPlayerId)
+  const offer = trade.currentOffer
+
+  function propName(id: string) {
+    return SPOTS.find(s => s.id === id)?.name ?? id
+  }
+
+  const isEmpty = (side: typeof offer.offeredToRecipient) =>
+    side.moneyAmount === 0 && side.propertyIds.length === 0
+
+  return (
+    <div className={styles.panel}>
+      <div className={styles.infoBox}>
+        {t.tradeSpectatorBetween(initiator?.name ?? '?', recipient?.name ?? '?')}
+      </div>
+      <div className={styles.offerBlock}>
+        <div className={styles.offerRow}>
+          <span className={styles.offerLabel}>{initiator?.name ?? '?'}</span>
+          <div className={styles.offerItems}>
+            {offer.offeredToRecipient.moneyAmount > 0 && (
+              <span className={styles.offerItem}>€{offer.offeredToRecipient.moneyAmount}</span>
+            )}
+            {offer.offeredToRecipient.propertyIds.map(id => (
+              <span key={id} className={styles.offerItem}>{propName(id)}</span>
+            ))}
+            {isEmpty(offer.offeredToRecipient) && <span style={{ fontSize: '0.8rem', color: '#aaa' }}>—</span>}
+          </div>
+        </div>
+        <div className={styles.offerRow}>
+          <span className={styles.offerLabel}>{recipient?.name ?? '?'}</span>
+          <div className={styles.offerItems}>
+            {offer.requestedFromRecipient.moneyAmount > 0 && (
+              <span className={styles.offerItem}>€{offer.requestedFromRecipient.moneyAmount}</span>
+            )}
+            {offer.requestedFromRecipient.propertyIds.map(id => (
+              <span key={id} className={styles.offerItem}>{propName(id)}</span>
+            ))}
+            {isEmpty(offer.requestedFromRecipient) && <span style={{ fontSize: '0.8rem', color: '#aaa' }}>—</span>}
+          </div>
+        </div>
+      </div>
+      {statusMsg && <div className={styles.infoBox} style={{ fontSize: '0.8rem' }}>{statusMsg}</div>}
     </div>
   )
 }
