@@ -562,12 +562,12 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
-  // Position card bubble at the INNER EDGE of the token's cell so the tail
-  // visually attaches to the board spot border, not just the cell center.
+  // Position card bubble at the INNER EDGE of the card spot's cell.
+  // Use the settled boardIndex (the actual Chance/Community square) — not the animated
+  // position — so the bubble always anchors to the square, never mid-animation.
   const cardBubblePos = useMemo(() => {
     if (!cardBubbleText || !activeTurnPlayer) return null
-    const displayIdx = animatedPositions.get(activeTurnPlayer.playerId) ?? activeTurnPlayer.boardIndex
-    const { row, col } = indexToGridPos(displayIdx)
+    const { row, col } = indexToGridPos(activeTurnPlayer.boardIndex)
     const cellW = 1 / 11  // one cell as fraction of board
 
     let tailDir: 'top' | 'bottom' | 'left' | 'right'
@@ -593,7 +593,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
 
     return { x: `${ax * 100}%`, y: `${ay * 100}%`, tailDir }
-  }, [cardBubbleText, activeTurnPlayer, animatedPositions])
+  }, [cardBubbleText, activeTurnPlayer])
 
   const isMyCardAck = isCardAck && state.turn?.activePlayerId === gameState.myPlayerId
 
