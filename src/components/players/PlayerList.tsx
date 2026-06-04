@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react'
 import styles from './PlayerList.module.css'
 import type { SessionState, PlayerSnapshot } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
@@ -86,7 +87,7 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             {totalHouses > 0 && <span className={styles.propStat}>🏠{totalHouses}</span>}
             {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>{t.mortgagedStat(mortgagedCount)}</span>}
           </div>
-      <div className={styles.propGrid}>
+      <PropertyChipWrap>
         {(() => {
           const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
           const sorted = [...ownedProps].sort((a, b) => {
@@ -94,32 +95,16 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
             const tb = SPOTS.find(s => s.id === b.propertyId)?.streetType ?? ''
             return (TYPE_ORDER.indexOf(ta) ?? 99) - (TYPE_ORDER.indexOf(tb) ?? 99)
           })
-          const free = sorted.filter(p => !p.mortgaged)
-          const pledged = sorted.filter(p => p.mortgaged)
-          const renderChip = (prop: typeof sorted[0]) => {
-            const spot = SPOTS.find(s => s.id === prop.propertyId)
-            const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
-            return (
-              <button key={prop.propertyId}
-                className={`${styles.propChip} ${onSpotClick ? styles.propChipClickable : ''} ${prop.mortgaged ? styles.propChipMortgaged : ''}`}
-                style={{ background: color + '22' }}
-                onClick={e => { e.stopPropagation(); onSpotClick?.(prop.propertyId) }}>
-                <div className={styles.propChipBar} style={{ background: color }} />
-                <span className={styles.propChipName}>{spot?.name ?? prop.propertyId}</span>
-                {prop.hotelCount > 0 && <span className={styles.hotel}>H</span>}
-                {prop.houseCount > 0 && Array.from({ length: prop.houseCount }).map((_, i) => <span key={i} className={styles.house} />)}
-                {prop.mortgaged && <span style={{ fontSize: '0.7rem', flexShrink: 0, padding: '0 5px', display: 'flex', alignItems: 'center' }}>🔒</span>}
-              </button>
-            )
-          }
-          return (
-            <>
-              {free.map(renderChip)}
-              {pledged.length > 0 && pledged.map(renderChip)}
-            </>
-          )
+          return sorted.map(prop => (
+            <PropertyChip
+              key={prop.propertyId}
+              id={prop.propertyId}
+              mortgaged={prop.mortgaged}
+              onClick={onSpotClick ? () => onSpotClick(prop.propertyId) : undefined}
+            />
+          ))
         })()}
-      </div>
+      </PropertyChipWrap>
         </>
       )}
     </div>

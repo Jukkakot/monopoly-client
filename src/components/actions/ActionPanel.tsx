@@ -5,6 +5,7 @@ import type { SessionState } from '../../types/api'
 import { getCardText } from '../../i18n/cards'
 import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
+import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
@@ -652,21 +653,17 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                   const renderChip = (prop: typeof sortedProps[0]) => {
                     const spot = SPOTS.find(s => s.id === prop.propertyId)
                     if (!spot) return null
-                    const color = STREET_COLORS[spot.streetType] ?? '#888'
                     const mortgageVal = spot.price ? Math.floor(spot.price / 2) : null
                     const redeemCost = mortgageVal ? Math.ceil(mortgageVal * 1.1) : null
                     return (
-                      <button key={prop.propertyId}
-                        className={`${styles.tradePropChip} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
-                        data-testid={`mortgage-toggle-${prop.propertyId}`}
-                        style={{ background: color + '22' }}
-                        onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}>
-                        <div className={styles.tradePropChipBar} style={{ background: color }} />
-                        <span className={styles.tradePropChipName}>{spot.name}</span>
-                        <span className={styles.tradePropChipPrice}>
-                          {prop.mortgaged ? `lunasta €${redeemCost}` : `+€${mortgageVal}`}
-                        </span>
-                      </button>
+                      <PropertyChip
+                        key={prop.propertyId}
+                        id={prop.propertyId}
+                        mortgaged={prop.mortgaged}
+                        rightText={prop.mortgaged ? `lunasta €${redeemCost}` : `+€${mortgageVal}`}
+                        testId={`mortgage-toggle-${prop.propertyId}`}
+                        onClick={() => { playButtonClick(); sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }) }}
+                      />
                     )
                   }
                   return (
@@ -674,13 +671,13 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                       {free.length > 0 && (
                         <>
                           <div className={styles.debtChipLabel} style={{ color: '#555' }}>Panttaa</div>
-                          <div className={styles.tradePropWrap}>{free.map(renderChip)}</div>
+                          <PropertyChipWrap>{free.map(renderChip)}</PropertyChipWrap>
                         </>
                       )}
                       {pledged.length > 0 && (
                         <>
                           <div className={styles.debtChipLabel} style={{ color: '#b71c1c' }}>Pantattu — lunasta</div>
-                          <div className={styles.tradePropWrap}>{pledged.map(renderChip)}</div>
+                          <PropertyChipWrap>{pledged.map(renderChip)}</PropertyChipWrap>
                         </>
                       )}
                     </>
@@ -916,23 +913,21 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         return (
           <>
             <div className={styles.debtChipLabel}>{t.debtMortgageGroupTitle}</div>
-            <div className={styles.tradePropWrap}>
+            <PropertyChipWrap>
               {flatProps.map(prop => {
                 const spot = SPOTS.find(s => s.id === prop.propertyId)
-                const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
                 const mortgageVal = spot?.price ? Math.floor(spot.price / 2) : null
                 return (
-                  <button key={prop.propertyId} className={styles.tradePropChip}
-                    data-testid={`action-mortgage-for-debt-${prop.propertyId}`}
-                    style={{ background: color + '22' }}
-                    onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}>
-                    <div className={styles.tradePropChipBar} style={{ background: color }} />
-                    <span className={styles.tradePropChipName}>{spot?.name ?? prop.propertyId}</span>
-                    {mortgageVal && <span className={styles.tradePropChipPrice}>+€{mortgageVal}</span>}
-                  </button>
+                  <PropertyChip
+                    key={prop.propertyId}
+                    id={prop.propertyId}
+                    rightText={mortgageVal ? `+€${mortgageVal}` : undefined}
+                    testId={`action-mortgage-for-debt-${prop.propertyId}`}
+                    onClick={() => { playButtonClick(); sendCmd({ type: 'MortgagePropertyForDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId, propertyId: prop.propertyId }) }}
+                  />
                 )
               })}
-            </div>
+            </PropertyChipWrap>
           </>
         )
       })()}
@@ -1118,34 +1113,26 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
     const pledged = sorted.filter(p => p.mortgaged)
     const renderChip = (prop: typeof sorted[0]) => {
       const spot = SPOTS.find(s => s.id === prop.propertyId)
-      const color = STREET_COLORS[spot?.streetType ?? ''] ?? '#888'
       const included = offerData.propertyIds.includes(prop.propertyId)
       const displayPrice = prop.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? null
       return (
-        <button key={prop.propertyId}
-          className={`${styles.tradePropChip} ${included ? styles.tradePropChipSelected : ''} ${prop.mortgaged ? styles.tradePropMortgaged : ''}`}
-          style={{ background: included ? color + '55' : color + '22' }}
-          onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}>
-          <div className={styles.tradePropChipBar} style={{ background: color }} />
-          <span className={styles.tradePropChipName}>
-            {included && <span style={{ color: '#2e7d32', marginRight: 2 }}>✓</span>}
-            {spot?.name ?? prop.propertyId}
-          </span>
-          {displayPrice !== null && (
-            <span className={styles.tradePropChipPrice}>
-              {prop.mortgaged ? `🔒€${displayPrice}` : `€${displayPrice}`}
-            </span>
-          )}
-        </button>
+        <PropertyChip
+          key={prop.propertyId}
+          id={prop.propertyId}
+          selected={included}
+          mortgaged={prop.mortgaged}
+          rightText={displayPrice !== null ? (prop.mortgaged ? `🔒€${displayPrice}` : `€${displayPrice}`) : undefined}
+          onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}
+        />
       )
     }
     return (
       <>
-        {free.length > 0 && <div className={styles.tradePropWrap}>{free.map(renderChip)}</div>}
+        {free.length > 0 && <PropertyChipWrap>{free.map(renderChip)}</PropertyChipWrap>}
         {pledged.length > 0 && (
           <>
             <div className={styles.tradeMortgagedDivider}>🔒 Pantatut</div>
-            <div className={styles.tradePropWrap}>{pledged.map(renderChip)}</div>
+            <PropertyChipWrap>{pledged.map(renderChip)}</PropertyChipWrap>
           </>
         )}
       </>
@@ -1242,14 +1229,7 @@ type TradeSelection = { moneyAmount: number; propertyIds: string[] }
 
 function TradePropChip({ id }: { id: string }) {
   const spot = SPOTS.find(s => s.id === id)
-  const color = spot?.streetType ? (STREET_COLORS[spot.streetType] ?? '#888') : '#888'
-  return (
-    <div className={styles.tradePropChip} style={{ background: color + '22' }}>
-      <div className={styles.tradePropChipBar} style={{ background: color }} />
-      <span className={styles.tradePropChipName}>{spot?.name ?? id}</span>
-      {spot?.price != null && <span className={styles.tradePropChipPrice}>€{spot.price}</span>}
-    </div>
-  )
+  return <PropertyChip id={id} rightText={spot?.price != null ? `€${spot.price}` : undefined} />
 }
 
 function TradeMoneyChip({ amount }: { amount: number }) {
@@ -1268,7 +1248,9 @@ function TradeSide({ label, side }: { label: string; side: TradeSelection }) {
       <span className={styles.tradeOfferSideLabel}>{label}</span>
       {isEmpty && <span className={styles.tradeEmptyNote}>—</span>}
       {side.moneyAmount > 0 && <TradeMoneyChip amount={side.moneyAmount} />}
-      {side.propertyIds.map(id => <TradePropChip key={id} id={id} />)}
+      <PropertyChipWrap>
+        {side.propertyIds.map(id => <TradePropChip key={id} id={id} />)}
+      </PropertyChipWrap>
     </div>
   )
 }

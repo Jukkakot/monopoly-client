@@ -1,0 +1,60 @@
+.chip {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 28px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+  cursor: default;
+}
+
+button.chip {
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+button.chip:hover  { filter: brightness(0.92); }
+button.chip:active { filter: brightness(0.82); }
+
+.bar {
+  width: 5px;
+  flex-shrink: 0;
+}
+
+.name {
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.right {
+  font-size: 0.68rem;
+  color: #666;
+  padding: 4px 6px 4px 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.selected {
+  outline: 2px solid #43a047;
+  outline-offset: -1px;
+}
+
+.mortgaged {
+  opacity: 0.55;
+}
+.mortgaged .name {
+  text-decoration: line-through;
+}
+
+/* Wrap container — use this everywhere chips appear */
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
