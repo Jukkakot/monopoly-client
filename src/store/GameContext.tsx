@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react'
 import type { SessionState, ClientSessionSnapshot, PlayerSnapshot, PropertyStateSnapshot } from '../types/api'
 import { logger } from '../utils/logger'
-import { sendCommand, sseUrl, applySessionSettings } from '../api/sessionApi'
+import { sendCommand, sseUrl, applySessionSettings, sendAck } from '../api/sessionApi'
 import { loadBotSpeed } from '../utils/animationSettings'
 import { useEffect, useRef } from 'react'
 import { translateBackendEvents, deriveMiscEvents, type GameEvent } from './events'
@@ -311,6 +311,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!next) return
     settlingRef.current = true
     dispatch({ type: 'SET_SNAPSHOT', snapshot: next })
+    if (state.sessionId) sendAck(state.sessionId, next.version)
     // After a yield, check if this snapshot started an animation.
     // If not, immediately drain the next one.
     setTimeout(() => {
@@ -507,6 +508,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           } else {
             settlingRef.current = true
             dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
+            sendAck(state.sessionId!, snap.version)
             setTimeout(() => {
               settlingRef.current = false
               if (!isAnyPlayerAnimating()) drainPendingRef.current()

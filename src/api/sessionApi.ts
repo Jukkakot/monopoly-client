@@ -157,6 +157,14 @@ export interface SessionSettings {
   botSpeed?: 'fast' | 'normal' | 'slow'
 }
 
+/** Fire-and-forget: tell the backend which snapshot version the client has processed.
+ *  The backend uses this to pace bot games so it doesn't run too far ahead. */
+export function sendAck(sessionId: string, version: number): void {
+  fetch(`${BASE}/sessions/${sessionId}/ack`, {
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ version }),
+  }).catch(() => {})  // intentionally silent — pacing is advisory
+}
+
 export async function retriggerBot(sessionId: string): Promise<void> {
   const hostToken = (() => { try { return localStorage.getItem(`monopoly_host_${sessionId}`) ?? '' } catch { return '' } })()
   await fetch(`${BASE}/sessions/${sessionId}/bot/retrigger`, {
