@@ -328,5 +328,13 @@
     margin-left: 0;
     height: 44px;
     width: 100%;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .tokenPreview::before {
+    content: 'Valittu:';
+    font-size: 0.72rem;
+    color: #666;
+    white-space: nowrap;
   }
 }
