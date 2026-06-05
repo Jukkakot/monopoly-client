@@ -316,13 +316,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     const movDelay = getAnimationConfig(loadAnimationSpeed()).diceToMoveDelayMs
     zoomToDiceTimerRef.current = setTimeout(() => {
       diceZoomBlockRef.current = false
-      // Use animatedPositionsRef (current displayed position = start square) so the zoom
-      // previews where the token IS, not where it's going (snapshot already has final pos).
-      const startPos = pid
-        ? (animatedPositionsRef.current.get(pid) ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex)
-        : undefined
-      if (startPos !== undefined) setZoomedSpot(startPos)
-      // Fallback: zoom out if no movement follows (jail, etc.)
+      const player = pid ? stateRef.current.players.find(p => p.playerId === pid) : undefined
+      // Don't zoom to a jailed player's square — they may not move; token-follow handles it if they do
+      if (!player?.inJail) {
+        const startPos = animatedPositionsRef.current.get(pid!) ?? player?.boardIndex
+        if (startPos !== undefined) setZoomedSpot(startPos)
+      }
+      // Fallback: zoom out if no movement follows
       zoomToDiceTimerRef.current = setTimeout(() => {
         zoomToDiceTimerRef.current = null
         setZoomedSpot(null)
