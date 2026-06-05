@@ -138,7 +138,7 @@
 }
 
 .cashName {
-  max-width: 64px;
+  max-width: clamp(60px, 20vw, 100px);
   overflow: hidden;
   text-overflow: ellipsis;
 }
