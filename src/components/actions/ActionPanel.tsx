@@ -439,6 +439,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   if (phase === 'WAITING_FOR_END_TURN') {
     const lastDice = turn?.lastDice
     const showJailEscapeNote = !me?.inJail && lastDice?.[0] === lastDice?.[1] && lastDice?.[0] != null
+    const showStuckInJail = me?.inJail === true
     return (
       <div className={`${styles.panel} ${styles.myTurnPanel}`}>
         <TabBar />
@@ -449,6 +450,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           <>
             {showJailEscapeNote && (
               <div className={styles.infoBox}>{t.jailEscapeDoubles}</div>
+            )}
+            {showStuckInJail && (
+              <div className={styles.infoBox}>{t.stuckInJail(me.jailRoundsRemaining ?? 1)}</div>
             )}
             {visibleRent && !rentDismissed && (
               <div className={`${styles.cardPopup} ${styles.rentPopup}`}>

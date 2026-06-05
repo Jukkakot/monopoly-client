@@ -34,6 +34,7 @@ export interface T {
   doublesWarning: string
   jailEscapeDoubles: string
   inJail: (rounds: number) => string
+  stuckInJail: (rounds: number) => string
   useJailCard: (n: number, rounds: number) => string
   payJailFine: (rounds: number) => string
   rollDice: string
@@ -415,6 +416,9 @@ const fi: T = {
   inJail: (r) => r <= 1
     ? '⛓ Viimeinen vankila-heitto! Vapaudut automaattisesti (sakko €50, ellei tupla)'
     : `⛓ Vankilassa — ${r} kierrosta jäljellä`,
+  stuckInJail: (r) => r <= 1
+    ? '⛓ Tupla ei tullut — vapaudut ensi vuorolla automaattisesti'
+    : `⛓ Tupla ei tullut — ${r} yritystä jäljellä`,
   useJailCard: (n, r) => r > 1 ? `🃏 Käytä vapautuskortti (${n}) — ${r}kr.` : `🃏 Käytä vapautuskortti (${n})`,
   payJailFine: (r) => r > 1 ? `💸 Maksa €50 — ${r}kr.` : '💸 Maksa €50 ja vapaudu',
   rollDice: '🎲 Heitä nopat',
@@ -811,6 +815,9 @@ const en: T = {
   inJail: (r) => r <= 1
     ? '⛓ Last jail turn! Auto-released after roll (€50 fine unless doubles)'
     : `⛓ In jail — ${r} round${r !== 1 ? 's' : ''} left`,
+  stuckInJail: (r) => r <= 1
+    ? '⛓ No doubles — auto-released next turn'
+    : `⛓ No doubles — ${r} attempt${r !== 1 ? 's' : ''} left`,
   useJailCard: (n, r) => r > 1 ? `🃏 Use get-out-of-jail card (${n}) — ${r}r.` : `🃏 Use get-out-of-jail card (${n})`,
   payJailFine: (r) => r > 1 ? `💸 Pay €50 — ${r}r.` : '💸 Pay €50 and get out',
   rollDice: '🎲 Roll dice',
