@@ -205,21 +205,26 @@ export function useTokenAnimation(): Map<string, number> {
       // cardKeyChanged is false (same key) so we rely on the persisted flag.
       if (pendingBackThreeRef.current) {
         pendingBackThreeRef.current = false
-        const steps: number[] = []
-        let pos = settledIdx
-        while (pos !== currentIdx) {
-          pos = (pos - 1 + BOARD_SIZE) % BOARD_SIZE
-          steps.push(pos)
-        }
-        settledRef.current.set(pid, currentIdx)
-        if (steps.length > 0) {
-          const existing = queueRef.current.get(pid) ?? []
-          queueRef.current.set(pid, [...existing, ...steps])
-          if (!localAnimatingRef.current.has(pid)) {
-            animatePlayer(pid)
+        const backDist = (settledIdx - currentIdx + BOARD_SIZE) % BOARD_SIZE
+        if (backDist > 0 && backDist <= 3) {
+          // Genuine back-3 move: animate backward step by step
+          const steps: number[] = []
+          let pos = settledIdx
+          while (pos !== currentIdx) {
+            pos = (pos - 1 + BOARD_SIZE) % BOARD_SIZE
+            steps.push(pos)
           }
+          settledRef.current.set(pid, currentIdx)
+          if (steps.length > 0) {
+            const existing = queueRef.current.get(pid) ?? []
+            queueRef.current.set(pid, [...existing, ...steps])
+            if (!localAnimatingRef.current.has(pid)) {
+              animatePlayer(pid)
+            }
+          }
+          continue
         }
-        continue
+        // Flag was stale (e.g. doubles roll after back-3 card): fall through to forward walk
       }
 
       // Card move: jump directly (no step-by-step walk)
