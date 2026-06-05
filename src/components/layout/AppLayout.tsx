@@ -392,7 +392,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
             {/* Only render actions on mobile — desktop renders its own instance above.
                 Keep mounted (not conditionally) so internal state survives tab switches. */}
             {isMobile && <div className={[
-              styles.mobilePadded,
+              styles.mobileActionWrapper,
               mobileTab !== 'board' ? styles.mobileHidden : '',
               boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
             ].join(' ')}>{actions}</div>}

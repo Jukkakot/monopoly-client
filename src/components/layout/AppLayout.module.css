@@ -154,10 +154,18 @@
   min-height: 0;
   overflow-y: auto;
   background: #f5f9f5;
+  display: flex;
+  flex-direction: column;
 }
 
 .mobilePadded {
   padding: 12px;
+}
+
+/* Action panel on board tab — pushed to the bottom so controls stay in thumb reach */
+.mobileActionWrapper {
+  margin-top: auto;
+  padding: 10px 12px 6px;
 }
 
 .mobileHidden {
