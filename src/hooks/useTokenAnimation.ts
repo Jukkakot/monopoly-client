@@ -25,7 +25,7 @@ function isBackThreeCard(key: string | null): boolean {
 const _animatingPlayers = new Set<string>()
 const _jailingPlayers = new Set<string>()
 const _cardJumpingPlayers = new Set<string>()
-const _steppingPlayers = new Set<string>()  // briefly set on each step landing
+const _steppingPlayers = new Map<string, number>()  // briefly set on each step landing; value = hop variant 0–2
 const _landingPlayers = new Set<string>()   // briefly set on final destination landing
 const _listeners = new Set<() => void>()
 
@@ -58,7 +58,7 @@ function setPlayerCardJumping(pid: string, jumping: boolean) {
 }
 
 function flashPlayerStepping(pid: string) {
-  _steppingPlayers.add(pid)
+  _steppingPlayers.set(pid, Math.floor(Math.random() * 3))
   notifyListeners()
   setTimeout(() => {
     _steppingPlayers.delete(pid)
@@ -131,11 +131,11 @@ export function useCardJumpingPlayers(): Set<string> {
   return jumping
 }
 
-// Hook: returns set of playerIds currently mid-step (brief flash per landing)
-export function useSteppingPlayers(): Set<string> {
-  const [stepping, setStepping] = useState(() => new Set<string>(_steppingPlayers))
+// Hook: returns map of playerId → hop variant (0–2) for players currently mid-step
+export function useSteppingPlayers(): Map<string, number> {
+  const [stepping, setStepping] = useState(() => new Map<string, number>(_steppingPlayers))
   useEffect(() => {
-    const update = () => setStepping(new Set(_steppingPlayers))
+    const update = () => setStepping(new Map(_steppingPlayers))
     _listeners.add(update)
     return () => { _listeners.delete(update) }
   }, [])

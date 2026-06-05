@@ -17,7 +17,7 @@ interface Props {
   tokenShapes?: Map<string, TokenShape>
   jailingPlayers?: Set<string>
   cardJumpingPlayers?: Set<string>
-  steppingPlayers?: Set<string>
+  steppingPlayers?: Map<string, number>
   landingPlayers?: Set<string>
   goFlash?: boolean
   highlighted?: 'selected' | 'group'
@@ -57,7 +57,7 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
   tokenShapes?: Map<string, TokenShape>
   jailingPlayers?: Set<string>
   cardJumpingPlayers?: Set<string>
-  steppingPlayers?: Set<string>
+  steppingPlayers?: Map<string, number>
   landingPlayers?: Set<string>
 }) {
   if (!players.length) return null
@@ -69,11 +69,12 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
         const isJailing = jailingPlayers?.has(p.playerId) ?? false
         const isCardJumping = cardJumpingPlayers?.has(p.playerId) ?? false
         const isLanding = landingPlayers?.has(p.playerId) ?? false
-        const isStepping = steppingPlayers?.has(p.playerId) ?? false
+        const hopVariant = steppingPlayers?.get(p.playerId)
+        const HOP_CLASSES = [styles.stepHop, styles.stepHopSpin, styles.stepHopLean] as const
         const animClass = isJailing ? styles.jailArrive
           : isCardJumping ? styles.cardArrive
           : isLanding ? styles.tokenLand
-          : isStepping ? styles.stepHop
+          : hopVariant !== undefined ? HOP_CLASSES[hopVariant]
           : undefined
         return (
           <span key={p.playerId} className={animClass}>
@@ -88,7 +89,7 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
   )
 }
 
-function GoCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers, goFlash }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string>; landingPlayers?: Set<string>; goFlash?: boolean }) {
+function GoCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers, goFlash }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Map<string, number>; landingPlayers?: Set<string>; goFlash?: boolean }) {
   const t = useT()
   return (
     <div className={`${styles.corner} ${styles.goCorner} ${goFlash ? styles.goCornerFlash : ''}`}>
@@ -100,7 +101,7 @@ function GoCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers
   )
 }
 
-function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; jailingPlayers?: Set<string>; steppingPlayers?: Set<string>; landingPlayers?: Set<string> }) {
+function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; jailingPlayers?: Set<string>; steppingPlayers?: Map<string, number>; landingPlayers?: Set<string> }) {
   const t = useT()
   const jailed = players.filter(p => p.inJail)
   const visiting = players.filter(p => !p.inJail)
@@ -135,7 +136,7 @@ function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlaye
   )
 }
 
-function ParkingCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string>; landingPlayers?: Set<string> }) {
+function ParkingCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Map<string, number>; landingPlayers?: Set<string> }) {
   const t = useT()
   return (
     <div className={`${styles.corner} ${styles.parkingCorner}`}>
@@ -147,7 +148,7 @@ function ParkingCorner({ players, seats, tokenShapes, steppingPlayers, landingPl
   )
 }
 
-function GoJailCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string>; landingPlayers?: Set<string> }) {
+function GoJailCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Map<string, number>; landingPlayers?: Set<string> }) {
   const t = useT()
   return (
     <div className={`${styles.corner} ${styles.goJailCorner}`}>

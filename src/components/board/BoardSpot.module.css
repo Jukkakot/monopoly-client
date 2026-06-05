@@ -377,6 +377,30 @@
   animation: stepHop var(--anim-hop-ms, 280ms) ease-out forwards;
 }
 
+@keyframes stepHopSpin {
+  0%   { transform: translateY(0) scale(1) rotate(0deg); }
+  35%  { transform: translateY(-4px) scale(1.15) rotate(18deg); }
+  70%  { transform: translateY(1px) scale(0.93) rotate(6deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+
+.stepHopSpin {
+  display: inline-block;
+  animation: stepHopSpin var(--anim-hop-ms, 280ms) ease-out forwards;
+}
+
+@keyframes stepHopLean {
+  0%   { transform: translateY(0) scale(1) skewX(0deg); }
+  30%  { transform: translateY(-5px) scale(1.18) skewX(-8deg); }
+  65%  { transform: translateY(2px) scale(0.9) skewX(3deg); }
+  100% { transform: translateY(0) scale(1) skewX(0deg); }
+}
+
+.stepHopLean {
+  display: inline-block;
+  animation: stepHopLean var(--anim-hop-ms, 280ms) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 @keyframes tokenLand {
   0%   { transform: scale(1) rotate(0deg); }
   22%  { transform: scale(1.5) rotate(14deg); }
