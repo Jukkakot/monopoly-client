@@ -162,17 +162,19 @@
 }
 
 .cashDown {
-  animation: flashDown 0.5s ease-out;
+  animation: flashDown 0.65s ease-out;
 }
 
 @keyframes flashUp {
-  0%   { color: #1b5e20; transform: scale(1.15); }
+  0%   { color: #1b5e20; transform: scale(1.18); }
   100% { color: #2e7d32; transform: scale(1); }
 }
 
 @keyframes flashDown {
-  0%   { color: #c62828; transform: scale(1.1); }
-  100% { color: #2e7d32; transform: scale(1); }
+  0%   { color: #ff1744; transform: scale(1.18) translateX(-2px); }
+  20%  { transform: scale(1.14) translateX(2px); }
+  40%  { transform: scale(1.10) translateX(-1px); }
+  100% { color: #2e7d32; transform: scale(1) translateX(0); }
 }
 
 .badge {

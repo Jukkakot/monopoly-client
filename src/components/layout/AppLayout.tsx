@@ -516,7 +516,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               <div className={styles.playerPopupHeader}>
                 <span className={styles.playerPopupDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
                 <span className={styles.playerPopupName}>{player.name}</span>
-                <span className={styles.playerPopupCash}>€{player.cash}</span>
+                <span className={styles.playerPopupCash}>€<AnimatedCash value={player.cash} /></span>
                 <button className={styles.playerPopupClose} onClick={() => setCashPopupPlayerId(null)}>✕</button>
               </div>
               {ownedProps.length === 0 ? (

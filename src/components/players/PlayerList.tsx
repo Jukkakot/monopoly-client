@@ -143,6 +143,27 @@ function GroupDots({ player, state }: { player: PlayerSnapshot; state: SessionSt
   )
 }
 
+function AnimatedCash({ value }: { value: number }) {
+  const [display, setDisplay] = useState(value)
+  const prevRef = useRef(value)
+  const frameRef = useRef(0)
+  useEffect(() => {
+    const from = prevRef.current
+    prevRef.current = value
+    if (from === value) return
+    const duration = 350
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration)
+      setDisplay(Math.round(from + (value - from) * (1 - Math.pow(1 - t, 3))))
+      if (t < 1) frameRef.current = requestAnimationFrame(tick)
+    }
+    frameRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frameRef.current)
+  }, [value])
+  return <>{display}</>
+}
+
 export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
   const t = useT()
   const activeId = state.turn?.activePlayerId
@@ -264,7 +285,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                   )}
                   <div className={`${styles.cash} ${flash === 'up' ? styles.cashUp : flash === 'down' ? styles.cashDown : ''}`}
                     data-testid={`player-${seat?.seatIndex ?? turnIdx}-cash`}>
-                    €{player.cash}
+                    €<AnimatedCash value={player.cash} />
                   </div>
                 </div>
                 {!isBankrupt && netWorth !== player.cash && (
