@@ -320,14 +320,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <Btn label={t.buyBtn(p.price)} disabled={!canAfford}
                 onClick={() => {
                   setBuyBurst(true)
-                  setTimeout(() => setBuyBurst(false), 650)
-                  // Delay cmd by two rAF frames so the burst animation renders before
-                  // the backend response can unmount this panel
-                  requestAnimationFrame(() =>
-                    requestAnimationFrame(() =>
-                      cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })
-                    )
-                  )
+                  setTimeout(() => setBuyBurst(false), 700)
+                  // Delay command so the burst animation is visible before the panel unmounts
+                  setTimeout(() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId }), 380)
                 }}
                 variant="primary" testId="action-buy" />
               <Btn label={t.skipToAuction}
