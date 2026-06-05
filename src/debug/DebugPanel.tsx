@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import type { SessionState } from '../types/api'
@@ -160,6 +161,7 @@ export default function DebugPanel({ sessionId }: Props) {
   }
   // Property editor
   const [editingPropId, setEditingPropId] = useState<string | null>(null)
+  const [editingCellRect, setEditingCellRect] = useState<DOMRect | null>(null)
 
   // Always-current ref so the lastDice effect never has stale closures
 
@@ -383,6 +385,21 @@ export default function DebugPanel({ sessionId }: Props) {
     try {
       await importDebugState(sessionId, { properties: [{ propertyId: propId, ...patch }] })
     } catch (e) { showMsg(`✗ ${String(e)}`) }
+  }
+
+  function calcPopupStyle(rect: DOMRect): CSSProperties {
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const popupW = 210
+    const popupH = 180
+    const gap = 6
+    let left = rect.right + gap
+    if (left + popupW > vw - 8) left = rect.left - popupW - gap
+    if (left < 8) left = 8
+    let top = rect.top
+    if (top + popupH > vh - 8) top = vh - popupH - 8
+    if (top < 8) top = 8
+    return { position: 'fixed', left, top, width: popupW, zIndex: 10001 }
   }
 
   if (!open) {
@@ -639,7 +656,16 @@ export default function DebugPanel({ sessionId }: Props) {
                         outlineOffset: '-2px',
                       }}
                       title={`${spot.name}${ownerColor ? ` — ${getOwnerName(ps?.ownerPlayerId)}` : ''}`}
-                      onClick={() => spot.isProperty && setEditingPropId(isEditing ? null : spot.id)}
+                      onClick={e => {
+                        if (!spot.isProperty) return
+                        if (isEditing) {
+                          setEditingPropId(null)
+                          setEditingCellRect(null)
+                        } else {
+                          setEditingPropId(spot.id)
+                          setEditingCellRect((e.currentTarget as HTMLElement).getBoundingClientRect())
+                        }
+                      }}
                     >
                       {ownerColor && (
                         <div className={styles.miniOwnerRing} style={{ borderColor: ownerColor }} />
@@ -654,16 +680,16 @@ export default function DebugPanel({ sessionId }: Props) {
                 })}
               </div>
 
-              {/* Inline editor for selected property */}
-              {editSpot && (
-                <div className={styles.propEditor}>
+              {/* Property editor — rendered as a fixed portal so panel overflow won't clip it */}
+              {editSpot && editingCellRect && createPortal(
+                <div className={styles.propEditorPopup} style={calcPopupStyle(editingCellRect)}>
                   <div className={styles.propEditorTitle}>
                     <span
                       className={styles.propEditorDot}
                       style={{ background: STREET_COLORS[editSpot.streetType as StreetType] ?? '#888' }}
                     />
                     <strong>{editSpot.name}</strong>
-                    <button className={styles.propEditorClose} onClick={() => setEditingPropId(null)}>✕</button>
+                    <button className={styles.propEditorClose} onClick={() => { setEditingPropId(null); setEditingCellRect(null) }}>✕</button>
                   </div>
                   <select
                     className={styles.propSelect}
@@ -702,7 +728,8 @@ export default function DebugPanel({ sessionId }: Props) {
                     />
                     pantattu
                   </label>
-                </div>
+                </div>,
+                document.body
               )}
             </>
           )

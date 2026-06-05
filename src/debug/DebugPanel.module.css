@@ -473,6 +473,21 @@
   gap: 5px;
 }
 
+.propEditorPopup {
+  /* rendered via portal into document.body */
+  background: rgba(18, 18, 18, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 7px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  color: #e8e8e8;
+  font-size: 12px;
+}
+
 .propEditorTitle {
   display: flex;
   align-items: center;
