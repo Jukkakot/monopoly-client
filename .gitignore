@@ -35,3 +35,6 @@ docs/todo.md
 # Debug-capturet gitignoressa — tilapäisiä, ei committia
 # Testiluonteiset skenaariot ovat e2e/scenarios/ alla (ei ignorata)
 src/debug/scenarios/*.json
+
+# MCP-työkalujen ottamat kuvakaappaukset juuressa
+/*.png
