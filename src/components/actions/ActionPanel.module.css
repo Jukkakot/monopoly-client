@@ -1309,7 +1309,24 @@ button.tradePropChip:active { filter: brightness(0.84); }
 
 /* ── Mobile compaction ── */
 @media (max-width: 767px) {
-  .panel { gap: 5px; }
+  .panel {
+    gap: 5px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 12px 6px;
+  }
+
+  /* Tab bar: sticky at top, always visible */
+  .tabBar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f5f9f5;
+    flex-shrink: 0;
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
 
   .btn {
     padding: 9px 12px;
