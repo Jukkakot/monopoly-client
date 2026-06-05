@@ -10,6 +10,7 @@
   gap: 2px;
   border-bottom: 2px solid #e0e0e0;
   margin-bottom: 4px;
+  position: relative;
 }
 
 .tab {
@@ -34,8 +35,24 @@
 .tabActive {
   background: #fff;
   color: #2e7d32;
-  border-bottom: 2px solid #fff;
-  margin-bottom: -2px;
+}
+
+/* Sliding underline indicator — translates to position of active tab */
+.tabIndicator {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background: #2e7d32;
+  border-radius: 1px;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tabIndicatorRight {
+  transform: translateX(100%);
 }
 
 .tabBadge {
@@ -1287,6 +1304,43 @@ button.tradePropChip:active { filter: brightness(0.84); }
   border-left: 7px solid #a5d6a7;  /* color overridden inline */
   border-radius: 8px;
   padding: 8px 12px;
+  position: relative;
+  overflow: visible;
+}
+
+@keyframes propBuyBurst {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.06); box-shadow: 0 4px 18px rgba(46, 125, 50, 0.4); }
+  65%  { transform: scale(1.02); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+.propBuyBurst {
+  animation: propBuyBurst 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Particle burst on buy */
+.buyParticles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.buyParticle {
+  position: absolute;
+  font-size: 1.05rem;
+  line-height: 1;
+  animation: buyParticleAnim 0.65s ease-out forwards;
+}
+
+@keyframes buyParticleAnim {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.3); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1); }
 }
 
 .propBuyName {

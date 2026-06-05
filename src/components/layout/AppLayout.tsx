@@ -51,6 +51,31 @@ type MobileTab = 'board' | 'players' | 'log'
 
 const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log']
 
+/** Smoothly counts a number to a new value over ~350 ms. */
+function AnimatedCash({ value }: { value: number }) {
+  const [display, setDisplay] = useState(value)
+  const prevRef = useRef(value)
+  const frameRef = useRef(0)
+
+  useEffect(() => {
+    const from = prevRef.current
+    prevRef.current = value
+    if (from === value) return
+    const duration = 350
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setDisplay(Math.round(from + (value - from) * eased))
+      if (t < 1) frameRef.current = requestAnimationFrame(tick)
+    }
+    frameRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frameRef.current)
+  }, [value])
+
+  return <>{display}</>
+}
+
 interface Props {
   header: ReactNode
   board: ReactNode
@@ -62,6 +87,7 @@ interface Props {
 export default function AppLayout({ header, board, players, log, actions }: Props) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('board')
   const { state } = useGame()
+  const snap = state.snapshot
   const t = useT()
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
@@ -101,6 +127,14 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [playersSplitPct, setPlayersSplitPct] = useState(() => {
     try { const v = parseInt(localStorage.getItem('monopoly_players_split') ?? ''); return isNaN(v) ? 40 : Math.max(15, Math.min(75, v)) } catch { return 40 }
   })
+
+  // Animation: cash delta floats + chip shake
+  const [cashDeltas, setCashDeltas] = useState<Array<{ playerId: string; amount: number; key: number }>>([])
+  const prevCashRef = useRef(new Map<string, number>())
+  const deltaKeyRef = useRef(0)
+  // Animation: bankruptcy collapse
+  const [justBankrupt, setJustBankrupt] = useState(new Set<string>())
+  const prevBankruptRef = useRef(new Set<string>())
 
   const dragStartX = useRef<number | null>(null)
   const dragStartW = useRef<number>(sidebarWidth)
@@ -247,7 +281,34 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     }
   }, [state.events.length, mobileTab])
 
-  const snap = state.snapshot
+  // Track cash changes → delta floats + chip shake; track new bankruptcies → collapse anim
+  useEffect(() => {
+    if (!snap) return
+    const deltasToAdd: typeof cashDeltas = []
+    const newBankrupt: string[] = []
+
+    for (const p of snap.players) {
+      const prevCash = prevCashRef.current.get(p.playerId)
+      if (prevCash !== undefined && !p.bankrupt && p.cash < prevCash) {
+        const key = ++deltaKeyRef.current
+        const k = key
+        deltasToAdd.push({ playerId: p.playerId, amount: prevCash - p.cash, key })
+        setTimeout(() => setCashDeltas(d => d.filter(x => x.key !== k)), 1350)
+      }
+      prevCashRef.current.set(p.playerId, p.cash)
+
+      if (p.bankrupt && !prevBankruptRef.current.has(p.playerId)) {
+        prevBankruptRef.current.add(p.playerId)
+        newBankrupt.push(p.playerId)
+        const id = p.playerId
+        setTimeout(() => setJustBankrupt(s => { const n = new Set(s); n.delete(id); return n }), 900)
+      }
+    }
+
+    if (deltasToAdd.length > 0) setCashDeltas(d => [...d, ...deltasToAdd])
+    if (newBankrupt.length > 0) setJustBankrupt(s => new Set([...s, ...newBankrupt]))
+  }, [snap]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const isMyTurn = !!(snap && snap.turn &&
     snap.turn.activePlayerId === state.myPlayerId &&
     snap.status !== 'GAME_OVER')
@@ -377,12 +438,19 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                         isActive ? styles.cashChipActive : '',
                         isMe ? styles.cashChipMe : '',
                         p.bankrupt ? styles.cashChipBankrupt : '',
+                        cashDeltas.some(d => d.playerId === p.playerId) ? styles.cashChipShake : '',
+                        justBankrupt.has(p.playerId) ? styles.cashChipBankruptAnim : '',
                       ].join(' ')}
                       onClick={() => setCashPopupPlayerId(p.playerId)}
                     >
                       <span className={styles.cashDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
                       <span className={styles.cashName}>{p.name}</span>
-                      <span className={styles.cashAmt}>{p.bankrupt ? '💀' : `€${p.cash}`}</span>
+                      <span className={styles.cashAmt}>
+                        {p.bankrupt ? '💀' : <>€<AnimatedCash value={p.cash} /></>}
+                      </span>
+                      {cashDeltas.filter(d => d.playerId === p.playerId).map(d => (
+                        <span key={d.key} className={styles.cashDeltaFloat}>−€{d.amount}</span>
+                      ))}
                     </div>
                   )
                 })}

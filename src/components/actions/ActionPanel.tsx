@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
@@ -23,6 +23,28 @@ function takePendingTradeProperty() {
   const v = _pendingTradeProperty
   _pendingTradeProperty = null
   return v
+}
+
+const BUY_PARTICLE_DIRS = [
+  { dx: -38, dy: -28, e: '💰' },
+  { dx: 38, dy: -28, e: '💰' },
+  { dx: -52, dy:   2, e: '✨' },
+  { dx:  52, dy:   2, e: '✨' },
+  { dx:  -8, dy: -46, e: '💸' },
+  { dx:  16, dy: -44, e: '⭐' },
+]
+
+function BuyParticles() {
+  return (
+    <span className={styles.buyParticles} aria-hidden="true">
+      {BUY_PARTICLE_DIRS.map((d, i) => (
+        <span key={i} className={styles.buyParticle}
+          style={{ '--dx': `${d.dx}px`, '--dy': `${d.dy}px` } as CSSProperties}>
+          {d.e}
+        </span>
+      ))}
+    </span>
+  )
 }
 
 function useTurnTimer(activeId: string | undefined, phase: string | undefined): number {
@@ -85,6 +107,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const hasPropActions = myProps.length > 0
 
   const [activeTab, setActiveTab] = useState<'action' | 'properties'>('action')
+  const [buyBurst, setBuyBurst] = useState(false)
 
   // Auto-switch to action tab when it becomes my turn
   useEffect(() => {
@@ -143,6 +166,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
           {t.propertiesTabLabel}
           {mortgagedCount > 0 && <span className={styles.tabBadge}>{mortgagedCount}</span>}
         </button>
+        <span aria-hidden="true" className={`${styles.tabIndicator} ${activeTab === 'properties' ? styles.tabIndicatorRight : ''}`} />
       </div>
     )
   }
@@ -286,14 +310,19 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         <TabBar />
         {activeTab === 'action' ? (
           <>
-            <div className={styles.propBuyCard} style={color ? { borderLeftColor: color, borderLeftWidth: 7 } : {}}>
+            <div className={`${styles.propBuyCard} ${buyBurst ? styles.propBuyBurst : ''}`} style={color ? { borderLeftColor: color, borderLeftWidth: 7 } : {}}>
+              {buyBurst && <BuyParticles />}
               <span className={styles.propBuyName}>{spot?.name ?? p.propertyDisplayName}</span>
               <span className={styles.propBuyPrice}>{t.priceLabel(p.price)}</span>
             </div>
             {!canAfford && <div className={styles.warningBox}>{t.insufficientFunds}</div>}
             <div className={styles.btnRow}>
               <Btn label={t.buyBtn(p.price)} disabled={!canAfford}
-                onClick={() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
+                onClick={() => {
+                  setBuyBurst(true)
+                  setTimeout(() => setBuyBurst(false), 600)
+                  cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })
+                }}
                 variant="primary" testId="action-buy" />
               <Btn label={t.skipToAuction}
                 onClick={() => cmd('DeclineProperty', { decisionId: dec.decisionId, propertyId: p.propertyId })}
