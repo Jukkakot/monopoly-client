@@ -307,7 +307,9 @@ export default function DebugPanel({ sessionId }: Props) {
     if (!diceActive) return
     const { d1, d2, persist } = diceCtx.current
     if (persist && d1 !== null && d2 !== null) {
-      importDebugState(sessionId, { nextDice: [d1, d2] }).catch(() => {})
+      importDebugState(sessionId, { nextDice: [d1, d2] })
+        .then(() => retriggerBot(sessionId).catch(() => {}))
+        .catch(() => {})
     } else {
       setDiceActive(false)
       setDiceD1(null)

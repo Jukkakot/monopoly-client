@@ -37,13 +37,22 @@ export default function LobbyWaitingScreen() {
   const [hostToken] = useState<string | null>(() => {
     try { return localStorage.getItem(`monopoly_host_${sessionId}`) } catch { return null }
   })
-  // Auto-pick a non-taken color when the seat list updates (avoids submitting with a taken color)
+  // Auto-pick a non-taken color and shape when the seat list updates
   useEffect(() => {
     if (alreadyJoined) return
     const takenColors = seats.map(s => s.tokenColorHex?.toUpperCase())
     if (takenColors.includes(color.toUpperCase())) {
       const free = PRESET_COLORS.find(c => !takenColors.includes(c.toUpperCase()))
       if (free) setColor(free)
+    }
+    const takenShapes = sessionId
+      ? seats.map((s, _) => {
+          try { return localStorage.getItem(`token-shape-${sessionId}-${s.playerId}`) } catch { return null }
+        }).filter(Boolean)
+      : []
+    if (takenShapes.includes(tokenShape)) {
+      const free = ALL_SHAPES.find(s => !takenShapes.includes(s.key))
+      if (free) setTokenShape(free.key)
     }
   }, [seats]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -87,6 +96,12 @@ export default function LobbyWaitingScreen() {
 
   async function handleJoin() {
     if (!sessionId || !name.trim()) return
+    const takenNames = seats.map(s => s.displayName?.trim().toLowerCase()).filter(Boolean)
+    const takenColors = seats.map(s => s.tokenColorHex?.toUpperCase()).filter(Boolean)
+    const takenShapes = seats.map(s => { try { return localStorage.getItem(`token-shape-${sessionId}-${s.playerId}`) } catch { return null } }).filter(Boolean)
+    if (takenNames.includes(name.trim().toLowerCase())) { setError(t.duplicateNameErr ?? 'Nimi on jo käytössä'); return }
+    if (takenColors.includes(color.toUpperCase())) { setError(t.duplicateColorErr ?? 'Väri on jo käytössä'); return }
+    if (takenShapes.includes(tokenShape)) { setError(t.duplicateShapeErr ?? 'Symboli on jo käytössä'); return }
     setError(null)
     setJoining(true)
     try {

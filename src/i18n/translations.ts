@@ -204,6 +204,9 @@ export interface T {
   nameRequiredErr: string
   minPlayersErr: string
   colorsUniqueErr: string
+  duplicateNameErr: string
+  duplicateColorErr: string
+  duplicateShapeErr: string
   lobbyFailedErr: (e: string) => string
   sessionFailedErr: (e: string) => string
   serverBusyErr: string
@@ -593,6 +596,9 @@ const fi: T = {
   nameRequiredErr: 'Kaikilla pelaajilla pitää olla nimi.',
   minPlayersErr: 'Pelissä täytyy olla vähintään 2 pelaajaa.',
   colorsUniqueErr: 'Jokaisella pelaajalla pitää olla eri väri.',
+  duplicateNameErr: 'Nimi on jo käytössä — valitse toinen nimi.',
+  duplicateColorErr: 'Väri on jo käytössä — valitse toinen väri.',
+  duplicateShapeErr: 'Symboli on jo käytössä — valitse toinen symboli.',
   lobbyFailedErr: (e) => `Odotushuoneen luonti epäonnistui: ${e}`,
   sessionFailedErr: (e) => `Sessio ei onnistunut: ${e}`,
   serverBusyErr: 'Palvelin on juuri nyt kuormittunut — yritä hetken kuluttua uudelleen.',
@@ -992,6 +998,9 @@ const en: T = {
   nameRequiredErr: 'All players must have a name.',
   minPlayersErr: 'The game requires at least 2 players.',
   colorsUniqueErr: 'Each player must have a unique color.',
+  duplicateNameErr: 'Name already taken — choose a different name.',
+  duplicateColorErr: 'Color already taken — choose a different color.',
+  duplicateShapeErr: 'Symbol already taken — choose a different symbol.',
   lobbyFailedErr: (e) => `Failed to create waiting room: ${e}`,
   sessionFailedErr: (e) => `Session failed: ${e}`,
   serverBusyErr: 'The server is under heavy load right now — please try again in a moment.',
