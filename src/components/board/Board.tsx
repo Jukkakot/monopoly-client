@@ -562,55 +562,33 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardBubbleIcon = isChanceCard ? '?' : '🏙'
   const cardBubbleTypeLabel = isChanceCard ? 'Sattuma' : 'Yhteinen kassa'
 
-  // Find the Chance/Community square where the card was drawn.
-  // For non-move cards the player stays at the spot (boardIndex IS the spot).
-  // For move cards the player has already jumped to the destination — walk backwards
-  // (or forwards for MOVE_BACK_3) around the board until we hit the right spot type.
-  const CHANCE_SPOTS = new Set([7, 22, 36])
-  const COMMUNITY_SPOTS = new Set([2, 17, 33])
-  function findCardSpotIdx(destIdx: number, isChance: boolean, isBack3: boolean): number {
-    const targets = isChance ? CHANCE_SPOTS : COMMUNITY_SPOTS
-    if (targets.has(destIdx)) return destIdx           // already at the spot
-    const step = isBack3 ? 1 : -1                      // back-3 → walk forward to find spot
-    let pos = destIdx
-    for (let i = 0; i < 40; i++) {
-      pos = (pos + step + 40) % 40
-      if (targets.has(pos)) return pos
-    }
-    return destIdx
-  }
+  // Freeze the bubble position once when WAITING_FOR_CARD_ACK first becomes active.
+  // Backend guarantees the player is still at the card spot at that moment (move happens only after ACK).
+  // Position never recalculates — the bubble is pinned to the spot for the entire ack phase + linger.
+  type CardPos = { x: string; y: string; tailDir: 'top' | 'bottom' | 'left' | 'right' }
+  const frozenCardPosRef = useRef<CardPos | null>(null)
+  const prevIsCardAckRef = useRef(false)
 
-  const cardBubblePos = useMemo(() => {
-    if (!cardBubbleText || !activeTurnPlayer) return null
-    const isBack3 = (state.lastCardKey ?? '').includes(':MOVE_BACK_3:')
-    const sourceIdx = findCardSpotIdx(activeTurnPlayer.boardIndex, isChanceCard, isBack3)
-    const { row, col } = indexToGridPos(sourceIdx)
-    const cellW = 1 / 11  // one cell as fraction of board
-
-    let tailDir: 'top' | 'bottom' | 'left' | 'right'
-    let ax: number  // anchor x (0–1)
-    let ay: number  // anchor y (0–1)
-
+  if (isCardAck && !prevIsCardAckRef.current && activeTurnPlayer) {
+    const { row, col } = indexToGridPos(activeTurnPlayer.boardIndex)
+    const cellW = 1 / 11
+    let tailDir: CardPos['tailDir']
+    let ax: number
+    let ay: number
     if (row === 11) {
-      tailDir = 'bottom'
-      ax = (col - 0.5) * cellW        // cell center horizontally
-      ay = (row - 1) * cellW           // TOP edge of bottom row = inner border
+      tailDir = 'bottom'; ax = (col - 0.5) * cellW; ay = (row - 1) * cellW
     } else if (row === 1) {
-      tailDir = 'top'
-      ax = (col - 0.5) * cellW
-      ay = row * cellW                 // BOTTOM edge of top row = inner border
+      tailDir = 'top'; ax = (col - 0.5) * cellW; ay = row * cellW
     } else if (col === 11) {
-      tailDir = 'right'
-      ax = (col - 1) * cellW           // LEFT edge of right col = inner border
-      ay = (row - 0.5) * cellW
+      tailDir = 'right'; ax = (col - 1) * cellW; ay = (row - 0.5) * cellW
     } else {
-      tailDir = 'left'
-      ax = col * cellW                 // RIGHT edge of left col = inner border
-      ay = (row - 0.5) * cellW
+      tailDir = 'left'; ax = col * cellW; ay = (row - 0.5) * cellW
     }
+    frozenCardPosRef.current = { x: `${ax * 100}%`, y: `${ay * 100}%`, tailDir }
+  }
+  prevIsCardAckRef.current = isCardAck
 
-    return { x: `${ax * 100}%`, y: `${ay * 100}%`, tailDir }
-  }, [cardBubbleText, activeTurnPlayer, isChanceCard, state.lastCardKey])
+  const cardBubblePos = frozenCardPosRef.current
 
   const isMyCardAck = isCardAck && state.turn?.activePlayerId === gameState.myPlayerId
 
@@ -620,12 +598,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const cardWasMineRef = useRef(false)
   const lingerInfoRef = useRef<{
     text: string; isChance: boolean; typeLabel: string; icon: string; playerName: string
-    pos: { x: string; y: string; tailDir: 'top' | 'bottom' | 'left' | 'right' }
+    pos: CardPos
   } | null>(null)
   const [lingerActive, setLingerActive] = useState(false)
   const lingerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Save bot card display info during render so linger can restore it after phase changes
+  // Save bot card display info during render so linger can restore it after phase changes.
+  // Uses frozenCardPosRef so position is always the spot where the card was drawn.
   if (isCardAck && !isMyCardAck && cardBubbleText && cardBubblePos && activeTurnPlayer) {
     lingerInfoRef.current = {
       text: cardBubbleText,
