@@ -40,8 +40,9 @@ function loadMobileBoardHeight(): number {
     const v = localStorage.getItem('monopoly_mobile_board_height')
     if (v) { const n = parseInt(v); if (n >= MOBILE_BOARD_H_MIN && n <= MOBILE_BOARD_H_MAX) return n }
   } catch {}
+  // Cap at 50% of screen height so the action area below is always reachable
   return typeof window !== 'undefined'
-    ? Math.min(MOBILE_BOARD_H_MAX, Math.max(MOBILE_BOARD_H_MIN, window.innerWidth))
+    ? Math.min(MOBILE_BOARD_H_MAX, Math.max(MOBILE_BOARD_H_MIN, Math.min(window.innerWidth, Math.floor(window.innerHeight * 0.5))))
     : 320
 }
 
