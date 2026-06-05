@@ -5,7 +5,7 @@ import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
@@ -256,6 +256,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const jailingPlayers = useJailingPlayers()
   const cardJumpingPlayers = useCardJumpingPlayers()
   const steppingPlayers = useSteppingPlayers()
+  const landingPlayers = useLandingPlayers()
   const animatingPlayers = useAnimatingPlayers()
   const { state: gameState, sendCmd } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
@@ -283,6 +284,18 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       setDiceRollKey(k => k + 1)
     }
   }, [diceStr])
+
+  // GO corner flash: briefly highlight GO spot when any player passes it
+  const [goFlashing, setGoFlashing] = useState(false)
+  const lastPassedGoIdRef = useRef(-1)
+  useEffect(() => {
+    const newGo = gameState.events.filter(e => e.icon === '💰' && e.id > lastPassedGoIdRef.current)
+    if (newGo.length === 0) return
+    lastPassedGoIdRef.current = Math.max(...newGo.map(e => e.id))
+    setGoFlashing(true)
+    const tid = setTimeout(() => setGoFlashing(false), 750)
+    return () => clearTimeout(tid)
+  }, [gameState.events])
 
   // Dice zoom: zoom to board center when new dice arrive, hold until first token step.
   // diceZoomBlockRef prevents animatedPositions/animatingPlayers effects from overriding
@@ -688,6 +701,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             jailingPlayers={jailingPlayers}
             cardJumpingPlayers={cardJumpingPlayers}
             steppingPlayers={steppingPlayers}
+            landingPlayers={landingPlayers}
+            goFlash={goFlashing && spot.id === 'GO_SPOT'}
             highlighted={isSelected ? 'selected' : isGroupHighlighted ? 'group' : undefined}
           />
         )

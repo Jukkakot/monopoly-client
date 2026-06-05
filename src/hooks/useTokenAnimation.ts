@@ -26,6 +26,7 @@ const _animatingPlayers = new Set<string>()
 const _jailingPlayers = new Set<string>()
 const _cardJumpingPlayers = new Set<string>()
 const _steppingPlayers = new Set<string>()  // briefly set on each step landing
+const _landingPlayers = new Set<string>()   // briefly set on final destination landing
 const _listeners = new Set<() => void>()
 
 function notifyListeners() {
@@ -63,6 +64,15 @@ function flashPlayerStepping(pid: string) {
     _steppingPlayers.delete(pid)
     notifyListeners()
   }, cfg().stepHopCssMs)
+}
+
+function flashPlayerLanding(pid: string) {
+  _landingPlayers.add(pid)
+  notifyListeners()
+  setTimeout(() => {
+    _landingPlayers.delete(pid)
+    notifyListeners()
+  }, cfg().landingCssMs)
 }
 
 // Non-hook: read animation state outside React render cycle (for snapshot queue)
@@ -130,6 +140,17 @@ export function useSteppingPlayers(): Set<string> {
     return () => { _listeners.delete(update) }
   }, [])
   return stepping
+}
+
+// Hook: returns set of playerIds who just landed on their final destination
+export function useLandingPlayers(): Set<string> {
+  const [landing, setLanding] = useState(() => new Set<string>(_landingPlayers))
+  useEffect(() => {
+    const update = () => setLanding(new Set(_landingPlayers))
+    _listeners.add(update)
+    return () => { _listeners.delete(update) }
+  }, [])
+  return landing
 }
 
 // Returns animated positions: Map<playerId, displayIndex>
@@ -283,6 +304,7 @@ export function useTokenAnimation(): Map<string, number> {
       if (queue.length === 0) {
         localAnimatingRef.current.delete(pid)
         setPlayerAnimating(pid, false)
+        flashPlayerLanding(pid)
         return
       }
       const next = queue[0]

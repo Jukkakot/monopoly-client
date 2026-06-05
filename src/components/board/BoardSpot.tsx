@@ -18,6 +18,8 @@ interface Props {
   jailingPlayers?: Set<string>
   cardJumpingPlayers?: Set<string>
   steppingPlayers?: Set<string>
+  landingPlayers?: Set<string>
+  goFlash?: boolean
   highlighted?: 'selected' | 'group'
 }
 
@@ -49,13 +51,14 @@ const ROTATION: Record<string, string> = {
 }
 
 
-function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumpingPlayers, steppingPlayers }: {
+function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumpingPlayers, steppingPlayers, landingPlayers }: {
   players: PlayerSnapshot[]
   seats: SeatState[]
   tokenShapes?: Map<string, TokenShape>
   jailingPlayers?: Set<string>
   cardJumpingPlayers?: Set<string>
   steppingPlayers?: Set<string>
+  landingPlayers?: Set<string>
 }) {
   if (!players.length) return null
   return (
@@ -65,9 +68,11 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
         const shape = tokenShapes?.get(p.playerId) ?? 'circle'
         const isJailing = jailingPlayers?.has(p.playerId) ?? false
         const isCardJumping = cardJumpingPlayers?.has(p.playerId) ?? false
+        const isLanding = landingPlayers?.has(p.playerId) ?? false
         const isStepping = steppingPlayers?.has(p.playerId) ?? false
         const animClass = isJailing ? styles.jailArrive
           : isCardJumping ? styles.cardArrive
+          : isLanding ? styles.tokenLand
           : isStepping ? styles.stepHop
           : undefined
         return (
@@ -83,19 +88,19 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
   )
 }
 
-function GoCorner({ players, seats, tokenShapes, steppingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string> }) {
+function GoCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers, goFlash }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string>; landingPlayers?: Set<string>; goFlash?: boolean }) {
   const t = useT()
   return (
-    <div className={`${styles.corner} ${styles.goCorner}`}>
+    <div className={`${styles.corner} ${styles.goCorner} ${goFlash ? styles.goCornerFlash : ''}`}>
       <div className={styles.goArrow}>→</div>
       <div className={styles.goText}>GO</div>
       <div className={styles.goSub}>{t.goCollect}</div>
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} />
     </div>
   )
 }
 
-function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; jailingPlayers?: Set<string>; steppingPlayers?: Set<string> }) {
+function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; jailingPlayers?: Set<string>; steppingPlayers?: Set<string>; landingPlayers?: Set<string> }) {
   const t = useT()
   const jailed = players.filter(p => p.inJail)
   const visiting = players.filter(p => !p.inJail)
@@ -123,39 +128,39 @@ function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlaye
       {visiting.length > 0 && (
         <>
           <div className={styles.jailSub}>{t.visitingLabel}</div>
-          <PlayerTokens players={visiting} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} />
+          <PlayerTokens players={visiting} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} />
         </>
       )}
     </div>
   )
 }
 
-function ParkingCorner({ players, seats, tokenShapes, steppingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string> }) {
+function ParkingCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string>; landingPlayers?: Set<string> }) {
   const t = useT()
   return (
     <div className={`${styles.corner} ${styles.parkingCorner}`}>
       <div className={styles.cornerSymbol}>🅿</div>
       <div className={styles.cornerLabel}>{t.freeParkingLine1}</div>
       <div className={styles.cornerLabel}>{t.freeParkingLine2}</div>
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} />
     </div>
   )
 }
 
-function GoJailCorner({ players, seats, tokenShapes, steppingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string> }) {
+function GoJailCorner({ players, seats, tokenShapes, steppingPlayers, landingPlayers }: { players: PlayerSnapshot[]; seats: SeatState[]; tokenShapes?: Map<string, TokenShape>; steppingPlayers?: Set<string>; landingPlayers?: Set<string> }) {
   const t = useT()
   return (
     <div className={`${styles.corner} ${styles.goJailCorner}`}>
       <div className={styles.cornerSymbol}>👮</div>
       <div className={styles.cornerLabel}>{t.goToJailLine1}</div>
       <div className={styles.cornerLabel}>{t.goToJailLine2}</div>
-      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} />
+      <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} />
     </div>
   )
 }
 
 function BoardSpot(props: Props) {
-  const { spot, index, property, players, seats, onClick, tokenShapes, jailingPlayers, cardJumpingPlayers, steppingPlayers, highlighted } = props
+  const { spot, index, property, players, seats, onClick, tokenShapes, jailingPlayers, cardJumpingPlayers, steppingPlayers, landingPlayers, goFlash, highlighted } = props
   const { row, col } = indexToGridPos(index)
   const side = getSide(index)
 
@@ -166,10 +171,10 @@ function BoardSpot(props: Props) {
 
   if (side === 'corner') {
     const inner =
-      spot.id === 'GO_SPOT'      ? <GoCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} /> :
-      spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} steppingPlayers={steppingPlayers} /> :
-      spot.id === 'FREE_PARKING' ? <ParkingCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} /> :
-                                   <GoJailCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} />
+      spot.id === 'GO_SPOT'      ? <GoCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} goFlash={goFlash} /> :
+      spot.id === 'JAIL'         ? <JailCorner players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} /> :
+      spot.id === 'FREE_PARKING' ? <ParkingCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} /> :
+                                   <GoJailCorner players={players} seats={seats} tokenShapes={tokenShapes} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} />
     return <div className={styles.cornerWrapper} style={{ ...gridStyle, zIndex: players.length > 0 ? 10 : 1 }}>{inner}</div>
   }
 
@@ -231,7 +236,7 @@ function BoardSpot(props: Props) {
     </div>
     {/* Tokens rendered outside the rotated .spot so they sit in spotWrapper's stacking
         context and are never clipped or obscured by the color bar. */}
-    <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} cardJumpingPlayers={cardJumpingPlayers} steppingPlayers={steppingPlayers} />
+    <PlayerTokens players={players} seats={seats} tokenShapes={tokenShapes} jailingPlayers={jailingPlayers} cardJumpingPlayers={cardJumpingPlayers} steppingPlayers={steppingPlayers} landingPlayers={landingPlayers} />
     </div>
   )
 }
@@ -245,7 +250,9 @@ function spotPropsEqual(prev: Props, next: Props): boolean {
     prev.highlighted === next.highlighted &&
     prev.jailingPlayers === next.jailingPlayers &&
     prev.cardJumpingPlayers === next.cardJumpingPlayers &&
-    prev.steppingPlayers === next.steppingPlayers
+    prev.steppingPlayers === next.steppingPlayers &&
+    prev.landingPlayers === next.landingPlayers &&
+    prev.goFlash === next.goFlash
   )
 }
 

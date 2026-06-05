@@ -135,6 +135,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   // Animation: bankruptcy collapse
   const [justBankrupt, setJustBankrupt] = useState(new Set<string>())
   const prevBankruptRef = useRef(new Set<string>())
+  // Animation: turn-start highlight on active player's cash chip
+  const [turnFlashId, setTurnFlashId] = useState<string | null>(null)
+  const prevActivePlayerIdRef = useRef<string | null>(null)
 
   const dragStartX = useRef<number | null>(null)
   const dragStartW = useRef<number>(sidebarWidth)
@@ -307,6 +310,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
     if (deltasToAdd.length > 0) setCashDeltas(d => [...d, ...deltasToAdd])
     if (newBankrupt.length > 0) setJustBankrupt(s => new Set([...s, ...newBankrupt]))
+
+    const activeId = snap.turn?.activePlayerId ?? null
+    if (activeId && activeId !== prevActivePlayerIdRef.current) {
+      prevActivePlayerIdRef.current = activeId
+      setTurnFlashId(activeId)
+      setTimeout(() => setTurnFlashId(null), 700)
+    }
   }, [snap]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isMyTurn = !!(snap && snap.turn &&
@@ -440,6 +450,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                         p.bankrupt ? styles.cashChipBankrupt : '',
                         cashDeltas.some(d => d.playerId === p.playerId) ? styles.cashChipShake : '',
                         justBankrupt.has(p.playerId) ? styles.cashChipBankruptAnim : '',
+                        turnFlashId === p.playerId ? styles.cashChipTurnStart : '',
                       ].join(' ')}
                       onClick={() => setCashPopupPlayerId(p.playerId)}
                     >

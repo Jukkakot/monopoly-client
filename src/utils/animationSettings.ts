@@ -5,6 +5,7 @@ export interface AnimationConfig {
   stepMs: number
   stepJitter: number
   stepHopCssMs: number
+  landingCssMs: number
   jailArriveCssMs: number
   cardArriveCssMs: number
   jailBlockMin: number
@@ -19,6 +20,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     stepMs: 40,
     stepJitter: 0,
     stepHopCssMs: 20,
+    landingCssMs: 100,
     jailArriveCssMs: 50,
     cardArriveCssMs: 30,
     jailBlockMin: 80,
@@ -31,6 +33,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     stepMs: 390,
     stepJitter: 60,
     stepHopCssMs: 280,
+    landingCssMs: 480,
     jailArriveCssMs: 700,
     cardArriveCssMs: 500,
     jailBlockMin: 600,
@@ -43,6 +46,7 @@ const CONFIGS: Record<AnimationSpeed, AnimationConfig> = {
     stepMs: 750,
     stepJitter: 80,
     stepHopCssMs: 550,
+    landingCssMs: 900,
     jailArriveCssMs: 1400,
     cardArriveCssMs: 900,
     jailBlockMin: 1200,
@@ -99,6 +103,7 @@ export function applyAnimationSpeedToCss(speed: AnimationSpeed) {
   const cfg = CONFIGS[speed]
   const root = document.documentElement
   root.style.setProperty('--anim-hop-ms', `${cfg.stepHopCssMs}ms`)
+  root.style.setProperty('--anim-land-ms', `${cfg.landingCssMs}ms`)
   root.style.setProperty('--anim-jail-ms', `${cfg.jailArriveCssMs}ms`)
   root.style.setProperty('--anim-card-ms', `${cfg.cardArriveCssMs}ms`)
 }
