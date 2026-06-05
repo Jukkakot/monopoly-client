@@ -473,9 +473,12 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
       if (!diceZoomBlockRef.current) {
         const pid = stateRef.current.turn?.activePlayerId
         if (pid && animatingPlayers.has(pid) && shouldZoomForPlayer(pid)) {
-          const startPos = animatedPositions.get(pid)
-            ?? stateRef.current.players.find(p => p.playerId === pid)?.boardIndex
-          if (startPos !== undefined) setZoomedSpot(startPos)
+          const player = stateRef.current.players.find(p => p.playerId === pid)
+          // Skip pre-zoom for jailed players — they may not move, zoom follows if they do
+          if (!player?.inJail) {
+            const startPos = animatedPositions.get(pid) ?? player?.boardIndex
+            if (startPos !== undefined) setZoomedSpot(startPos)
+          }
         }
       }
     }

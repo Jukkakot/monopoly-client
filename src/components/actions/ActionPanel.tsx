@@ -254,9 +254,24 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       sendCmd={sendCmd} />
   }
 
-  // Auction
+  // Auction — allow switching to properties tab to mortgage during auction
   if (state.auctionState) {
-    return <AuctionSection state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+    if (activeTab === 'properties' && hasPropActions) {
+      return (
+        <div className={`${styles.panel} ${styles.myTurnPanel}`}>
+          <TabBar />
+          <BuildingButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
+        </div>
+      )
+    }
+    return (
+      <AuctionSection
+        state={state}
+        myPlayerId={myPlayerId}
+        sendCmd={sendCmd}
+        header={hasPropActions ? <TabBar /> : undefined}
+      />
+    )
   }
 
   // Buy decision
@@ -696,8 +711,8 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
 // Auction
 // ─────────────────────────────────────────────────────────────────────────────
 
-function AuctionSection({ state, myPlayerId, sendCmd }: {
-  state: SessionState; myPlayerId: string | null; sendCmd: (c: object) => void
+function AuctionSection({ state, myPlayerId, sendCmd, header }: {
+  state: SessionState; myPlayerId: string | null; sendCmd: (c: object) => void; header?: React.ReactNode
 }) {
   const t = useT()
   const sid = state.sessionId
@@ -722,6 +737,7 @@ function AuctionSection({ state, myPlayerId, sendCmd }: {
 
   return (
     <div className={styles.panel}>
+      {header}
       {/* Property header — label inline left of chip */}
       <div className={styles.auctionPropHeader}>
         {auction.status !== 'WON_PENDING_RESOLUTION' && (
