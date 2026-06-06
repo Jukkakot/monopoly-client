@@ -662,25 +662,20 @@
   letter-spacing: 0.5px;
 }
 
-.tradeMoney {
+.moneyStepper {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 5px 8px;
-  background: #f5f5f5;
-  border-radius: 6px;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 0;
 }
 
-.tradeMoneyAmt {
-  font-size: 1rem;
+.moneyStepperAmt {
+  flex: 1;
+  text-align: center;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #222;
-}
-
-.tradeMoneyEmpty {
-  font-size: 0.72rem;
-  color: #aaa;
-  font-style: italic;
+  min-width: 0;
 }
 
 .moneyBtns {
@@ -702,16 +697,31 @@
   border-color: #e57373 !important;
   background: #fff5f5;
   color: #c62828;
+  padding: 5px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1.5px solid;
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 32px;
 }
-.moneyBtnMinus:hover { background: #ffebee; }
+.moneyBtnMinus:hover:not(:disabled) { background: #ffebee; }
 .moneyBtnPlus {
   border-color: #81c784 !important;
   background: #f1f8e9;
   color: #2e7d32;
+  padding: 5px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1.5px solid;
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 32px;
 }
-.moneyBtnPlus:hover { background: #e8f5e9; }
+.moneyBtnPlus:hover:not(:disabled) { background: #e8f5e9; }
 
-.moneyBtns button:disabled { opacity: 0.3; cursor: default; }
+.moneyBtnMinus:disabled,
+.moneyBtnPlus:disabled { opacity: 0.3; cursor: default; }
 
 /* Value balance indicator */
 .tradeBalance {
@@ -1435,12 +1445,8 @@ button.tradePropChip:active { filter: brightness(0.84); }
   .myStats { display: none; }
 }
 
-/* ── Small phone (<480px): stack trade columns vertically ── */
+/* ── Small phone (<480px) ── */
 @media (max-width: 479px) {
-  .tradeColumns {
-    flex-direction: column;
-  }
-
   .buildRow {
     flex-wrap: wrap;
     gap: 8px;
