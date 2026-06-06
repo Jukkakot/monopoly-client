@@ -30,20 +30,23 @@ test('spectator sees active player and phase in action panel', async ({ page }) 
 })
 
 test('player cash values update in the player list', async ({ page }) => {
-  const sid = await createBotSession(2)
+  // Human session + human's turn: bot never acts (not its turn), so the injected cash
+  // values persist until the assertion completes. Bot-only + fast bots fail because
+  // the bot rolls immediately and overwrites the injected values via SSE.
+  const { sid, humanPlayerId } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'fast')
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 
     const snap0 = await getSnapshot(sid)
+    const humanSeat = snap0.state!.players.findIndex(p => p.playerId === humanPlayerId)
     await injectState(sid, buildPatch({
       description: '', rules: [],
       players: [
         { cash: 777, boardIndex: 0  },
         { cash: 333, boardIndex: 10 },
       ],
-      turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
+      turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
       expectedAfter: {},
     }, snap0))
 

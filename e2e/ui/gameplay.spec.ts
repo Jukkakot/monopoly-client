@@ -89,19 +89,24 @@ test('buy button: Buy-nappi ostaa kiinteistön ja kassa pienenee', async ({ page
 test('SSE tilainjektion kautta: injektoitu kassa ja faasi näkyy UI:ssa', async ({ page }) => {
   // Tests that injectState fires an SSE event that the frontend processes and renders.
   // Uses the same pipeline as all other state changes: inject → SSE → GameContext → DOM.
-  const sid = await createBotSession(2)
+  //
+  // Human session + human's turn: the bot never acts (not its turn), so the injected
+  // cash values persist until the assertion completes. Bot-only sessions with fast bots
+  // fail because the bot rolls immediately and overwrites the injected values.
+  const { sid, humanPlayerId } = await createHumanBotSession()
   try {
-    await setBotSpeed(sid, 'fast')
-    // Navigate BEFORE inject so SSE is already connected when the update fires
+    // Navigate as spectator (no credentials) BEFORE inject so SSE is already connected.
     await page.goto(`/#/game/${sid}`)
     await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
 
     const snap0 = await getSnapshot(sid)
-    // Inject distinctive cash values that are easy to assert in the DOM
+    const humanSeat = humanSeatOf(snap0, humanPlayerId)
+    // Inject distinctive cash values that are easy to assert in the DOM.
+    // Turn is set to the human's seat so the bot has no reason to act.
     await injectState(sid, buildPatch({
       description: '', rules: [],
       players: [{ cash: 555, boardIndex: 0 }, { cash: 777, boardIndex: 10 }],
-      turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
+      turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
       expectedAfter: {},
     }, snap0))
 

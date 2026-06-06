@@ -1,41 +1,44 @@
 import { test, expect, type Page } from '@playwright/test'
-import { createBotSession, getSnapshot, injectState, setBotSpeed, sendCmd, deleteSession } from '../helpers/api'
+import { createHumanBotSession, createTwoHumanSession, getSnapshot, injectState, setBotSpeed, sendCmd, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
-// Bot-only sessions accept any token — navigate as player 0 without real auth.
-async function navigateAsPlayer0(page: Page, sid: string, playerId: string) {
+async function navigateAsHuman(page: Page, sid: string, playerId: string, token: string) {
   await page.goto('/')
-  await page.evaluate(({ sid, playerId }) => {
+  await page.evaluate(({ sid, playerId, token }) => {
     sessionStorage.setItem(`monopoly_player_${sid}`, playerId)
-    sessionStorage.setItem(`monopoly_token_${sid}`, 'bot-no-token')
-  }, { sid, playerId })
+    sessionStorage.setItem(`monopoly_token_${sid}`, token)
+  }, { sid, playerId, token })
   await page.goto(`/#/game/${sid}`)
 }
 
 test('accept trade → ownership swaps visible in player list', async ({ page }) => {
-  const sid = await createBotSession(2)
+  // Two-human session: offerer (p1) sends trade commands via API with their token,
+  // recipient (p2) navigates in the browser and clicks accept. No bots means no race
+  // condition where a fast bot would decline the offer before the page even loads.
+  const { sid, p1: offerer, p2: recipient } = await createTwoHumanSession()
   try {
-    await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
-    const [p0, p1] = snap0.state!.players.map(p => p.playerId)
+    const offererSeat = snap0.state!.players.findIndex(p => p.playerId === offerer.playerId)
+    const recipientSeat = 1 - offererSeat
 
-    // p1 owns B2, p0 owns B1 — p1 offers B2 for B1
     await injectState(sid, buildPatch({
       description: '', rules: [],
-      players: [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 10 }],
-      ownedProperties: { 0: ['B1'], 1: ['B2'] },
-      turn: { seat: 1, phase: 'WAITING_FOR_END_TURN' },
+      players: offererSeat === 0
+        ? [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 10 }]
+        : [{ cash: 1500, boardIndex: 10 }, { cash: 1500, boardIndex: 0 }],
+      ownedProperties: { [offererSeat]: ['B2'], [recipientSeat]: ['B1'] },
+      turn: { seat: offererSeat, phase: 'WAITING_FOR_END_TURN' },
       expectedAfter: {},
     }, snap0))
 
-    await sendCmd(sid, { type: 'OpenTrade', actorPlayerId: p1, recipientPlayerId: p0 })
+    await sendCmd(sid, { type: 'OpenTrade', actorPlayerId: offerer.playerId, playerToken: offerer.playerToken, recipientPlayerId: recipient.playerId })
     const snap1 = await getSnapshot(sid)
     const tradeId = snap1.state!.tradeState!.tradeId
-    await sendCmd(sid, { type: 'EditTradeOffer', actorPlayerId: p1, tradeId, patch: { offeredSide: true, propertyIdsToAdd: ['B2'] } })
-    await sendCmd(sid, { type: 'EditTradeOffer', actorPlayerId: p1, tradeId, patch: { offeredSide: false, propertyIdsToAdd: ['B1'] } })
-    await sendCmd(sid, { type: 'SubmitTradeOffer', actorPlayerId: p1, tradeId })
+    await sendCmd(sid, { type: 'EditTradeOffer', actorPlayerId: offerer.playerId, playerToken: offerer.playerToken, tradeId, patch: { offeredSide: true, propertyIdsToAdd: ['B2'] } })
+    await sendCmd(sid, { type: 'EditTradeOffer', actorPlayerId: offerer.playerId, playerToken: offerer.playerToken, tradeId, patch: { offeredSide: false, propertyIdsToAdd: ['B1'] } })
+    await sendCmd(sid, { type: 'SubmitTradeOffer', actorPlayerId: offerer.playerId, playerToken: offerer.playerToken, tradeId })
 
-    await navigateAsPlayer0(page, sid, p0)
+    await navigateAsHuman(page, sid, recipient.playerId, recipient.playerToken)
 
     // Accept the trade
     await expect(page.getByTestId('action-accept-trade').first()).toBeVisible({ timeout: 8000 })
@@ -49,7 +52,7 @@ test('accept trade → ownership swaps visible in player list', async ({ page })
 })
 
 test('trade editing: submit button disabled when offer is empty', async ({ page }) => {
-  const { sid, humanPlayerId, humanPlayerToken } = await (await import('../helpers/api')).createHumanBotSession()
+  const { sid, humanPlayerId, humanPlayerToken } = await createHumanBotSession()
   try {
     await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
@@ -65,12 +68,7 @@ test('trade editing: submit button disabled when offer is empty', async ({ page 
       expectedAfter: {},
     }, snap0))
 
-    await page.goto('/')
-    await page.evaluate(({ sid, playerId, token }) => {
-      sessionStorage.setItem(`monopoly_player_${sid}`, playerId)
-      sessionStorage.setItem(`monopoly_token_${sid}`, token)
-    }, { sid, playerId: humanPlayerId, token: humanPlayerToken })
-    await page.goto(`/#/game/${sid}`)
+    await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
 
     await expect(page.getByTestId('action-open-trade').first()).toBeVisible({ timeout: 5000 })
     await page.getByTestId('action-open-trade').first().click()
