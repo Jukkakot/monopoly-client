@@ -917,6 +917,7 @@
 
 .tradeOfferSide {
   background: #f5f5f5;
+  border: 1.5px solid transparent;
   border-radius: 8px;
   padding: 8px 7px;
   display: flex;

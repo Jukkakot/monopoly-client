@@ -1327,11 +1327,15 @@ function PlayerName({ name, color, shape, size = 11 }: { name: string; color: st
   )
 }
 
-function TradeSide({ label, side }: { label: ReactNode; side: TradeSelection }) {
+function TradeSide({ label, side, playerColor }: { label: ReactNode; side: TradeSelection; playerColor?: string }) {
   const t = useT()
   const isEmpty = side.moneyAmount === 0 && side.propertyIds.length === 0
+  const sideStyle: CSSProperties = playerColor ? {
+    background: `${playerColor}18`,
+    border: `1.5px solid ${playerColor}55`,
+  } : {}
   return (
-    <div className={styles.tradeOfferSide}>
+    <div className={styles.tradeOfferSide} style={sideStyle}>
       <span className={styles.tradeOfferSideLabel}>{label}</span>
       {isEmpty && <span className={styles.tradeEmptyNote}>{t.tradeNothingLabel}</span>}
       {side.moneyAmount > 0 && <TradeMoneyChip amount={side.moneyAmount} />}
@@ -1381,10 +1385,12 @@ function TradeSpectatorView({ state, statusMsg }: {
         <TradeSide
           label={<><PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>}
           side={offer.offeredToRecipient}
+          playerColor={initiatorSeat?.tokenColorHex}
         />
         <TradeSide
           label={<><PlayerName name={recipient?.name ?? '?'} color={recipientSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.recipientPlayerId ?? '') ?? 'circle'} /> {t.tradeOfferNoun}</>}
           side={offer.requestedFromRecipient}
+          playerColor={recipientSeat?.tokenColorHex}
         />
       </div>
       {statusMsg && <div className={styles.infoBox} style={{ fontSize: '0.8rem' }}>{statusMsg}</div>}
@@ -1420,8 +1426,8 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
       </div>
 
       <div className={styles.tradeOfferGrid}>
-        <TradeSide label={initiatorLabel} side={offer.offeredToRecipient} />
-        <TradeSide label={myLabel} side={offer.requestedFromRecipient} />
+        <TradeSide label={initiatorLabel} side={offer.offeredToRecipient} playerColor={initiatorSeat?.tokenColorHex} />
+        <TradeSide label={myLabel} side={offer.requestedFromRecipient} playerColor={mySeat?.tokenColorHex} />
       </div>
 
       <TradeBalanceBar give={offer.offeredToRecipient} want={offer.requestedFromRecipient} />
