@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo, type CSSProperties } from 'react'
+﻿import { useState, useEffect, useRef, useMemo, type CSSProperties, type ReactNode } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
@@ -1318,7 +1318,16 @@ function TradeMoneyChip({ amount }: { amount: number }) {
   )
 }
 
-function TradeSide({ label, side }: { label: string; side: TradeSelection }) {
+function PlayerName({ name, color, shape, size = 11 }: { name: string; color: string; shape: TokenShape; size?: number }) {
+  return (
+    <>
+      <TokenSvg size={size} color={color} shape={shape} style={{ verticalAlign: 'middle', marginRight: 2 }} />
+      <span style={{ color, fontWeight: 700, textTransform: 'none' }}>{name}</span>
+    </>
+  )
+}
+
+function TradeSide({ label, side }: { label: ReactNode; side: TradeSelection }) {
   const t = useT()
   const isEmpty = side.moneyAmount === 0 && side.propertyIds.length === 0
   return (
@@ -1358,6 +1367,9 @@ function TradeSpectatorView({ state, statusMsg }: {
   const trade = state.tradeState!
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
   const recipient = state.players.find(p => p.playerId === trade.recipientPlayerId)
+  const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
+  const recipientSeat = state.seats.find(s => s.playerId === trade.recipientPlayerId)
+  const tokenShapes = useTokenShapes(state)
   const offer = trade.currentOffer
 
   return (
@@ -1366,8 +1378,14 @@ function TradeSpectatorView({ state, statusMsg }: {
         {t.tradeSpectatorBetween(initiator?.name ?? '?', recipient?.name ?? '?')}
       </div>
       <div className={styles.tradeOfferGrid}>
-        <TradeSide label={initiator?.name ?? '?'} side={offer.offeredToRecipient} />
-        <TradeSide label={recipient?.name ?? '?'} side={offer.requestedFromRecipient} />
+        <TradeSide
+          label={<><PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>}
+          side={offer.offeredToRecipient}
+        />
+        <TradeSide
+          label={<><PlayerName name={recipient?.name ?? '?'} color={recipientSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.recipientPlayerId ?? '') ?? 'circle'} /> {t.tradeOfferNoun}</>}
+          side={offer.requestedFromRecipient}
+        />
       </div>
       {statusMsg && <div className={styles.infoBox} style={{ fontSize: '0.8rem' }}>{statusMsg}</div>}
     </div>
@@ -1381,7 +1399,18 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const sid = state.sessionId
   const trade = state.tradeState!
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
+  const myPlayer = state.players.find(p => p.playerId === myPlayerId)
+  const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
+  const mySeat = state.seats.find(s => s.playerId === myPlayerId)
+  const tokenShapes = useTokenShapes(state)
   const offer = trade.currentOffer
+
+  const initiatorLabel = (
+    <><PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>
+  )
+  const myLabel = (
+    <><PlayerName name={myPlayer?.name ?? '?'} color={mySeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(myPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>
+  )
 
   return (
     <div className={styles.panel}>
@@ -1390,8 +1419,8 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
       </div>
 
       <div className={styles.tradeOfferGrid}>
-        <TradeSide label={t.tradeOffers(initiator?.name ?? '?')} side={offer.offeredToRecipient} />
-        <TradeSide label={t.tradeRequests(initiator?.name ?? '?')} side={offer.requestedFromRecipient} />
+        <TradeSide label={initiatorLabel} side={offer.offeredToRecipient} />
+        <TradeSide label={myLabel} side={offer.requestedFromRecipient} />
       </div>
 
       <TradeBalanceBar give={offer.offeredToRecipient} want={offer.requestedFromRecipient} />

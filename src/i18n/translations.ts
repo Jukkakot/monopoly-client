@@ -99,8 +99,7 @@ export interface T {
   sendOfferBtn: string
   cancelBtn: string
   tradeOfferLabel: string
-  tradeOffers: (name: string) => string
-  tradeRequests: (name: string) => string
+  tradeOfferNoun: string
   tradeNothingLabel: string
   acceptBtn: string
   counterOfferBtn: string
@@ -489,8 +488,7 @@ const fi: T = {
   sendOfferBtn: '📤 Lähetä tarjous',
   cancelBtn: '❌ Peruuta',
   tradeOfferLabel: '🤝 kauppatarjous',
-  tradeOffers: (name) => `${name} tarjoaa`,
-  tradeRequests: (name) => `${name} pyytää`,
+  tradeOfferNoun: 'tarjous',
   tradeNothingLabel: 'ei mitään',
   acceptBtn: '✅ Hyväksy',
   counterOfferBtn: '💬 Vastatarjous',
@@ -894,8 +892,7 @@ const en: T = {
   sendOfferBtn: '📤 Send offer',
   cancelBtn: '❌ Cancel',
   tradeOfferLabel: '🤝 trade offer',
-  tradeOffers: (name) => `${name} offers`,
-  tradeRequests: (name) => `${name} requests`,
+  tradeOfferNoun: 'offer',
   tradeNothingLabel: 'nothing',
   acceptBtn: '✅ Accept',
   counterOfferBtn: '💬 Counter offer',
