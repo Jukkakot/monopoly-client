@@ -887,6 +887,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               type="number" inputMode="numeric" pattern="[0-9]*"
               placeholder={`vapaa tarjous (min €${minBid})`}
               value={customBid}
+              disabled={!isMyTurnToBid}
               onChange={e => setCustomBid(e.target.value)}
             />
             <button className={`${styles.btn} ${styles.info}`} style={{ width: 'auto', padding: '8px 14px' }}
