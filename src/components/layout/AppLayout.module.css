@@ -240,9 +240,15 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0;
+  padding: 7px 10px 10px;
   display: flex;
   flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .mobileActionWrapper {
+    padding-top: 0;
+  }
 }
 
 .mobileHidden {
