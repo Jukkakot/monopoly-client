@@ -1234,8 +1234,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
               ? <span className={styles.tradeMoneyAmt}>€{myOffer.moneyAmount}</span>
               : <span className={styles.tradeMoneyEmpty}>— ei rahaa —</span>}
             <div className={styles.moneyBtns}>
-              {myOffer.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount < 50}>−50</button>}
-              {myOffer.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount < 10}>−10</button>}
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount === 0}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount === 0}>−10</button>
               <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 10 > myCash} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
               <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 50 > myCash} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
             </div>
@@ -1254,8 +1254,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
               ? <span className={styles.tradeMoneyAmt}>€{myRequest.moneyAmount}</span>
               : <span className={styles.tradeMoneyEmpty}>— ei rahaa —</span>}
             <div className={styles.moneyBtns}>
-              {myRequest.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount < 50}>−50</button>}
-              {myRequest.moneyAmount >= 10 && <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount < 10}>−10</button>}
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount === 0}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount === 0}>−10</button>
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
             </div>
