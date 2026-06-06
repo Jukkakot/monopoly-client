@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { loadHapticsEnabled, saveHapticsEnabled } from '../../utils/haptics'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed, loadDiceZoomEnabled, saveDiceZoomEnabled } from '../../utils/animationSettings'
@@ -119,6 +120,10 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
   const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
   const [zoomMode, setZoomMode] = useState<ZoomMode>(loadZoomMode)
   const [diceZoom, setDiceZoom] = useState(loadDiceZoomEnabled)
+  const [haptics, setHaptics] = useState(loadHapticsEnabled)
+  const isMobileWithVibration = typeof navigator !== 'undefined'
+    && 'vibrate' in navigator
+    && window.matchMedia('(pointer: coarse)').matches
   const rtt = usePingRtt()
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
@@ -237,6 +242,19 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
           </div>
           <input type="checkbox" checked={diceZoom}
             onChange={e => { saveDiceZoomEnabled(e.target.checked); setDiceZoom(e.target.checked) }}
+            className={styles.checkbox}
+          />
+        </label>
+      )}
+
+      {isMobileWithVibration && (
+        <label className={styles.toggleRow}>
+          <div className={styles.toggleInfo}>
+            <span className={styles.label}>Tärinäpalaute</span>
+            <span className={styles.desc}>Värinä napeista ja pelin tapahtumista</span>
+          </div>
+          <input type="checkbox" checked={haptics}
+            onChange={e => { saveHapticsEnabled(e.target.checked); setHaptics(e.target.checked) }}
             className={styles.checkbox}
           />
         </label>
