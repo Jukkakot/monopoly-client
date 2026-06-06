@@ -5,7 +5,7 @@ import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers, useIsAnimating, skipAllAnimations } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers, skipAllAnimations } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
@@ -258,7 +258,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const steppingPlayers = useSteppingPlayers()
   const landingPlayers = useLandingPlayers()
   const animatingPlayers = useAnimatingPlayers()
-  const isAnimating = useIsAnimating()
+  const isWalking = [...animatingPlayers].some(pid => !jailingPlayers.has(pid) && !cardJumpingPlayers.has(pid))
   const { state: gameState, sendCmd } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
@@ -763,7 +763,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         {t.zoomOutBtn}
       </button>
     )}
-    {isAnimating && (
+    {isWalking && (
       <button className={styles.skipAnimBtn} onClick={() => {
         skipAllAnimations()
         userZoomedOutRef.current = true
