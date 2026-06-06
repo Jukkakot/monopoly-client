@@ -1,4 +1,10 @@
 import { loadSoundConfig } from '../components/menu/SoundSettings'
+import {
+  hapticButtonClick, hapticDiceRoll, hapticTokenStep, hapticPassGo,
+  hapticBuyProperty, hapticPayRent, hapticGoToJail, hapticDrawCard,
+  hapticBuildHouse, hapticBuildHotel, hapticAuctionBid, hapticAuctionWin,
+  hapticTradeAccepted, hapticTradeDeclined, hapticBankruptcy,
+} from './haptics'
 
 let ctx: AudioContext | null = null
 
@@ -56,6 +62,7 @@ function noise(duration: number, gain = 0.15) {
 // ── Sound effects ─────────────────────────────────────────────────────────────
 
 export function playDiceRoll() {
+  hapticDiceRoll()
   if (!canPlayGame()) return
   // Rattling dice sound: noise burst
   noise(0.12, 0.25)
@@ -64,6 +71,7 @@ export function playDiceRoll() {
 }
 
 export function playTokenMove() {
+  hapticTokenStep()
   if (!canPlayGame()) return
   // Smooth sliding sound - continuous glide
   const c = getCtx()
@@ -172,6 +180,7 @@ export function playTokenMoveCardboardCrunchy() {
 }
 
 export function playPassGo() {
+  hapticPassGo()
   if (!canPlayNotif()) return
   // Happy ascending chord
   chord([523, 659, 784], 0.3, 'sine', 0.4)
@@ -179,12 +188,14 @@ export function playPassGo() {
 }
 
 export function playBuyProperty() {
+  hapticBuyProperty()
   if (!canPlayGame()) return
   chord([392, 494, 587], 0.25, 'sine', 0.35)
   setTimeout(() => beep(784, 0.3, 'sine', 0.3), 220)
 }
 
 export function playPayRent() {
+  hapticPayRent()
   if (!canPlayNotif()) return
   // Minor descending
   beep(440, 0.15, 'sine', 0.25)
@@ -193,28 +204,33 @@ export function playPayRent() {
 }
 
 export function playAuctionBid() {
+  hapticAuctionBid()
   if (!canPlayGame()) return
   beep(660, 0.08, 'square', 0.15)
 }
 
 export function playAuctionWin() {
+  hapticAuctionWin()
   if (!canPlayNotif()) return
   chord([523, 659, 784, 1047], 0.5, 'sine', 0.4)
 }
 
 export function playBuildHouse() {
+  hapticBuildHouse()
   if (!canPlayGame()) return
   beep(440, 0.08, 'triangle', 0.2)
   setTimeout(() => beep(554, 0.1, 'triangle', 0.2), 80)
 }
 
 export function playBuildHotel() {
+  hapticBuildHotel()
   if (!canPlayGame()) return
   chord([523, 659, 784], 0.2, 'triangle', 0.35)
   setTimeout(() => beep(1047, 0.3, 'sine', 0.3), 180)
 }
 
 export function playGoToJail() {
+  hapticGoToJail()
   if (!canPlayNotif()) return
   beep(220, 0.15, 'sawtooth', 0.25)
   setTimeout(() => beep(196, 0.15, 'sawtooth', 0.22), 150)
@@ -228,12 +244,14 @@ export function playReleaseJail() {
 }
 
 export function playDrawCard() {
+  hapticDrawCard()
   if (!canPlayGame()) return
   beep(880, 0.06, 'sine', 0.2)
   setTimeout(() => beep(1108, 0.08, 'sine', 0.2), 60)
 }
 
 export function playBankruptcy() {
+  hapticBankruptcy()
   if (!canPlayNotif()) return
   // Sad descending
   beep(330, 0.2, 'sawtooth', 0.3)
@@ -250,11 +268,13 @@ export function playGameOver() {
 }
 
 export function playTradeAccepted() {
+  hapticTradeAccepted()
   if (!canPlayNotif()) return
   chord([523, 659, 784], 0.3, 'sine', 0.3)
 }
 
 export function playTradeDeclined() {
+  hapticTradeDeclined()
   if (!canPlayNotif()) return
   beep(330, 0.2, 'sine', 0.2)
   setTimeout(() => beep(277, 0.25, 'sine', 0.18), 180)
@@ -267,6 +287,7 @@ export function playMortgage() {
 }
 
 export function playButtonClick() {
+  hapticButtonClick()
   if (!canPlayUi()) return
   beep(660, 0.04, 'square', 0.1)
 }
