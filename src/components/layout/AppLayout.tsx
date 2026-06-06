@@ -124,6 +124,14 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const actionsDragRef = useRef<{ startY: number; startH: number } | null>(null)
   useEffect(() => { actionsHeightRef.current = actionsHeight }, [actionsHeight])
 
+  // Content-height tracking for auto-expand
+  const actionsContentRef = useRef<HTMLDivElement>(null)
+  const [actionsContentH, setActionsContentH] = useState(0)
+  const mobileActionsWrapperRef = useRef<HTMLDivElement>(null)
+  const mobileActionsContentRef = useRef<HTMLDivElement>(null)
+  const [mobileActionsContentH, setMobileActionsContentH] = useState(0)
+  const savedMobileBoardHRef = useRef<number | null>(null)
+
   const [playersSplitPct, setPlayersSplitPct] = useState(() => {
     try { const v = parseInt(localStorage.getItem('monopoly_players_split') ?? ''); return isNaN(v) ? 40 : Math.max(15, Math.min(75, v)) } catch { return 40 }
   })
@@ -319,6 +327,40 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     }
   }, [snap]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Desktop: observe actions content height → display = max(user-drag, content)
+  useEffect(() => {
+    const el = actionsContentRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setActionsContentH(e.contentRect.height))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // Mobile portrait: observe action content; when it overflows the wrapper, shrink the board
+  // by exactly the overflow amount so all content fits without scrolling.
+  useEffect(() => {
+    const content = mobileActionsContentRef.current
+    if (!content) return
+    const ro = new ResizeObserver(([e]) => setMobileActionsContentH(e.contentRect.height))
+    ro.observe(content)
+    return () => ro.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!isMobile || isLandscape || mobileTab !== 'board') return
+    const wrapper = mobileActionsWrapperRef.current
+    if (!wrapper) return
+    const wrapperH = wrapper.clientHeight
+    const overflow = mobileActionsContentH - wrapperH
+    if (overflow > 4) {
+      if (savedMobileBoardHRef.current === null) savedMobileBoardHRef.current = mobileBoardHeightRef.current
+      setMobileBoardHeight(h => Math.max(MOBILE_BOARD_H_MIN, h - overflow))
+    } else if (overflow <= 0 && savedMobileBoardHRef.current !== null) {
+      setMobileBoardHeight(savedMobileBoardHRef.current)
+      savedMobileBoardHRef.current = null
+    }
+  }, [mobileActionsContentH, isMobile, isLandscape, mobileTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const isMyTurn = !!(snap && snap.turn &&
     snap.turn.activePlayerId === state.myPlayerId &&
     snap.status !== 'GAME_OVER')
@@ -408,7 +450,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                 <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
               </div>
               {!actionsCollapsed && (
-                <div className={styles.actionsWrapper} style={{ height: actionsHeight }}>{actions}</div>
+                <div className={styles.actionsWrapper} style={{ height: Math.max(actionsHeight, actionsContentH) }}>
+                  <div ref={actionsContentRef}>{actions}</div>
+                </div>
               )}
             </div>
           )}
@@ -471,11 +515,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           <div className={styles.mobileSection}>
             {/* Only render actions on mobile — desktop renders its own instance above.
                 Keep mounted (not conditionally) so internal state survives tab switches. */}
-            {isMobile && <div className={[
+            {isMobile && <div ref={mobileActionsWrapperRef} className={[
               styles.mobileActionWrapper,
               mobileTab !== 'board' ? styles.mobileHidden : '',
               boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
-            ].join(' ')}>{actions}</div>}
+            ].join(' ')}><div ref={mobileActionsContentRef}>{actions}</div></div>}
             {mobileTab === 'players' && (
               <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
             )}
