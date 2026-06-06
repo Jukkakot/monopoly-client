@@ -132,8 +132,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [mobileActionsContentH, setMobileActionsContentH] = useState(0)
   const savedMobileBoardHRef = useRef<number | null>(null)
 
-  const [playersSplitPct, setPlayersSplitPct] = useState(() => {
-    try { const v = parseInt(localStorage.getItem('monopoly_players_split') ?? ''); return isNaN(v) ? 40 : Math.max(15, Math.min(75, v)) } catch { return 40 }
+  const [playersSplitPx, setPlayersSplitPx] = useState(() => {
+    try { const v = parseInt(localStorage.getItem('monopoly_players_split_px') ?? ''); return isNaN(v) ? 250 : Math.max(60, Math.min(600, v)) } catch { return 250 }
   })
 
   // Animation: cash delta floats + chip shake
@@ -149,9 +149,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
   const dragStartX = useRef<number | null>(null)
   const dragStartW = useRef<number>(sidebarWidth)
-  const splitDragRef = useRef<{ startY: number; startPct: number } | null>(null)
-  const splitPctRef = useRef(playersSplitPct)
-  useEffect(() => { splitPctRef.current = playersSplitPct }, [playersSplitPct])
+  const splitDragRef = useRef<{ startY: number; startPx: number } | null>(null)
+  const splitPxRef = useRef(playersSplitPx)
+  useEffect(() => { splitPxRef.current = playersSplitPx }, [playersSplitPx])
 
   const onDragStart = useCallback((e: React.MouseEvent) => {
     dragStartX.current = e.clientX
@@ -242,19 +242,16 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     }
     function onSplitMove(e: MouseEvent) {
       if (!splitDragRef.current) return
-      const sideEl = document.querySelector('[data-side-section]') as HTMLElement | null
-      if (!sideEl) return
-      const h = sideEl.getBoundingClientRect().height
       const delta = e.clientY - splitDragRef.current.startY
-      const newPct = Math.max(15, Math.min(75, splitDragRef.current.startPct + (delta / h) * 100))
-      setPlayersSplitPct(newPct)
+      const newPx = Math.max(60, Math.min(600, splitDragRef.current.startPx + delta))
+      setPlayersSplitPx(newPx)
     }
     function onSplitUp() {
       if (!splitDragRef.current) return
       splitDragRef.current = null
       document.body.style.cursor = ''
       document.body.style.userSelect = ''
-      try { localStorage.setItem('monopoly_players_split', String(Math.round(splitPctRef.current))) } catch {}
+      try { localStorage.setItem('monopoly_players_split_px', String(Math.round(splitPxRef.current))) } catch {}
     }
     function onActionsMove(e: MouseEvent) {
       if (!actionsDragRef.current) return
@@ -414,11 +411,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               <span className={styles.sideSectionChevron}>{playersCollapsed ? '▸' : '▾'}</span>
             </div>
             {!playersCollapsed && (
-              <div className={styles.playersWrapper} style={{ flexBasis: `${playersSplitPct}%` }}>{players}</div>
+              <div className={styles.playersWrapper} style={{ height: playersSplitPx }}>{players}</div>
             )}
             <div className={styles.sideDivider}
               onMouseDown={!playersCollapsed && !logCollapsed ? e => {
-                splitDragRef.current = { startY: e.clientY, startPct: splitPctRef.current }
+                splitDragRef.current = { startY: e.clientY, startPx: splitPxRef.current }
                 document.body.style.cursor = 'row-resize'
                 document.body.style.userSelect = 'none'
               } : undefined}

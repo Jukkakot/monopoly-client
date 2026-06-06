@@ -659,10 +659,10 @@
     overflow: hidden;
   }
 
-  /* Players: shrinks to content, scrolls if list is very long */
+  /* Players: fixed height (set via inline style, px), does not shrink so the
+     log-section header below stays anchored when the actions panel expands. */
   .playersWrapper {
-    flex-shrink: 1;
-    min-height: 0;
+    flex-shrink: 0;
     overflow-y: auto;
   }
 
