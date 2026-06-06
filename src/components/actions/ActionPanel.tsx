@@ -790,8 +790,8 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
         <PropertyChip id={auction.propertyId} rightText={spotPrice > 0 ? `€${spotPrice}` : undefined} />
       </div>
 
-      {/* Player list */}
-      <div className={styles.auctionPlayerList}>
+      {/* Player list — hidden once auction is resolved */}
+      {auction.status !== 'WON_PENDING_RESOLUTION' && <div className={styles.auctionPlayerList}>
         {auction.eligiblePlayerIds.map(id => {
           const player = state.players.find(p => p.playerId === id)
           const seat = state.seats.find(s => s.playerId === id)
@@ -815,7 +815,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
             </div>
           )
         })}
-      </div>
+      </div>}
 
       {!isEligible && currentActor && auction.status === 'ACTIVE' && (
         <div className={styles.infoBox}>{t.auctionActorWaiting(currentActor.name)}</div>
@@ -831,18 +831,26 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
             return (
               <div className={styles.auctionWonBox} style={{ borderColor: color, background: color + '18' }}>
                 <div className={styles.auctionWonTitle}>
-                  {isMe ? '🏆 Voitit huutokaupan!' : `🏆 ${winner?.name ?? '?'} voitti`}
+                  {isMe ? '🏆 Voitit huutokaupan!' : `🏆 ${winner?.name ?? '?'} voitti huutokaupan`}
                 </div>
                 <div className={styles.auctionWonDetail}>
                   <PropertyChip id={auction.propertyId} />
-                  <span className={styles.auctionWonPrice}>€{auction.currentBid}</span>
+                  <span className={styles.auctionWonPrice}>
+                    {isMe ? `maksat €${auction.currentBid}` : `€${auction.currentBid}`}
+                  </span>
                 </div>
               </div>
             )
           })()}
-          {myPlayerId !== null && myPlayerId === auction.leadingPlayerId && <Btn label={t.auctionConfirmWin}
-            onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
-            variant="primary" />}
+          {myPlayerId !== null && myPlayerId === auction.leadingPlayerId
+            ? <Btn label={t.auctionConfirmWin}
+                onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
+                variant="primary" />
+            : (() => {
+                const winner = state.players.find(p => p.playerId === auction.leadingPlayerId)
+                return <div className={styles.infoBox}>{t.auctionWonWaiting(winner?.name ?? '?')}</div>
+              })()
+          }
         </>
       ) : isEligible ? (
         <>

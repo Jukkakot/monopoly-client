@@ -59,6 +59,7 @@ export interface T {
   auctionListPrice: (v: number) => string
   auctionActorWaiting: (name: string) => string
   auctionConfirmWin: string
+  auctionWonWaiting: (name: string) => string
   placeBidBtn: string
   passAuctionBtn: string
   passAuctionBtnKbd: string
@@ -447,6 +448,7 @@ const fi: T = {
   auctionListPrice: (v) => `🏷 Listahinta €${v}`,
   auctionActorWaiting: (name) => `⏳ ${name} tekee tarjouksen…`,
   auctionConfirmWin: '🏆 Vahvista voitto',
+  auctionWonWaiting: (name) => `⏳ Odotetaan vahvistusta — ${name} vahvistaa ostonsa…`,
   placeBidBtn: 'Tarjoa',
   passAuctionBtn: '🚫 Luovuta',
   passAuctionBtnKbd: '🚫 Luovuta  [P]',
@@ -850,6 +852,7 @@ const en: T = {
   auctionListPrice: (v) => `🏷 List price €${v}`,
   auctionActorWaiting: (name) => `⏳ ${name} is bidding…`,
   auctionConfirmWin: '🏆 Confirm win',
+  auctionWonWaiting: (name) => `⏳ Waiting for confirmation — ${name} is confirming their purchase…`,
   placeBidBtn: 'Bid',
   passAuctionBtn: '🚫 Pass',
   passAuctionBtnKbd: '🚫 Pass  [P]',
