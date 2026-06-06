@@ -1308,11 +1308,12 @@ function TradeMoneyChip({ amount }: { amount: number }) {
 }
 
 function TradeSide({ label, side }: { label: string; side: TradeSelection }) {
+  const t = useT()
   const isEmpty = side.moneyAmount === 0 && side.propertyIds.length === 0
   return (
     <div className={styles.tradeOfferSide}>
       <span className={styles.tradeOfferSideLabel}>{label}</span>
-      {isEmpty && <span className={styles.tradeEmptyNote}>—</span>}
+      {isEmpty && <span className={styles.tradeEmptyNote}>{t.tradeNothingLabel}</span>}
       {side.moneyAmount > 0 && <TradeMoneyChip amount={side.moneyAmount} />}
       <PropertyChipWrap>
         {side.propertyIds.map(id => <TradePropChip key={id} id={id} />)}
@@ -1369,11 +1370,19 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const sid = state.sessionId
   const trade = state.tradeState!
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
+  const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
   const offer = trade.currentOffer
+  const color = initiatorSeat?.tokenColorHex ?? '#888'
 
   return (
     <div className={styles.panel}>
-      <div className={styles.infoBox}>{t.tradeOfferFrom(initiator?.name ?? '?')}</div>
+      <div className={styles.tradeOfferHeader}>
+        <span className={styles.tradeOfferHeaderDot} style={{ background: color }} />
+        <span className={styles.tradeOfferHeaderName} style={{ color }}>
+          {initiator?.name ?? '?'}
+        </span>
+        <span className={styles.tradeOfferHeaderLabel}>{t.tradeOfferLabel}</span>
+      </div>
 
       <div className={styles.tradeOfferGrid}>
         <TradeSide label={t.theyOfferLabel} side={offer.offeredToRecipient} />
@@ -1382,9 +1391,11 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
 
       <TradeBalanceBar give={offer.offeredToRecipient} want={offer.requestedFromRecipient} />
 
-      <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" testId="action-accept-trade" />
+      <div className={styles.btnRow}>
+        <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" testId="action-accept-trade" />
+        <Btn label={t.declineBtn} onClick={() => sendCmd({ type: 'DeclineTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" testId="action-decline-trade" />
+      </div>
       <Btn label={t.counterOfferBtn} onClick={() => sendCmd({ type: 'CounterTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="neutral" testId="action-counter-trade" />
-      <Btn label={t.declineBtn} onClick={() => sendCmd({ type: 'DeclineTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="danger" testId="action-decline-trade" />
     </div>
   )
 }

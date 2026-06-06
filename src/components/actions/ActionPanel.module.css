@@ -883,6 +883,31 @@
 }
 
 /* ── Trade offer visual components ── */
+.tradeOfferHeader {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0 4px;
+}
+
+.tradeOfferHeaderDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tradeOfferHeaderName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tradeOfferHeaderLabel {
+  font-size: 0.78rem;
+  color: #888;
+}
+
 .tradeOfferGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

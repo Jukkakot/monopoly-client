@@ -99,8 +99,10 @@ export interface T {
   sendOfferBtn: string
   cancelBtn: string
   tradeOfferFrom: (initiator: string) => string
+  tradeOfferLabel: string
   theyOfferLabel: string
   theyRequestLabel: string
+  tradeNothingLabel: string
   acceptBtn: string
   counterOfferBtn: string
   declineBtn: string
@@ -488,8 +490,10 @@ const fi: T = {
   sendOfferBtn: '📤 Lähetä tarjous',
   cancelBtn: '❌ Peruuta',
   tradeOfferFrom: (initiator) => `🤝 Kauppatarjous — ${initiator}`,
+  tradeOfferLabel: '🤝 kauppatarjous',
   theyOfferLabel: 'He tarjoavat',
   theyRequestLabel: 'He pyytävät',
+  tradeNothingLabel: 'ei mitään',
   acceptBtn: '✅ Hyväksy',
   counterOfferBtn: '💬 Vastatarjous',
   declineBtn: '❌ Hylkää',
@@ -892,8 +896,10 @@ const en: T = {
   sendOfferBtn: '📤 Send offer',
   cancelBtn: '❌ Cancel',
   tradeOfferFrom: (initiator) => `🤝 Trade offer — ${initiator}`,
+  tradeOfferLabel: '🤝 trade offer',
   theyOfferLabel: 'They offer',
   theyRequestLabel: 'They request',
+  tradeNothingLabel: 'nothing',
   acceptBtn: '✅ Accept',
   counterOfferBtn: '💬 Counter offer',
   declineBtn: '❌ Decline',
