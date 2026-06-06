@@ -435,7 +435,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
             {me?.inJail && (() => {
               const rounds = me.jailRoundsRemaining ?? 0
               const isLastRound = rounds <= 1
-              const hasCard = me.getOutOfJailCards > 0
+              // Both exit options are irrelevant on the last round — the player rolls for free
+              // and is automatically released regardless. Apply isLastRound guard to both.
+              const hasCard = !isLastRound && me.getOutOfJailCards > 0
               const canPay = !isLastRound && me.cash >= 50
               const hasButtons = hasCard || canPay
               return (
@@ -837,7 +839,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               </div>
             )
           })()}
-          {myPlayerId !== null && <Btn label={t.auctionConfirmWin}
+          {myPlayerId !== null && myPlayerId === auction.leadingPlayerId && <Btn label={t.auctionConfirmWin}
             onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
             variant="primary" />}
         </>
@@ -1065,7 +1067,17 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
     return <TradeEditor state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
-  if (status === 'SUBMITTED' && trade.decisionRequiredFromPlayerId === myPlayerId) {
+  // Show TradeReceiver only to the player who genuinely needs to respond:
+  // - status must be SUBMITTED (an offer is waiting)
+  // - the player must be identified as the decision-maker
+  // - the player must NOT be the one who just submitted the (counter-)offer
+  //   (editingPlayerId remains set to the submitter; this prevents a counter-offerer
+  //   from seeing "Accept" on their own counter-offer)
+  if (
+    status === 'SUBMITTED' &&
+    trade.decisionRequiredFromPlayerId === myPlayerId &&
+    trade.editingPlayerId !== myPlayerId
+  ) {
     return <TradeReceiver state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
