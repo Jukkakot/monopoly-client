@@ -904,8 +904,9 @@
 }
 
 .tradeOfferHeaderLabel {
-  font-size: 0.78rem;
-  color: #888;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
 }
 
 .tradeOfferGrid {
