@@ -886,9 +886,11 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               {t.placeBidBtn}
             </button>
           </div>
-          <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
-            onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
-            variant="danger" testId="action-pass-auction" />
+          {isMyTurnToBid && (
+            <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
+              onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
+              variant="danger" testId="action-pass-auction" />
+          )}
         </>
       ) : (
         <div className={styles.infoBox}>{t.waitingForOthers}</div>
