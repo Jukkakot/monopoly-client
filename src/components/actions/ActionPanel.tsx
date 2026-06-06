@@ -828,7 +828,13 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
             const winnerSeat = state.seats.find(s => s.playerId === auction.leadingPlayerId)
             const isMe = myPlayerId !== null && auction.leadingPlayerId === myPlayerId
             const color = winnerSeat?.tokenColorHex ?? '#888'
-            return (
+            return (<>
+              {isMe
+                ? <Btn label={t.auctionConfirmWin}
+                    onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
+                    variant="primary" />
+                : <div className={styles.infoBox}>{t.auctionWonWaiting(winner?.name ?? '?')}</div>
+              }
               <div className={styles.auctionWonBox} style={{ borderColor: color, background: color + '18' }}>
                 <div className={styles.auctionWonTitle}>
                   {isMe ? '🏆 Voitit huutokaupan!' : `🏆 ${winner?.name ?? '?'} voitti huutokaupan`}
@@ -840,17 +846,8 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
                   </span>
                 </div>
               </div>
-            )
+            </>)
           })()}
-          {myPlayerId !== null && myPlayerId === auction.leadingPlayerId
-            ? <Btn label={t.auctionConfirmWin}
-                onClick={() => sendCmd({ type: 'FinishAuctionResolution', sessionId: sid, auctionId: auction.auctionId })}
-                variant="primary" />
-            : (() => {
-                const winner = state.players.find(p => p.playerId === auction.leadingPlayerId)
-                return <div className={styles.infoBox}>{t.auctionWonWaiting(winner?.name ?? '?')}</div>
-              })()
-          }
         </>
       ) : isEligible ? (
         <>
