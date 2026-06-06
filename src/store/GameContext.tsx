@@ -404,12 +404,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'INJECT_DEBUG_SNAPSHOT', snapshot })
   }, [])
 
+  const lastCmdTimeRef = useRef(new Map<string, number>())
+
   const sendCmd = useCallback(async (command: object) => {
     if (!state.sessionId) return
+    const cmdType = (command as { type?: string }).type ?? 'unknown'
+    const now = Date.now()
+    if (now - (lastCmdTimeRef.current.get(cmdType) ?? 0) < 600) return
+    lastCmdTimeRef.current.set(cmdType, now)
     try {
       const sid = state.sessionId
       const playerToken = sessionStorage.getItem(`monopoly_token_${sid}`) ?? undefined
-      const cmdType = (command as { type?: string }).type
       const hostToken = cmdType === 'AbortGame'
         ? (localStorage.getItem(`monopoly_host_${sid}`) ?? undefined)
         : undefined

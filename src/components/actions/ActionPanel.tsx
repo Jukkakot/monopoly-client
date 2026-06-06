@@ -80,11 +80,18 @@ function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId }
   colorHex?: string
   testId?: string
 }) {
+  const [cooldown, setCooldown] = useState(false)
+  function handleClick() {
+    setCooldown(true)
+    setTimeout(() => setCooldown(false), 500)
+    playButtonClick()
+    onClick()
+  }
   return (
-    <button className={`${styles.btn} ${styles[variant]}`} disabled={disabled}
+    <button className={`${styles.btn} ${styles[variant]}`} disabled={disabled || cooldown}
       data-testid={testId}
       style={colorHex ? { borderLeftColor: colorHex, borderLeftWidth: 4, borderLeftStyle: 'solid' } : undefined}
-      onClick={() => { playButtonClick(); onClick() }}>
+      onClick={handleClick}>
       {label}
     </button>
   )
