@@ -1415,7 +1415,8 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   return (
     <div className={styles.panel}>
       <div className={styles.tradeOfferHeader}>
-        <span className={styles.tradeOfferHeaderLabel}>{t.tradeOfferLabel}</span>
+        <PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} size={13} />
+        <span className={styles.tradeOfferHeaderLabel}>{t.tradeMadeOffer}</span>
       </div>
 
       <div className={styles.tradeOfferGrid}>
