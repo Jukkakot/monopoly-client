@@ -5,11 +5,13 @@
  * TradeState fields.  These tests verify the predicate logic without
  * mounting React — no DOM / jsdom required.
  *
+ * Backend contract (TradeCommandHandler.handleSubmit):
+ *   After any submit, editingPlayerId = decisionRequiredFromPlayerId = responderId
+ *   (the OTHER party, never the submitter).
+ *
  * Routing rules (from TradeSection):
  *   1. Show TradeEditor  when: status EDITING|COUNTERED AND editingPlayerId === me
- *   2. Show TradeReceiver when: status SUBMITTED
- *                               AND decisionRequiredFromPlayerId === me
- *                               AND editingPlayerId !== me   ← bug-fix guard
+ *   2. Show TradeReceiver when: status SUBMITTED AND decisionRequiredFromPlayerId === me
  *   3. Otherwise: show waiting / spectator view
  */
 
@@ -32,12 +34,11 @@ function shouldShowEditor(trade: MinimalTradeState, myPlayerId: string): boolean
   )
 }
 
-/** Mirrors the condition used by TradeSection to pick TradeReceiver (post bug-fix) */
+/** Mirrors the condition used by TradeSection to pick TradeReceiver */
 function shouldShowReceiver(trade: MinimalTradeState, myPlayerId: string): boolean {
   return (
     trade.status === 'SUBMITTED' &&
-    trade.decisionRequiredFromPlayerId === myPlayerId &&
-    trade.editingPlayerId !== myPlayerId   // guard: never show accept to the submitter
+    trade.decisionRequiredFromPlayerId === myPlayerId
   )
 }
 
@@ -55,16 +56,19 @@ const stateEditing: MinimalTradeState = {
   recipientPlayerId: B,
 }
 
-/** A has submitted the offer; B must respond */
+/**
+ * A has submitted the offer.
+ * Backend sets editingPlayerId = decisionRequiredFromPlayerId = B (the responder).
+ */
 const stateSubmittedByA: MinimalTradeState = {
   status: 'SUBMITTED',
-  editingPlayerId: A,          // still set to A (the submitter)
+  editingPlayerId: B,
   decisionRequiredFromPlayerId: B,
   initiatorPlayerId: A,
   recipientPlayerId: B,
 }
 
-/** B clicked "Counter" → status COUNTERED, B is now editing */
+/** B clicked "Counter" → status COUNTERED, B is now editing their counter-offer */
 const stateCounteredByB: MinimalTradeState = {
   status: 'COUNTERED',
   editingPlayerId: B,
@@ -75,24 +79,11 @@ const stateCounteredByB: MinimalTradeState = {
 
 /**
  * B submitted their counter-offer.
- * editingPlayerId remains B (the submitter); A must now respond.
- *
- * The pre-fix bug: if backend also set decisionRequiredFromPlayerId = B,
- * the old condition (without editingPlayerId guard) would show TradeReceiver to B.
- * We model the worst-case backend behaviour here to confirm the guard works.
+ * Backend sets editingPlayerId = decisionRequiredFromPlayerId = A (the new responder).
  */
-const stateSubmittedByB_bugged: MinimalTradeState = {
+const stateSubmittedByB: MinimalTradeState = {
   status: 'SUBMITTED',
-  editingPlayerId: B,               // B just submitted
-  decisionRequiredFromPlayerId: B,  // worst-case: backend points back to B
-  initiatorPlayerId: A,
-  recipientPlayerId: B,
-}
-
-/** B submitted counter correctly; A is the decision-maker */
-const stateSubmittedByB_correct: MinimalTradeState = {
-  status: 'SUBMITTED',
-  editingPlayerId: B,
+  editingPlayerId: A,
   decisionRequiredFromPlayerId: A,
   initiatorPlayerId: A,
   recipientPlayerId: B,
@@ -123,24 +114,19 @@ describe('TradeSection routing — shouldShowReceiver', () => {
     expect(shouldShowReceiver(stateSubmittedByA, B)).toBe(true)
   })
 
-  it('A does NOT see TradeReceiver when A just submitted (A is editingPlayerId)', () => {
+  it('A does NOT see TradeReceiver when A submitted — decisionRequired points to B', () => {
     expect(shouldShowReceiver(stateSubmittedByA, A)).toBe(false)
   })
 
-  it('A sees TradeReceiver after B submits counter-offer (correct backend state)', () => {
-    expect(shouldShowReceiver(stateSubmittedByB_correct, A)).toBe(true)
+  it('A sees TradeReceiver after B submits counter-offer (decisionRequired = A)', () => {
+    expect(shouldShowReceiver(stateSubmittedByB, A)).toBe(true)
   })
 
-  it('B does NOT see TradeReceiver after B submits counter-offer — guard prevents accept-own-counter (correct backend state)', () => {
-    expect(shouldShowReceiver(stateSubmittedByB_correct, B)).toBe(false)
+  it('B does NOT see TradeReceiver after B submits counter-offer — decisionRequired points to A', () => {
+    expect(shouldShowReceiver(stateSubmittedByB, B)).toBe(false)
   })
 
-  it('B does NOT see TradeReceiver even when backend incorrectly points decisionRequired back to B', () => {
-    // This is the exact bug scenario: editingPlayerId guard must block B from seeing accept
-    expect(shouldShowReceiver(stateSubmittedByB_bugged, B)).toBe(false)
-  })
-
-  it('Nobody sees TradeReceiver when status is COUNTERED (no offer submitted yet)', () => {
+  it('Nobody sees TradeReceiver when status is COUNTERED (offer not yet submitted)', () => {
     expect(shouldShowReceiver(stateCounteredByB, A)).toBe(false)
     expect(shouldShowReceiver(stateCounteredByB, B)).toBe(false)
   })
@@ -148,7 +134,7 @@ describe('TradeSection routing — shouldShowReceiver', () => {
 
 describe('TradeSection routing — mutual exclusivity', () => {
   it('Editor and Receiver views are mutually exclusive for all states and players', () => {
-    const states = [stateEditing, stateSubmittedByA, stateCounteredByB, stateSubmittedByB_correct, stateSubmittedByB_bugged]
+    const states = [stateEditing, stateSubmittedByA, stateCounteredByB, stateSubmittedByB]
     const players = [A, B]
     for (const state of states) {
       for (const player of players) {

@@ -1067,17 +1067,10 @@ function TradeSection({ state, myPlayerId, sendCmd }: {
     return <TradeEditor state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
-  // Show TradeReceiver only to the player who genuinely needs to respond:
-  // - status must be SUBMITTED (an offer is waiting)
-  // - the player must be identified as the decision-maker
-  // - the player must NOT be the one who just submitted the (counter-)offer
-  //   (editingPlayerId remains set to the submitter; this prevents a counter-offerer
-  //   from seeing "Accept" on their own counter-offer)
-  if (
-    status === 'SUBMITTED' &&
-    trade.decisionRequiredFromPlayerId === myPlayerId &&
-    trade.editingPlayerId !== myPlayerId
-  ) {
+  // Show TradeReceiver to the player who needs to respond.
+  // decisionRequiredFromPlayerId alone is the authoritative signal — the backend
+  // always sets it to the OTHER party (never the submitter), so no extra guard needed.
+  if (status === 'SUBMITTED' && trade.decisionRequiredFromPlayerId === myPlayerId) {
     return <TradeReceiver state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
   }
 
