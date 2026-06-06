@@ -782,13 +782,13 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
   return (
     <div className={styles.panel}>
       {header}
-      {/* Property header — label inline left of chip */}
-      <div className={styles.auctionPropHeader}>
-        {auction.status !== 'WON_PENDING_RESOLUTION' && (
+      {/* Property header — hidden once resolved (property shown in won-box instead) */}
+      {auction.status !== 'WON_PENDING_RESOLUTION' && (
+        <div className={styles.auctionPropHeader}>
           <span className={styles.auctionInlineLabel}>🔨 Huutokaupattavana</span>
-        )}
-        <PropertyChip id={auction.propertyId} rightText={spotPrice > 0 ? `€${spotPrice}` : undefined} />
-      </div>
+          <PropertyChip id={auction.propertyId} rightText={spotPrice > 0 ? `€${spotPrice}` : undefined} />
+        </div>
+      )}
 
       {/* Player list — hidden once auction is resolved */}
       {auction.status !== 'WON_PENDING_RESOLUTION' && <div className={styles.auctionPlayerList}>
