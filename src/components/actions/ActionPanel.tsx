@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, type CSSProperties } from 'react'
+﻿import { useState, useEffect, useRef, useMemo, type CSSProperties } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
@@ -10,6 +10,8 @@ import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sound
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
 import { retriggerBot } from '../../api/sessionApi'
+import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
+import { TokenSvg } from '../board/TokenSvg'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -98,6 +100,14 @@ function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId, 
   )
 }
 
+function useTokenShapes(state: SessionState): Map<string, TokenShape> {
+  return useMemo(() => {
+    const map = new Map<string, TokenShape>()
+    const saved = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
+    for (const seat of state.seats) map.set(seat.playerId, saved[seat.seatIndex] ?? 'circle')
+    return map
+  }, [state.sessionId, state.seats])
+}
 
 export default function ActionPanel({ state, myPlayerId }: Props) {
   const { sendCmd } = useGame()
@@ -768,6 +778,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
   const isEligible = myPlayerId !== null && auction.eligiblePlayerIds.includes(myPlayerId) && !auction.passedPlayerIds.includes(myPlayerId)
   const currentActor = state.players.find(p => p.playerId === auction.currentActorPlayerId)
   const spotPrice = spot?.price ?? 0
+  const tokenShapes = useTokenShapes(state)
 
   function placeBid(amount: number) {
     playAuctionBid()
@@ -804,7 +815,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               className={`${styles.auctionPlayerRow} ${passed ? styles.auctionPlayerRowPassed : ''} ${isActor && !passed ? styles.auctionPlayerRowActor : ''}`}
               style={{ borderLeftColor: color, background: isLeader ? color + '22' : color + '0a' }}
             >
-              <div className={styles.auctionPlayerDot} style={{ background: passed ? '#ccc' : color }} />
+              <TokenSvg size={14} color={passed ? '#ccc' : color} shape={tokenShapes.get(id) ?? 'circle'} />
               <span className={styles.auctionPlayerName}>{player?.name ?? '?'}</span>
               <span className={styles.auctionPlayerRight}>
                 {isLeader && <span className={styles.auctionLeadBid}>€{auction.currentBid}</span>}
@@ -1164,8 +1175,9 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   }
 
   const partnerSeat = state.seats.find(s => s.playerId === partnerId)
-
   const mySeat = state.seats.find(s => s.playerId === myPlayerId)
+  const tokenShapes = useTokenShapes(state)
+  const partnerCash = state.players.find(p => p.playerId === partnerId)?.cash ?? 0
 
   function renderProps(props: typeof myProps, offerSide: boolean, offerData: typeof myOffer) {
     const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
@@ -1226,8 +1238,9 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         {/* Left: what I give */}
         <div className={styles.tradeCol} style={mySeat ? { background: mySeat.tokenColorHex + '14', borderRadius: 8, padding: '6px 6px 8px' } : undefined}>
           <div className={styles.tradeColHeader} style={mySeat ? { background: mySeat.tokenColorHex + '30', borderColor: mySeat.tokenColorHex } : undefined}>
-            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill={mySeat?.tokenColorHex ?? '#888'} /></svg>
+            <TokenSvg size={12} color={mySeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(myPlayerId) ?? 'circle'} />
             <span>{t.youOfferLabel}</span>
+            <span className={styles.tradeColCash}>€{myCash}</span>
           </div>
           <div className={styles.tradeMoney}>
             {myOffer.moneyAmount > 0
@@ -1246,8 +1259,9 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         {/* Right: what I request */}
         <div className={styles.tradeCol} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '14', borderRadius: 8, padding: '6px 6px 8px' } : undefined}>
           <div className={styles.tradeColHeader} style={partnerSeat ? { background: partnerSeat.tokenColorHex + '30', borderColor: partnerSeat.tokenColorHex } : undefined}>
-            <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3.5" fill={partnerSeat?.tokenColorHex ?? '#888'} /></svg>
+            <TokenSvg size={12} color={partnerSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(partnerId ?? '') ?? 'circle'} />
             <span>{partner?.name?.split(' ')[0] ?? t.youRequestLabel}</span>
+            <span className={styles.tradeColCash}>€{partnerCash}</span>
           </div>
           <div className={styles.tradeMoney}>
             {myRequest.moneyAmount > 0
@@ -1266,11 +1280,12 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
       {!isEmpty && (myOfferValue > 0 || myRequestValue > 0) && (
         <div className={`${styles.tradeBalance} ${balanceDiff > 0 ? styles.tradeBalancePos : balanceDiff < 0 ? styles.tradeBalanceNeg : styles.tradeBalanceEven}`}>
-          {balanceDiff === 0
-            ? '⚖️ Tasapuolinen'
-            : balanceDiff > 0
-              ? `↑ Saat €${balanceDiff} enemmän`
-              : `↓ Annat €${Math.abs(balanceDiff)} enemmän`}
+          <span className={styles.tradeBalanceSide}>annat €{myOfferValue}</span>
+          <span className={styles.tradeBalanceSep}>↔</span>
+          <span className={styles.tradeBalanceSide}>saat €{myRequestValue}</span>
+          <span className={styles.tradeBalanceNet}>
+            {balanceDiff === 0 ? '⚖️' : balanceDiff > 0 ? `+€${balanceDiff}` : `−€${Math.abs(balanceDiff)}`}
+          </span>
         </div>
       )}
 
@@ -1373,11 +1388,12 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
   const offer = trade.currentOffer
   const color = initiatorSeat?.tokenColorHex ?? '#888'
+  const tokenShapes = useTokenShapes(state)
 
   return (
     <div className={styles.panel}>
       <div className={styles.tradeOfferHeader}>
-        <span className={styles.tradeOfferHeaderDot} style={{ background: color }} />
+        <TokenSvg size={14} color={color} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} />
         <span className={styles.tradeOfferHeaderName} style={{ color }}>
           {initiator?.name ?? '?'}
         </span>

@@ -530,17 +530,6 @@
   font-size: 1rem;
   font-weight: 700;
 }
-.auctionPlayerRowActor .auctionPlayerDot {
-  width: 13px;
-  height: 13px;
-}
-
-.auctionPlayerDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .auctionPlayerName {
   flex: 1;
@@ -656,6 +645,13 @@
   color: #111;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+}
+
+.tradeColCash {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.65;
 }
 
 .tradeColTitle {
@@ -890,12 +886,6 @@
   padding: 2px 0 4px;
 }
 
-.tradeOfferHeaderDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .tradeOfferHeaderName {
   font-size: 0.95rem;
@@ -1017,6 +1007,23 @@ button.tradePropChip:active { filter: brightness(0.84); }
   padding: 7px 12px;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.tradeBalanceSide {
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.tradeBalanceSep {
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.tradeBalanceNet {
+  margin-left: 4px;
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .tradeBalanceGood {
