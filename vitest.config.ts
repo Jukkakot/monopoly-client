@@ -10,6 +10,8 @@ export default defineConfig({
           include: ['src/**/*.test.ts'],
           environment: 'node',
           reporters: ['verbose'],
+          maxWorkers: 4,
+          sequence: { groupOrder: 1 },
         },
       },
       {
@@ -24,6 +26,7 @@ export default defineConfig({
           pool: 'threads',
           maxWorkers: 2,
           retry: 1,
+          sequence: { groupOrder: 2 },
         },
       },
     ],
