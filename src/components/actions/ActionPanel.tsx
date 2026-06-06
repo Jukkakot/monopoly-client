@@ -1382,6 +1382,7 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const trade = state.tradeState!
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
   const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
+  const myPlayer = state.players.find(p => p.playerId === myPlayerId)
   const offer = trade.currentOffer
   const color = initiatorSeat?.tokenColorHex ?? '#888'
   const tokenShapes = useTokenShapes(state)
@@ -1397,8 +1398,8 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
       </div>
 
       <div className={styles.tradeOfferGrid}>
-        <TradeSide label={t.theyOfferLabel} side={offer.offeredToRecipient} />
-        <TradeSide label={t.theyRequestLabel} side={offer.requestedFromRecipient} />
+        <TradeSide label={initiator?.name ?? '?'} side={offer.offeredToRecipient} />
+        <TradeSide label={myPlayer?.name ?? '?'} side={offer.requestedFromRecipient} />
       </div>
 
       <TradeBalanceBar give={offer.offeredToRecipient} want={offer.requestedFromRecipient} />
