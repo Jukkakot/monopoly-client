@@ -72,13 +72,14 @@ interface Props {
 }
 
 
-function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId }: {
+function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId, title }: {
   label: string
   onClick: () => void
   variant?: 'primary' | 'secondary' | 'danger' | 'neutral' | 'info' | 'ghost'
   disabled?: boolean
   colorHex?: string
   testId?: string
+  title?: string
 }) {
   const [cooldown, setCooldown] = useState(false)
   function handleClick() {
@@ -89,7 +90,7 @@ function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId }
   }
   return (
     <button className={`${styles.btn} ${styles[variant]}`} disabled={disabled || cooldown}
-      data-testid={testId}
+      data-testid={testId} title={title}
       style={colorHex ? { borderLeftColor: colorHex, borderLeftWidth: 4, borderLeftStyle: 'solid' } : undefined}
       onClick={handleClick}>
       {label}
@@ -886,11 +887,11 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               {t.placeBidBtn}
             </button>
           </div>
-          {isMyTurnToBid && (
-            <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
-              onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
-              variant="danger" testId="action-pass-auction" />
-          )}
+          <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
+            onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
+            variant="danger" testId="action-pass-auction"
+            disabled={!isMyTurnToBid}
+            title={!isMyTurnToBid ? 'Ei sinun vuorosi' : undefined} />
         </>
       ) : (
         <div className={styles.infoBox}>{t.waitingForOthers}</div>
