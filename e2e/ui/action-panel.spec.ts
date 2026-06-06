@@ -36,7 +36,9 @@ test('player cash values update in the player list', async ({ page }) => {
   const { sid, humanPlayerId } = await createHumanBotSession()
   try {
     await page.goto(`/#/game/${sid}`)
-    await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
+    // Dynamic mode (no credentials) returns the active human as myPlayerId, so the
+    // spectator banner never appears. Wait for initial cash instead as the SSE-ready signal.
+    await expect(page.getByTestId('player-0-cash').first()).toContainText('1500', { timeout: 8000 })
 
     const snap0 = await getSnapshot(sid)
     const humanSeat = snap0.state!.players.findIndex(p => p.playerId === humanPlayerId)

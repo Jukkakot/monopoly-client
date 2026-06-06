@@ -95,9 +95,11 @@ test('SSE tilainjektion kautta: injektoitu kassa ja faasi näkyy UI:ssa', async 
   // fail because the bot rolls immediately and overwrites the injected values.
   const { sid, humanPlayerId } = await createHumanBotSession()
   try {
-    // Navigate as spectator (no credentials) BEFORE inject so SSE is already connected.
+    // Navigate without credentials BEFORE inject so SSE is already connected.
+    // Dynamic mode returns the active human as myPlayerId, so no spectator banner appears —
+    // wait for initial cash values instead as the SSE-ready signal.
     await page.goto(`/#/game/${sid}`)
-    await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
+    await expect(page.getByTestId('player-0-cash').first()).toContainText('1500', { timeout: 8000 })
 
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
