@@ -1242,14 +1242,14 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             <span>{t.youOfferLabel}</span>
             <span className={styles.tradeColCash}>€{myCash}</span>
           </div>
-          <div className={styles.moneyStepper}>
-            <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount === 0}>−50</button>
-            <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount === 0}>−10</button>
-            <span className={styles.moneyStepperAmt}>
-              {myOffer.moneyAmount > 0 ? `€${myOffer.moneyAmount}` : '€0'}
-            </span>
-            <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 10 > myCash} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
-            <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 50 > myCash} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
+          <div className={styles.tradeMoneyCpt}>
+            <span className={styles.tradeMoneyCptAmt}>€{myOffer.moneyAmount}</span>
+            <div className={styles.moneyBtns}>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount === 0}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount === 0}>−10</button>
+              <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 10 > myCash} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 50 > myCash} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
+            </div>
           </div>
           {renderProps(myProps, myOfferSide, myOffer)}
         </div>
@@ -1261,14 +1261,14 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             <span>{partner?.name?.split(' ')[0] ?? t.youRequestLabel}</span>
             <span className={styles.tradeColCash}>€{partnerCash}</span>
           </div>
-          <div className={styles.moneyStepper}>
-            <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount === 0}>−50</button>
-            <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount === 0}>−10</button>
-            <span className={styles.moneyStepperAmt}>
-              {myRequest.moneyAmount > 0 ? `€${myRequest.moneyAmount}` : '€0'}
-            </span>
-            <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
-            <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
+          <div className={styles.tradeMoneyCpt}>
+            <span className={styles.tradeMoneyCptAmt}>€{myRequest.moneyAmount}</span>
+            <div className={styles.moneyBtns}>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount === 0}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount === 0}>−10</button>
+              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
+            </div>
           </div>
           {renderProps(partnerProps, myRequestSide, myRequest)}
         </div>
