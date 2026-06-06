@@ -10,7 +10,18 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'sanity',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: '**/sanity.spec.ts',
+      retries: 0,
+    },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: '**/sanity.spec.ts',
+      dependencies: ['sanity'],
+    },
   ],
   webServer: {
     command: 'npm run dev',
