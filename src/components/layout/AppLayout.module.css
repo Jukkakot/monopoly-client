@@ -96,7 +96,8 @@
   gap: 6px;
   flex-shrink: 0;
   flex-wrap: wrap;
-  z-index: 2; /* float above mobileSection siblings so delta floats render on top */
+  position: relative; /* required for z-index to create a stacking context */
+  z-index: 2; /* paint delta floats above mobileSection siblings */
 }
 
 .cashChip {
