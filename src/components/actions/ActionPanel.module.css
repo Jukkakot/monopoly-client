@@ -645,6 +645,8 @@
   color: #111;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .tradeColCash {
