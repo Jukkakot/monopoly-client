@@ -5,7 +5,7 @@ import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers, useIsAnimating, skipAllAnimations } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
@@ -258,6 +258,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const steppingPlayers = useSteppingPlayers()
   const landingPlayers = useLandingPlayers()
   const animatingPlayers = useAnimatingPlayers()
+  const isAnimating = useIsAnimating()
   const { state: gameState, sendCmd } = useGame()
   const [hoveredSpotId, setHoveredSpotId] = useState<string | null>(null)
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 })
@@ -760,6 +761,15 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         setPinch({ scale: 1, tx: 0, ty: 0 })
       }}>
         {t.zoomOutBtn}
+      </button>
+    )}
+    {isAnimating && (
+      <button className={styles.skipAnimBtn} onClick={() => {
+        skipAllAnimations()
+        userZoomedOutRef.current = true
+        setZoomedSpot(null)
+      }}>
+        {t.skipAnimBtn}
       </button>
     )}
     {hoveredSpotId && (

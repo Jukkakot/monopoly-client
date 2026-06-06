@@ -28,6 +28,11 @@ const _cardJumpingPlayers = new Set<string>()
 const _steppingPlayers = new Map<string, number>()  // briefly set on each step landing; value = hop variant 0–2
 const _landingPlayers = new Set<string>()   // briefly set on final destination landing
 const _listeners = new Set<() => void>()
+// Module-level settled positions and queue refs — shared between hook instances and skipAllAnimations
+const _settledPositions = new Map<string, number>()
+const _queues = new Map<string, number[]>()
+type DisplayPositionSetter = (fn: (prev: Map<string, number>) => Map<string, number>) => void
+const _displaySetters = new Set<DisplayPositionSetter>()
 
 function notifyListeners() {
   for (const fn of _listeners) fn()
@@ -78,6 +83,32 @@ function flashPlayerLanding(pid: string) {
 // Non-hook: read animation state outside React render cycle (for snapshot queue)
 export function isAnyPlayerAnimating(): boolean {
   return _animatingPlayers.size > 0
+}
+
+// Non-hook: instantly snap all animating players to their settled position and stop animation.
+// Called by the "skip animation" button on the board.
+export function skipAllAnimations(): void {
+  if (_animatingPlayers.size === 0) return
+  // Snap display positions to settled positions for all animating players
+  if (_settledPositions.size > 0 && _displaySetters.size > 0) {
+    const snapped = new Map(_settledPositions)
+    for (const setter of _displaySetters) {
+      setter(prev => {
+        const next = new Map(prev)
+        for (const [pid, idx] of snapped) next.set(pid, idx)
+        return next
+      })
+    }
+  }
+  for (const pid of Array.from(_animatingPlayers)) {
+    _queues.delete(pid)
+    setPlayerAnimating(pid, false)
+    setPlayerJailing(pid, false)
+    setPlayerCardJumping(pid, false)
+    _steppingPlayers.delete(pid)
+    _landingPlayers.delete(pid)
+  }
+  notifyListeners()
 }
 
 // Non-hook: subscribe to animation-idle transitions (fires each time _animatingPlayers → empty)
@@ -157,10 +188,16 @@ export function useLandingPlayers(): Set<string> {
 export function useTokenAnimation(): Map<string, number> {
   const { state } = useGame()
   const snapshot = state.snapshot
-  const settledRef = useRef<Map<string, number>>(new Map())
+  const settledRef = useRef<Map<string, number>>(_settledPositions)
   const [displayPositions, setDisplayPositions] = useState<Map<string, number>>(new Map())
-  const queueRef = useRef<Map<string, number[]>>(new Map())
+  const queueRef = useRef<Map<string, number[]>>(_queues)
   const localAnimatingRef = useRef(new Set<string>())
+
+  // Register/unregister display-position setter so skipAllAnimations can snap tokens
+  useEffect(() => {
+    _displaySetters.add(setDisplayPositions)
+    return () => { _displaySetters.delete(setDisplayPositions) }
+  }, [])
   const prevInJailRef = useRef<Map<string, boolean>>(new Map())
   const prevCardKeyRef = useRef<string | null>(null)
   // Set when a MOVE_BACK_3 card is first seen; cleared once the backward steps are queued.

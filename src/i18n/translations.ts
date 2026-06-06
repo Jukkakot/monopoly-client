@@ -320,6 +320,7 @@ export interface T {
   zoomModeOwn: string
   zoomModeAll: string
   zoomOutBtn: string
+  skipAnimBtn: string
 
   // ── SoundSettings ────────────────────────────────────────────────────────────
   soundSettingsTitle: string
@@ -717,6 +718,7 @@ const fi: T = {
   zoomModeOwn: 'Seuraa omaa nappulaa',
   zoomModeAll: 'Seuraa kaikkia',
   zoomOutBtn: 'Loitonna',
+  skipAnimBtn: 'Ohita',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Asetukset',
@@ -1119,6 +1121,7 @@ const en: T = {
   zoomModeOwn: 'Follow own token',
   zoomModeAll: 'Follow all players',
   zoomOutBtn: 'Zoom out',
+  skipAnimBtn: 'Skip',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Settings',
