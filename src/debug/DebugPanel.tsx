@@ -682,6 +682,8 @@ export default function DebugPanel({ sessionId }: Props) {
 
               {/* Property editor — rendered as a fixed portal so panel overflow won't clip it */}
               {editSpot && editingCellRect && createPortal(
+                <>
+                <div className={styles.propEditorBackdrop} onClick={() => { setEditingPropId(null); setEditingCellRect(null) }} />
                 <div className={styles.propEditorPopup} style={calcPopupStyle(editingCellRect)}>
                   <div className={styles.propEditorTitle}>
                     <span
@@ -728,7 +730,8 @@ export default function DebugPanel({ sessionId }: Props) {
                     />
                     pantattu
                   </label>
-                </div>,
+                </div>
+                </>,
                 document.body
               )}
             </>

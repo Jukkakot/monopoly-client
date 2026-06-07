@@ -473,6 +473,12 @@
   gap: 5px;
 }
 
+.propEditorBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+}
+
 .propEditorPopup {
   /* rendered via portal into document.body */
   background: rgba(18, 18, 18, 0.97);
