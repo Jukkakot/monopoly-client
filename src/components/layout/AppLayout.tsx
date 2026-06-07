@@ -127,9 +127,6 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const actionsDragRef = useRef<{ startY: number; startH: number } | null>(null)
   useEffect(() => { actionsHeightRef.current = actionsHeight }, [actionsHeight])
 
-  // Content-height tracking for auto-expand
-  const actionsContentRef = useRef<HTMLDivElement>(null)
-  const [actionsContentH, setActionsContentH] = useState(0)
   const mobileActionsWrapperRef = useRef<HTMLDivElement>(null)
   const mobileActionsContentRef = useRef<HTMLDivElement>(null)
   const [mobileActionsContentH, setMobileActionsContentH] = useState(0)
@@ -327,15 +324,6 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     }
   }, [snap]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Desktop: observe actions content height → display = max(user-drag, content)
-  useEffect(() => {
-    const el = actionsContentRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([e]) => setActionsContentH(e.contentRect.height))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
   // Mobile portrait: observe action content; when it overflows the wrapper, shrink the board
   // by exactly the overflow amount so all content fits without scrolling.
   useEffect(() => {
@@ -425,15 +413,15 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               style={!playersCollapsed && !logCollapsed ? { cursor: 'row-resize' } : undefined}
             />
             <div className={styles.sideSectionHeader}
-              onClick={() => { const v = !logCollapsed; setLogCollapsed(v); try { localStorage.setItem('monopoly_log_collapsed', v ? '1' : '0') } catch {} }}>
-              <span className={styles.sideSectionTitle}>📋 Tapahtumaloki</span>
-              <span className={styles.sideSectionChevron}>{logCollapsed ? '▸' : '▾'}</span>
+              onClick={() => { const v = !actionsCollapsed; setActionsCollapsed(v); try { localStorage.setItem('monopoly_actions_collapsed', v ? '1' : '0') } catch {} }}>
+              <span className={styles.sideSectionTitle}>🎮 Toiminnot</span>
+              <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
             </div>
-            {!logCollapsed && (
-              <div className={styles.logWrapper}>{log}</div>
+            {!actionsCollapsed && (
+              <div className={styles.logWrapper}>{actions}</div>
             )}
           </div>
-          {/* Actions: pinned to bottom, collapsible, resizable */}
+          {/* Log: pinned to bottom, collapsible, resizable */}
           {!isMobile && (
             <div className={styles.actionsSection}>
               <div
@@ -445,13 +433,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                 }}
               />
               <div className={styles.sideSectionHeader}
-                onClick={() => { const v = !actionsCollapsed; setActionsCollapsed(v); try { localStorage.setItem('monopoly_actions_collapsed', v ? '1' : '0') } catch {} }}>
-                <span className={styles.sideSectionTitle}>🎮 Toiminnot</span>
-                <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
+                onClick={() => { const v = !logCollapsed; setLogCollapsed(v); try { localStorage.setItem('monopoly_log_collapsed', v ? '1' : '0') } catch {} }}>
+                <span className={styles.sideSectionTitle}>📋 Tapahtumaloki</span>
+                <span className={styles.sideSectionChevron}>{logCollapsed ? '▸' : '▾'}</span>
               </div>
-              {!actionsCollapsed && (
-                <div className={styles.actionsWrapper} style={{ height: Math.max(actionsHeight, actionsContentH) }}>
-                  <div ref={actionsContentRef}>{actions}</div>
+              {!logCollapsed && (
+                <div className={styles.actionsWrapper} style={{ height: actionsHeight }}>
+                  {log}
                 </div>
               )}
             </div>
