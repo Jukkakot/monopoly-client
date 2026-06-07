@@ -33,6 +33,9 @@ const _settledPositions = new Map<string, number>()
 const _queues = new Map<string, number[]>()
 type DisplayPositionSetter = (fn: (prev: Map<string, number>) => Map<string, number>) => void
 const _displaySetters = new Set<DisplayPositionSetter>()
+// Dice animation tracking: snapshot queue must not drain while dice are still rolling
+let _diceAnimating = false
+let _diceAnimationTimerId: ReturnType<typeof setTimeout> | null = null
 
 function notifyListeners() {
   for (const fn of _listeners) fn()
@@ -80,15 +83,33 @@ function flashPlayerLanding(pid: string) {
   }, cfg().landingCssMs)
 }
 
+// Non-hook: called by Board when a new dice roll animation starts (11 frames × 50ms = 550ms).
+// Blocks snapshot draining until the dice finish rolling so that phase-change UI (e.g. "tupla"
+// indicator) does not flash before the dice animation completes.
+export function startDiceAnimation(durationMs: number): void {
+  if (_diceAnimationTimerId) clearTimeout(_diceAnimationTimerId)
+  _diceAnimating = true
+  notifyListeners()
+  _diceAnimationTimerId = setTimeout(() => {
+    _diceAnimationTimerId = null
+    _diceAnimating = false
+    notifyListeners()
+  }, durationMs)
+}
+
 // Non-hook: read animation state outside React render cycle (for snapshot queue)
 export function isAnyPlayerAnimating(): boolean {
-  return _animatingPlayers.size > 0
+  return _animatingPlayers.size > 0 || _diceAnimating
 }
 
 // Non-hook: instantly snap all animating players to their settled position and stop animation.
 // Called by the "skip animation" button on the board.
 export function skipAllAnimations(): void {
-  if (_animatingPlayers.size === 0) return
+  if (_animatingPlayers.size === 0 && !_diceAnimating) return
+  // Also cancel any in-progress dice animation so queued snapshots can drain
+  if (_diceAnimationTimerId) { clearTimeout(_diceAnimationTimerId); _diceAnimationTimerId = null }
+  _diceAnimating = false
+  if (_animatingPlayers.size === 0) { notifyListeners(); return }
   // Snap display positions to settled positions for all animating players
   if (_settledPositions.size > 0 && _displaySetters.size > 0) {
     const snapped = new Map(_settledPositions)
@@ -111,9 +132,9 @@ export function skipAllAnimations(): void {
   notifyListeners()
 }
 
-// Non-hook: subscribe to animation-idle transitions (fires each time _animatingPlayers → empty)
+// Non-hook: subscribe to animation-idle transitions (fires when both token and dice animations end)
 export function onAnimationIdle(fn: () => void): () => void {
-  const wrapper = () => { if (_animatingPlayers.size === 0) fn() }
+  const wrapper = () => { if (_animatingPlayers.size === 0 && !_diceAnimating) fn() }
   _listeners.add(wrapper)
   return () => _listeners.delete(wrapper)
 }
@@ -205,9 +226,29 @@ export function useTokenAnimation(): Map<string, number> {
   // moved), then is unchanged in the follow-up snapshot (player moved) — so cardKeyChanged is
   // false by the time we need to animate, and without this flag it falls through to forward walk.
   const pendingBackThreeRef = useRef(false)
+  const prevSnapshotSessionIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!snapshot) return
+
+    // Reset all module-level animation state when the session changes. This prevents stale
+    // _settledPositions entries from triggering spurious animations at the start of a new game.
+    const snapSessionId = snapshot.sessionId
+    if (prevSnapshotSessionIdRef.current !== null && prevSnapshotSessionIdRef.current !== snapSessionId) {
+      _settledPositions.clear()
+      _queues.clear()
+      for (const pid of Array.from(localAnimatingRef.current)) {
+        setPlayerAnimating(pid, false)
+        setPlayerJailing(pid, false)
+        setPlayerCardJumping(pid, false)
+      }
+      localAnimatingRef.current.clear()
+      prevInJailRef.current.clear()
+      pendingBackThreeRef.current = false
+      prevCardKeyRef.current = null
+      setDisplayPositions(new Map())
+    }
+    prevSnapshotSessionIdRef.current = snapSessionId
 
     const cardKeyChanged = snapshot.lastCardKey !== null &&
                            snapshot.lastCardKey !== prevCardKeyRef.current

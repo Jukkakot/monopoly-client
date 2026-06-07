@@ -273,6 +273,9 @@ interface GameContextValue {
   injectDebugSnapshot: (snapshot: SessionState) => void
 }
 
+// Commands that are safe to fire rapidly (idempotent replace operations or continuous adjustments)
+const FAST_DEDUP_CMDS = new Set(['EditTradeOffer', 'BuyBuildingRound', 'SellBuildingRound'])
+
 const GameContext = createContext<GameContextValue | null>(null)
 
 export function GameProvider({ children }: { children: ReactNode }) {
@@ -423,7 +426,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!state.sessionId) return
     const cmdType = (command as { type?: string }).type ?? 'unknown'
     const now = Date.now()
-    if (now - (lastCmdTimeRef.current.get(cmdType) ?? 0) < 600) return
+    const dedupeMs = FAST_DEDUP_CMDS.has(cmdType) ? 100 : 600
+    if (now - (lastCmdTimeRef.current.get(cmdType) ?? 0) < dedupeMs) return
     lastCmdTimeRef.current.set(cmdType, now)
     try {
       const sid = state.sessionId

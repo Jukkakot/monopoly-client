@@ -5,7 +5,7 @@ import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
 import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
-import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers, skipAllAnimations } from '../../hooks/useTokenAnimation'
+import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers, skipAllAnimations, startDiceAnimation } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
@@ -276,6 +276,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   useEffect(() => { animatedPositionsRef.current = animatedPositions }, [animatedPositions])
 
   // Track dice rolls for AnimatedDice key
+  // DICE_ANIM_MS matches AnimatedDice: 11 frames × 50ms = 550ms
+  const DICE_ANIM_MS = 550
   const [diceRollKey, setDiceRollKey] = useState(0)
   const prevDiceStrRef = useRef<string | null>(null)
   const diceStr = gameState.lastDice ? gameState.lastDice.join(',') : null
@@ -283,6 +285,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     if (diceStr && diceStr !== prevDiceStrRef.current) {
       prevDiceStrRef.current = diceStr
       setDiceRollKey(k => k + 1)
+      // Block snapshot draining until dice animation finishes so phase-change UI
+      // (e.g. "tupla" indicator) doesn't flash before the dice stop rolling.
+      startDiceAnimation(DICE_ANIM_MS)
     }
   }, [diceStr])
 

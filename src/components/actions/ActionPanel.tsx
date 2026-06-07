@@ -1151,13 +1151,21 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
     if (isMyOffer) {
       offerMoneyRef.current = Math.max(0, offerMoneyRef.current + delta)
       setLocalOfferMoney(offerMoneyRef.current)
-      sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
-        patch: { offeredSide, replaceMoneyAmount: offerMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
+      if (offerSendTimer.current) clearTimeout(offerSendTimer.current)
+      offerSendTimer.current = setTimeout(() => {
+        offerSendTimer.current = null
+        sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+          patch: { offeredSide, replaceMoneyAmount: offerMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
+      }, 300)
     } else {
       requestMoneyRef.current = Math.max(0, requestMoneyRef.current + delta)
       setLocalRequestMoney(requestMoneyRef.current)
-      sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
-        patch: { offeredSide, replaceMoneyAmount: requestMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
+      if (requestSendTimer.current) clearTimeout(requestSendTimer.current)
+      requestSendTimer.current = setTimeout(() => {
+        requestSendTimer.current = null
+        sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+          patch: { offeredSide, replaceMoneyAmount: requestMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
+      }, 300)
     }
   }
 
@@ -1177,8 +1185,14 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const [localRequestMoney, setLocalRequestMoney] = useState(myRequest.moneyAmount)
   const offerMoneyRef = useRef(myOffer.moneyAmount)
   const requestMoneyRef = useRef(myRequest.moneyAmount)
+  const offerSendTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestSendTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => { offerMoneyRef.current = myOffer.moneyAmount; setLocalOfferMoney(myOffer.moneyAmount) }, [myOffer.moneyAmount])
   useEffect(() => { requestMoneyRef.current = myRequest.moneyAmount; setLocalRequestMoney(myRequest.moneyAmount) }, [myRequest.moneyAmount])
+  useEffect(() => () => {
+    if (offerSendTimer.current) clearTimeout(offerSendTimer.current)
+    if (requestSendTimer.current) clearTimeout(requestSendTimer.current)
+  }, [])
 
   const partnerSeat = state.seats.find(s => s.playerId === partnerId)
   const mySeat = state.seats.find(s => s.playerId === myPlayerId)
