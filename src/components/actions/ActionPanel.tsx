@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo, type CSSProperties, type ReactNode } from 'react'
+﻿import { useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import styles from './ActionPanel.module.css'
 import { useGame } from '../../store/GameContext'
 import type { SessionState } from '../../types/api'
@@ -10,7 +10,7 @@ import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sound
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
 import { retriggerBot } from '../../api/sessionApi'
-import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
+import { useTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
@@ -100,14 +100,6 @@ function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId, 
   )
 }
 
-function useTokenShapes(state: SessionState): Map<string, TokenShape> {
-  return useMemo(() => {
-    const map = new Map<string, TokenShape>()
-    const saved = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
-    for (const seat of state.seats) map.set(seat.playerId, saved[seat.seatIndex] ?? 'circle')
-    return map
-  }, [state.sessionId, state.seats])
-}
 
 export default function ActionPanel({ state, myPlayerId }: Props) {
   const { sendCmd } = useGame()

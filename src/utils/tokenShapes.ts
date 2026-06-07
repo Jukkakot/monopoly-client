@@ -1,3 +1,6 @@
+import { useMemo } from 'react'
+import type { SessionState } from '../types/api'
+
 export type TokenShape =
   | 'circle' | 'star' | 'square' | 'triangle'
   | 'diamond' | 'hexagon'
@@ -26,6 +29,16 @@ export function saveTokenShapes(sessionId: string, shapes: TokenShape[]) {
 /** Save a single player's chosen shape (used when joining an existing lobby). */
 export function savePlayerTokenShape(sessionId: string, playerId: string, shape: TokenShape) {
   try { localStorage.setItem(OVERRIDE_KEY(sessionId, playerId), shape) } catch { /* ignore */ }
+}
+
+export function useTokenShapes(state: SessionState | null): Map<string, TokenShape> {
+  return useMemo(() => {
+    if (!state) return new Map()
+    const map = new Map<string, TokenShape>()
+    const saved = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
+    for (const seat of state.seats) map.set(seat.playerId, saved[seat.seatIndex] ?? 'circle')
+    return map
+  }, [state?.sessionId, state?.seats]) // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 export function loadTokenShapes(sessionId: string, seats?: { playerId: string; seatIndex: number }[]): TokenShape[] {

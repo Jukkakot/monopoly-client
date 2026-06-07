@@ -4,6 +4,8 @@ import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { SPOTS } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
+import { TokenSvg } from '../board/TokenSvg'
+import { useTokenShapes } from '../../utils/tokenShapes'
 
 type AnimDir = 'right' | 'left'
 
@@ -88,6 +90,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const [mobileTab, setMobileTab] = useState<MobileTab>('board')
   const { state } = useGame()
   const snap = state.snapshot
+  const tokenShapes = useTokenShapes(snap)
   const t = useT()
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
@@ -495,7 +498,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                       ].join(' ')}
                       onClick={() => setCashPopupPlayerId(p.playerId)}
                     >
-                      <span className={styles.cashDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
+                      <TokenSvg size={13} color={seat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(p.playerId) ?? 'circle'} style={{ flexShrink: 0, verticalAlign: 'middle' }} />
                       <span className={styles.cashName}>{p.name}</span>
                       <span className={styles.cashAmt}>
                         {p.bankrupt ? '💀' : <>€<AnimatedCash value={p.cash} /></>}
