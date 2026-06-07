@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { createLobby, createBotsOnlySession, addLobbyBot, setLobbyReady, ApiError } from '../api/sessionApi'
-import { ALL_SHAPES, saveTokenShapes, type TokenShape } from '../utils/tokenShapes'
+import { ALL_SHAPES, savePlayerTokenShape, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
 import { TokenSvg } from '../components/board/TokenSvg'
@@ -61,7 +61,7 @@ export default function LobbyScreen() {
     setLoading(true)
     try {
       const result = await createLobby(name.trim(), color)
-      saveTokenShapes(result.sessionId, [tokenShape])
+      savePlayerTokenShape(result.sessionId, result.playerId, tokenShape)
       try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
       try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}
       try { sessionStorage.setItem(`monopoly_token_${result.sessionId}`, result.playerToken) } catch {}
@@ -89,7 +89,7 @@ export default function LobbyScreen() {
         navigate(`/game/${sessionId}`)
       } else {
         const result = await createLobby(name.trim(), color)
-        saveTokenShapes(result.sessionId, [tokenShape])
+        savePlayerTokenShape(result.sessionId, result.playerId, tokenShape)
         try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
         try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}
         try { sessionStorage.setItem(`monopoly_token_${result.sessionId}`, result.playerToken) } catch {}

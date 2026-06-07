@@ -36,7 +36,26 @@ export function useTokenShapes(state: SessionState | null): Map<string, TokenSha
     if (!state) return new Map()
     const map = new Map<string, TokenShape>()
     const saved = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
-    for (const seat of state.seats) map.set(seat.playerId, saved[seat.seatIndex] ?? 'circle')
+    const usedShapes = new Set<TokenShape>()
+    // First pass: assign saved shapes (only if not already taken by an earlier seat)
+    for (const seat of state.seats) {
+      const shape = saved[seat.seatIndex]
+      if (shape && !usedShapes.has(shape)) {
+        map.set(seat.playerId, shape)
+        usedShapes.add(shape)
+      }
+    }
+    // Second pass: give any unassigned player a distinct shape from the pool
+    const pool = ALL_SHAPES.map(s => s.key)
+    let poolIdx = 0
+    for (const seat of state.seats) {
+      if (!map.has(seat.playerId)) {
+        while (poolIdx < pool.length && usedShapes.has(pool[poolIdx])) poolIdx++
+        const assigned = poolIdx < pool.length ? pool[poolIdx++] : pool[seat.seatIndex % pool.length]
+        map.set(seat.playerId, assigned)
+        usedShapes.add(assigned)
+      }
+    }
     return map
   }, [state?.sessionId, state?.seats]) // eslint-disable-line react-hooks/exhaustive-deps
 }
