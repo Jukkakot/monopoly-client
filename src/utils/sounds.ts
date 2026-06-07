@@ -64,10 +64,14 @@ function noise(duration: number, gain = 0.15) {
 export function playDiceRoll() {
   hapticDiceRoll()
   if (!canPlayGame()) return
-  // Rattling dice sound: noise burst
-  noise(0.12, 0.25)
-  setTimeout(() => noise(0.08, 0.2), 80)
-  setTimeout(() => noise(0.06, 0.15), 140)
+  // Shake phase: rattling noise bursts
+  noise(0.09, 0.35)
+  setTimeout(() => noise(0.09, 0.35), 85)
+  setTimeout(() => noise(0.09, 0.35), 165)
+  setTimeout(() => noise(0.07, 0.30), 240)
+  // Impact: two dice hitting the table (low thump + short noise)
+  setTimeout(() => { beep(140, 0.06, 'triangle', 0.5); noise(0.05, 0.25) }, 320)
+  setTimeout(() => { beep(120, 0.06, 'triangle', 0.4); noise(0.04, 0.20) }, 360)
 }
 
 export function playTokenMove() {
