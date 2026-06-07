@@ -156,12 +156,30 @@ export interface SessionSettings {
   botSpeed?: 'fast' | 'normal' | 'slow'
 }
 
+// Throttle state for sendAck — at most one HTTP request per 50 ms, always reporting the latest version.
+let _ackPendingVersion = -1
+let _ackSessionId = ''
+let _ackTimer: ReturnType<typeof setTimeout> | null = null
+
 /** Fire-and-forget: tell the backend which snapshot version the client has processed.
- *  The backend uses this to pace bot games so it doesn't run too far ahead. */
+ *  The backend uses this to pace bot games so it doesn't run too far ahead.
+ *  Throttled to one request per 50 ms to avoid spamming the server during fast bot games. */
 export function sendAck(sessionId: string, version: number): void {
-  fetch(`${BASE}/sessions/${sessionId}/ack`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ version }),
-  }).catch(() => {})  // intentionally silent — pacing is advisory
+  if (sessionId !== _ackSessionId) {
+    if (_ackTimer !== null) { clearTimeout(_ackTimer); _ackTimer = null }
+    _ackPendingVersion = -1
+    _ackSessionId = sessionId
+  }
+  if (version <= _ackPendingVersion) return
+  _ackPendingVersion = version
+  if (_ackTimer !== null) return
+  _ackTimer = setTimeout(() => {
+    _ackTimer = null
+    const v = _ackPendingVersion
+    fetch(`${BASE}/sessions/${_ackSessionId}/ack`, {
+      method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ version: v }),
+    }).catch(() => {})
+  }, 50)
 }
 
 export async function retriggerBot(sessionId: string): Promise<void> {
