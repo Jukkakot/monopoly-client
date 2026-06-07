@@ -1411,32 +1411,44 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const sid = state.sessionId
   const trade = state.tradeState!
   const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
-  const myPlayer = state.players.find(p => p.playerId === myPlayerId)
+  const recipient = state.players.find(p => p.playerId === trade.recipientPlayerId)
   const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
-  const mySeat = state.seats.find(s => s.playerId === myPlayerId)
+  const recipientSeat = state.seats.find(s => s.playerId === trade.recipientPlayerId)
   const tokenShapes = useTokenShapes(state)
   const offer = trade.currentOffer
 
+  // The player who submitted this offer is always the OTHER participant
+  const iAmInitiator = myPlayerId === trade.initiatorPlayerId
+  const partnerPlayerId = iAmInitiator ? trade.recipientPlayerId : trade.initiatorPlayerId
+  const partner = state.players.find(p => p.playerId === partnerPlayerId)
+  const partnerSeat = state.seats.find(s => s.playerId === partnerPlayerId)
+
+  // Column labels: always reflect who GIVES those items, regardless of who's viewing
   const initiatorLabel = (
     <><PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>
   )
-  const myLabel = (
-    <><PlayerName name={myPlayer?.name ?? '?'} color={mySeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(myPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>
+  const recipientLabel = (
+    <><PlayerName name={recipient?.name ?? '?'} color={recipientSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.recipientPlayerId ?? '') ?? 'circle'} /> {t.tradeOfferNoun}</>
   )
+
+  // Balance bar from MY perspective: what do I receive vs give?
+  // Initiator gives offeredToRecipient and receives requestedFromRecipient — swap for them.
+  const balanceGive = iAmInitiator ? offer.requestedFromRecipient : offer.offeredToRecipient
+  const balanceWant = iAmInitiator ? offer.offeredToRecipient : offer.requestedFromRecipient
 
   return (
     <div className={styles.panel}>
       <div className={styles.tradeOfferHeader}>
-        <PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} size={13} />
+        <PlayerName name={partner?.name ?? '?'} color={partnerSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(partnerPlayerId) ?? 'circle'} size={13} />
         <span className={styles.tradeOfferHeaderLabel}>{t.tradeMadeOffer}</span>
       </div>
 
       <div className={styles.tradeOfferGrid}>
         <TradeSide label={initiatorLabel} side={offer.offeredToRecipient} playerColor={initiatorSeat?.tokenColorHex} />
-        <TradeSide label={myLabel} side={offer.requestedFromRecipient} playerColor={mySeat?.tokenColorHex} />
+        <TradeSide label={recipientLabel} side={offer.requestedFromRecipient} playerColor={recipientSeat?.tokenColorHex} />
       </div>
 
-      <TradeBalanceBar give={offer.offeredToRecipient} want={offer.requestedFromRecipient} />
+      <TradeBalanceBar give={balanceGive} want={balanceWant} />
 
       <div className={styles.btnRow}>
         <Btn label={t.acceptBtn} onClick={() => sendCmd({ type: 'AcceptTrade', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId })} variant="primary" testId="action-accept-trade" />
