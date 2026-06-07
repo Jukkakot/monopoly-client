@@ -902,9 +902,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
             disabled={!isMyTurnToBid}
             title={!isMyTurnToBid ? 'Ei sinun vuorosi' : undefined} />
         </>
-      ) : (
-        <div className={styles.infoBox}>{t.waitingForOthers}</div>
-      )}
+      ) : null}
     </div>
   )
 }
