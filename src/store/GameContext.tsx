@@ -8,7 +8,7 @@ import { translateBackendEvents, deriveMiscEvents, type GameEvent } from './even
 import {
   playTokenMove, playBuyProperty, playBuildHouse, playBuildHotel,
   playGoToJail, playReleaseJail, playDrawCard, playBankruptcy,
-  playGameOver, playTradeAccepted, playMortgage, playPassGo, playPayRent, playAuctionWin,
+  playGameOver, playTradeAccepted, playMortgage, playPassGo, playPayRent, playAuctionWin, playDiceRoll,
 } from '../utils/sounds'
 import { calcNetWorth } from '../utils/netWorth'
 import { getLang } from '../i18n/lang'
@@ -359,6 +359,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const delay = e.releaseAt ? Math.max(0, e.releaseAt - now) : 0
       timers.push(setTimeout(() => {
         switch (e.icon) {
+          case '🎲': playDiceRoll(); break
           case '🏃': playTokenMove(); break
           case '🏠': playBuyProperty(); break
           case '🏗': e.kind === 'hotel' ? playBuildHotel() : playBuildHouse(); break

@@ -43,35 +43,50 @@ function chord(freqs: number[], duration: number, type: OscillatorType = 'sine',
   freqs.forEach(f => beep(f, duration, type, gain / freqs.length))
 }
 
-function noise(duration: number, gain = 0.15) {
-  const c = getCtx()
-  const buf = c.createBuffer(1, c.sampleRate * duration, c.sampleRate)
-  const data = buf.getChannelData(0)
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
-  const src = c.createBufferSource()
-  src.buffer = buf
-  const g = c.createGain()
-  g.gain.setValueAtTime(gain * vol(), c.currentTime)
-  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + duration)
-  src.connect(g)
-  g.connect(c.destination)
-  src.start()
-  src.stop(c.currentTime + duration)
-}
 
 // ── Sound effects ─────────────────────────────────────────────────────────────
 
 export function playDiceRoll() {
   hapticDiceRoll()
   if (!canPlayGame()) return
-  // Shake phase: rattling noise bursts
-  noise(0.09, 0.35)
-  setTimeout(() => noise(0.09, 0.35), 85)
-  setTimeout(() => noise(0.09, 0.35), 165)
-  setTimeout(() => noise(0.07, 0.30), 240)
-  // Impact: two dice hitting the table (low thump + short noise)
-  setTimeout(() => { beep(140, 0.06, 'triangle', 0.5); noise(0.05, 0.25) }, 320)
-  setTimeout(() => { beep(120, 0.06, 'triangle', 0.4); noise(0.04, 0.20) }, 360)
+  const c = getCtx()
+  const v = vol()
+
+  function rattle(startT: number) {
+    const len = Math.floor(c.sampleRate * 0.065)
+    const buf = c.createBuffer(1, len, c.sampleRate)
+    const data = buf.getChannelData(0)
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1
+    const src = c.createBufferSource()
+    src.buffer = buf
+    // Bandpass filter: plastic/wood clack
+    const filter = c.createBiquadFilter()
+    filter.type = 'bandpass'
+    filter.frequency.value = 2200 + Math.random() * 1200
+    filter.Q.value = 2.5
+    const g = c.createGain()
+    g.gain.setValueAtTime(0.45 * v, startT)
+    g.gain.exponentialRampToValueAtTime(0.001, startT + 0.065)
+    src.connect(filter); filter.connect(g); g.connect(c.destination)
+    src.start(startT); src.stop(startT + 0.065)
+  }
+
+  const now = c.currentTime
+  // 5 rattle bursts
+  for (let i = 0; i < 5; i++) rattle(now + i * 0.06)
+  // Landing impact: pitch-dropping sine (thud) + rattle
+  const land = now + 0.34
+  const osc = c.createOscillator()
+  const og = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(200, land)
+  osc.frequency.exponentialRampToValueAtTime(55, land + 0.1)
+  og.gain.setValueAtTime(0.5 * v, land)
+  og.gain.exponentialRampToValueAtTime(0.001, land + 0.13)
+  osc.connect(og); og.connect(c.destination)
+  osc.start(land); osc.stop(land + 0.13)
+  rattle(land)
+  rattle(land + 0.035)
 }
 
 export function playTokenMove() {

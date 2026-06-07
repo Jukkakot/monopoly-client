@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { playDiceRoll, playButtonClick } from '../utils/sounds'
+import { playButtonClick } from '../utils/sounds'
 import AppLayout from '../components/layout/AppLayout'
 import Header from '../components/layout/Header'
 import Board, { markCardAcknowledged } from '../components/board/Board'
@@ -113,7 +113,6 @@ export default function GameScreen() {
         sendCmd({ type: 'BuyProperty', sessionId: snap.sessionId, actorPlayerId: myId, decisionId: dec.decisionId, propertyId: dec.payload.propertyId })
       } else if (isMyTurn && turn?.phase === 'WAITING_FOR_ROLL') {
         spacePendingRef.current = true
-        playDiceRoll()
         sendCmd({ type: 'RollDice', sessionId: snap.sessionId, actorPlayerId: myId })
       } else if (isMyTurn && turn?.phase === 'WAITING_FOR_END_TURN' && (turn?.consecutiveDoubles ?? 0) === 0) {
         spacePendingRef.current = true

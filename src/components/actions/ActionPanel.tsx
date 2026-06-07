@@ -6,7 +6,7 @@ import { getCardText } from '../../i18n/cards'
 import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
-import { playButtonClick, playDiceRoll, playAuctionBid } from '../../utils/sounds'
+import { playButtonClick, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
 import { retriggerBot } from '../../api/sessionApi'
@@ -465,7 +465,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               )
             })()}
             <div className={styles.btnRow}>
-              <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => { playDiceRoll(); cmd('RollDice') }} variant="primary" testId="action-roll" />
+              <Btn label={isTouchDevice ? t.rollDice : t.rollDiceKbd} onClick={() => cmd('RollDice')} variant="primary" testId="action-roll" />
               <TradeButtons state={state} myPlayerId={myPlayerId} sendCmd={sendCmd} />
             </div>
           </>
