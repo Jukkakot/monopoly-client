@@ -137,9 +137,8 @@ export async function createBotsOnlySession(botCount: number): Promise<{ session
   const colors = pickDistinct(PRESET_COLORS, botCount)
   const shapes = pickDistinct(ALL_SHAPES.map(s => s.key) as TokenShape[], botCount)
   const seatKinds = Array(botCount).fill('BOT')
-  const difficulties = Array(botCount).fill('STRONG')
   const result = await fetchJson<{ sessionId: string }>(`${BASE}/sessions`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, colors, seatKinds, difficulties }),
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, colors, seatKinds }),
   })
   saveTokenShapes(result.sessionId, shapes)
   return result

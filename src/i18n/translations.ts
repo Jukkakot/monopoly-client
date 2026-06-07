@@ -188,9 +188,6 @@ export interface T {
   colorUsedByOther: string
   humanLabel: string
   botLabel: string
-  easyLabel: string
-  normalLabel: string
-  strongLabel: string
   addHumanBtn: string
   addBotBtn: string
   removePlayerBtn: string
@@ -582,9 +579,6 @@ const fi: T = {
   colorUsedByOther: 'Väri on jo käytössä toisella pelaajalla',
   humanLabel: 'Ihminen',
   botLabel: 'Botti',
-  easyLabel: 'Helppo',
-  normalLabel: 'Normaali',
-  strongLabel: 'Vahva',
   addHumanBtn: 'Lisää ihminen',
   addBotBtn: 'Lisää botti',
   removePlayerBtn: 'Poista',
@@ -986,9 +980,6 @@ const en: T = {
   colorUsedByOther: 'Color already used by another player',
   humanLabel: 'Human',
   botLabel: 'Bot',
-  easyLabel: 'Easy',
-  normalLabel: 'Normal',
-  strongLabel: 'Strong',
   addHumanBtn: 'Add human',
   addBotBtn: 'Add bot',
   removePlayerBtn: 'Remove',

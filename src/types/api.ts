@@ -1,5 +1,4 @@
 export type SeatKind = 'HUMAN' | 'BOT'
-export type BotDifficulty = 'EASY' | 'NORMAL' | 'STRONG'
 export type SessionStatus = 'LOBBY' | 'IN_PROGRESS' | 'GAME_OVER'
 export type TurnPhase =
   | 'WAITING_FOR_ROLL'
@@ -22,7 +21,6 @@ export interface SeatState {
   displayName: string | null
   tokenColorHex: string
   joined: boolean
-  botDifficulty: BotDifficulty | null
   ready: boolean
 }
 
@@ -162,7 +160,6 @@ export interface CreateSessionRequest {
   names: string[]
   colors: string[]
   seatKinds: SeatKind[]
-  difficulties: BotDifficulty[]
 }
 
 export interface CommandRejection {

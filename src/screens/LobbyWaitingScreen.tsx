@@ -218,9 +218,6 @@ export default function LobbyWaitingScreen() {
             <div key={s.seatId} className={styles.seatRow}>
               <span className={styles.seatDot} style={{ background: s.tokenColorHex }} />
               <span className={styles.seatName}>🤖 {s.displayName ?? '–'}</span>
-              {s.botDifficulty && (
-                <span className={styles.diffBadge}>{s.botDifficulty === 'EASY' ? t.easyLabel : s.botDifficulty === 'STRONG' ? t.strongLabel : t.normalLabel}</span>
-              )}
               <span className={`${styles.readyBadge} ${styles.readyBadgeYes}`}>✓</span>
               {isHost && (
                 <button
