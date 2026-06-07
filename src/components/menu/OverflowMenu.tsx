@@ -85,9 +85,10 @@ export default function OverflowMenu() {
             <button className={styles.menuItem} onClick={() => { setOpen(false); setShowSound(true) }}>
               {t.soundSettingsBtn}
             </button>
+            {/* keyboard shortcuts button hidden — shortcuts reduced to spacebar only
             <button className={`${styles.menuItem} ${styles.desktopOnly}`} onClick={() => { setOpen(false); setShowHelp(true) }}>
               {t.keyboardShortcutsBtn}
-            </button>
+            </button> */}
             {snapshot && (
               <>
                 <div className={styles.divider} />
