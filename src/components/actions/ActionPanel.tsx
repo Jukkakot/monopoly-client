@@ -86,7 +86,7 @@ function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId, 
   const [cooldown, setCooldown] = useState(false)
   function handleClick() {
     setCooldown(true)
-    setTimeout(() => setCooldown(false), 500)
+    setTimeout(() => setCooldown(false), 150)
     playButtonClick()
     onClick()
   }
@@ -332,7 +332,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
                   setBuyBurst(true)
                   setTimeout(() => setBuyBurst(false), 700)
                   // Delay command so the burst animation is visible before the panel unmounts
-                  setTimeout(() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId }), 380)
+                  setTimeout(() => cmd('BuyProperty', { decisionId: dec.decisionId, propertyId: p.propertyId }), 200)
                 }}
                 variant="primary" testId="action-buy" />
               <Btn label={t.skipToAuction}
@@ -1147,12 +1147,18 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
 
   function editMoney(offeredSide: boolean, delta: number) {
-    const side = offeredSide ? offer.offeredToRecipient : offer.requestedFromRecipient
-    const newAmount = Math.max(0, side.moneyAmount + delta)
-    sendCmd({
-      type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
-      patch: { offeredSide, replaceMoneyAmount: newAmount, propertyIdsToAdd: [], propertyIdsToRemove: [] }
-    })
+    const isMyOffer = offeredSide === myOfferSide
+    if (isMyOffer) {
+      offerMoneyRef.current = Math.max(0, offerMoneyRef.current + delta)
+      setLocalOfferMoney(offerMoneyRef.current)
+      sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+        patch: { offeredSide, replaceMoneyAmount: offerMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
+    } else {
+      requestMoneyRef.current = Math.max(0, requestMoneyRef.current + delta)
+      setLocalRequestMoney(requestMoneyRef.current)
+      sendCmd({ type: 'EditTradeOffer', sessionId: sid, actorPlayerId: myPlayerId, tradeId: trade.tradeId,
+        patch: { offeredSide, replaceMoneyAmount: requestMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
+    }
   }
 
   function toggleProp(offeredSide: boolean, propertyId: string, included: boolean) {
@@ -1165,6 +1171,14 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
       }
     })
   }
+
+  // Local state for immediate display on rapid clicks; ref accumulates correct value between state updates
+  const [localOfferMoney, setLocalOfferMoney] = useState(myOffer.moneyAmount)
+  const [localRequestMoney, setLocalRequestMoney] = useState(myRequest.moneyAmount)
+  const offerMoneyRef = useRef(myOffer.moneyAmount)
+  const requestMoneyRef = useRef(myRequest.moneyAmount)
+  useEffect(() => { offerMoneyRef.current = myOffer.moneyAmount; setLocalOfferMoney(myOffer.moneyAmount) }, [myOffer.moneyAmount])
+  useEffect(() => { requestMoneyRef.current = myRequest.moneyAmount; setLocalRequestMoney(myRequest.moneyAmount) }, [myRequest.moneyAmount])
 
   const partnerSeat = state.seats.find(s => s.playerId === partnerId)
   const mySeat = state.seats.find(s => s.playerId === myPlayerId)
@@ -1210,19 +1224,19 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   }
 
   // Value balance: positive = I'm getting more than I give
-  const myOfferValue = myOffer.moneyAmount + myOffer.propertyIds.reduce((s, id) => {
+  const myOfferValue = localOfferMoney + myOffer.propertyIds.reduce((s, id) => {
     const spot = SPOTS.find(sp => sp.id === id)
     const prop = state.properties.find(p => p.propertyId === id)
     return s + (prop?.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? 0)
   }, 0)
-  const myRequestValue = myRequest.moneyAmount + myRequest.propertyIds.reduce((s, id) => {
+  const myRequestValue = localRequestMoney + myRequest.propertyIds.reduce((s, id) => {
     const spot = SPOTS.find(sp => sp.id === id)
     const prop = state.properties.find(p => p.propertyId === id)
     return s + (prop?.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? 0)
   }, 0)
   const balanceDiff = myRequestValue - myOfferValue
-  const isEmpty = myOffer.moneyAmount === 0 && myOffer.propertyIds.length === 0
-    && myRequest.moneyAmount === 0 && myRequest.propertyIds.length === 0
+  const isEmpty = localOfferMoney === 0 && myOffer.propertyIds.length === 0
+    && localRequestMoney === 0 && myRequest.propertyIds.length === 0
 
   return (
     <div className={styles.panel}>
@@ -1235,12 +1249,12 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             <span className={styles.tradeColCash}>€{myCash}</span>
           </div>
           <div className={styles.tradeMoneyCpt}>
-            <span className={styles.tradeMoneyCptAmt}>€{myOffer.moneyAmount}</span>
+            <span className={styles.tradeMoneyCptAmt}>€{localOfferMoney}</span>
             <div className={styles.moneyBtns}>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={myOffer.moneyAmount === 0}>−50</button>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={myOffer.moneyAmount === 0}>−10</button>
-              <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 10 > myCash} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
-              <button className={styles.moneyBtnPlus} disabled={myOffer.moneyAmount + 50 > myCash} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -50)} disabled={localOfferMoney === 0}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myOfferSide, -10)} disabled={localOfferMoney === 0}>−10</button>
+              <button className={styles.moneyBtnPlus} disabled={localOfferMoney + 10 > myCash} onClick={() => editMoney(myOfferSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} disabled={localOfferMoney + 50 > myCash} onClick={() => editMoney(myOfferSide, 50)}>+50</button>
             </div>
           </div>
           {renderProps(myProps, myOfferSide, myOffer)}
@@ -1254,10 +1268,10 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             <span className={styles.tradeColCash}>€{partnerCash}</span>
           </div>
           <div className={styles.tradeMoneyCpt}>
-            <span className={styles.tradeMoneyCptAmt}>€{myRequest.moneyAmount}</span>
+            <span className={styles.tradeMoneyCptAmt}>€{localRequestMoney}</span>
             <div className={styles.moneyBtns}>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={myRequest.moneyAmount === 0}>−50</button>
-              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={myRequest.moneyAmount === 0}>−10</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={localRequestMoney === 0}>−50</button>
+              <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={localRequestMoney === 0}>−10</button>
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
               <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
             </div>
