@@ -65,7 +65,9 @@ export default function LobbyWaitingScreen() {
 
   const isHost = !!hostToken
   const mySeat = seats.find(s => s.playerId === myPlayerId)
-  const alreadyJoined = !!myPlayerId && !!mySeat
+  // seats starts empty before SSE delivers state — treat as already joined if we have credentials
+  // to avoid briefly flashing the join form with the old localStorage name
+  const alreadyJoined = !!myPlayerId && (seats.length === 0 || !!mySeat)
   const humanSeats = seats.filter(s => s.seatKind === 'HUMAN')
   const botSeats = seats.filter(s => s.seatKind === 'BOT')
   const readyCount = humanSeats.filter(s => s.ready).length
