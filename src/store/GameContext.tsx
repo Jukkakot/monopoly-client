@@ -326,6 +326,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return onAnimationIdle(() => drainPendingRef.current())
   }, [])
 
+  // Safety net: if pendingSnapshots accumulates and neither the 60ms settling timer nor
+  // onAnimationIdle drains it (e.g. a brief animation ends before items were queued),
+  // force-drain every 500ms. This handles edge cases that would otherwise leave the
+  // trade / auction UI stuck until the next animation or page refresh.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (pendingSnapshots.current.length > 0 && !isAnyPlayerAnimating() && !settlingRef.current) {
+        drainPendingRef.current()
+      }
+    }, 500)
+    return () => clearInterval(id)
+  }, [])
+
   // Clear pending queue on session change or disconnect
   useEffect(() => {
     pendingSnapshots.current = []
