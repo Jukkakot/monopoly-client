@@ -187,24 +187,38 @@ export default function DebugPanel({ sessionId }: Props) {
   useEffect(() => { try { localStorage.setItem('debug_panel_size', JSON.stringify(size)) } catch { /* ignore */ } }, [size])
 
   useEffect(() => {
-    function onMove(e: MouseEvent) {
+    function applyMove(cx: number, cy: number) {
       if (dragRef.current) {
         setPos({
-          x: Math.max(0, dragRef.current.px + e.clientX - dragRef.current.mx),
-          y: Math.max(0, dragRef.current.py + e.clientY - dragRef.current.my),
+          x: Math.max(0, dragRef.current.px + cx - dragRef.current.mx),
+          y: Math.max(0, dragRef.current.py + cy - dragRef.current.my),
         })
       }
       if (resizeRef.current) {
         setSize({
-          w: Math.max(220, resizeRef.current.sw + e.clientX - resizeRef.current.mx),
-          h: Math.max(180, resizeRef.current.sh + e.clientY - resizeRef.current.my),
+          w: Math.max(220, resizeRef.current.sw + cx - resizeRef.current.mx),
+          h: Math.max(180, resizeRef.current.sh + cy - resizeRef.current.my),
         })
+      }
+    }
+    function onMove(e: MouseEvent) { applyMove(e.clientX, e.clientY) }
+    function onTouchMove(e: TouchEvent) {
+      if (dragRef.current || resizeRef.current) {
+        e.preventDefault()
+        applyMove(e.touches[0].clientX, e.touches[0].clientY)
       }
     }
     function onUp() { dragRef.current = null; resizeRef.current = null }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onUp)
+    }
   }, [])
   const diceCtx = useRef({ d1: null as number | null, d2: null as number | null, persist: false })
   diceCtx.current = { d1: diceD1, d2: diceD2, persist: persistDice }
@@ -403,12 +417,13 @@ export default function DebugPanel({ sessionId }: Props) {
   }
 
   if (!open) {
-    return (
-      <button className={styles.fab} onClick={() => setOpen(true)} title="Debug panel">🐛</button>
+    return createPortal(
+      <button className={styles.fab} onClick={() => setOpen(true)} title="Debug panel">🐛</button>,
+      document.body
     )
   }
 
-  return (
+  return createPortal(
     <div
       className={styles.panel}
       style={{ left: pos.x, top: pos.y, width: size.w, height: size.h }}
@@ -416,6 +431,7 @@ export default function DebugPanel({ sessionId }: Props) {
       <div
         className={styles.header}
         onMouseDown={e => { dragRef.current = { mx: e.clientX, my: e.clientY, px: pos.x, py: pos.y }; e.preventDefault() }}
+        onTouchStart={e => { const t = e.touches[0]; dragRef.current = { mx: t.clientX, my: t.clientY, px: pos.x, py: pos.y }; e.preventDefault() }}
       >
         <span className={styles.headerTitle}>🐛 DEBUG</span>
         <button className={styles.closeBtn} onClick={() => setOpen(false)}>✕</button>
@@ -744,7 +760,9 @@ export default function DebugPanel({ sessionId }: Props) {
       <div
         className={styles.resizeHandle}
         onMouseDown={e => { resizeRef.current = { mx: e.clientX, my: e.clientY, sw: size.w, sh: size.h }; e.preventDefault(); e.stopPropagation() }}
+        onTouchStart={e => { const t = e.touches[0]; resizeRef.current = { mx: t.clientX, my: t.clientY, sw: size.w, sh: size.h }; e.preventDefault(); e.stopPropagation() }}
       />
-    </div>
+    </div>,
+    document.body
   )
 }
