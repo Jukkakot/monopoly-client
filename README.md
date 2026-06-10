@@ -3,7 +3,11 @@
 Helsinki-themed multiplayer Monopoly — React/TypeScript SPA. All game state comes from the backend; the client is purely reactive.
 
 **Live:** https://jukkakot.github.io/monopoly-client/  
-**Backend:** https://monopoly-backend-bv41.onrender.com
+**Backend:** https://monopoly-backend-bv41.onrender.com ([MonopolyBackend repo](../MonopolyBackend))
+
+Features: real-time multiplayer over SSE, lobby flow, server-side strong bots,
+auctions, trading, debt resolution, Finnish/English UI, sound effects, board
+animations, mobile-friendly layout.
 
 ---
 
@@ -92,9 +96,11 @@ flowchart TD
 | File | Description |
 |---|---|
 | `src/store/GameContext.tsx` | All game state, SSE connection, `sendCmd` |
-| `src/types/api.ts` | All backend-facing types (40+ interfaces) |
+| `src/types/api.ts` | All backend-facing types (40+ interfaces) — kept in sync with `MonopolyBackend/docs/openapi.yaml` |
 | `src/types/spots.ts` | Static board definition (40 Helsinki spots) |
 | `src/components/actions/ActionPanel.tsx` | Phase-driven action panel |
+| `src/i18n/translations.ts` | Finnish/English UI strings — all user-visible text goes through `useT()` |
+| `src/debug/DebugPanel.tsx` | In-app debug tool: load scenario states, inspect snapshots |
 
 ### ActionPanel phases
 
