@@ -158,6 +158,7 @@ function reducer(state: GameState, action: Action): GameState {
         turnCount: 0,
         netWorthHistory: new Map(),
         lastSeenEventId: -1,
+        sseFrozen: false,
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
@@ -313,6 +314,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (isAnyPlayerAnimating()) return
     const next = pendingSnapshots.current.shift()
     if (!next) return
+    // Discard stale snapshots belonging to a previous session
+    if (next.state?.sessionId && next.state.sessionId !== state.sessionId) {
+      pendingSnapshots.current = []
+      return
+    }
     settlingRef.current = true
     dispatch({ type: 'SET_SNAPSHOT', snapshot: next })
     if (state.sessionId) sendAck(state.sessionId, next.version)
@@ -381,6 +387,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.events])
 
   const joinSession = useCallback((sessionId: string) => {
+    // Clear queue and stale refs synchronously before the new session starts —
+    // prevents 60ms drain timers from dispatching old snapshots into the new session.
+    pendingSnapshots.current = []
+    settlingRef.current = false
+    lastSoundedId.current = -1
+    prevPhaseRef.current = undefined
+    lastEventTimestamp.current = null
     dispatch({ type: 'SET_SESSION', sessionId })
     retryCount.current = 0
     versionRef.current = 0
@@ -391,6 +404,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       .catch(e => console.warn('[settings] failed to send botSpeed:', e))
   }, [])
   const leaveSession = useCallback(() => {
+    pendingSnapshots.current = []
+    settlingRef.current = false
     dispatch({ type: 'LEAVE_SESSION' })
     retryCount.current = 0
     versionRef.current = 0
