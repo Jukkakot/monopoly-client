@@ -170,6 +170,16 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         events.push(ev('🤝', t.tradeCancelled, [pid, pid2]))
         break
       }
+      case 'MONEY_FLOW': {
+        const from = e.data.from ?? ''
+        const to = e.data.to ?? ''
+        const amount = parseInt(e.data.amount ?? '0')
+        const reason = e.data.reason ?? ''
+        const fromName = from ? (players.find(p => p.playerId === from)?.name ?? from) : 'Pankki'
+        const toName = to ? (players.find(p => p.playerId === to)?.name ?? to) : 'Pankki'
+        events.push(ev('💵', `${fromName} → ${toName} €${amount} (${reason})`, e.playerIds.filter(Boolean)))
+        break
+      }
     }
   }
 

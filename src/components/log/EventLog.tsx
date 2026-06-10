@@ -23,6 +23,7 @@ const ICON_CLASS: Record<string, string> = {
   '🎊': styles.typeGameOver,
   '💰': styles.typeBuy,
   '💸': styles.typeRent,
+  '💵': styles.typeRent,
   '🏆': styles.typeGameOver,
 }
 
@@ -31,7 +32,7 @@ type FilterGroup = 'dice' | 'moves' | 'money' | 'property' | 'build' | 'trade' |
 const FILTER_ICONS: Record<FilterGroup, Set<string>> = {
   dice:     new Set(['🎲']),
   moves:    new Set(['🏃']),
-  money:    new Set(['💰', '💸']),
+  money:    new Set(['💰', '💸', '💵']),
   property: new Set(['🏠', '🔨']),
   build:    new Set(['🏗', '🏚', '🏦', '💳']),
   trade:    new Set(['🤝', '🚫']),
