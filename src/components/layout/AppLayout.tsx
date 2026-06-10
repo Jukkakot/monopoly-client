@@ -429,6 +429,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
             {!actionsCollapsed && (
               <div className={styles.logWrapper}>{actions}</div>
             )}
+            <div className={styles.upperSpacer} />
           </div>
           {/* Log: pinned to bottom, collapsible, resizable */}
           {!isMobile && (
