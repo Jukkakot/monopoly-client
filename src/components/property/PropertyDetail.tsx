@@ -1,5 +1,6 @@
 import styles from './PropertyDetail.module.css'
-import { SPOTS, STREET_COLORS } from '../../types/spots'
+import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
+import type { StreetType } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState } from '../../types/api'
 import { useGame } from '../../store/GameContext'
@@ -30,7 +31,8 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
 
   const isMyProp = prop?.ownerPlayerId === myPlayerId
   const isOthersProp = owner && !isMyProp
-  const canAct = !prop?.mortgaged
+  const isGameOver = state.status === 'GAME_OVER'
+  const isMyTurn = state.turn?.activePlayerId === myPlayerId
 
   // Count how many of this group the owner has
   const isRailroad = spot.streetType === 'RAILROAD'
@@ -49,6 +51,20 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
   const rents = RENT_TABLE[spot.id] ?? []
   const mortgageValue = spot.price ? Math.floor(spot.price / 2) : 0
   const color = STREET_COLORS[spot.streetType]
+
+  // All properties in this group that I own (for build/sell validation)
+  const myGroupProps = isStreet && isMyProp
+    ? state.properties.filter(p =>
+        p.ownerPlayerId === myPlayerId &&
+        SPOTS.find(s => s.id === p.propertyId)?.streetType === spot.streetType
+      )
+    : []
+  const anyGroupMortgaged = myGroupProps.some(p => p.mortgaged)
+  const myLevel = (prop?.hotelCount ?? 0) > 0 ? 5 : (prop?.houseCount ?? 0)
+  const minLevelInGroup = myGroupProps.reduce((min, p) => Math.min(min, p.hotelCount > 0 ? 5 : p.houseCount), 5)
+  const maxLevelInGroup = myGroupProps.reduce((max, p) => Math.max(max, p.hotelCount > 0 ? 5 : p.houseCount), 0)
+  const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
+  const housePrice = HOUSE_PRICES[spot.streetType as StreetType] ?? 0
 
   // Compute current effective rent
   let currentRent: number | string | null = null
@@ -86,14 +102,15 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
     onClose()
   }
 
-  const canBuild = isMyProp && isStreet && isMonopoly && !prop?.mortgaged && (prop?.hotelCount ?? 0) === 0
+  const canBuild = isMyProp && isStreet && isMonopoly
+    && !anyGroupMortgaged
+    && (prop?.hotelCount ?? 0) === 0
+    && myLevel <= minLevelInGroup
+    && myCash >= housePrice
+    && isMyTurn && !isGameOver
 
-  // Sellable: at max level in the group
-  const myLevelHere = (prop?.hotelCount ?? 0) > 0 ? 5 : (prop?.houseCount ?? 0)
-  const maxLevelInGroup = owner ? state.properties
-    .filter(p => SPOTS.find(s => s.id === p.propertyId)?.streetType === spot.streetType && p.ownerPlayerId === owner.playerId)
-    .reduce((max, p) => Math.max(max, p.hotelCount > 0 ? 5 : p.houseCount), 0) : 0
-  const canSell = isMyProp && isStreet && myLevelHere > 0 && myLevelHere >= maxLevelInGroup
+  const canSell = isMyProp && isStreet && myLevel > 0 && myLevel >= maxLevelInGroup
+    && isMyTurn && !isGameOver
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -256,17 +273,17 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
                 {t.sellHouseBtn}
               </button>
             )}
-            {isMyProp && canAct && !prop?.mortgaged && (
+            {isMyProp && !prop?.mortgaged && !isGameOver && (
               <button className={`${styles.btn} ${styles.secondary}`} onClick={toggleMortgage}>
                 {t.mortgageBtn}
               </button>
             )}
-            {isMyProp && prop?.mortgaged && (
+            {isMyProp && prop?.mortgaged && !isGameOver && (
               <button className={`${styles.btn} ${styles.secondary}`} onClick={toggleMortgage}>
                 {t.redeemBtn}
               </button>
             )}
-            {isOthersProp && !state.tradeState && (
+            {isOthersProp && !state.tradeState && !isGameOver && (
               <button className={`${styles.btn} ${styles.primary}`} onClick={openTrade}>
                 {t.tradeBtnPD}
               </button>

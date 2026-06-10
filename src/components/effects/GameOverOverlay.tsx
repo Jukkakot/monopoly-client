@@ -5,6 +5,7 @@ import type { SessionState } from '../../types/api'
 import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { useT } from '../../i18n/LanguageContext'
+import { calcNetWorth } from '../../utils/netWorth'
 
 interface Props {
   state: SessionState
@@ -24,7 +25,7 @@ export default function GameOverOverlay({ state }: Props) {
   const sorted = [...state.players].sort((a, b) => {
     if (a.bankrupt && !b.bankrupt) return 1
     if (!a.bankrupt && b.bankrupt) return -1
-    return b.cash - a.cash
+    return calcNetWorth(b, state) - calcNetWorth(a, state)
   })
 
   const winner = sorted[0]
@@ -73,7 +74,11 @@ export default function GameOverOverlay({ state }: Props) {
                   {houses > 0 && <span className={styles.rankStat}>🏠{houses}</span>}
                 </div>
                 <span className={styles.rankCash}>
-                  {p.bankrupt ? <span className={styles.bankrupt}>{t.bankruptLabel}</span> : `€${p.cash}`}
+                  {p.bankrupt ? (
+                    <span className={styles.bankrupt}>{t.bankruptLabel}</span>
+                  ) : (
+                    <span title={`käteinen €${p.cash}`}>€{calcNetWorth(p, state)}</span>
+                  )}
                 </span>
               </div>
             )

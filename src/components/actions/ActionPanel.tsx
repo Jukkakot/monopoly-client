@@ -12,6 +12,7 @@ import { markCardAcknowledged } from '../board/Board'
 import { retriggerBot } from '../../api/sessionApi'
 import { useTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
+import { calcNetWorth } from '../../utils/netWorth'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -253,19 +254,22 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const sorted = [...state.players].sort((a, b) => {
       if (a.bankrupt && !b.bankrupt) return 1
       if (!a.bankrupt && b.bankrupt) return -1
-      return b.cash - a.cash
+      return calcNetWorth(b, state) - calcNetWorth(a, state)
     })
     return (
       <div className={styles.panel}>
         <div className={styles.winner}>{t.gameOverTitle}</div>
         {sorted.map((p, i) => {
           const seat = state.seats.find(s => s.playerId === p.playerId)
+          const netWorth = calcNetWorth(p, state)
           return (
             <div key={p.playerId} style={{ fontSize: '0.85rem', display: 'flex', gap: '6px', alignItems: 'center' }}>
               <span>{['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`}</span>
               <span style={{ width: 12, height: 12, borderRadius: '50%', background: seat?.tokenColorHex ?? '#888', display: 'inline-block', flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{p.name}</span>
-              <span style={{ fontWeight: 700 }}>{p.bankrupt ? t.bankruptLabel : `€${p.cash}`}</span>
+              <span style={{ fontWeight: 700 }} title={`käteinen €${p.cash}`}>
+                {p.bankrupt ? t.bankruptLabel : `€${netWorth}`}
+              </span>
             </div>
           )
         })}
