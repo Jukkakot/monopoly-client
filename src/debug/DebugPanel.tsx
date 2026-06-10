@@ -166,39 +166,61 @@ export default function DebugPanel({ sessionId }: Props) {
   // Always-current ref so the lastDice effect never has stale closures
 
   // Drag state — persisted in localStorage
+  const clampPos = (x: number, y: number, w: number, h: number) => ({
+    x: Math.min(Math.max(0, x), Math.max(0, window.innerWidth - w)),
+    y: Math.min(Math.max(0, y), Math.max(0, window.innerHeight - h)),
+  })
+  const clampSize = (w: number, h: number) => ({
+    w: Math.min(window.innerWidth, Math.max(220, w)),
+    h: Math.min(window.innerHeight, Math.max(180, h)),
+  })
+
   const [pos, setPos] = useState<{ x: number; y: number }>(() => {
+    const defaultW = Math.min(260, window.innerWidth)
+    const defaultH = Math.min(520, window.innerHeight)
     try {
       const saved = localStorage.getItem('debug_panel_pos')
-      if (saved) return JSON.parse(saved)
+      if (saved) {
+        const p = JSON.parse(saved)
+        return clampPos(p.x, p.y, defaultW, defaultH)
+      }
     } catch { /* ignore */ }
-    return { x: Math.max(8, window.innerWidth - 276), y: Math.max(8, window.innerHeight - 560) }
+    return { x: Math.max(8, window.innerWidth - defaultW - 8), y: Math.max(8, window.innerHeight - defaultH - 8) }
   })
   const [size, setSize] = useState<{ w: number; h: number }>(() => {
     try {
       const saved = localStorage.getItem('debug_panel_size')
-      if (saved) return JSON.parse(saved)
+      if (saved) return clampSize(...(Object.values(JSON.parse(saved)) as [number, number]))
     } catch { /* ignore */ }
-    return { w: 260, h: 520 }
+    return clampSize(260, 520)
   })
+  const sizeRef = useRef(size)
+  useEffect(() => { sizeRef.current = size }, [size])
   const dragRef = useRef<{ mx: number; my: number; px: number; py: number } | null>(null)
   const resizeRef = useRef<{ mx: number; my: number; sw: number; sh: number } | null>(null)
 
   useEffect(() => { try { localStorage.setItem('debug_panel_pos', JSON.stringify(pos)) } catch { /* ignore */ } }, [pos])
   useEffect(() => { try { localStorage.setItem('debug_panel_size', JSON.stringify(size)) } catch { /* ignore */ } }, [size])
 
+  // Re-clamp position when viewport is resized (e.g. rotation on mobile)
+  useEffect(() => {
+    function onResize() {
+      setSize(s => clampSize(s.w, s.h))
+      setPos(p => clampPos(p.x, p.y, sizeRef.current.w, sizeRef.current.h))
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     function applyMove(cx: number, cy: number) {
       if (dragRef.current) {
-        setPos({
-          x: Math.max(0, dragRef.current.px + cx - dragRef.current.mx),
-          y: Math.max(0, dragRef.current.py + cy - dragRef.current.my),
-        })
+        const { w, h } = sizeRef.current
+        setPos(clampPos(dragRef.current.px + cx - dragRef.current.mx, dragRef.current.py + cy - dragRef.current.my, w, h))
       }
       if (resizeRef.current) {
-        setSize({
-          w: Math.max(220, resizeRef.current.sw + cx - resizeRef.current.mx),
-          h: Math.max(180, resizeRef.current.sh + cy - resizeRef.current.my),
-        })
+        const clamped = clampSize(resizeRef.current.sw + cx - resizeRef.current.mx, resizeRef.current.sh + cy - resizeRef.current.my)
+        setSize(clamped)
       }
     }
     function onMove(e: MouseEvent) { applyMove(e.clientX, e.clientY) }
