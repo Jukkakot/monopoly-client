@@ -364,6 +364,19 @@
 .debtChip:hover  { filter: brightness(0.9); }
 .debtChip:active { filter: brightness(0.75); }
 
+.debtInsufficientFunds {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #c62828;
+  padding: 1px 0;
+}
+
+.debtBankruptSep {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 4px 0;
+}
+
 .winner {
   text-align: center;
   font-size: 1.4rem;

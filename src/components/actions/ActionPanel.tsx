@@ -916,7 +916,10 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function formatDebtReason(reason: string, creditorType: string, t: ReturnType<typeof useT>): string {
-  if (creditorType === 'PLAYER') return t.debtReasonRent(reason)
+  if (creditorType === 'PLAYER') {
+    const spotName = SPOTS.find(s => s.id === reason)?.name
+    return t.debtReasonRent(spotName ?? reason)
+  }
   if (reason === 'Tax') return t.debtReasonTax
   if (reason === 'Card repairs') return t.debtReasonRepairs
   if (reason === 'Card payment') return t.debtReasonCard
@@ -932,23 +935,37 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
   const creditorName = debt.creditorType === 'PLAYER'
     ? state.players.find(p => p.playerId === debt.creditorPlayerId)?.name ?? t.playerCreditorLabel
     : t.bankLabel
+  const debtorName = state.players.find(p => p.playerId === debt.debtorPlayerId)?.name ?? '?'
   const reason = formatDebtReason(debt.reason, debt.creditorType, t)
-  const canPay = debt.allowedActions.includes('PAY_DEBT_NOW')
+  const hasEnoughCash = debt.currentCash >= debt.amountRemaining
 
   return (
     <div className={styles.panel} data-testid="debt-panel">
       <div className={styles.debtCard}>
         <div className={styles.debtCardHeader}>
-          <span className={styles.debtCardHeaderIcon}>⚠️</span>
-          <span className={styles.debtCardHeaderTitle}>{creditorName}</span>
+          <span className={styles.debtCardHeaderIcon}>💸</span>
+          <span className={styles.debtCardHeaderTitle}>{t.debtCardTitle}</span>
           <span className={styles.debtCardAmount}>€{debt.amountRemaining}</span>
         </div>
         <div className={styles.debtCardBody}>
           <div className={styles.debtCardReason}>{reason}</div>
+          {debt.creditorType === 'PLAYER' && (
+            <div className={styles.debtCardRow}>
+              <span>{t.debtCreditorRow(creditorName)}</span>
+            </div>
+          )}
+          {myPlayerId === null && (
+            <div className={styles.debtCardRow}>
+              <span>{t.debtDebtorRow(debtorName)}</span>
+            </div>
+          )}
           <div className={styles.debtCardRow}>
             <span className={styles.debtCardRowLabel}>{t.debtCashLabel}</span>
-            <span className={canPay ? styles.debtCardRowVal : styles.debtCardRowValRed}>€{debt.currentCash}</span>
+            <span className={hasEnoughCash ? styles.debtCardRowVal : styles.debtCardRowValRed}>€{debt.currentCash}</span>
           </div>
+          {!hasEnoughCash && myPlayerId !== null && (
+            <div className={styles.debtInsufficientFunds}>⚠️ {t.insufficientFunds}</div>
+          )}
           {debt.estimatedLiquidationValue > 0 && (
             <div className={styles.debtCardRow}>
               <span className={styles.debtCardRowLabel}>{t.debtLiquidationLabel}</span>
@@ -959,7 +976,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
       </div>
       {myPlayerId !== null && debt.allowedActions.includes('PAY_DEBT_NOW') && (
         <Btn label={t.payDebtBtn}
-          disabled={debt.currentCash < debt.amountRemaining}
+          disabled={!hasEnoughCash}
           onClick={() => sendCmd({ type: 'PayDebt', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
           variant="primary" testId="action-pay-debt" />
       )}
@@ -1059,7 +1076,10 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         )
       })()}
       {myPlayerId !== null && debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
-        <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="danger" testId="action-declare-bankruptcy" />
+        <>
+          <div className={styles.debtBankruptSep} />
+          <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="ghost" testId="action-declare-bankruptcy" />
+        </>
       )}
     </div>
   )

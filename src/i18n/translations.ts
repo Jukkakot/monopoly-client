@@ -67,6 +67,9 @@ export interface T {
   waitingForDebt: (playerName: string) => string
   // Debt
   debtTitle: (amount: number, creditor: string) => string
+  debtCardTitle: string
+  debtCreditorRow: (name: string) => string
+  debtDebtorRow: (name: string) => string
   debtReasonLabel: string
   debtReasonRent: (propName: string) => string
   debtReasonTax: string
@@ -453,12 +456,15 @@ const fi: T = {
   waitingForDebt: (name: string) => `⏳ ${name} maksaa velkaa…`,
 
   debtTitle: (amount, creditor) => `⚠️ Velka €${amount} → ${creditor}`,
+  debtCardTitle: 'Velka',
+  debtCreditorRow: (name) => `Velkojan: ${name}`,
+  debtDebtorRow: (name) => `Velallinen: ${name}`,
   debtReasonLabel: 'Syy',
   debtReasonRent: (p) => `Vuokra: ${p}`,
   debtReasonTax: 'Veromaksu',
   debtReasonCard: 'Korttimaksu',
   debtReasonRepairs: 'Korttimaksu (korjaukset)',
-  debtCashLabel: 'Kassassasi',
+  debtCashLabel: 'Kassassa',
   debtLiquidationLabel: 'Realisoitavissa',
   debtCash: (n) => `Käteinen: €${n}`,
   debtLiquidation: (n) => `Likvidointiarvo: ~€${n}`,
@@ -854,12 +860,15 @@ const en: T = {
   waitingForDebt: (name: string) => `⏳ ${name} is settling a debt…`,
 
   debtTitle: (amount, creditor) => `⚠️ Debt €${amount} → ${creditor}`,
+  debtCardTitle: 'Debt',
+  debtCreditorRow: (name) => `Creditor: ${name}`,
+  debtDebtorRow: (name) => `Debtor: ${name}`,
   debtReasonLabel: 'Reason',
   debtReasonRent: (p) => `Rent: ${p}`,
   debtReasonTax: 'Tax',
   debtReasonCard: 'Card payment',
   debtReasonRepairs: 'Card payment (repairs)',
-  debtCashLabel: 'Your cash',
+  debtCashLabel: 'Cash',
   debtLiquidationLabel: 'Liquidatable',
   debtCash: (n) => `Cash: €${n}`,
   debtLiquidation: (n) => `Liquidation value: ~€${n}`,
