@@ -279,17 +279,19 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   // DICE_ANIM_MS matches AnimatedDice: 11 frames × 50ms = 550ms
   const DICE_ANIM_MS = 550
   const [diceRollKey, setDiceRollKey] = useState(0)
-  const prevDiceStrRef = useRef<string | null>(null)
-  const diceStr = gameState.lastDice ? gameState.lastDice.join(',') : null
+  // Use backend DICE_ROLLED event id — not the dice VALUES — so that same-combo rolls in
+  // different turns still trigger a fresh animation. diceStr is kept only for the display prop.
+  const diceEventId = gameState.lastDiceEventId
+  const prevDiceEventIdRef = useRef(diceEventId)  // init to current value → no animation on mount
   useEffect(() => {
-    if (diceStr && diceStr !== prevDiceStrRef.current) {
-      prevDiceStrRef.current = diceStr
+    if (diceEventId > prevDiceEventIdRef.current) {
+      prevDiceEventIdRef.current = diceEventId
       setDiceRollKey(k => k + 1)
       // Block snapshot draining until dice animation finishes so phase-change UI
       // (e.g. "tupla" indicator) doesn't flash before the dice stop rolling.
       startDiceAnimation(DICE_ANIM_MS)
     }
-  }, [diceStr])
+  }, [diceEventId])
 
   // GO corner flash: briefly highlight GO spot when any player passes it
   const [goFlashing, setGoFlashing] = useState(false)
@@ -307,17 +309,18 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   // diceZoomBlockRef prevents animatedPositions/animatingPlayers effects from overriding
   // the sentinel until the token actually moves (pos changes from its settled start pos).
   const zoomToDiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevDiceForZoomRef = useRef<string | null>(diceStr)  // init to current → no zoom on mount
+  const prevDiceEventIdForZoomRef = useRef(diceEventId)  // init to current → no zoom on mount
   const diceZoomBlockRef = useRef(false)
   const animStartPosRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!diceStr || diceStr === prevDiceForZoomRef.current) return
+    if (diceEventId <= prevDiceEventIdForZoomRef.current) return
+    if (!gameState.lastDice) return
     if (loadZoomMode() === 'off') return
     if (!loadDiceZoomEnabled()) return
     const pid = stateRef.current.turn?.activePlayerId
     if (pid && !shouldZoomForPlayer(pid)) return
-    prevDiceForZoomRef.current = diceStr
+    prevDiceEventIdForZoomRef.current = diceEventId
     userZoomedOutRef.current = false
     diceZoomBlockRef.current = true
     animStartPosRef.current = null  // reset so lazy-init fires on first animatedPositions fire
@@ -347,7 +350,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
         setZoomedSpot(null)
       }, Math.max(400, movDelay - transitionAt) + 800)
     }, transitionAt)
-  }, [diceStr])
+  }, [diceEventId])
 
   // Manual pinch-to-zoom state
   const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 })

@@ -90,6 +90,7 @@ interface GameState {
   netWorthHistory: Map<string, number[]>
   lastSeenEventId: number
   sseFrozen: boolean
+  lastDiceEventId: number  // backend event id of the most recent DICE_ROLLED event; drives animation
 }
 
 type Action =
@@ -159,6 +160,7 @@ function reducer(state: GameState, action: Action): GameState {
         netWorthHistory: new Map(),
         lastSeenEventId: -1,
         sseFrozen: false,
+        lastDiceEventId: -1,
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
@@ -196,6 +198,19 @@ function reducer(state: GameState, action: Action): GameState {
       const diceHistory = lastDice && lastDice !== state.lastDice
         ? [...state.diceHistory, lastDice].slice(-10)
         : state.diceHistory
+
+      // Track the backend event id of the latest DICE_ROLLED event (non-historical only).
+      // Board.tsx uses this — not dice VALUES — to trigger the roll animation so that the
+      // same dice combination in different turns still fires a fresh animation.
+      let lastDiceEventId = state.lastDiceEventId
+      if (newSnapshot && state.snapshot !== null) {
+        const backendLog = newSnapshot.eventLog ?? []
+        const newEntries = backendLog.filter(e => e.id > state.lastSeenEventId)
+        const diceEntries = newEntries.filter(e => e.type === 'DICE_ROLLED')
+        if (diceEntries.length > 0) {
+          lastDiceEventId = Math.max(...diceEntries.map(e => e.id))
+        }
+      }
 
       // Count turns: a turn completes when consecutiveDoubles resets to 0 and the active player changes
       let turnCount = state.turnCount
@@ -235,6 +250,7 @@ function reducer(state: GameState, action: Action): GameState {
         turnCount,
         netWorthHistory,
         lastSeenEventId,
+        lastDiceEventId,
       }
     }
     case 'LEAVE_SESSION':
@@ -250,6 +266,7 @@ function reducer(state: GameState, action: Action): GameState {
         turnCount: 0,
         netWorthHistory: new Map(),
         lastSeenEventId: -1,
+        lastDiceEventId: -1,
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
@@ -295,6 +312,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     netWorthHistory: new Map(),
     lastSeenEventId: -1,
     sseFrozen: false,
+    lastDiceEventId: -1,
   })
 
   const retryCount = useRef(0)
