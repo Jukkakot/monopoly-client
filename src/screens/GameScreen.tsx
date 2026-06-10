@@ -42,7 +42,7 @@ export default function GameScreen() {
   const [showHelp, setShowHelp] = useState(false)
   const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
-  const [isDebugMode] = useDebugMode()
+  const [isDebugMode, toggleDebug] = useDebugMode()
 
   // Auto-clear debug player selection when the active player changes
   const activePlayerId = state.snapshot?.turn?.activePlayerId
@@ -101,6 +101,11 @@ export default function GameScreen() {
     const turn = snap.turn
     const isMyTurn = turn?.activePlayerId === myId
 
+    if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey) {
+      toggleDebug()
+      return
+    }
+
     if (e.key === ' ' || e.code === 'Space') {
       e.preventDefault()
       // Block until the previous space command is confirmed by a state change
@@ -125,7 +130,7 @@ export default function GameScreen() {
         sendCmd({ type: 'AcknowledgeCard', sessionId: snap.sessionId, actorPlayerId: myId })
       }
     }
-  }, [state.snapshot, state.myPlayerId, sendCmd])
+  }, [state.snapshot, state.myPlayerId, sendCmd, toggleDebug])
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
