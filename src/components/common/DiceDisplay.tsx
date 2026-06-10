@@ -40,9 +40,13 @@ export function AnimatedDice({ dice, rollKey, size = 36, showSum, className }: A
   const [d2, setD2] = useState(dice?.[1] ?? 1)
   const [rolling, setRolling] = useState(false)
   const prevKeyRef = useRef(rollKey)
+  // Always points to the latest dice prop so the interval's final frame is never stale.
+  const diceRef = useRef(dice)
+  diceRef.current = dice
 
   useEffect(() => {
-    if (!dice || rollKey === prevKeyRef.current) return
+    const d = diceRef.current
+    if (!d || rollKey === prevKeyRef.current) return
     prevKeyRef.current = rollKey
     setRolling(true)
 
@@ -52,16 +56,19 @@ export function AnimatedDice({ dice, rollKey, size = 36, showSum, className }: A
       frame++
       if (frame >= FRAMES) {
         clearInterval(id)
-        setD1(dice[0])
-        setD2(dice[1])
+        const latest = diceRef.current
+        setD1(latest?.[0] ?? 1)
+        setD2(latest?.[1] ?? 1)
         setRolling(false)
       } else {
         setD1(Math.ceil(Math.random() * 6))
         setD2(Math.ceil(Math.random() * 6))
       }
     }, 50)
-    return () => clearInterval(id)
-  }, [rollKey, dice])
+    // Reset rolling on cleanup so the sync effect can recover if this effect is interrupted
+    // (e.g. component unmounts or rollKey changes while animation is mid-run).
+    return () => { clearInterval(id); setRolling(false) }
+  }, [rollKey])
 
   // Sync to real values when not rolling
   useEffect(() => {
