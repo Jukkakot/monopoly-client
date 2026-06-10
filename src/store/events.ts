@@ -4,9 +4,9 @@ import { getCardText } from '../i18n/cards'
 import { getLang } from '../i18n/lang'
 import { translations } from '../i18n/translations'
 import { SPOTS } from '../types/spots'
+import { loadAnimationSpeed, getAnimationConfig } from '../utils/animationSettings'
+import type { AnimationConfig } from '../utils/animationSettings'
 
-// Must stay in sync with useTokenAnimation.ts
-const STEP_MS = 390
 const BOARD_SIZE = 40
 const JAIL_INDEX = 10
 
@@ -28,14 +28,16 @@ function ev(icon: string, message: string, related: string[] = [], kind?: string
   return { id: _id++, timestamp: now, icon, message, relatedPlayerIds: related, kind, releaseAt: delay > 0 ? now + delay : undefined }
 }
 
-function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean): number {
+function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean, cfg: AnimationConfig): number {
   if (goingToJail) {
     const dist = (JAIL_INDEX - fromIdx + BOARD_SIZE) % BOARD_SIZE
-    return Math.max(600, Math.min(2000, 600 + (dist / 39) * 1400))
+    const jailDur = Math.max(cfg.jailBlockMin, Math.min(cfg.jailBlockMax,
+      cfg.jailBlockMin + (dist / 39) * (cfg.jailBlockMax - cfg.jailBlockMin)))
+    return cfg.diceToMoveDelayMs + jailDur
   }
   const forward = (toIdx - fromIdx + BOARD_SIZE) % BOARD_SIZE
   const backward = (fromIdx - toIdx + BOARD_SIZE) % BOARD_SIZE
-  return Math.min(forward, backward) * STEP_MS
+  return cfg.diceToMoveDelayMs + Math.min(forward, backward) * cfg.stepMs
 }
 
 /**
@@ -44,6 +46,7 @@ function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean): number
  */
 export function translateBackendEvents(entries: GameEventEntry[], players: PlayerSnapshot[]): GameEvent[] {
   const t = translations[getLang()].ev
+  const cfg = getAnimationConfig(loadAnimationSpeed())
   const events: GameEvent[] = []
   // Tracks last movement delay per player so subsequent events appear after animation
   const playerDelayMs = new Map<string, number>()
@@ -64,7 +67,7 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
       case 'PLAYER_MOVED': {
         const from = parseInt(e.data.from ?? '0')
         const to = parseInt(e.data.to ?? '0')
-        const delay = moveDelay(from, to, false)
+        const delay = moveDelay(from, to, false, cfg)
         playerDelayMs.set(pid, delay)
         const spot = SPOTS[to]
         events.push(ev('🏃', `${name} → ${spot?.name ?? `#${to}`}`, [pid], undefined, delay))
@@ -77,7 +80,7 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
       }
       case 'WENT_TO_JAIL': {
         const from = e.data.from != null ? parseInt(e.data.from) : null
-        const delay = from != null ? moveDelay(from, JAIL_INDEX, true) : (playerDelayMs.get(pid) ?? 0)
+        const delay = from != null ? moveDelay(from, JAIL_INDEX, true, cfg) : (playerDelayMs.get(pid) ?? 0)
         playerDelayMs.set(pid, delay)
         events.push(ev('⛓', t.wentToJail(name), [pid], undefined, delay))
         break

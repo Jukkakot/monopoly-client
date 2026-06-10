@@ -174,7 +174,7 @@ function reducer(state: GameState, action: Action): GameState {
           if (backendLog.length > 0) {
             lastSeenEventId = Math.max(...backendLog.map(e => e.id))
             newEvents.push(...translateBackendEvents(backendLog, newSnapshot.players)
-              .map(e => ({ ...e, historical: true })))
+              .map(e => ({ ...e, historical: true, releaseAt: undefined })))
           }
         } else {
           const newEntries = backendLog.filter(e => e.id > lastSeenEventId)
