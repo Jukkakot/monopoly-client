@@ -231,10 +231,11 @@ export function useTokenAnimation(): Map<string, number> {
   useEffect(() => {
     if (!snapshot) return
 
-    // Reset all module-level animation state when the session changes. This prevents stale
-    // _settledPositions entries from triggering spurious animations at the start of a new game.
+    // Reset all module-level animation state when the session changes (or on first mount of a
+    // fresh game). prevSnapshotSessionIdRef starts null, so null !== sessionId triggers cleanup
+    // on the very first snapshot, ensuring _settledPositions from a previous game is cleared.
     const snapSessionId = snapshot.sessionId
-    if (prevSnapshotSessionIdRef.current !== null && prevSnapshotSessionIdRef.current !== snapSessionId) {
+    if (prevSnapshotSessionIdRef.current !== snapSessionId) {
       _settledPositions.clear()
       _queues.clear()
       for (const pid of Array.from(localAnimatingRef.current)) {
