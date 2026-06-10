@@ -377,6 +377,13 @@
   margin: 4px 0;
 }
 
+.debtBankruptConfirm {
+  font-size: 0.78rem;
+  color: #b71c1c;
+  font-weight: 600;
+  padding: 2px 0 4px;
+}
+
 .winner {
   text-align: center;
   font-size: 1.4rem;

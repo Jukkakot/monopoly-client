@@ -938,21 +938,23 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
   const debtorName = state.players.find(p => p.playerId === debt.debtorPlayerId)?.name ?? '?'
   const reason = formatDebtReason(debt.reason, debt.creditorType, t)
   const hasEnoughCash = debt.currentCash >= debt.amountRemaining
+  const [confirmBankruptcy, setConfirmBankruptcy] = useState(false)
+
+  const headerTitle = debt.creditorType === 'PLAYER'
+    ? `${t.debtCardTitle} — ${creditorName}`
+    : reason
 
   return (
     <div className={styles.panel} data-testid="debt-panel">
       <div className={styles.debtCard}>
         <div className={styles.debtCardHeader}>
           <span className={styles.debtCardHeaderIcon}>💸</span>
-          <span className={styles.debtCardHeaderTitle}>{t.debtCardTitle}</span>
+          <span className={styles.debtCardHeaderTitle}>{headerTitle}</span>
           <span className={styles.debtCardAmount}>€{debt.amountRemaining}</span>
         </div>
         <div className={styles.debtCardBody}>
-          <div className={styles.debtCardReason}>{reason}</div>
           {debt.creditorType === 'PLAYER' && (
-            <div className={styles.debtCardRow}>
-              <span>{t.debtCreditorRow(creditorName)}</span>
-            </div>
+            <div className={styles.debtCardReason}>{reason}</div>
           )}
           {myPlayerId === null && (
             <div className={styles.debtCardRow}>
@@ -1078,7 +1080,19 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
       {myPlayerId !== null && debt.allowedActions.includes('DECLARE_BANKRUPTCY') && (
         <>
           <div className={styles.debtBankruptSep} />
-          <Btn label={t.declareBankruptcy} onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })} variant="ghost" testId="action-declare-bankruptcy" />
+          {confirmBankruptcy ? (
+            <>
+              <div className={styles.debtBankruptConfirm}>{t.bankruptcyConfirmText}</div>
+              <div className={styles.btnRow}>
+                <Btn label={t.bankruptcyConfirmBtn}
+                  onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
+                  variant="danger" testId="action-declare-bankruptcy" />
+                <Btn label={t.cancelBtn} onClick={() => setConfirmBankruptcy(false)} variant="ghost" />
+              </div>
+            </>
+          ) : (
+            <Btn label={t.declareBankruptcy} onClick={() => setConfirmBankruptcy(true)} variant="ghost" testId="action-declare-bankruptcy-trigger" />
+          )}
         </>
       )}
     </div>

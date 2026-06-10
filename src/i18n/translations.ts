@@ -88,6 +88,8 @@ export interface T {
   houseLabel: string
   sellBuildingBtn: (type: string, name: string) => string
   declareBankruptcy: string
+  bankruptcyConfirmText: string
+  bankruptcyConfirmBtn: string
   bankLabel: string
   playerCreditorLabel: string
   // Trade
@@ -477,6 +479,8 @@ const fi: T = {
   houseLabel: 'talo',
   sellBuildingBtn: (type, name) => `🏠 Myy ${type}: ${name}`,
   declareBankruptcy: '☠ Julistaudu konkurssiin',
+  bankruptcyConfirmText: 'Oletko varma? Kaikki omaisuutesi menee huutokauppaan.',
+  bankruptcyConfirmBtn: '☠ Vahvista konkurssi',
   bankLabel: 'Pankki',
   playerCreditorLabel: 'pelaaja',
 
@@ -881,6 +885,8 @@ const en: T = {
   houseLabel: 'house',
   sellBuildingBtn: (type, name) => `🏠 Sell ${type}: ${name}`,
   declareBankruptcy: '☠ Declare bankruptcy',
+  bankruptcyConfirmText: 'Are you sure? All your assets will go to auction.',
+  bankruptcyConfirmBtn: '☠ Confirm bankruptcy',
   bankLabel: 'Bank',
   playerCreditorLabel: 'player',
 
