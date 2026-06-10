@@ -167,6 +167,33 @@
   100% { opacity: 0; transform: translateX(-50%) translateY(28px) scale(0.9); }
 }
 
+/* Floating +€ label drifting up from the chip on cash gain */
+.cashGainFloat {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  font-weight: 900;
+  color: #00c853;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  animation: cashGainFloat 1.5s ease-out forwards;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 8px;
+  padding: 2px 7px;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+@keyframes cashGainFloat {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  15%  { transform: translateX(-50%) translateY(-4px) scale(1.08); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-28px) scale(0.9); }
+}
+
 /* Shake on cash loss — higher specificity beats the glow animation */
 .cashChip.cashChipShake {
   animation: cashChipShake 0.5s ease-in-out !important;

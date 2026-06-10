@@ -138,6 +138,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
   // Animation: cash delta floats + chip shake
   const [cashDeltas, setCashDeltas] = useState<Array<{ playerId: string; amount: number; key: number }>>([])
+  const [cashGains, setCashGains] = useState<Array<{ playerId: string; amount: number; key: number }>>([])
   const prevCashRef = useRef(new Map<string, number>())
   const deltaKeyRef = useRef(0)
   // Animation: bankruptcy collapse
@@ -293,6 +294,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   useEffect(() => {
     if (!snap) return
     const deltasToAdd: typeof cashDeltas = []
+    const gainsToAdd: typeof cashGains = []
     const newBankrupt: string[] = []
 
     for (const p of snap.players) {
@@ -302,6 +304,12 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
         const k = key
         deltasToAdd.push({ playerId: p.playerId, amount: prevCash - p.cash, key })
         setTimeout(() => setCashDeltas(d => d.filter(x => x.key !== k)), 1350)
+      }
+      if (prevCash !== undefined && !p.bankrupt && p.cash > prevCash) {
+        const key = ++deltaKeyRef.current
+        const k = key
+        gainsToAdd.push({ playerId: p.playerId, amount: p.cash - prevCash, key })
+        setTimeout(() => setCashGains(g => g.filter(x => x.key !== k)), 1350)
       }
       prevCashRef.current.set(p.playerId, p.cash)
 
@@ -314,6 +322,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     }
 
     if (deltasToAdd.length > 0) setCashDeltas(d => [...d, ...deltasToAdd])
+    if (gainsToAdd.length > 0) setCashGains(g => [...g, ...gainsToAdd])
     if (newBankrupt.length > 0) setJustBankrupt(s => new Set([...s, ...newBankrupt]))
 
     const activeId = snap.turn?.activePlayerId ?? null
@@ -468,7 +477,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           {snap && snap.players.length > 0 && mobileTab === 'board' && (
             <div className={styles.playerCashBar}>
               {[...snap.players]
-                .sort((a, b) => a.playerId === state.myPlayerId ? -1 : b.playerId === state.myPlayerId ? 1 : 0)
+                .sort((a, b) => {
+                  if (a.playerId === state.myPlayerId) return -1
+                  if (b.playerId === state.myPlayerId) return 1
+                  const seatA = snap.seats.findIndex(s => s.playerId === a.playerId)
+                  const seatB = snap.seats.findIndex(s => s.playerId === b.playerId)
+                  return seatA - seatB
+                })
                 .map(p => {
                   const seat = snap.seats.find(s => s.playerId === p.playerId)
                   const isActive = snap.turn?.activePlayerId === p.playerId
@@ -493,6 +508,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                       </span>
                       {cashDeltas.filter(d => d.playerId === p.playerId).map(d => (
                         <span key={d.key} className={styles.cashDeltaFloat}>−€{d.amount}</span>
+                      ))}
+                      {cashGains.filter(g => g.playerId === p.playerId).map(g => (
+                        <span key={g.key} className={styles.cashGainFloat}>+€{g.amount}</span>
                       ))}
                     </div>
                   )
