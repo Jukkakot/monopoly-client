@@ -1147,7 +1147,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   function editMoney(offeredSide: boolean, delta: number) {
     const isMyOffer = offeredSide === myOfferSide
     if (isMyOffer) {
-      offerMoneyRef.current = Math.max(0, offerMoneyRef.current + delta)
+      offerMoneyRef.current = Math.min(myCash, Math.max(0, offerMoneyRef.current + delta))
       setLocalOfferMoney(offerMoneyRef.current)
       if (offerSendTimer.current) clearTimeout(offerSendTimer.current)
       offerSendTimer.current = setTimeout(() => {
@@ -1156,7 +1156,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           patch: { offeredSide, replaceMoneyAmount: offerMoneyRef.current, propertyIdsToAdd: [], propertyIdsToRemove: [] } })
       }, 300)
     } else {
-      requestMoneyRef.current = Math.max(0, requestMoneyRef.current + delta)
+      requestMoneyRef.current = Math.min(partnerCash, Math.max(0, requestMoneyRef.current + delta))
       setLocalRequestMoney(requestMoneyRef.current)
       if (requestSendTimer.current) clearTimeout(requestSendTimer.current)
       requestSendTimer.current = setTimeout(() => {
@@ -1284,8 +1284,8 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
             <div className={styles.moneyBtns}>
               <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -50)} disabled={localRequestMoney === 0}>−50</button>
               <button className={styles.moneyBtnMinus} onClick={() => editMoney(myRequestSide, -10)} disabled={localRequestMoney === 0}>−10</button>
-              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
-              <button className={styles.moneyBtnPlus} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
+              <button className={styles.moneyBtnPlus} disabled={localRequestMoney + 10 > partnerCash} onClick={() => editMoney(myRequestSide, 10)}>+10</button>
+              <button className={styles.moneyBtnPlus} disabled={localRequestMoney + 50 > partnerCash} onClick={() => editMoney(myRequestSide, 50)}>+50</button>
             </div>
           </div>
           {renderProps(partnerProps, myRequestSide, myRequest)}
