@@ -96,7 +96,7 @@ flowchart TD
 | File | Description |
 |---|---|
 | `src/store/GameContext.tsx` | All game state, SSE connection, `sendCmd` |
-| `src/types/api.ts` | All backend-facing types (40+ interfaces) — kept in sync with `MonopolyBackend/docs/openapi.yaml` |
+| `src/types/api.ts` | All backend-facing types (40+ interfaces) — kept in sync with the backend's `openapi.yaml` |
 | `src/types/spots.ts` | Static board definition (40 Helsinki spots) |
 | `src/components/actions/ActionPanel.tsx` | Phase-driven action panel |
 | `src/i18n/translations.ts` | Finnish/English UI strings — all user-visible text goes through `useT()` |

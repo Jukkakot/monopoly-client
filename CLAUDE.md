@@ -18,8 +18,9 @@ npm run test:ui      # Playwright E2E tests (starts dev server automatically)
 Copy `.env.example` to `.env.local` and set `VITE_API_BASE` to the backend URL. Default fallback is `http://localhost:8080`; the deployed backend is at `https://monopoly-backend-bv41.onrender.com`.
 
 The backend lives in a sibling repo: `e:\Documents\ProcessingProjects\MonopolyBackend`.
-Its `docs/openapi.yaml` is the authoritative API spec — **check it before any change to
-the frontend↔backend interface**, and keep `src/types/api.ts` in sync with it.
+Its `src/main/resources/openapi.yaml` is the authoritative API spec (also served live at
+`<backend>/openapi.yaml`) — **check it before any change to the frontend↔backend
+interface**, and keep `src/types/api.ts` in sync with it.
 
 ## Architecture
 
