@@ -155,7 +155,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
       </div>
 
       <div className={styles.pingRow}>
-        <span className={styles.pingLabel}>Verkkolatenssi (RTT/2)</span>
+        <span className={styles.pingLabel}>{t.pingLatencyLabel}</span>
         <span className={styles.pingValue}>
           {rtt === null ? '—' : `${rtt} ms`}
         </span>
@@ -164,7 +164,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
       <div className={styles.divider} />
 
       <div className={styles.row}>
-        <label className={styles.label}>Volyymi</label>
+        <label className={styles.label}>{t.volumeLabel}</label>
         <div className={styles.sliderRow}>
           <input
             type="range" min="0" max="100" value={cfg.volume}
@@ -237,8 +237,8 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
       {zoomMode !== 'off' && (
         <label className={styles.toggleRow}>
           <div className={styles.toggleInfo}>
-            <span className={styles.label}>Noppa-zoomi</span>
-            <span className={styles.desc}>Lauta zoomaa noppiin kun ne heitetään</span>
+            <span className={styles.label}>{t.diceZoomLabel}</span>
+            <span className={styles.desc}>{t.diceZoomDesc}</span>
           </div>
           <input type="checkbox" checked={diceZoom}
             onChange={e => { saveDiceZoomEnabled(e.target.checked); setDiceZoom(e.target.checked) }}
@@ -250,8 +250,8 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
       {isMobileWithVibration && (
         <label className={styles.toggleRow}>
           <div className={styles.toggleInfo}>
-            <span className={styles.label}>Tärinäpalaute</span>
-            <span className={styles.desc}>Värinä napeista ja pelin tapahtumista</span>
+            <span className={styles.label}>{t.hapticFeedbackLabel}</span>
+            <span className={styles.desc}>{t.hapticFeedbackDesc}</span>
           </div>
           <input type="checkbox" checked={haptics}
             onChange={e => { saveHapticsEnabled(e.target.checked); setHaptics(e.target.checked) }}
@@ -262,16 +262,16 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
 
       <div className={styles.divider} />
 
-      <div className={styles.sectionLabel}>Ruutu-ilmoitukset</div>
+      <div className={styles.sectionLabel}>{t.screenNotifTitle}</div>
       {([
-        { key: 'yourTurn',    label: 'Sinun vuorosi', desc: '⭐ Ilmoitus kun oma vuoro alkaa' },
-        { key: 'rent',        label: 'Vuokrat',        desc: '💸 Maksetut ja saadut vuokrat' },
-        { key: 'debt',        label: 'Velat',          desc: '⛓ Velka, lunastus, konkurssi' },
-        { key: 'auction',     label: 'Huutokauppa',    desc: '🔨 Huutokauppailmoitukset' },
-        { key: 'trade',       label: 'Kauppa',         desc: '🤝 Kaupankäynti-ilmoitukset' },
-        { key: 'building',    label: 'Rakentaminen',   desc: '🏠 Talot ja hotellit' },
-        { key: 'cards',       label: 'Kortit',         desc: '🃏 Sattuma- ja yhteiskassakorteista' },
-        { key: 'celebration', label: 'Juhla',          desc: '🎊 Voitto ja erikoistapahtumat' },
+        { key: 'yourTurn',    label: t.notifYourTurnLabel,    desc: t.notifYourTurnDesc },
+        { key: 'rent',        label: t.notifRentLabel,        desc: t.notifRentDesc },
+        { key: 'debt',        label: t.notifDebtLabel,        desc: t.notifDebtDesc },
+        { key: 'auction',     label: t.notifAuctionLabel,     desc: t.notifAuctionDesc },
+        { key: 'trade',       label: t.notifTradeLabel,       desc: t.notifTradeDesc },
+        { key: 'building',    label: t.notifBuildingLabel,    desc: t.notifBuildingDesc },
+        { key: 'cards',       label: t.notifCardsLabel,       desc: t.notifCardsDesc },
+        { key: 'celebration', label: t.notifCelebrationLabel, desc: t.notifCelebrationDesc },
       ] as const).map(({ key, label, desc }) => (
         <label key={key} className={styles.toggleRow}>
           <div className={styles.toggleInfo}>

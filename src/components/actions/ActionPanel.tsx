@@ -877,11 +877,11 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
                 <button key={delta} className={styles.moneyBtnPlus}
                   style={{ flex: 1, padding: '6px 4px', lineHeight: 1.3 }}
                   disabled={!enabled}
-                  title={!isMyTurnToBid ? 'Ei sinun vuorosi' : !canAfford ? `Ei varaa — kassassa vain €${myCash}` : undefined}
+                  title={!isMyTurnToBid ? t.notYourTurn : !canAfford ? t.cannotAfford(myCash) : undefined}
                   onClick={() => placeBid(total)}>
-                  <div className={styles.bidQuickLabel}>korotus +{delta}</div>
+                  <div className={styles.bidQuickLabel}>{t.bidIncrement(delta)}</div>
                   <div className={styles.bidQuickTotal}>€{total}</div>
-                  <div className={styles.bidQuickLabel}>{canAfford ? 'tarjous' : `kassassa €${myCash}`}</div>
+                  <div className={styles.bidQuickLabel}>{canAfford ? t.bidOffer : t.bidInsufficientCash(myCash)}</div>
                 </button>
               )
             })}
@@ -889,7 +889,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
           <div className={styles.bidInput}>
             <input
               type="number" inputMode="numeric" pattern="[0-9]*"
-              placeholder={`vapaa tarjous (min €${minBid})`}
+              placeholder={t.freeBidPlaceholder(minBid)}
               value={customBid}
               disabled={!isMyTurnToBid}
               onChange={e => setCustomBid(e.target.value)}
@@ -900,11 +900,11 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               {t.placeBidBtn}
             </button>
           </div>
-          <Btn label={`${isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd} — luovun huutokaupasta`}
+          <Btn label={isTouchDevice ? t.passAuctionBtn : t.passAuctionBtnKbd}
             onClick={() => sendCmd({ type: 'PassAuction', sessionId: sid, actorPlayerId: myPlayerId, auctionId: auction.auctionId })}
             variant="danger" testId="action-pass-auction"
             disabled={!isMyTurnToBid}
-            title={!isMyTurnToBid ? 'Ei sinun vuorosi' : undefined} />
+            title={!isMyTurnToBid ? t.notYourTurn : undefined} />
         </>
       ) : null}
     </div>

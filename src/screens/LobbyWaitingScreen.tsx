@@ -183,7 +183,7 @@ export default function LobbyWaitingScreen() {
         <div className={styles.idRow}>
           <span className={styles.idLabel}>{t.gamePinLabel2}</span>
           <span className={styles.idCode}>{sessionId}</span>
-          <button className={styles.copyBtn} onClick={copyId} title="Kopioi koodi">
+          <button className={styles.copyBtn} onClick={copyId} title={t.copyCodeTitle}>
             {copied ? '✓' : '⎘'}
           </button>
         </div>
@@ -262,7 +262,7 @@ export default function LobbyWaitingScreen() {
                   <button key={c}
                     className={`${styles.colorDot} ${color === c ? styles.colorDotSelected : ''} ${taken ? styles.colorDotTaken : ''}`}
                     style={{ background: c }}
-                    title={taken ? 'Varattu' : c}
+                    title={taken ? t.colorTakenTitle : c}
                     disabled={taken}
                     onClick={() => !taken && setColor(c)} />
                 )

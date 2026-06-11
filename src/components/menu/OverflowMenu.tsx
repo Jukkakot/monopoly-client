@@ -63,9 +63,9 @@ export default function OverflowMenu() {
               <button className={styles.closeBtn} onClick={() => setShowHelp(false)}>✕</button>
             </div>
             <div className={styles.helpTable}>
-              <div className={styles.helpRow}><kbd>Välilyönti</kbd><span>Heitä nopat / Lopeta vuoro</span></div>
-              <div className={styles.helpRow}><kbd>Esc</kbd><span>Sulje modaali / kiinteistö</span></div>
-              <div className={styles.helpRow}><kbd>M</kbd><span>Mykistä / Ota äänet käyttöön</span></div>
+              <div className={styles.helpRow}><kbd>Välilyönti</kbd><span>{t.kbdRollOrEnd}</span></div>
+              <div className={styles.helpRow}><kbd>Esc</kbd><span>{t.kbdCloseModal}</span></div>
+              <div className={styles.helpRow}><kbd>M</kbd><span>{t.kbdMute}</span></div>
             </div>
           </div>
         </div>

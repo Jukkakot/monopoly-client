@@ -1,5 +1,7 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
 import { logger } from '../utils/logger'
+import { getLang } from '../i18n/lang'
+import { translations } from '../i18n/translations'
 
 interface Props { children: ReactNode }
 interface State { hasError: boolean }
@@ -21,13 +23,14 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const t = translations[getLang()]
       return (
         <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
-          <h2>Jokin meni pieleen</h2>
-          <p style={{ color: '#666' }}>Lataa sivu uudelleen jatkaaksesi.</p>
+          <h2>{t.errorTitle}</h2>
+          <p style={{ color: '#666' }}>{t.errorReload}</p>
           <button onClick={() => window.location.reload()}
             style={{ marginTop: '1rem', padding: '0.5rem 1.5rem', cursor: 'pointer' }}>
-            Lataa uudelleen
+            {t.errorReloadBtn}
           </button>
         </div>
       )

@@ -325,6 +325,59 @@ export interface T {
   zoomOutBtn: string
   skipAnimBtn: string
 
+  // ── ErrorBoundary ────────────────────────────────────────────────────────────
+  errorTitle: string
+  errorReload: string
+  errorReloadBtn: string
+
+  // ── ActionPanel — auction bid labels ─────────────────────────────────────────
+  notYourTurn: string
+  cannotAfford: (cash: number) => string
+  bidIncrement: (delta: number) => string
+  bidOffer: string
+  bidInsufficientCash: (cash: number) => string
+  freeBidPlaceholder: (min: number) => string
+
+  // ── SoundSettings — extra labels ─────────────────────────────────────────────
+  pingLatencyLabel: string
+  volumeLabel: string
+  diceZoomLabel: string
+  diceZoomDesc: string
+  hapticFeedbackLabel: string
+  hapticFeedbackDesc: string
+  screenNotifTitle: string
+  notifYourTurnLabel: string
+  notifYourTurnDesc: string
+  notifRentLabel: string
+  notifRentDesc: string
+  notifDebtLabel: string
+  notifDebtDesc: string
+  notifAuctionLabel: string
+  notifAuctionDesc: string
+  notifTradeLabel: string
+  notifTradeDesc: string
+  notifBuildingLabel: string
+  notifBuildingDesc: string
+  notifCardsLabel: string
+  notifCardsDesc: string
+  notifCelebrationLabel: string
+  notifCelebrationDesc: string
+
+  // ── OverflowMenu — keyboard shortcut hints ───────────────────────────────────
+  kbdRollOrEnd: string
+  kbdCloseModal: string
+  kbdMute: string
+
+  // ── SessionListScreen — tooltip labels ───────────────────────────────────────
+  copyCodeTitle: string
+  deleteGameTitle: string
+
+  // ── LobbyWaitingScreen ───────────────────────────────────────────────────────
+  colorTakenTitle: string
+
+  // ── Connection — cold start hint ─────────────────────────────────────────────
+  coldStartHint: string
+
   // ── SoundSettings ────────────────────────────────────────────────────────────
   soundSettingsTitle: string
   uiSoundsLabel: string
@@ -725,6 +778,59 @@ const fi: T = {
   zoomModeAll: 'Seuraa kaikkia',
   zoomOutBtn: 'Loitonna',
   skipAnimBtn: 'Ohita',
+
+  // ErrorBoundary
+  errorTitle: 'Jokin meni pieleen',
+  errorReload: 'Lataa sivu uudelleen jatkaaksesi.',
+  errorReloadBtn: 'Lataa uudelleen',
+
+  // ActionPanel — auction bid labels
+  notYourTurn: 'Ei sinun vuorosi',
+  cannotAfford: (cash) => `Ei varaa — kassassa vain €${cash}`,
+  bidIncrement: (delta) => `korotus +${delta}`,
+  bidOffer: 'tarjous',
+  bidInsufficientCash: (cash) => `kassassa €${cash}`,
+  freeBidPlaceholder: (min) => `vapaa tarjous (min €${min})`,
+
+  // SoundSettings — extra labels
+  pingLatencyLabel: 'Verkkolatenssi (RTT/2)',
+  volumeLabel: 'Volyymi',
+  diceZoomLabel: 'Noppa-zoomi',
+  diceZoomDesc: 'Lauta zoomaa noppiin kun ne heitetään',
+  hapticFeedbackLabel: 'Tärinäpalaute',
+  hapticFeedbackDesc: 'Värinä napeista ja pelin tapahtumista',
+  screenNotifTitle: 'Ruutu-ilmoitukset',
+  notifYourTurnLabel: 'Sinun vuorosi',
+  notifYourTurnDesc: '⭐ Ilmoitus kun oma vuoro alkaa',
+  notifRentLabel: 'Vuokrat',
+  notifRentDesc: '💸 Maksetut ja saadut vuokrat',
+  notifDebtLabel: 'Velat',
+  notifDebtDesc: '⛓ Velka, lunastus, konkurssi',
+  notifAuctionLabel: 'Huutokauppa',
+  notifAuctionDesc: '🔨 Huutokauppailmoitukset',
+  notifTradeLabel: 'Kauppa',
+  notifTradeDesc: '🤝 Kaupankäynti-ilmoitukset',
+  notifBuildingLabel: 'Rakentaminen',
+  notifBuildingDesc: '🏠 Talot ja hotellit',
+  notifCardsLabel: 'Kortit',
+  notifCardsDesc: '🃏 Sattuma- ja yhteiskassakorteista',
+  notifCelebrationLabel: 'Juhla',
+  notifCelebrationDesc: '🎊 Voitto ja erikoistapahtumat',
+
+  // OverflowMenu — keyboard shortcut hints
+  kbdRollOrEnd: 'Heitä nopat / Lopeta vuoro',
+  kbdCloseModal: 'Sulje modaali / kiinteistö',
+  kbdMute: 'Mykistä / Ota äänet käyttöön',
+
+  // SessionListScreen — tooltip labels
+  copyCodeTitle: 'Kopioi koodi',
+  deleteGameTitle: 'Poista peli',
+
+  // LobbyWaitingScreen
+  colorTakenTitle: 'Varattu',
+
+  // Connection — cold start hint
+  coldStartHint: 'Palvelin herää lepotilasta — odota noin minuutti…',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Asetukset',
@@ -1131,6 +1237,59 @@ const en: T = {
   zoomModeAll: 'Follow all players',
   zoomOutBtn: 'Zoom out',
   skipAnimBtn: 'Skip',
+
+  // ErrorBoundary
+  errorTitle: 'Something went wrong',
+  errorReload: 'Reload the page to continue.',
+  errorReloadBtn: 'Reload',
+
+  // ActionPanel — auction bid labels
+  notYourTurn: 'Not your turn',
+  cannotAfford: (cash) => `Can't afford — only €${cash} in hand`,
+  bidIncrement: (delta) => `raise +${delta}`,
+  bidOffer: 'offer',
+  bidInsufficientCash: (cash) => `cash €${cash}`,
+  freeBidPlaceholder: (min) => `free bid (min €${min})`,
+
+  // SoundSettings — extra labels
+  pingLatencyLabel: 'Network latency (RTT/2)',
+  volumeLabel: 'Volume',
+  diceZoomLabel: 'Dice zoom',
+  diceZoomDesc: 'Board zooms in on dice when rolled',
+  hapticFeedbackLabel: 'Haptic feedback',
+  hapticFeedbackDesc: 'Vibration on buttons and game events',
+  screenNotifTitle: 'Screen notifications',
+  notifYourTurnLabel: 'Your turn',
+  notifYourTurnDesc: '⭐ Alert when your turn starts',
+  notifRentLabel: 'Rent',
+  notifRentDesc: '💸 Rent paid and received',
+  notifDebtLabel: 'Debt',
+  notifDebtDesc: '⛓ Debt, redemption, bankruptcy',
+  notifAuctionLabel: 'Auction',
+  notifAuctionDesc: '🔨 Auction notifications',
+  notifTradeLabel: 'Trade',
+  notifTradeDesc: '🤝 Trade notifications',
+  notifBuildingLabel: 'Building',
+  notifBuildingDesc: '🏠 Houses and hotels',
+  notifCardsLabel: 'Cards',
+  notifCardsDesc: '🃏 Chance and Community Chest',
+  notifCelebrationLabel: 'Celebration',
+  notifCelebrationDesc: '🎊 Win and special events',
+
+  // OverflowMenu — keyboard shortcut hints
+  kbdRollOrEnd: 'Roll dice / End turn',
+  kbdCloseModal: 'Close modal / property',
+  kbdMute: 'Mute / Unmute',
+
+  // SessionListScreen — tooltip labels
+  copyCodeTitle: 'Copy code',
+  deleteGameTitle: 'Delete game',
+
+  // LobbyWaitingScreen
+  colorTakenTitle: 'Taken',
+
+  // Connection — cold start hint
+  coldStartHint: 'Server waking from sleep — please wait about a minute…',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Settings',

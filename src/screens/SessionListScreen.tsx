@@ -141,7 +141,7 @@ export default function SessionListScreen() {
             <button
               className={styles.rejoinDismiss}
               onClick={() => { setLastSession(null); try { localStorage.removeItem('monopoly_last_session') } catch {} }}
-              title="Poista"
+              title={t.deleteGameTitle}
             >✕</button>
           </div>
         )}
@@ -235,6 +235,7 @@ function SessionRow({ session, onJoin, onDelete, label, playerCountMeta, session
   playerCountMeta: (n: number) => string
   sessionAge: (createdAt: string) => string
 }) {
+  const t = useT()
   const [copied, setCopied] = useState(false)
   const age = session.createdAt ? sessionAge(session.createdAt) : '–'
 
@@ -250,7 +251,7 @@ function SessionRow({ session, onJoin, onDelete, label, playerCountMeta, session
       <div className={styles.sessionInfo}>
         <div className={styles.sessionIdRow}>
           <span className={styles.sessionId}>{session.sessionId}</span>
-          <button className={styles.copyBtn} onClick={copyId} title="Kopioi koodi">
+          <button className={styles.copyBtn} onClick={copyId} title={t.copyCodeTitle}>
             {copied ? '✓' : '⎘'}
           </button>
         </div>
@@ -261,7 +262,7 @@ function SessionRow({ session, onJoin, onDelete, label, playerCountMeta, session
         </div>
       </div>
       <button className={styles.joinBtn} onClick={onJoin}>{label}</button>
-      <button className={styles.deleteBtn} onClick={onDelete} title="Poista peli">✕</button>
+      <button className={styles.deleteBtn} onClick={onDelete} title={t.deleteGameTitle}>✕</button>
     </div>
   )
 }
