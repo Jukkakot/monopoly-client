@@ -124,6 +124,9 @@ for (const { label, vp, mobile } of VIEWPORTS) {
         await expect(page.getByTestId('action-buy').first()).toBeVisible({ timeout: 5000 })
         await page.getByTestId('action-buy').first().click()
 
+        // Wait for the buy command to be processed (end-turn becomes available)
+        await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 8000 })
+
         // Cash 1500 - 60 = 1440
         await verifyCash(page, humanSeat, '1440', mobile)
       } finally {
