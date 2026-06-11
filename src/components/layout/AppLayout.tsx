@@ -426,7 +426,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               <span className={styles.sideSectionTitle}>🎮 Toiminnot</span>
               <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
             </div>
-            {!actionsCollapsed && (
+            {!isMobile && !actionsCollapsed && (
               <div className={styles.logWrapper}>{actions}</div>
             )}
             <div className={styles.upperSpacer} />
