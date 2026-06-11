@@ -26,7 +26,7 @@ export default function GameScreen() {
   const t = useT()
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
-  const { state, joinSession, leaveSession } = useGame()
+  const { state, joinSession, leaveSession, retryConnection } = useGame()
 
   useEffect(() => {
     if (!sessionId) { navigate('/'); return }
@@ -147,17 +147,22 @@ export default function GameScreen() {
     return () => clearTimeout(timer)
   }, [sessionNeverLoaded, navigate])
 
+  const showColdStartHint = state.reconnectAttempts >= 3
+
   if (state.connectionStatus === 'FAILED') {
     return (
       <div className={styles.center}>
         <div className={styles.error}>
           <h2>{sessionNeverLoaded ? t.sessionNotFoundTitle : t.connectionLostTitle}</h2>
           <p>{sessionNeverLoaded ? t.sessionNotFoundMsg : t.checkNetworkMsg}</p>
+          {showColdStartHint && !sessionNeverLoaded && (
+            <p className={styles.coldStartHint}>{t.coldStartHint}</p>
+          )}
           {sessionId && !sessionNeverLoaded && (
             <p className={styles.sessionIdHint}>{t.gamePinLabel} <code>{sessionId}</code></p>
           )}
           {!sessionNeverLoaded && (
-            <button onClick={() => window.location.reload()} className={styles.btn}>{t.retryBtn}</button>
+            <button onClick={retryConnection} className={styles.btn}>{t.retryBtn}</button>
           )}
           <button onClick={() => navigate('/')} className={`${styles.btn} ${styles.btnSecondary}`}>{t.backBtn}</button>
         </div>
@@ -166,6 +171,12 @@ export default function GameScreen() {
   }
 
   if (!state.snapshot) {
+    // Show cold-start hint while waiting for initial connection after multiple attempts
+    if (showColdStartHint) {
+      return (
+        <DiceSpinner message={t.coldStartHint} overlay />
+      )
+    }
     return <DiceSpinner message={t.loadingGame} overlay />
   }
 

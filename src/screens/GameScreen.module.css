@@ -40,6 +40,17 @@
   color: #666;
 }
 
+.coldStartHint {
+  font-size: 0.9rem;
+  color: #e65100;
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+  border-radius: 8px;
+  padding: 8px 16px;
+  max-width: 320px;
+  text-align: center;
+}
+
 .sessionIdHint code {
   background: #f5f5f5;
   border: 1px solid #ddd;
