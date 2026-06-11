@@ -14,6 +14,8 @@ export interface GameEvent {
   id: number
   timestamp: number
   icon: string
+  /** Stable sound key — maps to a specific sound in GameContext. Prefer switching on this over icon. */
+  soundKey?: string
   message: string
   relatedPlayerIds: string[]
   kind?: string
@@ -23,9 +25,9 @@ export interface GameEvent {
 
 let _id = 0
 
-function ev(icon: string, message: string, related: string[] = [], kind?: string, delay = 0): GameEvent {
+function ev(icon: string, message: string, related: string[] = [], kind?: string, delay = 0, soundKey?: string): GameEvent {
   const now = Date.now()
-  return { id: _id++, timestamp: now, icon, message, relatedPlayerIds: related, kind, releaseAt: delay > 0 ? now + delay : undefined }
+  return { id: _id++, timestamp: now, icon, soundKey, message, relatedPlayerIds: related, kind, releaseAt: delay > 0 ? now + delay : undefined }
 }
 
 function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean, cfg: AnimationConfig): number {
@@ -61,7 +63,7 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
       case 'DICE_ROLLED': {
         const d1 = parseInt(e.data.d1 ?? '1')
         const d2 = parseInt(e.data.d2 ?? '1')
-        events.push(ev('🎲', t.rolledDice(name, d1, d2), [pid], `${d1}_${d2}`))
+        events.push(ev('🎲', t.rolledDice(name, d1, d2), [pid], `${d1}_${d2}`, 0, 'DICE_ROLLED'))
         break
       }
       case 'PLAYER_MOVED': {
@@ -70,78 +72,78 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const delay = moveDelay(from, to, false, cfg)
         playerDelayMs.set(pid, delay)
         const spot = SPOTS[to]
-        events.push(ev('🏃', `${name} → ${spot?.name ?? `#${to}`}`, [pid], undefined, delay))
+        events.push(ev('🏃', `${name} → ${spot?.name ?? `#${to}`}`, [pid], undefined, delay, 'PLAYER_MOVED'))
         break
       }
       case 'PASSED_GO': {
         const delay = playerDelayMs.get(pid) ?? 0
-        events.push(ev('💰', t.passedGo(name), [pid], undefined, delay))
+        events.push(ev('💰', t.passedGo(name), [pid], undefined, delay, 'PASSED_GO'))
         break
       }
       case 'WENT_TO_JAIL': {
         const from = e.data.from != null ? parseInt(e.data.from) : null
         const delay = from != null ? moveDelay(from, JAIL_INDEX, true, cfg) : (playerDelayMs.get(pid) ?? 0)
         playerDelayMs.set(pid, delay)
-        events.push(ev('⛓', t.wentToJail(name), [pid], undefined, delay))
+        events.push(ev('⛓', t.wentToJail(name), [pid], undefined, delay, 'WENT_TO_JAIL'))
         break
       }
       case 'RELEASED_FROM_JAIL': {
-        events.push(ev('🔓', t.releasedFromJail(name), [pid]))
+        events.push(ev('🔓', t.releasedFromJail(name), [pid], undefined, 0, 'RELEASED_FROM_JAIL'))
         break
       }
       case 'DREW_CARD': {
         const cardKey = e.data.card ?? ''
         const text = getCardText(cardKey, null)
         const delay = playerDelayMs.get(pid) ?? 0
-        if (text) events.push(ev('🃏', t.drewCard(name, text), [pid], undefined, delay))
+        if (text) events.push(ev('🃏', t.drewCard(name, text), [pid], undefined, delay, 'DREW_CARD'))
         break
       }
       case 'PAID_RENT': {
         const creditor = players.find(p => p.playerId === pid2)
         const amount = parseInt(e.data.amount ?? '0')
         const delay = playerDelayMs.get(pid) ?? 0
-        events.push(ev('💸', t.paidRent(name, amount, creditor?.name ?? '?'), e.playerIds.slice(0, 2), undefined, delay))
+        events.push(ev('💸', t.paidRent(name, amount, creditor?.name ?? '?'), e.playerIds.slice(0, 2), undefined, delay, 'PAID_RENT'))
         break
       }
       case 'BOUGHT_PROPERTY': {
         const spot = SPOTS.find(s => s.id === e.data.property)
         const propName = spot?.name ?? e.data.property ?? '?'
         const delay = playerDelayMs.get(pid) ?? 0
-        events.push(ev('🏠', t.bought(name, propName), [pid], undefined, delay))
+        events.push(ev('🏠', t.bought(name, propName), [pid], undefined, delay, 'BOUGHT_PROPERTY'))
         break
       }
       case 'BUILT_HOUSE': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('🏗', t.builtHouse(name, spot?.name ?? e.data.property ?? '?'), [pid], `house:${spot?.streetType ?? ''}`))
+        events.push(ev('🏗', t.builtHouse(name, spot?.name ?? e.data.property ?? '?'), [pid], `house:${spot?.streetType ?? ''}`, 0, 'BUILT_HOUSE'))
         break
       }
       case 'BUILT_HOTEL': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('🏗', t.builtHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `hotel:${spot?.streetType ?? ''}`))
+        events.push(ev('🏗', t.builtHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `hotel:${spot?.streetType ?? ''}`, 0, 'BUILT_HOTEL'))
         break
       }
       case 'SOLD_HOUSE': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('🏚', t.soldHouse(name, spot?.name ?? e.data.property ?? '?'), [pid], `sell:${spot?.streetType ?? ''}`))
+        events.push(ev('🏚', t.soldHouse(name, spot?.name ?? e.data.property ?? '?'), [pid], `sell:${spot?.streetType ?? ''}`, 0, 'SOLD_HOUSE'))
         break
       }
       case 'SOLD_HOTEL': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('🏚', t.soldHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `sellhotel:${spot?.streetType ?? ''}`))
+        events.push(ev('🏚', t.soldHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `sellhotel:${spot?.streetType ?? ''}`, 0, 'SOLD_HOTEL'))
         break
       }
       case 'MORTGAGED': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('🏦', t.mortgaged(name, spot?.name ?? e.data.property ?? '?'), [pid]))
+        events.push(ev('🏦', t.mortgaged(name, spot?.name ?? e.data.property ?? '?'), [pid], undefined, 0, 'MORTGAGED'))
         break
       }
       case 'REDEEMED': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('💳', t.redeemed(name, spot?.name ?? e.data.property ?? '?'), [pid]))
+        events.push(ev('💳', t.redeemed(name, spot?.name ?? e.data.property ?? '?'), [pid], undefined, 0, 'REDEEMED'))
         break
       }
       case 'WENT_BANKRUPT': {
-        events.push(ev('💀', t.wentBankrupt(name), [pid]))
+        events.push(ev('💀', t.wentBankrupt(name), [pid], undefined, 0, 'WENT_BANKRUPT'))
         break
       }
       case 'PLAYER_LEFT': {
@@ -161,7 +163,7 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const details = offeredParts || requestedParts
           ? ' · ' + [offeredParts, requestedParts].filter(Boolean).join(' ↔ ')
           : ''
-        events.push(ev('🤝', t.tradeAccepted(name, p2?.name ?? '?') + details, [pid, pid2], 'accepted'))
+        events.push(ev('🤝', t.tradeAccepted(name, p2?.name ?? '?') + details, [pid, pid2], 'accepted', 0, 'TRADE_ACCEPTED'))
         break
       }
       case 'TRADE_DECLINED': {
@@ -201,7 +203,7 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
   // Game over
   if (next.status === 'GAME_OVER' && prev.status !== 'GAME_OVER') {
     const winner = next.players.find(p => p.playerId === next.winnerPlayerId)
-    events.push(ev('🎊', t.gameOver(winner?.name ?? '?'), []))
+    events.push(ev('🎊', t.gameOver(winner?.name ?? '?'), [], undefined, 0, 'GAME_OVER'))
     return events
   }
 
@@ -241,7 +243,7 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
     const winner = winId ? next.players.find(p => p.playerId === winId) : null
     const spot = SPOTS.find(s => s.id === prev.auctionState!.propertyId)
     if (winner) {
-      events.push(ev('🔨', t.auctionWon(winner.name, spot?.name ?? '?'), [winner.playerId]))
+      events.push(ev('🔨', t.auctionWon(winner.name, spot?.name ?? '?'), [winner.playerId], undefined, 0, 'AUCTION_WON'))
     } else {
       events.push(ev('🔨', t.auctionNoWinner, []))
     }
