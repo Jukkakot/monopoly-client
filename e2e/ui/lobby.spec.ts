@@ -58,7 +58,7 @@ test('session list: quick start 1 vs 1 creates game and navigates', async ({ bro
     sid = sidFromUrl(page.url())
 
     // Game screen loaded: human player's first turn → roll button visible
-    await expect(page.getByTestId('action-roll')).toBeVisible({ timeout: 20000 })
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 20000 })
   } finally {
     if (sid) await deleteSession(sid)
     await page.context().close()
