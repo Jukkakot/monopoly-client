@@ -81,6 +81,7 @@ interface GameState {
   prevSnapshot: SessionState | null
   version: number
   connectionStatus: ConnectionStatus
+  reconnectAttempts: number  // how many consecutive SSE reconnect attempts since last success
   events: GameEvent[]
   myPlayerId: string | null
   lastDice: [number, number] | null
@@ -98,6 +99,7 @@ type Action =
   | { type: 'LEAVE_SESSION' }
   | { type: 'SET_SNAPSHOT'; snapshot: ClientSessionSnapshot }
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
+  | { type: 'SET_RECONNECT_ATTEMPTS'; count: number }
   | { type: 'SET_COMMAND_ERROR'; message: string | null }
   | { type: 'SET_SSE_FROZEN'; frozen: boolean }
   | { type: 'INJECT_DEBUG_SNAPSHOT'; snapshot: SessionState }
@@ -151,6 +153,7 @@ function reducer(state: GameState, action: Action): GameState {
         prevSnapshot: null,
         version: 0,
         connectionStatus: 'CONNECTING',
+        reconnectAttempts: 0,
         events: [],
         myPlayerId: null,
         lastDice: null,
@@ -241,6 +244,7 @@ function reducer(state: GameState, action: Action): GameState {
         snapshot: mergedSnapshot,
         version: action.snapshot.version,
         connectionStatus: 'LIVE',
+        reconnectAttempts: 0,
         events: mergedSnapshot
           ? (newEvents.length > 0 ? [...state.events, ...newEvents].slice(-200) : state.events)
           : state.events,
@@ -259,6 +263,7 @@ function reducer(state: GameState, action: Action): GameState {
         sessionId: null,
         snapshot: null,
         version: 0,
+        reconnectAttempts: 0,
         events: [],
         myPlayerId: null,
         lastDice: null,
@@ -270,6 +275,8 @@ function reducer(state: GameState, action: Action): GameState {
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
+    case 'SET_RECONNECT_ATTEMPTS':
+      return { ...state, reconnectAttempts: action.count }
     case 'SET_COMMAND_ERROR':
       return { ...state, commandError: action.message }
     case 'SET_SSE_FROZEN':
@@ -288,6 +295,7 @@ interface GameContextValue {
   sendCmd: (command: object) => Promise<void>
   freezeSSE: () => void
   unfreezeSSE: () => void
+  retryConnection: () => void
   injectDebugSnapshot: (snapshot: SessionState) => void
 }
 
@@ -303,6 +311,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     prevSnapshot: null,
     version: 0,
     connectionStatus: 'CONNECTING',
+    reconnectAttempts: 0,
     events: [],
     myPlayerId: null,
     lastDice: null,
@@ -382,22 +391,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
     for (const e of newEvents) {
       const delay = e.releaseAt ? Math.max(0, e.releaseAt - now) : 0
       timers.push(setTimeout(() => {
-        switch (e.icon) {
-          case '🎲': playDiceRoll(); break
-          case '🏃': playTokenMove(); break
-          case '🏠': playBuyProperty(); break
-          case '🏗': e.kind === 'hotel' ? playBuildHotel() : playBuildHouse(); break
-          case '⛓': playGoToJail(); break
-          case '🔓': playReleaseJail(); break
-          case '🃏': playDrawCard(); break
-          case '💀': playBankruptcy(); break
-          case '🎊': playGameOver(); break
-          case '🤝': if (e.kind === 'accepted') playTradeAccepted(); break
-          case '🏦': playMortgage(); break
-          case '💳': playMortgage(); break
-          case '💰': playPassGo(); break
-          case '💸': playPayRent(); break
-          case '🏆': playAuctionWin(); break
+        switch (e.soundKey) {
+          case 'DICE_ROLLED': playDiceRoll(); break
+          case 'PLAYER_MOVED': playTokenMove(); break
+          case 'BOUGHT_PROPERTY': playBuyProperty(); break
+          case 'BUILT_HOUSE': playBuildHouse(); break
+          case 'BUILT_HOTEL': playBuildHotel(); break
+          case 'WENT_TO_JAIL': playGoToJail(); break
+          case 'RELEASED_FROM_JAIL': playReleaseJail(); break
+          case 'DREW_CARD': playDrawCard(); break
+          case 'WENT_BANKRUPT': playBankruptcy(); break
+          case 'GAME_OVER': playGameOver(); break
+          case 'TRADE_ACCEPTED': playTradeAccepted(); break
+          case 'MORTGAGED': playMortgage(); break
+          case 'REDEEMED': playMortgage(); break
+          case 'PASSED_GO': playPassGo(); break
+          case 'PAID_RENT': playPayRent(); break
+          case 'AUCTION_WON': playAuctionWin(); break
         }
       }, delay))
     }
@@ -450,6 +460,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_SSE_FROZEN', frozen: false })
   }, [])
 
+  const retryConnection = useCallback(() => {
+    esRef.current?.close()
+    esRef.current = null
+    retryCount.current = 0
+    dispatch({ type: 'SET_RECONNECT_ATTEMPTS', count: 0 })
+    // Reset connection state — the SSE useEffect will re-run because connectionStatus changed,
+    // but we need sseFrozen to toggle to actually re-trigger the effect dependency list.
+    // Use freeze/unfreeze cycle: freeze dispatches synchronously, then unfreeze triggers reconnect.
+    dispatch({ type: 'SET_SSE_FROZEN', frozen: true })
+    // Unfreeze after a tick — the SSE effect cleanup will run then reconnect.
+    setTimeout(() => dispatch({ type: 'SET_SSE_FROZEN', frozen: false }), 0)
+  }, [])
+
   const injectDebugSnapshot = useCallback((snapshot: SessionState) => {
     dispatch({ type: 'INJECT_DEBUG_SNAPSHOT', snapshot })
   }, [])
@@ -462,6 +485,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const now = Date.now()
     const dedupeMs = FAST_DEDUP_CMDS.has(cmdType) ? 100 : 600
     if (now - (lastCmdTimeRef.current.get(cmdType) ?? 0) < dedupeMs) return
+    // Record timestamp to block duplicate clicks while the request is in-flight.
+    // Cleared on rejection or error so the user can retry immediately.
     lastCmdTimeRef.current.set(cmdType, now)
     try {
       const sid = state.sessionId
@@ -474,6 +499,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (result.accepted) {
         logger.info('cmd', { type: cmdType, sessionId: sid })
       } else if (result.rejections.length > 0) {
+        // Rejection: allow immediate retry
+        lastCmdTimeRef.current.delete(cmdType)
         // Log rejection for debugging — these should not happen during normal play
         // (the UI should prevent sending invalid commands in the first place)
         const codes = result.rejections.map(r => r.code).join(', ')
@@ -490,6 +517,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (err) {
+      // Network error: allow immediate retry
+      lastCmdTimeRef.current.delete(cmdType)
       dispatch({ type: 'SET_COMMAND_ERROR', message: translations[getLang()].commandErrorMsg })
       setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
       window.__monopolyErrorLog?.push(`NETWORK_ERROR: ${String(err)}`)
@@ -607,10 +636,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
         if (retryCount.current >= 5) {
           logger.warn('SSE failed after retries', { sessionId: state.sessionId, attempts: retryCount.current })
           dispatch({ type: 'SET_CONNECTION', status: 'FAILED' })
+          dispatch({ type: 'SET_RECONNECT_ATTEMPTS', count: retryCount.current })
           return
         }
         const delay = Math.min(1000 * 2 ** retryCount.current, 30000)
         retryCount.current++
+        dispatch({ type: 'SET_RECONNECT_ATTEMPTS', count: retryCount.current })
         dispatch({ type: 'SET_CONNECTION', status: 'RECONNECTING' })
         timeoutId = setTimeout(connect, delay)
       }
@@ -627,7 +658,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.sessionId, state.sseFrozen])
 
   return (
-    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd, freezeSSE, unfreezeSSE, injectDebugSnapshot }}>
+    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd, freezeSSE, unfreezeSSE, retryConnection, injectDebugSnapshot }}>
       {children}
     </GameContext.Provider>
   )
