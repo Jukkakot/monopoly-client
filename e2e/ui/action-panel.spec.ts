@@ -95,8 +95,9 @@ test('game over overlay appears with winner name after bankruptcy', async ({ pag
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 8000 })
     await page.getByTestId('action-roll').first().click()
 
-    // Declare bankruptcy via UI button
-    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 8000 })
+    // Declare bankruptcy via UI button (two-step confirmation flow)
+    await page.getByTestId('action-declare-bankruptcy-trigger').first().click()
+    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 3000 })
     await page.getByTestId('action-declare-bankruptcy').first().click()
 
     // Wait for frontend to receive GAME_OVER state via SSE

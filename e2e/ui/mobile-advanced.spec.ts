@@ -178,7 +178,8 @@ test('mobile: game over winner overlay visible on phone screen', async ({ browse
     await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
     await page.getByTestId('action-roll').first().click()
-    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 8000 })
+    await page.getByTestId('action-declare-bankruptcy-trigger').first().click()
+    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 3000 })
     await page.getByTestId('action-declare-bankruptcy').first().click()
 
     // Game over overlay visible on mobile phone screen

@@ -250,8 +250,9 @@ test('H1 bankrupts to H2 → both pages show H2 as winner', async ({ browser }) 
     await expect(page1.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
     await page1.getByTestId('action-roll').first().click()
 
-    // H1 declares bankruptcy to H2 → game over
-    await expect(page1.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 8000 })
+    // H1 declares bankruptcy to H2 → game over (two-step confirmation flow)
+    await page1.getByTestId('action-declare-bankruptcy-trigger').first().click()
+    await expect(page1.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 3000 })
     await page1.getByTestId('action-declare-bankruptcy').first().click()
 
     // Both pages show GAME_OVER and winner overlay

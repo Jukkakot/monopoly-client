@@ -44,9 +44,9 @@ test('declare bankruptcy button visible when player has no assets', async ({ pag
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
     await page.getByTestId('action-roll').first().click()
 
-    // Debt panel: human can't pay → DECLARE_BANKRUPTCY action available
+    // Debt panel: human can't pay → DECLARE_BANKRUPTCY trigger action available
     await expect(page.getByTestId('debt-panel').first()).toBeVisible({ timeout: 8000 })
-    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 3000 })
+    await expect(page.getByTestId('action-declare-bankruptcy-trigger').first()).toBeVisible({ timeout: 3000 })
   } finally {
     await deleteSession(sid)
   }
@@ -76,7 +76,8 @@ test('declare bankruptcy → game over overlay appears', async ({ page }) => {
 
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
     await page.getByTestId('action-roll').first().click()
-    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 8000 })
+    await page.getByTestId('action-declare-bankruptcy-trigger').first().click()
+    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 3000 })
     await page.getByTestId('action-declare-bankruptcy').first().click()
 
     // After bankruptcy: 2-player game → bot wins → GAME_OVER

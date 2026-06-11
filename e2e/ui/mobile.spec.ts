@@ -190,8 +190,8 @@ test('mobile: debt panel visible when cannot pay rent', async ({ browser }) => {
 
     // Debt panel appears on the board tab in the mobile action area
     await expect(page.getByTestId('debt-panel').first()).toBeVisible({ timeout: 8000 })
-    // Declare bankruptcy button also accessible on mobile
-    await expect(page.getByTestId('action-declare-bankruptcy').first()).toBeVisible({ timeout: 3000 })
+    // Declare bankruptcy trigger button accessible on mobile (first step of two-step confirmation)
+    await expect(page.getByTestId('action-declare-bankruptcy-trigger').first()).toBeVisible({ timeout: 3000 })
   } finally {
     await ctx.close()
     await deleteSession(sid)
