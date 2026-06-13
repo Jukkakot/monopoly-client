@@ -63,7 +63,7 @@ describe('Lobby flow', () => {
       for (const p of players) {
         expect(p.cash).toBeGreaterThan(0)
       }
-      const playerIds = players.map(p => p.id)
+      const playerIds = players.map(p => p.playerId)
       expect(playerIds).toContain(p1.playerId)
       expect(playerIds).toContain(p2.playerId)
     } finally {

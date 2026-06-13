@@ -10,7 +10,6 @@ import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
 import FlashBanner from '../components/notification/FlashBanner'
 import PropertyDetail from '../components/property/PropertyDetail'
-import KeyboardHelp from '../components/menu/KeyboardHelp'
 import Confetti from '../components/effects/Confetti'
 import GameOverOverlay from '../components/effects/GameOverOverlay'
 import DiceSpinner from '../components/common/DiceSpinner'
@@ -39,7 +38,6 @@ export default function GameScreen() {
 
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [highlightGroupType, setHighlightGroupType] = useState<string | null>(null)
-  const [showHelp, setShowHelp] = useState(false)
   const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
   const [isDebugMode, toggleDebug] = useDebugMode()
@@ -199,8 +197,7 @@ export default function GameScreen() {
           onClose={() => setSelectedSpotId(null)}
         />
       )}
-      {showHelp && <KeyboardHelp onClose={() => setShowHelp(false)} />}
-      {import.meta.env.DEV && isDebugMode && DebugPanel && sessionId && (
+{import.meta.env.DEV && isDebugMode && DebugPanel && sessionId && (
         <Suspense fallback={null}>
           <DebugPanel sessionId={sessionId} />
         </Suspense>

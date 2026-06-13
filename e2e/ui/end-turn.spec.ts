@@ -42,10 +42,8 @@ test('end-turn button → turn advances to opponent', async ({ page }) => {
 
     // After end turn: it's the bot's turn → human no longer sees end-turn button
     await expect(page.getByTestId('action-end-turn').first()).not.toBeVisible({ timeout: 5000 })
-    // Either the bot's phase indicator appears, or (if fast bot already acted) human's roll button is back
-    await expect(
-      page.getByTestId('current-phase').first().or(page.getByTestId('action-roll').first())
-    ).toBeVisible({ timeout: 5000 })
+    // Fast bot will act and return to human's roll — wait for roll button to reappear
+    await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 10000 })
   } finally {
     await deleteSession(sid)
   }

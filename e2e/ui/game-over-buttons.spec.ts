@@ -9,14 +9,14 @@
  * after the user interacts with the buttons.
  */
 import { test, expect } from '@playwright/test'
-import { createBotSession, getSnapshot, injectState, sendCmd, setBotSpeed, deleteSession } from '../helpers/api'
+import { createBotSession, injectState, getSnapshot, setBotSpeed, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
 async function reachGameOver(page: import('@playwright/test').Page, sid: string) {
   const snap0 = await getSnapshot(sid)
-  const ids = snap0.state!.players.map(p => p.playerId)
 
-  // seat0 has €1, seat1 owns B1+B2 with hotel → seat0 land on B2 → unaffordable rent → bankrupt
+  // seat0 has €1, seat1 owns B1+B2 with hotel → seat0 lands on B2 → unaffordable rent → bankrupt.
+  // Both players are bots so they handle RollDice and DeclareBankruptcy automatically.
   await injectState(sid, buildPatch({
     description: '', rules: [],
     players: [{ cash: 1, boardIndex: 0 }, { cash: 1500, boardIndex: 10 }],
@@ -27,12 +27,8 @@ async function reachGameOver(page: import('@playwright/test').Page, sid: string)
     expectedAfter: {},
   }, snap0))
 
-  await sendCmd(sid, { type: 'RollDice', actorPlayerId: ids[0] })
-  const snap1 = await getSnapshot(sid)
-  await sendCmd(sid, { type: 'DeclareBankruptcy', actorPlayerId: ids[0], debtId: snap1.state!.activeDebt!.debtId })
-
-  // Wait for SSE-driven GAME_OVER state on the page
-  await expect(page.getByTestId('game-status').first()).toHaveAttribute('data-status', 'GAME_OVER', { timeout: 12000 })
+  // Bots drive everything: seat0 rolls, can't pay rent, declares bankruptcy → GAME_OVER.
+  await expect(page.getByTestId('game-status').first()).toHaveAttribute('data-status', 'GAME_OVER', { timeout: 15000 })
   await expect(page.getByTestId('game-over-winner').first()).toBeVisible({ timeout: 3000 })
 }
 
