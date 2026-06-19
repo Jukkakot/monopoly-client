@@ -603,6 +603,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
           // in the settling window after a direct dispatch (animation useEffect not yet fired).
           if (isAnyPlayerAnimating() || pendingSnapshots.current.length > 0 || settlingRef.current) {
             pendingSnapshots.current.push(snap)
+            // Ack on receipt (not only on drain) so the backend lag-gate stays open while
+            // animations play — decouples bot liveness from the animation queue.
+            sendAck(state.sessionId!, snap.version)
           } else {
             settlingRef.current = true
             dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })
