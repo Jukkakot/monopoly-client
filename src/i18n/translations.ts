@@ -343,6 +343,7 @@ export interface T {
   bidOffer: string
   bidInsufficientCash: (cash: number) => string
   freeBidPlaceholder: (min: number) => string
+  auctionMortgageHint: string
 
   // ── SoundSettings — extra labels ─────────────────────────────────────────────
   pingLatencyLabel: string
@@ -802,6 +803,7 @@ const fi: T = {
   bidOffer: 'tarjous',
   bidInsufficientCash: (cash) => `kassassa €${cash}`,
   freeBidPlaceholder: (min) => `vapaa tarjous (min €${min})`,
+  auctionMortgageHint: 'Vihje: panttaa kiinteistöjä rahojen keräämiseksi — käytä Kiinteistöt-välilehteä',
 
   // SoundSettings — extra labels
   pingLatencyLabel: 'Verkkolatenssi (RTT/2)',
@@ -1266,6 +1268,7 @@ const en: T = {
   bidOffer: 'offer',
   bidInsufficientCash: (cash) => `cash €${cash}`,
   freeBidPlaceholder: (min) => `free bid (min €${min})`,
+  auctionMortgageHint: 'Tip: mortgage properties to raise funds — use the Properties tab',
 
   // SoundSettings — extra labels
   pingLatencyLabel: 'Network latency (RTT/2)',
