@@ -74,7 +74,6 @@ interface Props {
   myPlayerId: string
 }
 
-
 function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId, title }: {
   label: string
   onClick: () => void
@@ -1223,8 +1222,10 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const requestMoneyRef = useRef(myRequest.moneyAmount)
   const offerSendTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const requestSendTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => { offerMoneyRef.current = myOffer.moneyAmount; setLocalOfferMoney(myOffer.moneyAmount) }, [myOffer.moneyAmount])
-  useEffect(() => { requestMoneyRef.current = myRequest.moneyAmount; setLocalRequestMoney(myRequest.moneyAmount) }, [myRequest.moneyAmount])
+  // Only sync from backend when no local edit is in-flight; otherwise the arriving
+  // response for a previous click would overwrite the ref before the next send fires.
+  useEffect(() => { if (!offerSendTimer.current) { offerMoneyRef.current = myOffer.moneyAmount; setLocalOfferMoney(myOffer.moneyAmount) } }, [myOffer.moneyAmount])
+  useEffect(() => { if (!requestSendTimer.current) { requestMoneyRef.current = myRequest.moneyAmount; setLocalRequestMoney(myRequest.moneyAmount) } }, [myRequest.moneyAmount])
   useEffect(() => () => {
     if (offerSendTimer.current) clearTimeout(offerSendTimer.current)
     if (requestSendTimer.current) clearTimeout(requestSendTimer.current)

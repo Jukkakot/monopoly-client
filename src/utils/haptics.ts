@@ -8,9 +8,18 @@ export function saveHapticsEnabled(enabled: boolean) {
   try { localStorage.setItem(LS_KEY, String(enabled)) } catch { /* ignore */ }
 }
 
+// iOS (Safari, Chrome, Firefox on iOS) does not implement navigator.vibrate.
+// Some iOS versions expose the property but silently ignore calls.
+export function isIOSDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+}
+
 function vibe(pattern: number | number[]) {
   if (!loadHapticsEnabled()) return
   if (typeof navigator === 'undefined' || !('vibrate' in navigator)) return
+  if (isIOSDevice()) return
   navigator.vibrate(pattern)
 }
 
