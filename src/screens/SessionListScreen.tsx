@@ -152,7 +152,7 @@ export default function SessionListScreen() {
             <div className={styles.logoBox}>
               <div className={styles.logo}>Monopoly</div>
               <div className={styles.sub}>Helsinki Edition</div>
-              <div className={styles.version}>v{__APP_VERSION__}</div>
+              <div className={styles.version}>v{__APP_VERSION__} · {__BUILD_TIME__}</div>
             </div>
             <div className={styles.quickSection}>
               <button className={styles.newBtn} onClick={() => navigate('/lobby')}>
