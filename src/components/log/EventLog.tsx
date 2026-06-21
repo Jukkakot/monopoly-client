@@ -4,6 +4,7 @@ import type { GameEvent } from '../../store/events'
 import { useT } from '../../i18n/LanguageContext'
 import { STREET_COLORS } from '../../types/spots'
 import type { SeatState } from '../../types/api'
+import { ALL_SHAPES, loadTokenShapes } from '../../utils/tokenShapes'
 
 const ICON_CLASS: Record<string, string> = {
   '🎲': styles.typeDice,
@@ -54,9 +55,10 @@ interface EntryProps {
   event: GameEvent
   myPlayerId: string | null
   seatColorFn: (playerId: string) => string | null
+  seatSymbolFn: (playerId: string) => string | null
 }
 
-const EventEntry = memo(function EventEntry({ event, myPlayerId, seatColorFn }: EntryProps) {
+const EventEntry = memo(function EventEntry({ event, myPlayerId, seatColorFn, seatSymbolFn }: EntryProps) {
   const t = useT()
   const isRelated = !!(myPlayerId && event.relatedPlayerIds.includes(myPlayerId))
   const typeClass = ICON_CLASS[event.icon] ?? ''
@@ -65,6 +67,7 @@ const EventEntry = memo(function EventEntry({ event, myPlayerId, seatColorFn }: 
     : null
   const entryStyle = buildColor ? { borderLeftColor: buildColor } : undefined
   const primaryColor = event.relatedPlayerIds[0] ? seatColorFn(event.relatedPlayerIds[0]) : null
+  const primarySymbol = event.relatedPlayerIds[0] ? seatSymbolFn(event.relatedPlayerIds[0]) : null
 
   function relativeTime(timestamp: number): string {
     const diff = Math.floor((Date.now() - timestamp) / 1000)
@@ -79,8 +82,8 @@ const EventEntry = memo(function EventEntry({ event, myPlayerId, seatColorFn }: 
     <div className={`${styles.entry} ${typeClass} ${isRelated ? styles.mine : ''}`} style={entryStyle}>
       <span className={styles.icon}>{event.icon}</span>
       {buildColor && <span className={styles.buildDot} style={{ background: buildColor }} />}
-      {primaryColor && !buildColor && (
-        <span className={styles.playerDot} style={{ background: primaryColor }} />
+      {primaryColor && primarySymbol && !buildColor && (
+        <span className={styles.playerSymbol} style={{ color: primaryColor }}>{primarySymbol}</span>
       )}
       <span className={styles.message}>{event.message}</span>
       <span className={styles.time} title={new Date(event.timestamp).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}>
@@ -94,14 +97,26 @@ interface Props {
   events: GameEvent[]
   myPlayerId: string | null
   seats?: SeatState[]
+  sessionId?: string
 }
 
-export default memo(function EventLog({ events, myPlayerId, seats }: Props) {
+export default memo(function EventLog({ events, myPlayerId, seats, sessionId }: Props) {
   const t = useT()
   const seatColorFn = useMemo(() => {
     const map = new Map((seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
     return (id: string) => map.get(id) ?? null
   }, [seats])
+  const seatSymbolFn = useMemo(() => {
+    if (!seats || seats.length === 0 || !sessionId) return (_id: string) => null
+    const shapes = loadTokenShapes(sessionId, seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
+    const shapeMap = new Map<string, string>()
+    for (const seat of seats) {
+      const shape = shapes[seat.seatIndex]
+      const entry = shape ? ALL_SHAPES.find(s => s.key === shape) : null
+      shapeMap.set(seat.playerId, entry?.label ?? ALL_SHAPES[seat.seatIndex % ALL_SHAPES.length].label)
+    }
+    return (id: string) => shapeMap.get(id) ?? null
+  }, [seats, sessionId])
   const [activeFilters, setActiveFilters] = useState<Set<FilterGroup>>(new Set())
   const [mineOnly, setMineOnly] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
@@ -190,7 +205,7 @@ export default memo(function EventLog({ events, myPlayerId, seats }: Props) {
           <div className={styles.empty}>{t.noEventsYet}</div>
         )}
         {filtered.map(event => (
-          <EventEntry key={event.id} event={event} myPlayerId={myPlayerId} seatColorFn={seatColorFn} />
+          <EventEntry key={event.id} event={event} myPlayerId={myPlayerId} seatColorFn={seatColorFn} seatSymbolFn={seatSymbolFn} />
         ))}
       </div>
     </div>
