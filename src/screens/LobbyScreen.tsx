@@ -33,7 +33,7 @@ export default function LobbyScreen() {
   const [color, setColor] = useState(() => PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)])
   const [tokenShape, setTokenShape] = useState<TokenShape>(() => ALL_SHAPES[Math.floor(Math.random() * ALL_SHAPES.length)].key)
   const [botCount, setBotCount] = useState(0)
-  const [botStrategy, setBotStrategy] = useState<'pure-domain-v1' | 'utility-v1'>('utility-v1')
+  const botStrategy = 'pure-domain-v1' as const
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -200,23 +200,6 @@ export default function LobbyScreen() {
               onClick={() => { playButtonClick(); setBotCount(c => Math.min(maxBots, c + 1)) }}
               disabled={loading || botCount >= maxBots}
             >+</button>
-          </div>
-          <div className={styles.sectionTitle}>{t.botStrategyLabel}</div>
-          <div className={styles.toggle}>
-            <button
-              className={`${styles.toggleBtn} ${botStrategy === 'pure-domain-v1' ? styles.toggleActive : ''}`}
-              onClick={() => { playButtonClick(); setBotStrategy('pure-domain-v1') }}
-              disabled={loading}
-            >
-              {t.botStrategyClassic}
-            </button>
-            <button
-              className={`${styles.toggleBtn} ${botStrategy === 'utility-v1' ? styles.toggleActive : ''}`}
-              onClick={() => { playButtonClick(); setBotStrategy('utility-v1') }}
-              disabled={loading}
-            >
-              {t.botStrategyUtility}
-            </button>
           </div>
         </div>
 
