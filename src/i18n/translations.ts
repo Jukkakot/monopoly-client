@@ -248,6 +248,11 @@ export interface T {
   startNowBtn: string
   lobbyWaitHint: string
 
+  // LobbyScreen — bot strategy toggle (temporary; remove when utility-v1 is default)
+  botStrategyLabel: string
+  botStrategyClassic: string
+  botStrategyUtility: string
+
   // LobbyScreen — bot-only section (kept for compatibility)
   watchBotsTitle: string
   botCountLabel: (n: number) => string
@@ -688,6 +693,9 @@ const fi: T = {
   waitingForReady: (ready, total) => `Odotetaan pelaajia — ${ready}/${total} valmiina`,
   gameStarting: 'Peli alkaa…',
   removeBotBtn: 'Poista botti',
+  botStrategyLabel: 'Bottityyli',
+  botStrategyClassic: 'Klassinen',
+  botStrategyUtility: 'Utility-v1 ⚗',
   playingToggle: 'Pelaan itse',
   spectatingToggle: 'En pelaa itse',
   opponentsTitle: 'Vastustajat',
@@ -1147,6 +1155,9 @@ const en: T = {
   waitingForReady: (ready, total) => `Waiting for players — ${ready}/${total} ready`,
   gameStarting: 'Game starting…',
   removeBotBtn: 'Remove bot',
+  botStrategyLabel: 'Bot style',
+  botStrategyClassic: 'Classic',
+  botStrategyUtility: 'Utility-v1 ⚗',
   playingToggle: 'I\'m playing',
   spectatingToggle: 'Not playing',
   opponentsTitle: 'Opponents',
