@@ -36,7 +36,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json()
 }
 
-export async function createSession(req: CreateSessionRequest): Promise<{ sessionId: string; hostToken: string }> {
+export async function createSession(req: CreateSessionRequest): Promise<{ sessionId: string; hostToken: string; playerId?: string; playerToken?: string }> {
   return fetchJson(`${BASE}/sessions`, { method: 'POST', headers: JSON_HEADERS, body: JSON.stringify(req) })
 }
 

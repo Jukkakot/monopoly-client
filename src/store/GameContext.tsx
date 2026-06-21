@@ -127,22 +127,8 @@ function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, exi
       }
     } catch { }
   }
-  // No localStorage entry → dynamic mode: follow whoever needs to act right now.
-  // This lets solo testers control all players when starting via "Aloita peli".
-  // During an active auction, follow the auction's current actor (not the main-turn player).
-  if (snapshot.auctionState?.status === 'ACTIVE') {
-    const auctionActorId = snapshot.auctionState.currentActorPlayerId
-    if (auctionActorId) {
-      const seat = snapshot.seats.find(s => s.playerId === auctionActorId && s.seatKind === 'HUMAN')
-      if (seat) return auctionActorId
-    }
-  }
-  const activeId = snapshot.turn?.activePlayerId
-  if (activeId) {
-    const activeSeat = snapshot.seats.find(s => s.playerId === activeId && s.seatKind === 'HUMAN')
-    if (activeSeat) return activeId
-  }
-  return existing ?? (snapshot.seats.find(s => s.seatKind === 'HUMAN')?.playerId ?? null)
+  // No token found → this browser is not a player in this session (pure spectator).
+  return existing
 }
 
 function reducer(state: GameState, action: Action): GameState {
