@@ -40,5 +40,8 @@ export default defineConfig({
   base: '/monopoly-client/',
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_TIME__: JSON.stringify(
+      new Date().toLocaleString('fi-FI', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Helsinki' })
+    ),
   },
 })

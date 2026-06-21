@@ -1,4 +1,5 @@
 declare const __APP_VERSION__: string
+declare const __BUILD_TIME__: string
 
 // Global test helpers populated by the app at runtime.
 declare interface Window {
