@@ -243,7 +243,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         {botStuckGlobal && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
-        <Btn label={t.endGameBtn} onClick={() => cmd('AbortGame')} variant="danger" />
+        <Btn label={t.endGameBtn} onClick={() => { if (confirm(t.endGameConfirmMsg)) cmd('AbortGame') }} variant="danger" />
       </div>
     )
   }
