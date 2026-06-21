@@ -93,6 +93,7 @@ interface GameState {
   sseFrozen: boolean
   lastDiceEventId: number  // backend event id of the most recent DICE_ROLLED event; drives animation
   firstSnapshotAt: number | null  // timestamp of initial snapshot; events within 2s are marked historical
+  duplicateClient: boolean  // true when another tab is controlling the same player
 }
 
 type Action =
@@ -104,6 +105,7 @@ type Action =
   | { type: 'SET_COMMAND_ERROR'; message: string | null }
   | { type: 'SET_SSE_FROZEN'; frozen: boolean }
   | { type: 'INJECT_DEBUG_SNAPSHOT'; snapshot: SessionState }
+  | { type: 'SET_DUPLICATE_CLIENT'; duplicate: boolean }
 
 function resolveMyPlayerId(snapshot: SessionState, sessionId: string | null, existing: string | null = null): string | null {
   if (sessionId) {
@@ -166,6 +168,7 @@ function reducer(state: GameState, action: Action): GameState {
         sseFrozen: false,
         lastDiceEventId: -1,
         firstSnapshotAt: null,
+        duplicateClient: false,
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
@@ -288,6 +291,7 @@ function reducer(state: GameState, action: Action): GameState {
         lastSeenEventId: -1,
         lastDiceEventId: -1,
         firstSnapshotAt: null,
+        duplicateClient: false,
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
@@ -299,6 +303,8 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...state, sseFrozen: action.frozen }
     case 'INJECT_DEBUG_SNAPSHOT':
       return { ...state, snapshot: action.snapshot, prevSnapshot: state.snapshot }
+    case 'SET_DUPLICATE_CLIENT':
+      return { ...state, duplicateClient: action.duplicate }
     default:
       return state
   }
@@ -313,6 +319,7 @@ interface GameContextValue {
   unfreezeSSE: () => void
   retryConnection: () => void
   injectDebugSnapshot: (snapshot: SessionState) => void
+  reactivateTab: () => void
 }
 
 // Commands that are safe to fire rapidly (idempotent replace operations or continuous adjustments)
@@ -339,6 +346,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     sseFrozen: false,
     lastDiceEventId: -1,
     firstSnapshotAt: null,
+    duplicateClient: false,
   })
 
   const retryCount = useRef(0)
@@ -494,10 +502,52 @@ export function GameProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'INJECT_DEBUG_SNAPSHOT', snapshot })
   }, [])
 
+  // ── Duplicate-tab detection via BroadcastChannel ─────────────────────────────
+  // Each tab has a unique tabId. When a tab becomes active for a (sessionId, playerId)
+  // pair, it announces itself. Any other tab that sees the announcement and has the same
+  // credentials marks itself as a duplicate and stops sending commands.
+  const tabIdRef = useRef<string>(null!)
+  if (!tabIdRef.current) {
+    let id: string
+    try { id = sessionStorage.getItem('monopoly_tab_id') ?? crypto.randomUUID() } catch { id = Math.random().toString(36).slice(2) }
+    tabIdRef.current = id
+    try { sessionStorage.setItem('monopoly_tab_id', id) } catch { /* ignore */ }
+  }
+  const bcRef = useRef<BroadcastChannel | null>(null)
+
+  const reactivateTab = useCallback(() => {
+    dispatch({ type: 'SET_DUPLICATE_CLIENT', duplicate: false })
+    // Re-announce so the other tab becomes the duplicate
+    if (bcRef.current && state.sessionId && state.myPlayerId) {
+      bcRef.current.postMessage({ type: 'TAB_ACTIVE', tabId: tabIdRef.current, sessionId: state.sessionId, playerId: state.myPlayerId })
+    }
+  }, [state.sessionId, state.myPlayerId])
+
+  useEffect(() => {
+    if (!state.sessionId || !state.myPlayerId) return
+    if (typeof BroadcastChannel === 'undefined') return
+    const channelName = `monopoly-tab-${state.sessionId}-${state.myPlayerId}`
+    const bc = new BroadcastChannel(channelName)
+    bcRef.current = bc
+    // Announce this tab as active
+    bc.postMessage({ type: 'TAB_ACTIVE', tabId: tabIdRef.current, sessionId: state.sessionId, playerId: state.myPlayerId })
+    bc.onmessage = (e) => {
+      if (e.data?.type === 'TAB_ACTIVE' && e.data.tabId !== tabIdRef.current) {
+        // Another tab announced itself for the same player — we are now the duplicate
+        dispatch({ type: 'SET_DUPLICATE_CLIENT', duplicate: true })
+      }
+    }
+    return () => {
+      bc.close()
+      bcRef.current = null
+    }
+  }, [state.sessionId, state.myPlayerId])
+
   const lastCmdTimeRef = useRef(new Map<string, number>())
 
   const sendCmd = useCallback(async (command: object) => {
     if (!state.sessionId) return
+    if (state.duplicateClient) return  // blocked: another tab is controlling this player
     const cmdType = (command as { type?: string }).type ?? 'unknown'
     const now = Date.now()
     const dedupeMs = FAST_DEDUP_CMDS.has(cmdType) ? 100 : 600
@@ -546,7 +596,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
       window.__monopolyErrorLog?.push(`NETWORK_ERROR: ${String(err)}`)
     }
-  }, [state.sessionId])
+  }, [state.sessionId, state.duplicateClient])
 
   useEffect(() => {
     if (!state.sessionId || state.sseFrozen) return
@@ -684,7 +734,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.sessionId, state.sseFrozen])
 
   return (
-    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd, freezeSSE, unfreezeSSE, retryConnection, injectDebugSnapshot }}>
+    <GameContext.Provider value={{ state, joinSession, leaveSession, sendCmd, freezeSSE, unfreezeSSE, retryConnection, injectDebugSnapshot, reactivateTab }}>
       {children}
     </GameContext.Provider>
   )
