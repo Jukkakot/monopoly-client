@@ -105,6 +105,14 @@
   align-self: center;
 }
 
+.playerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+}
+
 .message {
   flex: 1;
   font-family: 'Arial Narrow', Arial, sans-serif;

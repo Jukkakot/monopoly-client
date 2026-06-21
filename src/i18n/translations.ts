@@ -27,6 +27,7 @@ export interface T {
   skipToAuction: string
   skipToAuctionKbd: string
   insufficientFunds: string
+  bankSupplyExhausted: string
   netWorthLabel: string
   rentalIncomeLabel: string
   yourTurnIn: (n: number) => string
@@ -473,6 +474,7 @@ const fi: T = {
   skipToAuction: '🏷 Ohita → huutokauppa',
   skipToAuctionKbd: '🏷 Ohita → huutokauppa  [D]',
   insufficientFunds: 'Rahat eivät riitä',
+  bankSupplyExhausted: 'Pankissa ei ole enempää rakennuksia',
   netWorthLabel: 'Nettovarallisuus',
   rentalIncomeLabel: 'Vuokratulot/kierros',
   yourTurnIn: (n) => `${n} pelaajan jälkeen`,
@@ -936,6 +938,7 @@ const en: T = {
   skipToAuction: '🏷 Skip → auction',
   skipToAuctionKbd: '🏷 Skip → auction  [D]',
   insufficientFunds: 'Not enough money',
+  bankSupplyExhausted: 'No more buildings in the bank',
   netWorthLabel: 'Net worth',
   rentalIncomeLabel: 'Rental income/round',
   yourTurnIn: (n) => `after ${n} player${n !== 1 ? 's' : ''}`,

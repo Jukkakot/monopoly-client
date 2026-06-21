@@ -3,6 +3,7 @@ import styles from './EventLog.module.css'
 import type { GameEvent } from '../../store/events'
 import { useT } from '../../i18n/LanguageContext'
 import { STREET_COLORS } from '../../types/spots'
+import type { SeatState } from '../../types/api'
 
 const ICON_CLASS: Record<string, string> = {
   '🎲': styles.typeDice,
@@ -52,9 +53,10 @@ const FILTER_LABELS: Record<FilterGroup, string> = {
 interface EntryProps {
   event: GameEvent
   myPlayerId: string | null
+  seatColorFn: (playerId: string) => string | null
 }
 
-const EventEntry = memo(function EventEntry({ event, myPlayerId }: EntryProps) {
+const EventEntry = memo(function EventEntry({ event, myPlayerId, seatColorFn }: EntryProps) {
   const t = useT()
   const isRelated = !!(myPlayerId && event.relatedPlayerIds.includes(myPlayerId))
   const typeClass = ICON_CLASS[event.icon] ?? ''
@@ -62,6 +64,7 @@ const EventEntry = memo(function EventEntry({ event, myPlayerId }: EntryProps) {
     ? STREET_COLORS[event.kind.split(':')[1]] ?? null
     : null
   const entryStyle = buildColor ? { borderLeftColor: buildColor } : undefined
+  const primaryColor = event.relatedPlayerIds[0] ? seatColorFn(event.relatedPlayerIds[0]) : null
 
   function relativeTime(timestamp: number): string {
     const diff = Math.floor((Date.now() - timestamp) / 1000)
@@ -76,6 +79,9 @@ const EventEntry = memo(function EventEntry({ event, myPlayerId }: EntryProps) {
     <div className={`${styles.entry} ${typeClass} ${isRelated ? styles.mine : ''}`} style={entryStyle}>
       <span className={styles.icon}>{event.icon}</span>
       {buildColor && <span className={styles.buildDot} style={{ background: buildColor }} />}
+      {primaryColor && !buildColor && (
+        <span className={styles.playerDot} style={{ background: primaryColor }} />
+      )}
       <span className={styles.message}>{event.message}</span>
       <span className={styles.time} title={new Date(event.timestamp).toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}>
         {relativeTime(event.timestamp)}
@@ -87,10 +93,15 @@ const EventEntry = memo(function EventEntry({ event, myPlayerId }: EntryProps) {
 interface Props {
   events: GameEvent[]
   myPlayerId: string | null
+  seats?: SeatState[]
 }
 
-export default memo(function EventLog({ events, myPlayerId }: Props) {
+export default memo(function EventLog({ events, myPlayerId, seats }: Props) {
   const t = useT()
+  const seatColorFn = useMemo(() => {
+    const map = new Map((seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
+    return (id: string) => map.get(id) ?? null
+  }, [seats])
   const [activeFilters, setActiveFilters] = useState<Set<FilterGroup>>(new Set())
   const [mineOnly, setMineOnly] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
@@ -179,7 +190,7 @@ export default memo(function EventLog({ events, myPlayerId }: Props) {
           <div className={styles.empty}>{t.noEventsYet}</div>
         )}
         {filtered.map(event => (
-          <EventEntry key={event.id} event={event} myPlayerId={myPlayerId} />
+          <EventEntry key={event.id} event={event} myPlayerId={myPlayerId} seatColorFn={seatColorFn} />
         ))}
       </div>
     </div>

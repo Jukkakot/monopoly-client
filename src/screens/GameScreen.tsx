@@ -214,7 +214,7 @@ export default function GameScreen() {
             sendCmd({ type: 'OpenTrade', sessionId: state.snapshot.sessionId, actorPlayerId: state.myPlayerId, recipientPlayerId: targetId })
           }
         }} />}
-        log={<EventLog events={state.events} myPlayerId={state.myPlayerId} />}
+        log={<EventLog events={state.events} myPlayerId={state.myPlayerId} seats={state.snapshot.seats} />}
         actions={
           <>
             {isDebugMode && (

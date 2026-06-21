@@ -53,6 +53,13 @@
   margin-top: 2px;
 }
 
+.version {
+  font-size: 0.72rem;
+  color: #aaa;
+  margin-top: 1px;
+  letter-spacing: 0.3px;
+}
+
 .quickSection {
   display: flex;
   flex-direction: column;

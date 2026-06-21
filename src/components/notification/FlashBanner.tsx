@@ -63,12 +63,13 @@ export default function FlashBanner() {
 
     const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
     const NOTIFY_ICONS = notifIconsFromConfig(loadNotifConfig(), isTouchDevice)
-    const newEvents = state.events.filter(e =>
-      !seenIds.current.has(e.id) &&
-      !e.historical &&
-      NOTIFY_ICONS.has(e.icon) &&
-      (e.relatedPlayerIds.length === 0 || e.relatedPlayerIds.includes(state.myPlayerId!))
-    )
+    const newEvents = state.events.filter(e => {
+      if (seenIds.current.has(e.id)) return false
+      // Always register historical event IDs so they can't fire if flag is later lost
+      if (e.historical) { seenIds.current.add(e.id); return false }
+      return NOTIFY_ICONS.has(e.icon) &&
+        (e.relatedPlayerIds.length === 0 || e.relatedPlayerIds.includes(state.myPlayerId!))
+    })
 
     if (newEvents.length === 0) return
 

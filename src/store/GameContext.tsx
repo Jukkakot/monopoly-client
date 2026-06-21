@@ -92,6 +92,7 @@ interface GameState {
   lastSeenEventId: number
   sseFrozen: boolean
   lastDiceEventId: number  // backend event id of the most recent DICE_ROLLED event; drives animation
+  firstSnapshotAt: number | null  // timestamp of initial snapshot; events within 2s are marked historical
 }
 
 type Action =
@@ -164,6 +165,7 @@ function reducer(state: GameState, action: Action): GameState {
         lastSeenEventId: -1,
         sseFrozen: false,
         lastDiceEventId: -1,
+        firstSnapshotAt: null,
       }
     case 'SET_SNAPSHOT': {
       const newSnapshot = action.snapshot.state
@@ -171,23 +173,35 @@ function reducer(state: GameState, action: Action): GameState {
       // Translate backend-persisted events (new entries only) + derive misc events from state diff
       let newEvents: GameEvent[] = []
       let lastSeenEventId = state.lastSeenEventId
+      let firstSnapshotAt = state.firstSnapshotAt
+      const INITIAL_SYNC_GRACE_MS = 2000
       if (newSnapshot) {
         const backendLog = newSnapshot.eventLog ?? []
         if (state.snapshot === null) {
           // First snapshot after connect/refresh: mark all existing log entries as historical
           // so they appear in the event log without triggering sounds or notifications.
+          firstSnapshotAt = Date.now()
           if (backendLog.length > 0) {
             lastSeenEventId = Math.max(...backendLog.map(e => e.id))
             newEvents.push(...translateBackendEvents(backendLog, newSnapshot.players)
               .map(e => ({ ...e, historical: true, releaseAt: undefined })))
           }
         } else {
+          // Mark events as historical during the initial sync grace window to avoid
+          // notification spam when bots play several turns while the client reconnects.
+          const inGracePeriod = firstSnapshotAt !== null && (Date.now() - firstSnapshotAt) < INITIAL_SYNC_GRACE_MS
           const newEntries = backendLog.filter(e => e.id > lastSeenEventId)
           if (newEntries.length > 0) {
             lastSeenEventId = Math.max(...newEntries.map(e => e.id))
-            newEvents.push(...translateBackendEvents(newEntries, newSnapshot.players))
+            const translated = translateBackendEvents(newEntries, newSnapshot.players)
+            newEvents.push(...inGracePeriod
+              ? translated.map(e => ({ ...e, historical: true, releaseAt: undefined }))
+              : translated)
           }
-          newEvents.push(...deriveMiscEvents(state.snapshot, newSnapshot))
+          const miscEvents = deriveMiscEvents(state.snapshot, newSnapshot)
+          newEvents.push(...inGracePeriod
+            ? miscEvents.map(e => ({ ...e, historical: true }))
+            : miscEvents)
         }
       }
 
@@ -246,7 +260,7 @@ function reducer(state: GameState, action: Action): GameState {
         connectionStatus: 'LIVE',
         reconnectAttempts: 0,
         events: mergedSnapshot
-          ? (newEvents.length > 0 ? [...state.events, ...newEvents].slice(-200) : state.events)
+          ? (newEvents.length > 0 ? [...state.events, ...newEvents].slice(-500) : state.events)
           : state.events,
         myPlayerId,
         lastDice,
@@ -255,6 +269,7 @@ function reducer(state: GameState, action: Action): GameState {
         netWorthHistory,
         lastSeenEventId,
         lastDiceEventId,
+        firstSnapshotAt,
       }
     }
     case 'LEAVE_SESSION':
@@ -272,6 +287,7 @@ function reducer(state: GameState, action: Action): GameState {
         netWorthHistory: new Map(),
         lastSeenEventId: -1,
         lastDiceEventId: -1,
+        firstSnapshotAt: null,
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
@@ -322,6 +338,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     lastSeenEventId: -1,
     sseFrozen: false,
     lastDiceEventId: -1,
+    firstSnapshotAt: null,
   })
 
   const retryCount = useRef(0)
@@ -509,10 +526,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
         window.__monopolyErrorLog?.push(`REJECTED [${codes}]: ${msgs}`)
         // Only show user-visible error for explicit user-facing rejection messages,
         // not for race-condition rejections that the UI should have prevented.
-        const userFacing = ['INSUFFICIENT_FUNDS', 'BUILDINGS_PRESENT', 'MORTGAGE_TOGGLE_FAILED']
-        const isUserFacing = result.rejections.some(r => userFacing.includes(r.code))
-        if (isUserFacing) {
-          dispatch({ type: 'SET_COMMAND_ERROR', message: msgs })
+        const userFacing = ['INSUFFICIENT_FUNDS', 'BUILDINGS_PRESENT', 'MORTGAGE_TOGGLE_FAILED', 'BANK_SUPPLY_EXHAUSTED']
+        const userFacingRejection = result.rejections.find(r => userFacing.includes(r.code))
+        if (userFacingRejection) {
+          const t = translations[getLang()]
+          const translatedMsg: Record<string, string> = {
+            INSUFFICIENT_FUNDS: t.insufficientFunds,
+            BANK_SUPPLY_EXHAUSTED: t.bankSupplyExhausted,
+          }
+          const msg = translatedMsg[userFacingRejection.code] ?? msgs
+          dispatch({ type: 'SET_COMMAND_ERROR', message: msg })
           setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
         }
       }
