@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { loadHapticsEnabled, saveHapticsEnabled } from '../../utils/haptics'
+import { loadHapticsEnabled, saveHapticsEnabled, isIOSDevice } from '../../utils/haptics'
 import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed, loadDiceZoomEnabled, saveDiceZoomEnabled } from '../../utils/animationSettings'
@@ -121,9 +121,11 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
   const [zoomMode, setZoomMode] = useState<ZoomMode>(loadZoomMode)
   const [diceZoom, setDiceZoom] = useState(loadDiceZoomEnabled)
   const [haptics, setHaptics] = useState(loadHapticsEnabled)
+  const isIOS = isIOSDevice()
   const isMobileWithVibration = typeof navigator !== 'undefined'
     && 'vibrate' in navigator
     && window.matchMedia('(pointer: coarse)').matches
+    && !isIOS
   const rtt = usePingRtt()
 
   useEffect(() => { saveSoundConfig(cfg) }, [cfg])
@@ -258,6 +260,14 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
             className={styles.checkbox}
           />
         </label>
+      )}
+      {isIOS && window.matchMedia('(pointer: coarse)').matches && (
+        <div className={styles.toggleRow} style={{ opacity: 0.5 }}>
+          <div className={styles.toggleInfo}>
+            <span className={styles.label}>{t.hapticFeedbackLabel}</span>
+            <span className={styles.desc}>{t.hapticFeedbackIosNote}</span>
+          </div>
+        </div>
       )}
 
       <div className={styles.divider} />

@@ -350,6 +350,7 @@ export interface T {
   diceZoomDesc: string
   hapticFeedbackLabel: string
   hapticFeedbackDesc: string
+  hapticFeedbackIosNote: string
   screenNotifTitle: string
   notifYourTurnLabel: string
   notifYourTurnDesc: string
@@ -807,6 +808,7 @@ const fi: T = {
   diceZoomDesc: 'Lauta zoomaa noppiin kun ne heitetään',
   hapticFeedbackLabel: 'Tärinäpalaute',
   hapticFeedbackDesc: 'Värinä napeista ja pelin tapahtumista',
+  hapticFeedbackIosNote: 'iOS-selaimet eivät tue tärinää',
   screenNotifTitle: 'Ruutu-ilmoitukset',
   notifYourTurnLabel: 'Sinun vuorosi',
   notifYourTurnDesc: '⭐ Ilmoitus kun oma vuoro alkaa',
@@ -1269,6 +1271,7 @@ const en: T = {
   diceZoomDesc: 'Board zooms in on dice when rolled',
   hapticFeedbackLabel: 'Haptic feedback',
   hapticFeedbackDesc: 'Vibration on buttons and game events',
+  hapticFeedbackIosNote: 'iOS browsers do not support vibration',
   screenNotifTitle: 'Screen notifications',
   notifYourTurnLabel: 'Your turn',
   notifYourTurnDesc: '⭐ Alert when your turn starts',
