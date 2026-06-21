@@ -74,7 +74,6 @@ interface Props {
   myPlayerId: string
 }
 
-
 function Btn({ label, onClick, variant = 'primary', disabled, colorHex, testId, title }: {
   label: string
   onClick: () => void
