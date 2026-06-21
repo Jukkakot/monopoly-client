@@ -60,6 +60,41 @@
   font-size: 0.88rem;
 }
 
+/* ── Duplicate client overlay ── */
+.duplicateClientOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.duplicateClientBox {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  max-width: 360px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.duplicateClientTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #b71c1c;
+}
+
+.duplicateClientMsg {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
+}
+
 /* ── Debug bar ── */
 .debugBar {
   display: flex;

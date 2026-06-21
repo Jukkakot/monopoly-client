@@ -386,6 +386,11 @@ export interface T {
   // ── Connection — cold start hint ─────────────────────────────────────────────
   coldStartHint: string
 
+  // ── Duplicate client (two tabs open for same player) ─────────────────────────
+  duplicateClientTitle: string
+  duplicateClientMsg: string
+  duplicateClientReactivate: string
+
   // ── SoundSettings ────────────────────────────────────────────────────────────
   soundSettingsTitle: string
   uiSoundsLabel: string
@@ -845,6 +850,11 @@ const fi: T = {
 
   // Connection — cold start hint
   coldStartHint: 'Palvelin herää lepotilasta — odota noin minuutti…',
+
+  // Duplicate client
+  duplicateClientTitle: 'Peli auki toisessa ikkunassa',
+  duplicateClientMsg: 'Tämä pelaaja on aktiivinen toisessa selainvälilehdessä. Sulje toinen välilehti tai napsauta alla aktivoidaksesi tämän.',
+  duplicateClientReactivate: 'Aktivoi tämä välilehti',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Asetukset',
@@ -1310,6 +1320,11 @@ const en: T = {
 
   // Connection — cold start hint
   coldStartHint: 'Server waking from sleep — please wait about a minute…',
+
+  // Duplicate client
+  duplicateClientTitle: 'Game open in another window',
+  duplicateClientMsg: 'This player is active in another browser tab. Close the other tab or click below to activate this one.',
+  duplicateClientReactivate: 'Activate this tab',
 
   // SoundSettings
   soundSettingsTitle: '⚙️ Settings',

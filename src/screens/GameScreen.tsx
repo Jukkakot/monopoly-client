@@ -25,7 +25,7 @@ export default function GameScreen() {
   const t = useT()
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
-  const { state, joinSession, leaveSession, retryConnection } = useGame()
+  const { state, joinSession, leaveSession, retryConnection, reactivateTab } = useGame()
 
   useEffect(() => {
     if (!sessionId) { navigate('/'); return }
@@ -189,6 +189,15 @@ export default function GameScreen() {
       <span data-testid="game-status" data-status={state.snapshot.status} style={{ display: 'none' }} />
       {isGameOver && <Confetti />}
       {isGameOver && <GameOverOverlay state={state.prevSnapshot ?? state.snapshot} />}
+      {state.duplicateClient && (
+        <div className={styles.duplicateClientOverlay}>
+          <div className={styles.duplicateClientBox}>
+            <div className={styles.duplicateClientTitle}>{t.duplicateClientTitle}</div>
+            <div className={styles.duplicateClientMsg}>{t.duplicateClientMsg}</div>
+            <button className={styles.btn} onClick={reactivateTab}>{t.duplicateClientReactivate}</button>
+          </div>
+        </div>
+      )}
       <FlashBanner />
       {selectedSpotId && (
         <PropertyDetail
