@@ -866,6 +866,9 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               💸 Kassassa vain €{myCash} — et pysty tarjoamaan enempää
             </div>
           )}
+          {header && myCash < minBid && (
+            <div className={styles.auctionMortgageHint}>{t.auctionMortgageHint}</div>
+          )}
           {/* Quick-bid buttons showing the resulting total */}
           <div className={styles.moneyBtns} style={{ gap: 6 }}>
             {[10, 50, 100].map(delta => {
