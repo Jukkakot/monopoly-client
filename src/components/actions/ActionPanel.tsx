@@ -186,10 +186,11 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const isBotTurn = activeSeatForStuck?.seatKind === 'BOT'
   const botStuckGlobal = isBotTurn && turnSeconds >= 15
 
-  // SPECTATOR (no player credentials — bot-only game watcher)
+  // SPECTATOR (no player credentials — watching someone else's game)
   if (!myPlayerId) {
     const activePlayerName = state.players.find(p => p.playerId === activeId)?.name
     const activeSeat = state.seats.find(s => s.playerId === activeId)
+    const hasHostToken = !!(() => { try { return localStorage.getItem(`monopoly_host_${state.sessionId}`) } catch { return null } })()
 
     let phaseContent: React.ReactNode
     if (state.tradeState) {
@@ -243,7 +244,9 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
         {botStuckGlobal && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
-        <Btn label={t.endGameBtn} onClick={() => { if (confirm(t.endGameConfirmMsg)) cmd('AbortGame') }} variant="danger" />
+        {hasHostToken && (
+          <Btn label={t.endGameBtn} onClick={() => { if (confirm(t.endGameConfirmMsg)) cmd('AbortGame') }} variant="danger" />
+        )}
       </div>
     )
   }
