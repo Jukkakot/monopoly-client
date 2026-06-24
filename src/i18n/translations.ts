@@ -90,6 +90,7 @@ export interface T {
   sellBuildingBtn: (type: string, name: string) => string
   declareBankruptcy: string
   bankruptcyConfirmText: string
+  bankruptcyConfirmTextPlayer: (creditorName: string) => string
   bankruptcyConfirmBtn: string
   bankLabel: string
   playerCreditorLabel: string
@@ -102,6 +103,8 @@ export interface T {
   tradeTitle: (partner: string) => string
   youOfferLabel: string
   youRequestLabel: string
+  youGetLabel: string
+  youGiveLabel: string
   sendOfferBtn: string
   cancelBtn: string
   tradeMadeOffer: string
@@ -542,6 +545,7 @@ const fi: T = {
   sellBuildingBtn: (type, name) => `🏠 Myy ${type}: ${name}`,
   declareBankruptcy: '☠ Julistaudu konkurssiin',
   bankruptcyConfirmText: 'Oletko varma? Kaikki omaisuutesi menee huutokauppaan.',
+  bankruptcyConfirmTextPlayer: (name) => `Oletko varma? Kaikki omaisuutesi siirtyy ${name}:lle.`,
   bankruptcyConfirmBtn: '☠ Vahvista konkurssi',
   bankLabel: 'Pankki',
   playerCreditorLabel: 'pelaaja',
@@ -554,6 +558,8 @@ const fi: T = {
   tradeTitle: (partner) => `🤝 Kauppa: ${partner}`,
   youOfferLabel: 'Tarjoat',
   youRequestLabel: 'Pyydät',
+  youGetLabel: 'SAAT',
+  youGiveLabel: 'ANNAT',
   sendOfferBtn: '📤 Lähetä tarjous',
   cancelBtn: '❌ Peruuta',
   tradeMadeOffer: 'teki kauppatarjouksen',
@@ -1009,6 +1015,7 @@ const en: T = {
   sellBuildingBtn: (type, name) => `🏠 Sell ${type}: ${name}`,
   declareBankruptcy: '☠ Declare bankruptcy',
   bankruptcyConfirmText: 'Are you sure? All your assets will go to auction.',
+  bankruptcyConfirmTextPlayer: (creditorName) => `Are you sure? All your assets will be transferred to ${creditorName}.`,
   bankruptcyConfirmBtn: '☠ Confirm bankruptcy',
   bankLabel: 'Bank',
   playerCreditorLabel: 'player',
@@ -1021,6 +1028,8 @@ const en: T = {
   tradeTitle: (partner) => `🤝 Trade: ${partner}`,
   youOfferLabel: 'You offer',
   youRequestLabel: 'You request',
+  youGetLabel: 'YOU GET',
+  youGiveLabel: 'YOU GIVE',
   sendOfferBtn: '📤 Send offer',
   cancelBtn: '❌ Cancel',
   tradeMadeOffer: 'made a trade offer',

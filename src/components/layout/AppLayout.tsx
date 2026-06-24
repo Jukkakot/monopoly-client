@@ -313,7 +313,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       }
       prevCashRef.current.set(p.playerId, p.cash)
 
-      if (p.bankrupt && !prevBankruptRef.current.has(p.playerId)) {
+      if ((p.bankrupt || p.eliminated) && !prevBankruptRef.current.has(p.playerId)) {
         prevBankruptRef.current.add(p.playerId)
         newBankrupt.push(p.playerId)
         const id = p.playerId
