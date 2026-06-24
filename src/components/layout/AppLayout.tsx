@@ -173,6 +173,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const portraitDragRef = useRef<{ startY: number; startH: number } | null>(null)
   const mobileBoardHeightRef = useRef(mobileBoardHeight)
   useEffect(() => { mobileBoardHeightRef.current = mobileBoardHeight }, [mobileBoardHeight])
+  // Tracks the user's preferred board height (set by dragging); auto-resize shrinks below this but grows back to it
+  const userBoardHeightRef = useRef(mobileBoardHeight)
 
   useEffect(() => {
     const mqLandscape = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
@@ -210,6 +212,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       if (portraitDragRef.current) {
         portraitDragRef.current = null
         mobileBoardRef.current?.classList.remove(styles.mobileBoardDragging)
+        userBoardHeightRef.current = mobileBoardHeightRef.current
         try { localStorage.setItem('monopoly_mobile_board_height', String(mobileBoardHeightRef.current)) } catch {}
       }
     }
@@ -349,10 +352,14 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     if (!isMobile || isLandscape || mobileTab !== 'board') return
     const wrapper = mobileActionsWrapperRef.current
     if (!wrapper) return
-    const wrapperH = wrapper.clientHeight
-    const overflow = mobileActionsContentH - wrapperH
-    if (overflow > 4) {
-      setMobileBoardHeight(h => Math.max(MOBILE_BOARD_H_MIN, h - overflow))
+    const overflow = mobileActionsContentH - wrapper.clientHeight
+    if (Math.abs(overflow) <= 2) return
+    const target = Math.min(
+      userBoardHeightRef.current,
+      Math.max(MOBILE_BOARD_H_MIN, mobileBoardHeightRef.current - overflow)
+    )
+    if (Math.abs(target - mobileBoardHeightRef.current) > 2) {
+      setMobileBoardHeight(target)
     }
   }, [mobileActionsContentH, isMobile, isLandscape, mobileTab]) // eslint-disable-line react-hooks/exhaustive-deps
 
