@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
 import { listSessions, sessionExists, deleteSession, createSession } from '../api/sessionApi'
 import type { SessionSummary } from '../types/api'
-import { saveTokenShapes } from '../utils/tokenShapes'
+import { saveTokenShapes, ALL_SHAPES } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
 import styles from './SessionListScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
@@ -88,10 +88,10 @@ export default function SessionListScreen() {
       const humanName = randomHumanName([])
       const names: string[] = [humanName]
       for (let i = 0; i < bots; i++) names.push(randomBotName(names))
-      const allColors = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#f4511e']
-      const allShapes = ['circle', 'star', 'square', 'diamond'] as const
+      const allColors = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#ff7043', '#00acc1', '#6d4c41']
+      const allShapeKeys = ALL_SHAPES.map(s => s.key)
       const shuffledColors = [...allColors].sort(() => Math.random() - 0.5).slice(0, 1 + bots)
-      const shuffledShapes = [...allShapes].sort(() => Math.random() - 0.5).slice(0, 1 + bots)
+      const shuffledShapes = [...allShapeKeys].sort(() => Math.random() - 0.5).slice(0, 1 + bots)
       const seatKinds = ['HUMAN', ...Array(bots).fill('BOT')] as ('HUMAN' | 'BOT')[]
       const { sessionId, hostToken, playerId, playerToken } = await createSession({ names, colors: shuffledColors, seatKinds })
       try { localStorage.setItem(`monopoly_host_${sessionId}`, hostToken) } catch {}

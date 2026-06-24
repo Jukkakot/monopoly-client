@@ -7,9 +7,7 @@ const PRESET_COLORS = ['#e53935', '#1e88e5', '#43a047', '#f9a825', '#8e24aa', '#
 
 function pickDistinct<T>(pool: T[], count: number): T[] {
   const shuffled = [...pool].sort(() => Math.random() - 0.5)
-  const result: T[] = []
-  for (let i = 0; i < count; i++) result.push(shuffled[i % shuffled.length])
-  return result
+  return shuffled.slice(0, Math.min(count, shuffled.length))
 }
 
 const BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
