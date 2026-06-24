@@ -352,14 +352,26 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     if (!isMobile || isLandscape || mobileTab !== 'board') return
     const wrapper = mobileActionsWrapperRef.current
     if (!wrapper) return
-    const overflow = mobileActionsContentH - wrapper.clientHeight
+    const cs = window.getComputedStyle(wrapper)
+    const paddingV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+    const overflow = mobileActionsContentH - (wrapper.clientHeight - paddingV)
     if (Math.abs(overflow) <= 2) return
     const target = Math.min(
       userBoardHeightRef.current,
       Math.max(MOBILE_BOARD_H_MIN, mobileBoardHeightRef.current - overflow)
     )
     if (Math.abs(target - mobileBoardHeightRef.current) > 2) {
-      setMobileBoardHeight(target)
+      if (target < mobileBoardHeightRef.current) {
+        // Shrinking to fit more content: instant (buttons must appear immediately)
+        mobileBoardRef.current?.classList.add(styles.mobileBoardDragging)
+        setMobileBoardHeight(target)
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          mobileBoardRef.current?.classList.remove(styles.mobileBoardDragging)
+        }))
+      } else {
+        // Growing back toward user preference: smooth transition feels natural
+        setMobileBoardHeight(target)
+      }
     }
   }, [mobileActionsContentH, isMobile, isLandscape, mobileTab]) // eslint-disable-line react-hooks/exhaustive-deps
 
