@@ -33,7 +33,6 @@ export default function LobbyScreen() {
   const [color, setColor] = useState(() => PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)])
   const [tokenShape, setTokenShape] = useState<TokenShape>(() => ALL_SHAPES[Math.floor(Math.random() * ALL_SHAPES.length)].key)
   const [botCount, setBotCount] = useState(0)
-  const botStrategy = 'pure-domain-v1' as const
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,7 +60,7 @@ export default function LobbyScreen() {
     playButtonClick()
     setLoading(true)
     try {
-      const result = await createLobby(name.trim(), color, botStrategy)
+      const result = await createLobby(name.trim(), color)
       savePlayerTokenShape(result.sessionId, result.playerId, tokenShape)
       try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
       try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}
@@ -85,11 +84,11 @@ export default function LobbyScreen() {
     setLoading(true)
     try {
       if (!isPlaying) {
-        const { sessionId } = await createBotsOnlySession(botCount, botStrategy)
+        const { sessionId } = await createBotsOnlySession(botCount)
         joinSession(sessionId)
         navigate(`/game/${sessionId}`)
       } else {
-        const result = await createLobby(name.trim(), color, botStrategy)
+        const result = await createLobby(name.trim(), color)
         savePlayerTokenShape(result.sessionId, result.playerId, tokenShape)
         try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
         try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}

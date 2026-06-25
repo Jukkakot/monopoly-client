@@ -57,14 +57,14 @@ export async function sessionExists(sessionId: string): Promise<boolean> {
   return res.ok
 }
 
-export async function createLobby(hostName: string, hostColor?: string, botStrategy?: string): Promise<{
+export async function createLobby(hostName: string, hostColor?: string): Promise<{
   sessionId: string
   hostToken: string
   playerId: string
   playerToken: string
 }> {
   return fetchJson(`${BASE}/sessions`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ lobbyMode: true, hostName, hostColor, ...(botStrategy ? { botStrategy } : {}) }),
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ lobbyMode: true, hostName, hostColor }),
   })
 }
 
@@ -125,7 +125,7 @@ export function sseUrl(sessionId: string): string {
   return `${BASE}/sessions/${sessionId}/events`
 }
 
-export async function createBotsOnlySession(botCount: number, botStrategy?: string): Promise<{ sessionId: string }> {
+export async function createBotsOnlySession(botCount: number): Promise<{ sessionId: string }> {
   const usedNames: string[] = []
   const names = Array.from({ length: botCount }, () => {
     const name = randomBotName(usedNames)
@@ -136,7 +136,7 @@ export async function createBotsOnlySession(botCount: number, botStrategy?: stri
   const shapes = pickDistinct(ALL_SHAPES.map(s => s.key) as TokenShape[], botCount)
   const seatKinds = Array(botCount).fill('BOT')
   const result = await fetchJson<{ sessionId: string }>(`${BASE}/sessions`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, colors, seatKinds, ...(botStrategy ? { botStrategy } : {}) }),
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ names, colors, seatKinds }),
   })
   saveTokenShapes(result.sessionId, shapes)
   return result
