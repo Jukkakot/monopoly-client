@@ -108,7 +108,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  height: 6px;
+  height: min(0.6cqw, 6px);
   display: flex;
 }
 
@@ -120,7 +120,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 6px;
+  width: min(0.6cqw, 6px);
   display: flex;
   flex-direction: column;
 }
@@ -221,7 +221,7 @@
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 700;
   opacity: 0.7;
-  margin-top: 2px;
+  margin-top: min(0.2cqw, 2px);
 }
 
 .centerTurnCount {
@@ -331,33 +331,33 @@
 /* ── Group ownership bar ── */
 .groupBar {
   display: flex;
-  gap: clamp(2px, 0.4cqw, 5px);
+  gap: min(0.4cqw, 5px);
   align-items: flex-end;
-  margin-top: clamp(2px, 0.4cqw, 5px);
+  margin-top: min(0.4cqw, 5px);
 }
 
 .groupBarGroup {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: min(0.1cqw, 1px);
   align-items: center;
 }
 
 .groupBarHeader {
-  width: clamp(6px, 1.2cqw, 14px);
-  height: clamp(2px, 0.4cqw, 4px);
+  width: min(1.2cqw, 14px);
+  height: min(0.4cqw, 4px);
   border-radius: 1px;
 }
 
 .groupBarSlots {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: min(0.1cqw, 1px);
 }
 
 .groupBarSlot {
-  width: clamp(6px, 1.2cqw, 14px);
-  height: clamp(3px, 0.6cqw, 7px);
+  width: min(1.2cqw, 14px);
+  height: min(0.6cqw, 7px);
   border-radius: 1px;
   transition: background 0.4s;
 }
