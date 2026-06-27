@@ -1,7 +1,7 @@
 .row {
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.5vw, 8px);
+  gap: clamp(3px, 0.5cqw, 8px);
 }
 
 /* ── Rolling animation ── */
@@ -54,22 +54,22 @@
 
 /* ── Sum and doubles labels ── */
 .sum {
-  font-size: clamp(0.6rem, 1.3vw, 1.2rem);
+  font-size: clamp(0.6rem, 1.3cqw, 1.2rem);
   font-weight: 900;
   color: #1a5c0a;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
   line-height: 1;
-  margin-left: clamp(1px, 0.2vw, 4px);
+  margin-left: clamp(1px, 0.2cqw, 4px);
   animation: dieSettle 0.25s ease-out 0.05s both;
 }
 
 .doubles {
-  font-size: clamp(0.4rem, 0.8vw, 0.7rem);
+  font-size: clamp(0.4rem, 0.8cqw, 0.7rem);
   font-weight: 800;
   color: #fff;
   background: #e65100;
   border-radius: 8px;
-  padding: 1px clamp(3px, 0.4vw, 6px);
+  padding: 1px clamp(3px, 0.4cqw, 6px);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   animation: dieSettle 0.25s ease-out 0.1s both;
