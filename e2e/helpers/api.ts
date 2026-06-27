@@ -25,6 +25,18 @@ export async function createBotSession(count: 2 | 3 | 4 = 2): Promise<string> {
   return (await r.json()).sessionId
 }
 
+export async function createBotSessionDetailed(count: 2 | 3 | 4 = 2): Promise<{ sid: string; hostToken: string }> {
+  const r = await postWithRetry(`${BASE}/sessions`, {
+    names: ['A', 'B', 'C', 'D'].slice(0, count),
+    seatKinds: Array(count).fill('BOT'),
+    difficulties: Array(count).fill('STRONG'),
+    colors: ['#e53935', '#1e88e5', '#43a047', '#f9a825'].slice(0, count),
+  })
+  if (!r.ok) throw new Error(`createSession failed: ${r.status}`)
+  const data = await r.json()
+  return { sid: data.sessionId, hostToken: data.hostToken ?? '' }
+}
+
 export async function getSnapshot(sid: string): Promise<ClientSessionSnapshot> {
   const r = await fetch(`${BASE}/sessions/${sid}/snapshot`)
   if (!r.ok) throw new Error(`getSnapshot failed: ${r.status}`)

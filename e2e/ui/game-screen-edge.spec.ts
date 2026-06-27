@@ -8,7 +8,7 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import {
-  createHumanBotSession, createBotSession, getSnapshot,
+  createHumanBotSession, createBotSession, createBotSessionDetailed, getSnapshot,
   injectState, setBotSpeed, deleteSession,
 } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
@@ -75,10 +75,17 @@ test('game screen: title shows player turn during game', async ({ page }) => {
 // ─── Spectator AbortGame button ───────────────────────────────────────────────
 
 test('game screen: spectator "Lopeta peli" button visible in action panel', async ({ page }) => {
-  const sid = await createBotSession(2)
+  // Use a human+bot session — it returns a real hostToken.
+  // Bot-only sessions return null for hostToken since no auth is needed.
+  // We navigate without player credentials (spectator view) but WITH the host token in localStorage.
+  const { sid, hostToken } = await createHumanBotSession()
   try {
     await setBotSpeed(sid, 'fast')
     await page.goto('/')
+    // Store host token so the spectator view recognises this browser as the session owner
+    await page.evaluate(({ sid, hostToken }) => {
+      localStorage.setItem(`monopoly_host_${sid}`, hostToken)
+    }, { sid, hostToken })
     await page.goto(`/#/game/${sid}`)
     await expect(page.locator('[class*=board]').first()).toBeVisible({ timeout: 8000 })
 
