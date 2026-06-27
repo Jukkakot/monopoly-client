@@ -167,8 +167,8 @@
 /* Scale the SVG die faces with the board (overrides the hardcoded size prop).
    Pure cqw so dice track board size on all screen sizes including mobile. */
 .diceArea svg {
-  width: min(5cqw, 52px);
-  height: min(5cqw, 52px);
+  width: min(6.5cqw, 64px);
+  height: min(6.5cqw, 64px);
 }
 
 @keyframes diceAppear {
