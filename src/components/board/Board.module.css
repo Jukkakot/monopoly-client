@@ -136,12 +136,8 @@
   letter-spacing: min(0.5cqw, 5px);
   text-transform: uppercase;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
-  text-shadow:
-    3px 3px 0 #880000,
-    -2px -2px 0 #880000,
-    2px -2px 0 #880000,
-    -2px 2px 0 #880000,
-    0 4px 8px rgba(0, 0, 0, 0.35);
+  -webkit-text-stroke: min(0.18cqw, 1.8px) #880000;
+  text-shadow: 0 min(0.35cqw, 4px) min(0.8cqw, 8px) rgba(0, 0, 0, 0.4);
   line-height: 1;
 }
 
