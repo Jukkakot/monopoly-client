@@ -124,23 +124,6 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     if (isMyTurn) setActiveTab('action')
   }, [isMyTurn])
 
-  // After auction resolves (auctionState clears), auto-end the active player's turn.
-  // autoEndTurnRef stays current every render so the effect closure is always fresh.
-  const autoEndTurnRef = useRef<() => void>(() => {})
-  autoEndTurnRef.current = () => {
-    if (isMyTurn && phase === 'WAITING_FOR_END_TURN' && myPlayerId) {
-      sendCmd({ type: 'EndTurn', sessionId: sid, actorPlayerId: myPlayerId })
-    }
-  }
-  const prevAuctionRef = useRef(state.auctionState)
-  useEffect(() => {
-    const prev = prevAuctionRef.current
-    prevAuctionRef.current = state.auctionState
-    if (prev !== null && state.auctionState === null) {
-      autoEndTurnRef.current()
-    }
-  }, [state.auctionState])
-
   const cmd = (type: string, extra: object = {}) =>
     sendCmd({ type, sessionId: sid, actorPlayerId: myPlayerId, ...extra })
 
