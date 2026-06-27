@@ -16,7 +16,7 @@
   justify-content: flex-end;
   padding: 2px 1px;
   overflow: hidden;
-  font-size: clamp(3.5px, 0.85vw, 7px);
+  font-size: clamp(3.5px, 0.85cqw, 7px);
   cursor: default;
   transform-origin: center center;
 }
@@ -39,13 +39,13 @@
 }
 
 .icon {
-  font-size: clamp(7px, 1.6vw, 15px);
+  font-size: clamp(7px, 1.6cqw, 15px);
   margin: auto 0;
   line-height: 1;
 }
 
 .chanceIcon {
-  font-size: clamp(11px, 2.4vw, 22px);
+  font-size: clamp(11px, 2.4cqw, 22px);
   font-weight: 900;
   color: #bf4000;
   font-family: 'Georgia', 'Times New Roman', serif;
@@ -91,32 +91,32 @@
   overflow: visible;
 }
 
-/* tokens scale with the board cell — cell ≈ board/11, board ≈ min(100vw,100vh) */
+/* tokens scale with the board container — cell ≈ board/11, cqw references board width */
 .tokens svg {
-  width: clamp(10px, 4vmin, 26px);
-  height: clamp(10px, 4vmin, 26px);
+  width: clamp(10px, 4cqw, 26px);
+  height: clamp(10px, 4cqw, 26px);
   flex-shrink: 0;
   drop-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
 /* Shrink tokens when multiple players share a spot so all remain visible */
 .tokens[data-count="2"] svg {
-  width: clamp(9px, 3.5vmin, 22px);
-  height: clamp(9px, 3.5vmin, 22px);
+  width: clamp(9px, 3.5cqw, 22px);
+  height: clamp(9px, 3.5cqw, 22px);
 }
 .tokens[data-count="3"] svg,
 .tokens[data-count="4"] svg {
-  width: clamp(8px, 3vmin, 18px);
-  height: clamp(8px, 3vmin, 18px);
+  width: clamp(8px, 3cqw, 18px);
+  height: clamp(8px, 3cqw, 18px);
 }
 .tokens[data-count="5"] svg,
 .tokens[data-count="6"] svg {
-  width: clamp(7px, 2.5vmin, 15px);
-  height: clamp(7px, 2.5vmin, 15px);
+  width: clamp(7px, 2.5cqw, 15px);
+  height: clamp(7px, 2.5cqw, 15px);
 }
 
 .houseInBar {
-  width: clamp(4px, 0.9vmin, 8px);
+  width: clamp(4px, 0.9cqw, 8px);
   height: 65%;
   flex-shrink: 0;
   background: #4caf50;
@@ -124,7 +124,7 @@
 }
 
 .hotelInBar {
-  width: clamp(7px, 2.2vmin, 18px);
+  width: clamp(7px, 2.2cqw, 18px);
   height: 80%;
   flex-shrink: 0;
   background: #b71c1c;
@@ -154,7 +154,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(4px, 0.9vw, 9px);
+  font-size: clamp(4px, 0.9cqw, 9px);
   font-weight: 900;
   color: #fff;
   line-height: 1;
@@ -214,20 +214,19 @@
   position: relative;
 }
 
-/* Corner squares use vmin so they scale with whichever dimension limits the board.
-   Board ≈ min(100vw, 100vh), corner cell ≈ board/11 ≈ 9vmin */
+/* Corner squares use cqw so they scale with the board container width. */
 
 .corner {
-  font-size: clamp(5px, 0.9vmin, 9px); /* base em for the whole corner */
+  font-size: clamp(5px, 0.9cqw, 9px); /* base em for the whole corner */
 }
 
 .cornerSymbol {
-  font-size: clamp(10px, 2.2vmin, 22px);
+  font-size: clamp(10px, 2.2cqw, 22px);
   line-height: 1;
 }
 
 .cornerLabel {
-  font-size: clamp(4.5px, 0.95vmin, 9.5px);
+  font-size: clamp(4.5px, 0.95cqw, 9.5px);
   font-weight: 900;
   color: #000;
   text-transform: uppercase;
@@ -239,7 +238,7 @@
 }
 
 .cornerSub {
-  font-size: clamp(3px, 0.55vmin, 5.5px);
+  font-size: clamp(3px, 0.55cqw, 5.5px);
   color: #444;
   font-style: italic;
 }
@@ -250,14 +249,14 @@
 }
 
 .goArrow {
-  font-size: clamp(10px, 2.5vmin, 26px);
+  font-size: clamp(10px, 2.5cqw, 26px);
   color: #cc0000;
   line-height: 1;
   font-weight: 900;
 }
 
 .goText {
-  font-size: clamp(9px, 2.2vmin, 22px);
+  font-size: clamp(9px, 2.2cqw, 22px);
   font-weight: 900;
   font-style: italic;
   color: #cc0000;
@@ -268,7 +267,7 @@
 }
 
 .goSub {
-  font-size: clamp(3px, 0.55vmin, 5.5px);
+  font-size: clamp(3px, 0.55cqw, 5.5px);
   color: #444;
   font-style: italic;
 }
@@ -279,12 +278,12 @@
 }
 
 .jailTop {
-  font-size: clamp(8px, 1.8vmin, 18px);
+  font-size: clamp(8px, 1.8cqw, 18px);
   line-height: 1;
 }
 
 .jailLabel {
-  font-size: clamp(4.5px, 1vmin, 10px);
+  font-size: clamp(4.5px, 1cqw, 10px);
   font-weight: 900;
   color: #000;
   text-transform: uppercase;
@@ -292,7 +291,7 @@
 }
 
 .jailSub {
-  font-size: clamp(3px, 0.55vmin, 5.5px);
+  font-size: clamp(3px, 0.55cqw, 5.5px);
   color: #666;
   font-style: italic;
   border-top: 1px solid #ddd;
@@ -318,13 +317,13 @@
 }
 
 .jailPrisonerRow svg {
-  width: clamp(7px, 2vmin, 14px);
-  height: clamp(7px, 2vmin, 14px);
+  width: clamp(7px, 2cqw, 14px);
+  height: clamp(7px, 2cqw, 14px);
   flex-shrink: 0;
 }
 
 .jailRounds {
-  font-size: clamp(3.5px, 0.7vmin, 7px);
+  font-size: clamp(3.5px, 0.7cqw, 7px);
   font-weight: 800;
   color: #7b3f00;
   font-family: 'Arial Narrow', Arial, sans-serif;

@@ -90,7 +90,7 @@
   z-index: 0;
   justify-content: center;
   flex-direction: column;
-  gap: 4px;
+  gap: min(0.4cqw, 4px);
   overflow: hidden;
   position: relative;
 }
@@ -129,11 +129,11 @@
 .ownerBarRight { right: 0; }
 
 .centerLogo {
-  font-size: clamp(1.2rem, 4cqw, 4.5rem);
+  font-size: min(4cqw, 4.5rem);
   font-weight: 900;
   font-style: italic;
   color: #cc0000;
-  letter-spacing: 5px;
+  letter-spacing: min(0.5cqw, 5px);
   text-transform: uppercase;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
   text-shadow:
@@ -146,11 +146,11 @@
 }
 
 .centerSub {
-  font-size: clamp(0.4rem, 1.1cqw, 0.9rem);
+  font-size: min(1.1cqw, 0.9rem);
   color: #1a5c0a;
   font-style: italic;
   font-family: 'Georgia', serif;
-  letter-spacing: 4px;
+  letter-spacing: min(0.4cqw, 4px);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -177,27 +177,27 @@
 }
 
 .diceSum {
-  font-size: clamp(0.6rem, 1.3cqw, 1.2rem);
+  font-size: min(1.3cqw, 1.2rem);
   font-weight: 900;
   color: #1a5c0a;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
   line-height: 1;
-  margin-left: clamp(1px, 0.2cqw, 4px);
+  margin-left: min(0.2cqw, 4px);
 }
 
 .diceDoubles {
-  font-size: clamp(0.4rem, 0.8cqw, 0.7rem);
+  font-size: min(0.8cqw, 0.7rem);
   font-weight: 800;
   color: #fff;
   background: #e65100;
   border-radius: 8px;
-  padding: 1px clamp(3px, 0.4cqw, 6px);
+  padding: min(0.1cqw, 1px) min(0.4cqw, 6px);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .centerTurn {
-  font-size: clamp(0.45rem, 1cqw, 0.85rem);
+  font-size: min(1cqw, 0.85rem);
   font-weight: 800;
   font-family: 'Arial Narrow', Arial, sans-serif;
   letter-spacing: 1px;
@@ -219,8 +219,8 @@
 .centerStats {
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.5cqw, 8px);
-  font-size: clamp(0.38rem, 0.85cqw, 0.75rem);
+  gap: min(0.5cqw, 8px);
+  font-size: min(0.85cqw, 0.75rem);
   color: #1a5c0a;
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 700;
@@ -229,7 +229,7 @@
 }
 
 .centerTurnCount {
-  font-size: clamp(0.32rem, 0.7cqw, 0.62rem);
+  font-size: min(0.7cqw, 0.62rem);
   color: #1a5c0a;
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 600;
