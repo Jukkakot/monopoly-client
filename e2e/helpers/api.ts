@@ -87,6 +87,14 @@ export async function setBotSpeed(sid: string, speed: 'fast' | 'normal' | 'slow'
   })
 }
 
+export async function setViewerGating(sid: string, enabled: boolean): Promise<void> {
+  await fetch(`${BASE}/sessions/${sid}/settings`, {
+    method: 'PUT',
+    headers: jsonHeaders,
+    body: JSON.stringify({ viewerGating: enabled }),
+  })
+}
+
 export async function retrigger(sid: string, hostToken = ''): Promise<void> {
   // hostToken '' works for bot-only sessions (validation skips when hostToken is null).
   // Pass the actual hostToken for human+bot sessions created via createHumanBotSession.

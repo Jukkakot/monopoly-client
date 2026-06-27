@@ -9,11 +9,16 @@
  * after the user interacts with the buttons.
  */
 import { test, expect } from '@playwright/test'
-import { createBotSession, injectState, getSnapshot, setBotSpeed, deleteSession } from '../helpers/api'
+import { createBotSession, injectState, getSnapshot, setBotSpeed, deleteSession, retrigger, setViewerGating } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
 async function reachGameOver(page: import('@playwright/test').Page, sid: string) {
   const snap0 = await getSnapshot(sid)
+
+  // Disable viewer gating so bots act immediately without waiting for client ACKs.
+  // Without this, the 50 ms ACK throttle can cause version lag > MAX_CLIENT_LAG_VERSIONS,
+  // making the bot driver stall until the watchdog fires (every 5 s) — flaky at 15-20 s timeout.
+  await setViewerGating(sid, false)
 
   // seat0 has €1, seat1 owns B1+B2 with hotel → seat0 lands on B2 → unaffordable rent → bankrupt.
   // Both players are bots so they handle RollDice and DeclareBankruptcy automatically.
@@ -27,7 +32,15 @@ async function reachGameOver(page: import('@playwright/test').Page, sid: string)
     expectedAfter: {},
   }, snap0))
 
-  // Bots drive everything: seat0 rolls, can't pay rent, declares bankruptcy → GAME_OVER.
+  // Two bot steps needed: (1) RollDice → RESOLVING_DEBT, (2) DeclareBankruptcy → GAME_OVER.
+  // Retrigger repeatedly — each call resets pendingAction and forces an immediate bot step,
+  // handling the race between onClientAck and onSnapshotChanged competing for the CAS.
+  // Retriggers after GAME_OVER are safe no-ops (bot driver checks status first).
+  for (let i = 0; i < 4; i++) {
+    await retrigger(sid)
+    await new Promise(r => setTimeout(r, 250))
+  }
+
   await expect(page.getByTestId('game-status').first()).toHaveAttribute('data-status', 'GAME_OVER', { timeout: 15000 })
   await expect(page.getByTestId('game-over-winner').first()).toBeVisible({ timeout: 3000 })
 }
