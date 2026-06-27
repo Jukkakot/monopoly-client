@@ -159,15 +159,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(3px, 0.5cqw, 8px);
-  margin-bottom: clamp(2px, 0.5cqw, 6px);
+  gap: min(0.6cqw, 8px);
+  margin-bottom: min(0.6cqw, 6px);
   animation: diceAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Scale the SVG die faces with the board (overrides the hardcoded size prop) */
+/* Scale the SVG die faces with the board (overrides the hardcoded size prop).
+   Pure cqw so dice track board size on all screen sizes including mobile. */
 .diceArea svg {
-  width: clamp(20px, 3.8cqw, 42px);
-  height: clamp(20px, 3.8cqw, 42px);
+  width: min(5cqw, 52px);
+  height: min(5cqw, 52px);
 }
 
 @keyframes diceAppear {
