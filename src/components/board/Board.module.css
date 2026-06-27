@@ -4,6 +4,7 @@
   grid-template-rows: repeat(11, 1fr);
   aspect-ratio: 1;
   position: relative; /* containing block for cardBubbleAnchor and cardDismissOverlay */
+  container-type: inline-size; /* enables cqw units in all children so they scale with board size */
 
   /* Responsive sizing: fill available width, but never taller than viewport */
   width: 100%;
@@ -128,7 +129,7 @@
 .ownerBarRight { right: 0; }
 
 .centerLogo {
-  font-size: clamp(1.2rem, 4vw, 4.5rem);
+  font-size: clamp(1.2rem, 4cqw, 4.5rem);
   font-weight: 900;
   font-style: italic;
   color: #cc0000;
@@ -145,7 +146,7 @@
 }
 
 .centerSub {
-  font-size: clamp(0.4rem, 1.1vw, 0.9rem);
+  font-size: clamp(0.4rem, 1.1cqw, 0.9rem);
   color: #1a5c0a;
   font-style: italic;
   font-family: 'Georgia', serif;
@@ -158,9 +159,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(3px, 0.5vw, 8px);
-  margin-bottom: clamp(2px, 0.5vw, 6px);
+  gap: min(0.6cqw, 8px);
+  margin-bottom: min(0.6cqw, 6px);
   animation: diceAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Scale the SVG die faces with the board (overrides the hardcoded size prop).
+   Pure cqw so dice track board size on all screen sizes including mobile. */
+.diceArea svg {
+  width: min(6.5cqw, 64px);
+  height: min(6.5cqw, 64px);
 }
 
 @keyframes diceAppear {
@@ -169,27 +177,27 @@
 }
 
 .diceSum {
-  font-size: clamp(0.6rem, 1.3vw, 1.2rem);
+  font-size: clamp(0.6rem, 1.3cqw, 1.2rem);
   font-weight: 900;
   color: #1a5c0a;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
   line-height: 1;
-  margin-left: clamp(1px, 0.2vw, 4px);
+  margin-left: clamp(1px, 0.2cqw, 4px);
 }
 
 .diceDoubles {
-  font-size: clamp(0.4rem, 0.8vw, 0.7rem);
+  font-size: clamp(0.4rem, 0.8cqw, 0.7rem);
   font-weight: 800;
   color: #fff;
   background: #e65100;
   border-radius: 8px;
-  padding: 1px clamp(3px, 0.4vw, 6px);
+  padding: 1px clamp(3px, 0.4cqw, 6px);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .centerTurn {
-  font-size: clamp(0.45rem, 1vw, 0.85rem);
+  font-size: clamp(0.45rem, 1cqw, 0.85rem);
   font-weight: 800;
   font-family: 'Arial Narrow', Arial, sans-serif;
   letter-spacing: 1px;
@@ -211,8 +219,8 @@
 .centerStats {
   display: flex;
   align-items: center;
-  gap: clamp(3px, 0.5vw, 8px);
-  font-size: clamp(0.38rem, 0.85vw, 0.75rem);
+  gap: clamp(3px, 0.5cqw, 8px);
+  font-size: clamp(0.38rem, 0.85cqw, 0.75rem);
   color: #1a5c0a;
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 700;
@@ -221,7 +229,7 @@
 }
 
 .centerTurnCount {
-  font-size: clamp(0.32rem, 0.7vw, 0.62rem);
+  font-size: clamp(0.32rem, 0.7cqw, 0.62rem);
   color: #1a5c0a;
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 600;
@@ -327,9 +335,9 @@
 /* ── Group ownership bar ── */
 .groupBar {
   display: flex;
-  gap: clamp(2px, 0.4vw, 5px);
+  gap: clamp(2px, 0.4cqw, 5px);
   align-items: flex-end;
-  margin-top: clamp(2px, 0.4vw, 5px);
+  margin-top: clamp(2px, 0.4cqw, 5px);
 }
 
 .groupBarGroup {
@@ -340,8 +348,8 @@
 }
 
 .groupBarHeader {
-  width: clamp(6px, 1.2vw, 14px);
-  height: clamp(2px, 0.4vw, 4px);
+  width: clamp(6px, 1.2cqw, 14px);
+  height: clamp(2px, 0.4cqw, 4px);
   border-radius: 1px;
 }
 
@@ -352,8 +360,8 @@
 }
 
 .groupBarSlot {
-  width: clamp(6px, 1.2vw, 14px);
-  height: clamp(3px, 0.6vw, 7px);
+  width: clamp(6px, 1.2cqw, 14px);
+  height: clamp(3px, 0.6cqw, 7px);
   border-radius: 1px;
   transition: background 0.4s;
 }
@@ -397,7 +405,7 @@
 /* Card is positioned via individual CSS translate/left/top relative to anchor */
 .cardBubble {
   position: absolute;
-  width: clamp(90px, 18vw, 155px);
+  width: clamp(90px, 18cqw, 155px);
   border-radius: 8px;
   overflow: visible;  /* allow ::after tail to extend outside */
   box-shadow:
@@ -495,7 +503,7 @@
 .cardCommunity .cardBubbleHeader { background: linear-gradient(160deg, #1565c0 0%, #0d47a1 100%); border-radius: 6px 6px 0 0; }
 
 .cardBubbleHeader {
-  padding: clamp(5px, 1vw, 9px) clamp(6px, 1.2vw, 12px);
+  padding: clamp(5px, 1cqw, 9px) clamp(6px, 1.2cqw, 12px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -503,7 +511,7 @@
 }
 
 .cardBubbleType {
-  font-size: clamp(0.38rem, 0.75vw, 0.6rem);
+  font-size: clamp(0.38rem, 0.75cqw, 0.6rem);
   font-weight: 900;
   color: rgba(255,255,255,0.75);
   text-transform: uppercase;
@@ -512,7 +520,7 @@
 }
 
 .cardBubbleIcon {
-  font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+  font-size: clamp(1.1rem, 2.2cqw, 1.8rem);
   line-height: 1;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
 }
@@ -520,7 +528,7 @@
 .cardBubbleBody {
   background: #fffdf0;
   border-radius: 0 0 6px 6px;
-  padding: clamp(6px, 1.2vw, 12px) clamp(6px, 1.2vw, 10px);
+  padding: clamp(6px, 1.2cqw, 12px) clamp(6px, 1.2cqw, 10px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -529,7 +537,7 @@
 }
 
 .cardBubbleText {
-  font-size: clamp(0.6rem, 1.1vw, 0.88rem);
+  font-size: clamp(0.6rem, 1.1cqw, 0.88rem);
   color: #1a1a1a;
   font-weight: 700;
   line-height: 1.35;
@@ -538,7 +546,7 @@
 }
 
 .cardBubblePlayer {
-  font-size: clamp(0.42rem, 0.8vw, 0.64rem);
+  font-size: clamp(0.42rem, 0.8cqw, 0.64rem);
   font-weight: 600;
   color: #888;
   font-family: 'Arial Narrow', Arial, sans-serif;
@@ -557,7 +565,7 @@
   color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: clamp(0.48rem, 0.9vw, 0.72rem);
+  font-size: clamp(0.48rem, 0.9cqw, 0.72rem);
   font-weight: 700;
   cursor: pointer;
   width: 100%;

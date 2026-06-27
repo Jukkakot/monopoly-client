@@ -130,7 +130,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const mobileActionsWrapperRef = useRef<HTMLDivElement>(null)
   const mobileActionsContentRef = useRef<HTMLDivElement>(null)
   const [mobileActionsContentH, setMobileActionsContentH] = useState(0)
-  const savedMobileBoardHRef = useRef<number | null>(null)
+  const mobileBoardRef = useRef<HTMLDivElement>(null)
 
   const [playersSplitPx, setPlayersSplitPx] = useState(() => {
     try { const v = parseInt(localStorage.getItem('monopoly_players_split_px') ?? ''); return isNaN(v) ? 250 : Math.max(60, Math.min(600, v)) } catch { return 250 }
@@ -173,6 +173,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const portraitDragRef = useRef<{ startY: number; startH: number } | null>(null)
   const mobileBoardHeightRef = useRef(mobileBoardHeight)
   useEffect(() => { mobileBoardHeightRef.current = mobileBoardHeight }, [mobileBoardHeight])
+  // Tracks the user's preferred board height (set by dragging); auto-resize shrinks below this but grows back to it
+  const userBoardHeightRef = useRef(mobileBoardHeight)
 
   useEffect(() => {
     const mqLandscape = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
@@ -209,6 +211,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       }
       if (portraitDragRef.current) {
         portraitDragRef.current = null
+        mobileBoardRef.current?.classList.remove(styles.mobileBoardDragging)
+        userBoardHeightRef.current = mobileBoardHeightRef.current
         try { localStorage.setItem('monopoly_mobile_board_height', String(mobileBoardHeightRef.current)) } catch {}
       }
     }
@@ -225,6 +229,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   function onPortraitHandleTouchStart(e: React.TouchEvent) {
     if (isLandscape) return
     portraitDragRef.current = { startY: e.touches[0].clientY, startH: mobileBoardHeightRef.current }
+    mobileBoardRef.current?.classList.add(styles.mobileBoardDragging)
   }
 
   useEffect(() => {
@@ -313,7 +318,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       }
       prevCashRef.current.set(p.playerId, p.cash)
 
-      if (p.bankrupt && !prevBankruptRef.current.has(p.playerId)) {
+      if ((p.bankrupt || p.eliminated) && !prevBankruptRef.current.has(p.playerId)) {
         prevBankruptRef.current.add(p.playerId)
         newBankrupt.push(p.playerId)
         const id = p.playerId
@@ -347,14 +352,26 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     if (!isMobile || isLandscape || mobileTab !== 'board') return
     const wrapper = mobileActionsWrapperRef.current
     if (!wrapper) return
-    const wrapperH = wrapper.clientHeight
-    const overflow = mobileActionsContentH - wrapperH
-    if (overflow > 4) {
-      if (savedMobileBoardHRef.current === null) savedMobileBoardHRef.current = mobileBoardHeightRef.current
-      setMobileBoardHeight(h => Math.max(MOBILE_BOARD_H_MIN, h - overflow))
-    } else if (overflow <= 0 && savedMobileBoardHRef.current !== null) {
-      setMobileBoardHeight(savedMobileBoardHRef.current)
-      savedMobileBoardHRef.current = null
+    const cs = window.getComputedStyle(wrapper)
+    const paddingV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+    const overflow = mobileActionsContentH - (wrapper.clientHeight - paddingV)
+    if (Math.abs(overflow) <= 2) return
+    const target = Math.min(
+      userBoardHeightRef.current,
+      Math.max(MOBILE_BOARD_H_MIN, mobileBoardHeightRef.current - overflow)
+    )
+    if (Math.abs(target - mobileBoardHeightRef.current) > 2) {
+      if (target < mobileBoardHeightRef.current) {
+        // Shrinking to fit more content: instant (buttons must appear immediately)
+        mobileBoardRef.current?.classList.add(styles.mobileBoardDragging)
+        setMobileBoardHeight(target)
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          mobileBoardRef.current?.classList.remove(styles.mobileBoardDragging)
+        }))
+      } else {
+        // Growing back toward user preference: smooth transition feels natural
+        setMobileBoardHeight(target)
+      }
     }
   }, [mobileActionsContentH, isMobile, isLandscape, mobileTab]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -461,6 +478,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       <div className={styles.mobileContent}>
         {/* Board: portrait = top section (hidden on non-board tabs); landscape = always-visible left column */}
         <div
+          ref={mobileBoardRef}
           className={mobileTab === 'board' ? styles.mobileBoard : styles.mobileBoardHidden}
           style={isMobile && !isLandscape ? { height: mobileBoardHeight, '--board-max-size': `${mobileBoardHeight}px` } as React.CSSProperties : undefined}
         >

@@ -58,36 +58,38 @@ test('two consecutive turns: roll twice, end-turn appears after each', async ({ 
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
 
     // Bot in jail so its turns are fast (roll, stay in jail, end turn).
-    // Human owns B2 — short 3-spot move minimises animation delay.
+    // Human lands on TAX1 (income tax) — non-purchasable, no trade target, instant WAITING_FOR_END_TURN.
     const scenario = {
       description: '', rules: [],
       players: humanSeat === 0
         ? [{ cash: 1500, boardIndex: 0 }, { cash: 1500, boardIndex: 10, inJail: true, jailRoundsRemaining: 2 }]
         : [{ cash: 1500, boardIndex: 10, inJail: true, jailRoundsRemaining: 2 }, { cash: 1500, boardIndex: 0 }],
-      ownedProperties: { [humanSeat]: ['B2'] },
       turn: { seat: humanSeat, phase: 'WAITING_FOR_ROLL' },
-      forcedDice: [1, 2] as [number, number],  // sum=3 → 0+3=3 = B2 (own) → WAITING_FOR_END_TURN
+      forcedDice: [1, 3] as [number, number],  // sum=4 → 0+4=4 = TAX1 (income tax) → WAITING_FOR_END_TURN
       expectedAfter: {},
     }
 
     await injectState(sid, buildPatch(scenario, snap0))
     await navigateAsHuman(page, sid, humanPlayerId, humanPlayerToken)
 
-    // Turn 1: roll (→ B2, own property) → end-turn
+    // Turn 1: roll (→ TAX1, pay tax automatically) → end-turn
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 5000 })
     await page.getByTestId('action-roll').first().click()
     await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 8000 })
+    // Pre-inject non-doubles for bot's jail roll so it stays in jail and doesn't trigger
+    // a property purchase or trade decision that would leave the test stuck waiting for input.
+    await injectState(sid, { nextDice: [3, 4] })
     await page.getByTestId('action-end-turn').first().click()
 
-    // Bot takes jail turn; wait for human's roll button to reappear
+    // Bot takes jail turn (rolls [3,4]=7, non-doubles, stays in jail); wait for human's roll button
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 10000 })
 
     // Re-inject to reset position + forced dice for the second roll.
-    // Re-injection changes boardIndex (B2→0) which triggers a token animation;
+    // Re-injection changes boardIndex (TAX1→0) which triggers a token animation;
     // action-roll may be absent while ActionPanel waits for the animation to finish.
     await injectState(sid, buildPatch(scenario, snap0))
 
-    // Turn 2: roll again (→ B2, own) → end-turn visible
+    // Turn 2: roll again (→ TAX1, pay tax) → end-turn visible
     await expect(page.getByTestId('action-roll').first()).toBeVisible({ timeout: 10000 })
     await page.getByTestId('action-roll').first().click()
     await expect(page.getByTestId('action-end-turn').first()).toBeVisible({ timeout: 8000 })

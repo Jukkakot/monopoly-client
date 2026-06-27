@@ -532,19 +532,20 @@
 }
 
 .auctionPlayerList {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 3px;
 }
 
 .auctionPlayerRow {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 8px;
+  gap: 5px;
+  padding: 5px 7px;
   border-radius: 7px;
   border-left: 3px solid transparent;
   transition: background 0.15s;
+  min-width: 0;
 }
 
 .auctionPlayerRowPassed {
@@ -552,17 +553,17 @@
 }
 
 .auctionPlayerRowActor {
-  padding: 7px 10px;
+  padding: 5px 7px;
   border-left-width: 4px;
 }
 .auctionPlayerRowActor .auctionPlayerName {
-  font-size: 1rem;
+  font-size: 0.88rem;
   font-weight: 700;
 }
 
 .auctionPlayerName {
   flex: 1;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -571,47 +572,49 @@
 
 .auctionPlayerRight {
   display: flex;
-  align-items: center;
-  gap: 5px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
   flex-shrink: 0;
 }
 
 .auctionLeadBid {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: #2e7d32;
+  line-height: 1;
 }
 
 .auctionLeadTag {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-weight: 700;
   background: #e8f5e9;
   color: #2e7d32;
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .auctionActorTag {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   background: #fff8e1;
   color: #e65100;
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   animation: pulse 1.2s ease-in-out infinite;
 }
 
 .auctionPassTag {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   background: #f5f5f5;
   color: #999;
   border-radius: 4px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   text-transform: uppercase;
 }
 

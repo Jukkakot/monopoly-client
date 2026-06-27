@@ -711,8 +711,11 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                 {mortgagedCount >= 2 && (
                   <Btn label={t.redeemAllBtn(totalRedeemCost)} variant="info"
                     disabled={myCash < totalRedeemCost}
-                    onClick={() => mortgagedProps.forEach(prop =>
-                      sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId }))} />
+                    onClick={async () => {
+                      for (const prop of mortgagedProps) {
+                        await sendCmd({ type: 'ToggleMortgage', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })
+                      }
+                    }} />
                 )}
                 {(() => {
                   const free = sortedProps.filter(p => !p.mortgaged)
@@ -1087,7 +1090,9 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           <div className={styles.debtBankruptSep} />
           {confirmBankruptcy ? (
             <>
-              <div className={styles.debtBankruptConfirm}>{t.bankruptcyConfirmText}</div>
+              <div className={styles.debtBankruptConfirm}>
+                {debt.creditorType === 'PLAYER' ? t.bankruptcyConfirmTextPlayer(creditorName) : t.bankruptcyConfirmText}
+              </div>
               <div className={styles.btnRow}>
                 <Btn label={t.bankruptcyConfirmBtn}
                   onClick={() => sendCmd({ type: 'DeclareBankruptcy', sessionId: sid, actorPlayerId: myPlayerId, debtId: debt.debtId })}
@@ -1467,8 +1472,6 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const t = useT()
   const sid = state.sessionId
   const trade = state.tradeState!
-  const initiator = state.players.find(p => p.playerId === trade.initiatorPlayerId)
-  const recipient = state.players.find(p => p.playerId === trade.recipientPlayerId)
   const initiatorSeat = state.seats.find(s => s.playerId === trade.initiatorPlayerId)
   const recipientSeat = state.seats.find(s => s.playerId === trade.recipientPlayerId)
   const tokenShapes = useTokenShapes(state)
@@ -1480,18 +1483,18 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
   const partner = state.players.find(p => p.playerId === partnerPlayerId)
   const partnerSeat = state.seats.find(s => s.playerId === partnerPlayerId)
 
-  // Column labels: always reflect who GIVES those items, regardless of who's viewing
-  const initiatorLabel = (
-    <><PlayerName name={initiator?.name ?? '?'} color={initiatorSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.initiatorPlayerId) ?? 'circle'} /> {t.tradeOfferNoun}</>
-  )
-  const recipientLabel = (
-    <><PlayerName name={recipient?.name ?? '?'} color={recipientSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(trade.recipientPlayerId ?? '') ?? 'circle'} /> {t.tradeOfferNoun}</>
-  )
-
   // Balance bar from MY perspective: what do I receive vs give?
   // Initiator gives offeredToRecipient and receives requestedFromRecipient — swap for them.
   const balanceGive = iAmInitiator ? offer.requestedFromRecipient : offer.offeredToRecipient
   const balanceWant = iAmInitiator ? offer.offeredToRecipient : offer.requestedFromRecipient
+
+  // Column labels from viewer's perspective:
+  // offeredToRecipient = what initiator gives to recipient
+  //   → recipient sees this as SAAT (I get); initiator sees this as ANNAT (I give)
+  // requestedFromRecipient = what recipient gives to initiator
+  //   → recipient sees this as ANNAT (I give); initiator sees this as SAAT (I get)
+  const leftLabel = iAmInitiator ? t.youGiveLabel : t.youGetLabel
+  const rightLabel = iAmInitiator ? t.youGetLabel : t.youGiveLabel
 
   return (
     <div className={styles.panel}>
@@ -1501,8 +1504,8 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
       </div>
 
       <div className={styles.tradeOfferGrid}>
-        <TradeSide label={initiatorLabel} side={offer.offeredToRecipient} playerColor={initiatorSeat?.tokenColorHex} />
-        <TradeSide label={recipientLabel} side={offer.requestedFromRecipient} playerColor={recipientSeat?.tokenColorHex} />
+        <TradeSide label={leftLabel} side={offer.offeredToRecipient} playerColor={initiatorSeat?.tokenColorHex} />
+        <TradeSide label={rightLabel} side={offer.requestedFromRecipient} playerColor={recipientSeat?.tokenColorHex} />
       </div>
 
       <TradeBalanceBar give={balanceGive} want={balanceWant} />
