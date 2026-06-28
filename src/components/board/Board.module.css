@@ -90,7 +90,7 @@
   z-index: 0;
   justify-content: center;
   flex-direction: column;
-  gap: min(0.4cqw, 4px);
+  gap: min(0.55cqw, 6px);
   overflow: hidden;
   position: relative;
 }
@@ -129,24 +129,24 @@
 .ownerBarRight { right: 0; }
 
 .centerLogo {
-  font-size: min(4cqw, 4.5rem);
+  font-size: min(5.5cqw, 6.3rem);
   font-weight: 900;
   font-style: italic;
   color: #cc0000;
-  letter-spacing: min(0.5cqw, 5px);
+  letter-spacing: min(0.7cqw, 7px);
   text-transform: uppercase;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
-  -webkit-text-stroke: min(0.18cqw, 1.8px) #880000;
-  text-shadow: 0 min(0.35cqw, 4px) min(0.8cqw, 8px) rgba(0, 0, 0, 0.4);
+  -webkit-text-stroke: min(0.25cqw, 2.5px) #880000;
+  text-shadow: 0 min(0.5cqw, 5px) min(1.1cqw, 11px) rgba(0, 0, 0, 0.4);
   line-height: 1;
 }
 
 .centerSub {
-  font-size: min(1.1cqw, 0.9rem);
+  font-size: min(1.55cqw, 1.25rem);
   color: #1a5c0a;
   font-style: italic;
   font-family: 'Georgia', serif;
-  letter-spacing: min(0.4cqw, 4px);
+  letter-spacing: min(0.55cqw, 5.5px);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -155,16 +155,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: min(0.6cqw, 8px);
-  margin-bottom: min(0.6cqw, 6px);
+  gap: min(0.85cqw, 11px);
+  margin-bottom: min(0.85cqw, 8px);
   animation: diceAppear 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Scale the SVG die faces with the board (overrides the hardcoded size prop).
    Pure cqw so dice track board size on all screen sizes including mobile. */
 .diceArea svg {
-  width: min(6.5cqw, 64px);
-  height: min(6.5cqw, 64px);
+  width: min(9cqw, 90px);
+  height: min(9cqw, 90px);
 }
 
 @keyframes diceAppear {
@@ -173,27 +173,27 @@
 }
 
 .diceSum {
-  font-size: min(1.3cqw, 1.2rem);
+  font-size: min(1.8cqw, 1.7rem);
   font-weight: 900;
   color: #1a5c0a;
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
   line-height: 1;
-  margin-left: min(0.2cqw, 4px);
+  margin-left: min(0.3cqw, 5px);
 }
 
 .diceDoubles {
-  font-size: min(0.8cqw, 0.7rem);
+  font-size: min(1.1cqw, 1rem);
   font-weight: 800;
   color: #fff;
   background: #e65100;
   border-radius: 8px;
-  padding: min(0.1cqw, 1px) min(0.4cqw, 6px);
+  padding: min(0.15cqw, 2px) min(0.55cqw, 8px);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .centerTurn {
-  font-size: min(1cqw, 0.85rem);
+  font-size: min(1.4cqw, 1.2rem);
   font-weight: 800;
   font-family: 'Arial Narrow', Arial, sans-serif;
   letter-spacing: 1px;
@@ -215,17 +215,17 @@
 .centerStats {
   display: flex;
   align-items: center;
-  gap: min(0.5cqw, 8px);
-  font-size: min(0.85cqw, 0.75rem);
+  gap: min(0.7cqw, 11px);
+  font-size: min(1.2cqw, 1.05rem);
   color: #1a5c0a;
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 700;
   opacity: 0.7;
-  margin-top: min(0.2cqw, 2px);
+  margin-top: min(0.3cqw, 3px);
 }
 
 .centerTurnCount {
-  font-size: min(0.7cqw, 0.62rem);
+  font-size: min(1cqw, 0.87rem);
   color: #1a5c0a;
   font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 600;
@@ -331,33 +331,33 @@
 /* ── Group ownership bar ── */
 .groupBar {
   display: flex;
-  gap: min(0.4cqw, 5px);
+  gap: min(0.55cqw, 7px);
   align-items: flex-end;
-  margin-top: min(0.4cqw, 5px);
+  margin-top: min(0.55cqw, 7px);
 }
 
 .groupBarGroup {
   display: flex;
   flex-direction: column;
-  gap: min(0.1cqw, 1px);
+  gap: min(0.15cqw, 2px);
   align-items: center;
 }
 
 .groupBarHeader {
-  width: min(1.2cqw, 14px);
-  height: min(0.4cqw, 4px);
+  width: min(1.7cqw, 20px);
+  height: min(0.55cqw, 6px);
   border-radius: 1px;
 }
 
 .groupBarSlots {
   display: flex;
   flex-direction: column;
-  gap: min(0.1cqw, 1px);
+  gap: min(0.15cqw, 2px);
 }
 
 .groupBarSlot {
-  width: min(1.2cqw, 14px);
-  height: min(0.6cqw, 7px);
+  width: min(1.7cqw, 20px);
+  height: min(0.85cqw, 10px);
   border-radius: 1px;
   transition: background 0.4s;
 }
