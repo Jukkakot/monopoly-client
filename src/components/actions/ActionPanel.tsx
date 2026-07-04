@@ -238,10 +238,14 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
       )
     }
 
+    // Bots-only sessions have no host token server-side, so any spectator may retrigger;
+    // in lobby games the backend requires host or player credentials — hide the button
+    // from credential-less spectators instead of letting it fail silently with 403.
+    const canRetrigger = hasHostToken || state.seats.every(s => s.seatKind === 'BOT')
     return (
       <div className={styles.panel}>
         {phaseContent}
-        {botStuckGlobal && (
+        {botStuckGlobal && canRetrigger && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
         {hasHostToken && (

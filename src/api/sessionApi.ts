@@ -181,9 +181,13 @@ export function sendAck(sessionId: string, version: number): void {
 }
 
 export async function retriggerBot(sessionId: string): Promise<void> {
+  // The backend accepts either a host token or any seated player's token —
+  // send whatever this browser has so non-host players can also unstick a bot.
   const hostToken = (() => { try { return localStorage.getItem(`monopoly_host_${sessionId}`) ?? '' } catch { return '' } })()
+  const playerId = (() => { try { return sessionStorage.getItem(`monopoly_player_${sessionId}`) ?? undefined } catch { return undefined } })()
+  const playerToken = (() => { try { return sessionStorage.getItem(`monopoly_token_${sessionId}`) ?? undefined } catch { return undefined } })()
   await fetch(`${BASE}/sessions/${sessionId}/bot/retrigger`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ hostToken }),
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ hostToken, playerId, playerToken }),
   })
 }
 
