@@ -391,6 +391,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     pendingSnapshots.current = []
   }, [state.sessionId])
 
+  // Pending delayed sound timers. Kept in a ref that survives re-renders: events are marked
+  // as sounded the moment they are scheduled, so cancelling their timers on the next
+  // state.events change (as an effect cleanup would) silently swallowed every
+  // movement-synced sound whenever the next snapshot arrived before the delay elapsed.
+  const soundTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
+
+  // Clear pending sounds only when the session changes or the provider unmounts.
+  useEffect(() => {
+    const timers = soundTimers.current
+    return () => { timers.forEach(clearTimeout); timers.clear() }
+  }, [state.sessionId])
+
   // Play sounds in sync with event log visibility (respects releaseAt animation delay)
   useEffect(() => {
     const newEvents = state.events.filter(e => e.id > lastSoundedId.current && !e.historical)
@@ -398,10 +410,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (allNew.length > 0) lastSoundedId.current = Math.max(...allNew.map(e => e.id))
     if (newEvents.length === 0) return
     const now = Date.now()
-    const timers: ReturnType<typeof setTimeout>[] = []
     for (const e of newEvents) {
       const delay = e.releaseAt ? Math.max(0, e.releaseAt - now) : 0
-      timers.push(setTimeout(() => {
+      const timer = setTimeout(() => {
+        soundTimers.current.delete(timer)
         switch (e.soundKey) {
           case 'DICE_ROLLED': playDiceRoll(); break
           case 'PLAYER_MOVED': playTokenMove(); break
@@ -420,9 +432,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
           case 'PAID_RENT': playPayRent(); break
           case 'AUCTION_WON': playAuctionWin(); break
         }
-      }, delay))
+      }, delay)
+      soundTimers.current.add(timer)
     }
-    return () => timers.forEach(clearTimeout)
+    // Intentionally no cleanup: pending sounds must survive subsequent event batches.
   }, [state.events])
 
   const joinSession = useCallback((sessionId: string) => {

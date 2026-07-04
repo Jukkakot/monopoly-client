@@ -9,6 +9,7 @@ import { loadNotifConfig, notifIconsFromConfig } from '../menu/SoundSettings'
 interface BannerItem {
   event: GameEvent
   visible: boolean
+  shownAt: number
 }
 
 let _localId = -1
@@ -22,7 +23,11 @@ export default function FlashBanner() {
   const prevActiveId = useRef<string | null>(null)
   const pendingMyTurn = useRef<{ playerId: string; msg: string } | null>(null)
 
-  // Detect when it becomes my turn — defer banner until animation finishes
+  // Detect when it becomes my turn and fire the banner as soon as no animation is
+  // running. A single effect covering both signals: the old animation-only effect never
+  // re-ran when the turn changed WITHOUT token movement (previous player just ended
+  // their turn), leaving the banner queued until some later animation finished — it
+  // then popped up mid-way through someone else's roll.
   useEffect(() => {
     const activeId = state.snapshot?.turn?.activePlayerId ?? null
     const gameOver = state.snapshot?.status === 'GAME_OVER'
@@ -39,10 +44,7 @@ export default function FlashBanner() {
       pendingMyTurn.current = { playerId: activeId, msg: t.yourTurnMsg }
     }
     prevActiveId.current = activeId
-  }, [state.snapshot?.turn?.activePlayerId, state.snapshot?.status, state.myPlayerId, state.sessionId, t.yourTurnMsg])
 
-  // Fire the "your turn" banner once animation stops
-  useEffect(() => {
     if (!animating && pendingMyTurn.current) {
       const { playerId, msg } = pendingMyTurn.current
       pendingMyTurn.current = null
@@ -54,9 +56,9 @@ export default function FlashBanner() {
         message: msg,
         relatedPlayerIds: [playerId],
       }
-      setBanners(prev => [...prev, { event: syntheticEvent, visible: true }])
+      setBanners(prev => [...prev, { event: syntheticEvent, visible: true, shownAt: Date.now() }])
     }
-  }, [animating])
+  }, [state.snapshot?.turn?.activePlayerId, state.snapshot?.status, state.myPlayerId, state.sessionId, t.yourTurnMsg, animating])
 
   useEffect(() => {
     if (!state.myPlayerId || state.events.length === 0) return
@@ -81,36 +83,41 @@ export default function FlashBanner() {
     const delayed = newEvents.filter(e => e.releaseAt && e.releaseAt > now)
 
     if (immediate.length > 0) {
-      setBanners(prev => [...prev, ...immediate.map(e => ({ event: e, visible: true }))])
+      setBanners(prev => [...prev, ...immediate.map(e => ({ event: e, visible: true, shownAt: Date.now() }))])
     }
     for (const e of delayed) {
       setTimeout(() => {
-        setBanners(prev => [...prev, { event: e, visible: true }])
+        setBanners(prev => [...prev, { event: e, visible: true, shownAt: Date.now() }])
       }, e.releaseAt! - now)
     }
   }, [state.events, state.myPlayerId])
 
-  // Auto-dismiss banners after 3s
+  // Auto-dismiss banners 3s after each one was shown. Driven by per-banner shownAt
+  // timestamps and a single ticker — the old per-effect timers restarted the full 3s
+  // whenever a NEW banner arrived, so in a busy game banners piled up far past their
+  // intended lifetime.
+  const hasBanners = banners.length > 0
   useEffect(() => {
-    if (banners.length === 0) return
-    const timers = banners
-      .filter(b => b.visible)
-      .map(b =>
-        setTimeout(() => {
-          setBanners(prev =>
-            prev.map(p => p.event.id === b.event.id ? { ...p, visible: false } : p)
-          )
-        }, 3000)
-      )
-    // Cleanup stale (invisible) banners after animation
-    const cleanup = setTimeout(() => {
-      setBanners(prev => prev.filter(p => p.visible))
-    }, 3600)
-    return () => {
-      timers.forEach(clearTimeout)
-      clearTimeout(cleanup)
-    }
-  }, [banners.length])
+    if (!hasBanners) return
+    const tick = setInterval(() => {
+      const now = Date.now()
+      setBanners(prev => {
+        let changed = false
+        const next: BannerItem[] = []
+        for (const b of prev) {
+          if (now - b.shownAt >= 3600) { changed = true; continue }          // remove after fade-out
+          if (b.visible && now - b.shownAt >= 3000) {
+            changed = true
+            next.push({ ...b, visible: false })                              // start fade-out
+          } else {
+            next.push(b)
+          }
+        }
+        return changed ? next : prev
+      })
+    }, 200)
+    return () => clearInterval(tick)
+  }, [hasBanners])
 
   const visible = banners.filter(b => b.visible)
   const hasContent = visible.length > 0 || !!state.commandError || state.connectionStatus === 'RECONNECTING'
