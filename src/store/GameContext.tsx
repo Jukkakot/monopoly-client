@@ -629,6 +629,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         try {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
+
+          // Drop stale or duplicate snapshots: on connect the backend can race the initial
+          // snapshot write with a concurrent update pushed through the listener, delivering
+          // an older version after a newer one — rendering it would show stale state until
+          // the next update arrives.
+          if (versionRef.current > 0 && snap.version <= versionRef.current) return
+
           const clientReceivedMs = Date.now()
 
           // Log inter-event delay (time between successive SSE events)
