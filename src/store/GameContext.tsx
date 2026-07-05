@@ -670,9 +670,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
           versionRef.current = snap.version  // always update for reconnection
           retryCount.current = 0
-          // GAME_OVER bypasses the animation queue so "lopeta peli" takes effect immediately
-          // regardless of how many queued snapshots are waiting.
-          if (snap.status === 'GAME_OVER') {
+          // Aborted game ("lopeta peli") bypasses the animation queue so it takes effect
+          // immediately regardless of how many queued snapshots are waiting. An abort is a
+          // status override with no winner. A NATURAL game over (bankruptcy → winnerPlayerId
+          // set in the same snapshot) flows through the normal queue instead — otherwise the
+          // final turn's dice and movement animations were skipped and the board jumped
+          // straight to the game-over overlay.
+          if (snap.status === 'GAME_OVER' && !snap.state?.winnerPlayerId) {
             pendingSnapshots.current = []
             settlingRef.current = false
             dispatch({ type: 'SET_SNAPSHOT', snapshot: snap })

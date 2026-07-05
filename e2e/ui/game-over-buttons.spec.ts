@@ -33,24 +33,40 @@ async function reachGameOver(page: import('@playwright/test').Page, sid: string)
   }, snap0))
 
   // Two bot steps needed: (1) RollDice → RESOLVING_DEBT, (2) DeclareBankruptcy → GAME_OVER.
-  // Retrigger repeatedly — each call resets pendingAction and forces an immediate bot step,
-  // handling the race between onClientAck and onSnapshotChanged competing for the CAS.
-  // Retriggers after GAME_OVER are safe no-ops (bot driver checks status first).
-  for (let i = 0; i < 4; i++) {
+  // Keep nudging the bot until the BACKEND reports GAME_OVER — each retrigger resets
+  // pendingAction and forces an immediate bot step (safe no-op once the game is over).
+  // Polling the backend decouples "did the bots finish?" from UI rendering, which now
+  // plays the final turn's animations before showing the overlay.
+  let backendOver = false
+  for (let i = 0; i < 30 && !backendOver; i++) {
     await retrigger(sid)
-    await new Promise(r => setTimeout(r, 250))
+    await new Promise(r => setTimeout(r, 300))
+    const snap = await getSnapshot(sid)
+    backendOver = snap.status === 'GAME_OVER' || snap.state?.status === 'GAME_OVER'
   }
+  expect(backendOver, 'backend should reach GAME_OVER within the retrigger budget').toBe(true)
 
+  // UI catches up once the final animations drain
   await expect(page.getByTestId('game-status').first()).toHaveAttribute('data-status', 'GAME_OVER', { timeout: 15000 })
   await expect(page.getByTestId('game-over-winner').first()).toBeVisible({ timeout: 3000 })
+}
+
+/** Open the game as a spectator with fast animations — a natural game over now flows
+ *  through the animation queue, so slow animations would eat the assertion timeouts. */
+async function gotoGameFastAnims(page: import('@playwright/test').Page, sid: string) {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.setItem('animation-speed', 'fast'))
+  await page.goto(`/#/game/${sid}`)
 }
 
 test('game over: "Jatka katselemaan" dismisses overlay and stays on game screen', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
     await setBotSpeed(sid, 'fast')
-    await page.goto(`/#/game/${sid}`)
-    await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
+    await gotoGameFastAnims(page, sid)
+    // Anchor on the always-present status span — the "Olet katsojana" text is hidden
+    // whenever the bots happen to be mid-decision/trade/auction when we connect.
+    await expect(page.getByTestId('game-status').first()).toBeAttached({ timeout: 8000 })
 
     await reachGameOver(page, sid)
 
@@ -69,8 +85,10 @@ test('game over: "Takaisin etusivulle" navigates to session list', async ({ page
   const sid = await createBotSession(2)
   try {
     await setBotSpeed(sid, 'fast')
-    await page.goto(`/#/game/${sid}`)
-    await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
+    await gotoGameFastAnims(page, sid)
+    // Anchor on the always-present status span — the "Olet katsojana" text is hidden
+    // whenever the bots happen to be mid-decision/trade/auction when we connect.
+    await expect(page.getByTestId('game-status').first()).toBeAttached({ timeout: 8000 })
 
     await reachGameOver(page, sid)
 
@@ -88,8 +106,10 @@ test('game over: rankings list shows all players', async ({ page }) => {
   const sid = await createBotSession(2)
   try {
     await setBotSpeed(sid, 'fast')
-    await page.goto(`/#/game/${sid}`)
-    await expect(page.getByText('Olet katsojana').first()).toBeVisible({ timeout: 8000 })
+    await gotoGameFastAnims(page, sid)
+    // Anchor on the always-present status span — the "Olet katsojana" text is hidden
+    // whenever the bots happen to be mid-decision/trade/auction when we connect.
+    await expect(page.getByTestId('game-status').first()).toBeAttached({ timeout: 8000 })
 
     await reachGameOver(page, sid)
 
