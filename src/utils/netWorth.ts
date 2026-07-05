@@ -34,7 +34,11 @@ export function calcCurrentRentIncome(player: PlayerSnapshot, state: SessionStat
       const rrOwned = myProps.filter(p => SPOTS.find(s => s.id === p.propertyId)?.streetType === 'RAILROAD').length
       total += rents[Math.min(rrOwned - 1, rents.length - 1)] ?? 0
     } else if (spot.streetType !== 'UTILITY' && rents.length >= 6) {
-      const ownerGroupCount = myProps.filter(p => SPOTS.find(s => s.id === p.propertyId)?.streetType === spot.streetType).length
+      // Monopoly doubling follows OWNERSHIP (the backend rule): a mortgaged member still
+      // counts toward the set, so count from all owned properties, not only unmortgaged ones.
+      const ownerGroupCount = state.properties.filter(p =>
+        p.ownerPlayerId === player.playerId &&
+        SPOTS.find(s => s.id === p.propertyId)?.streetType === spot.streetType).length
       const isMonopoly = ownerGroupCount === groupTotal
       const level = prop.hotelCount > 0 ? 5 : prop.houseCount
       total += level === 0 && isMonopoly ? rents[0] * 2 : rents[level] ?? 0
