@@ -142,14 +142,6 @@ export async function createBotsOnlySession(botCount: number): Promise<{ session
   return result
 }
 
-export async function startLobby(sessionId: string): Promise<void> {
-  const res = await fetch(`${BASE}/sessions/${sessionId}/start`, { method: 'POST' })
-  if (!res.ok) {
-    logger.error('API request failed', { url: `/sessions/${sessionId}/start`, status: res.status, method: 'POST' })
-    throw new Error(`Backend returned ${res.status}`)
-  }
-}
-
 export interface SessionSettings {
   botSpeed?: 'fast' | 'normal' | 'slow'
 }
