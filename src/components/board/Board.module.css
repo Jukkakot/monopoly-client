@@ -11,12 +11,14 @@
   max-width: calc(100vh - 24px);
   max-height: calc(100vh - 24px);
 
-  background: #0a2600;      /* shows between cells as grid lines */
+  background: #123512;      /* shows between cells as grid lines (softer than near-black) */
   gap: 1px;
-  border: 5px solid #0a2600;
+  border: 7px solid #123512;
+  border-radius: 16px;
   box-shadow:
-    0 0 0 2px #2d6a1e,
-    0 12px 40px rgba(0, 0, 0, 0.6);
+    0 0 0 1.5px #3a7d28,
+    0 2px 3px rgba(0, 0, 0, 0.35),
+    0 18px 48px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   flex-shrink: 0;
   transition: transform 0.5s cubic-bezier(0.33, 1, 0.66, 1);
@@ -130,26 +132,28 @@
 .ownerBarRight { right: 0; }
 
 .centerLogo {
-  font-size: min(5.5cqw, 6.3rem);
+  font-size: min(5.3cqw, 6rem);
   font-weight: 900;
   font-style: italic;
-  color: #cc0000;
-  letter-spacing: min(0.7cqw, 7px);
+  /* Iconic Monopoly red, but crisp and flat rather than heavy outlined Impact. */
+  color: #d81f27;
+  letter-spacing: min(0.55cqw, 6px);
   text-transform: uppercase;
-  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
-  -webkit-text-stroke: min(0.25cqw, 2.5px) #880000;
-  text-shadow: 0 min(0.5cqw, 5px) min(1.1cqw, 11px) rgba(0, 0, 0, 0.4);
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 min(0.3cqw, 3px) min(0.7cqw, 7px) rgba(120, 12, 12, 0.20);
   line-height: 1;
 }
 
 .centerSub {
-  font-size: min(1.55cqw, 1.25rem);
+  font-size: min(1.5cqw, 1.2rem);
   color: #1a5c0a;
-  font-style: italic;
   font-family: 'Georgia', serif;
-  letter-spacing: min(0.55cqw, 5.5px);
+  letter-spacing: min(0.6cqw, 6px);
   text-transform: uppercase;
   font-weight: 600;
+  opacity: 0.9;
 }
 
 .diceArea {
