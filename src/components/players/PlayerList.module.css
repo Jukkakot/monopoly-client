@@ -354,12 +354,19 @@
 }
 
 .propStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: 0.72rem;
   font-weight: 700;
   background: #e8f5e9;
   color: #2e7d32;
   border-radius: 4px;
   padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
+}
+.propStat svg {
+  flex-shrink: 0;
 }
 
 .propStatMuted {

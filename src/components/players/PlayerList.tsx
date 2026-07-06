@@ -3,6 +3,7 @@ import styles from './PlayerList.module.css'
 import type { SessionState, PlayerSnapshot } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
+import Icon from '../common/Icon'
 import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
@@ -82,10 +83,22 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
       ) : (
         <>
           <div className={styles.propSummary}>
-            {monopolyCount > 0 && <span className={styles.propStat}>🏆{monopolyCount} monopoli</span>}
-            {totalHotels > 0 && <span className={styles.propStat}>🏨{totalHotels}</span>}
-            {totalHouses > 0 && <span className={styles.propStat}>🏠{totalHouses}</span>}
-            {mortgagedCount > 0 && <span className={`${styles.propStat} ${styles.propStatMuted}`}>{t.mortgagedStat(mortgagedCount)}</span>}
+            {monopolyCount > 0 && <span className={styles.propStat}>🏆 {monopolyCount} {t.monopolyStatLabel}</span>}
+            {totalHotels > 0 && (
+              <span className={styles.propStat}>
+                <Icon name="hotel" size={12} style={{ color: '#d32f2f' }} />{totalHotels}
+              </span>
+            )}
+            {totalHouses > 0 && (
+              <span className={styles.propStat}>
+                <Icon name="house" size={12} strokeWidth={2.4} style={{ color: '#2e7d32' }} />{totalHouses}
+              </span>
+            )}
+            {mortgagedCount > 0 && (
+              <span className={`${styles.propStat} ${styles.propStatMuted}`}>
+                <Icon name="lock" size={11} strokeWidth={2.2} />{t.mortgagedStat(mortgagedCount)}
+              </span>
+            )}
           </div>
       <PropertyChipWrap>
         {(() => {

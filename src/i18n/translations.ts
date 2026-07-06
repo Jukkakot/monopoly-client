@@ -286,6 +286,7 @@ export interface T {
   noPropertiesMsg: string
   propAbbr: (n: number) => string
   mortgagedStat: (n: number) => string
+  monopolyStatLabel: string
   tradeWithBtn: (name: string) => string
 
   // ── PropertyDetail ───────────────────────────────────────────────────────────
@@ -756,7 +757,8 @@ const fi: T = {
   bankruptBadge: 'konkurssi',
   noPropertiesMsg: 'Ei kiinteistöjä',
   propAbbr: (n) => `${n} kiin.`,
-  mortgagedStat: (n) => `🏦${n} pantattu`,
+  mortgagedStat: (n) => `${n} pantattu`,
+  monopolyStatLabel: 'monopoli',
   tradeWithBtn: (name) => `🤝 Käy kauppaa ${name.split(' ')[0]}:n kanssa`,
 
   // PropertyDetail
@@ -1247,7 +1249,8 @@ const en: T = {
   bankruptBadge: 'bankrupt',
   noPropertiesMsg: 'No properties',
   propAbbr: (n) => `${n} prop.`,
-  mortgagedStat: (n) => `🏦${n} mortgaged`,
+  mortgagedStat: (n) => `${n} mortgaged`,
+  monopolyStatLabel: 'monopoly',
   tradeWithBtn: (name) => `🤝 Trade with ${name.split(' ')[0]}`,
 
   // PropertyDetail
