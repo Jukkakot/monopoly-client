@@ -61,6 +61,16 @@ export interface T {
   auctionActorWaiting: (name: string) => string
   auctionConfirmWin: string
   auctionWonWaiting: (name: string) => string
+  auctionForSaleLabel: string
+  auctionLeadTag: string
+  auctionActorTag: string
+  auctionPassedTag: string
+  auctionYouWon: string
+  auctionPlayerWon: (name: string) => string
+  auctionYouPay: (amount: number) => string
+  bidLabelYourTurn: string
+  bidLabel: string
+  auctionNoFundsInfo: (cash: number) => string
   placeBidBtn: string
   passAuctionBtn: string
   passAuctionBtnKbd: string
@@ -418,6 +428,8 @@ export interface T {
   playersTabLabel: string
 
   // ── Events (deriveEvents, non-React) ─────────────────────────────────────────
+  cashTooltip: (cash: number) => string
+  kbdSpace: string
   ev: {
     drewCard: (name: string, text: string) => string
     gameOver: (winner: string) => string
@@ -518,6 +530,16 @@ const fi: T = {
   auctionActorWaiting: (name) => `⏳ ${name} tekee tarjouksen…`,
   auctionConfirmWin: '🏆 Vahvista voitto',
   auctionWonWaiting: (name) => `⏳ Odotetaan vahvistusta — ${name} vahvistaa ostonsa…`,
+  auctionForSaleLabel: '🔨 Huutokaupattavana',
+  auctionLeadTag: 'johtaa',
+  auctionActorTag: 'vuorossa',
+  auctionPassedTag: 'luovutti',
+  auctionYouWon: '🏆 Voitit huutokaupan!',
+  auctionPlayerWon: (name) => `🏆 ${name} voitti huutokaupan`,
+  auctionYouPay: (amount) => `maksat €${amount}`,
+  bidLabelYourTurn: 'Tarjoa — sinun vuorosi',
+  bidLabel: 'Tarjoa',
+  auctionNoFundsInfo: (cash) => `💸 Kassassa vain €${cash} — et pysty tarjoamaan enempää`,
   placeBidBtn: 'Tarjoa',
   passAuctionBtn: '🚫 Luovuta',
   passAuctionBtnKbd: '🚫 Luovuta  [P]',
@@ -890,6 +912,8 @@ const fi: T = {
   playersTabLabel: '👥 Pelaajat',
 
   // Events
+  cashTooltip: (cash) => `käteinen €${cash}`,
+  kbdSpace: 'Välilyönti',
   ev: {
     drewCard: (name, text) => `${name} nosti: ${text}`,
     gameOver: (winner) => `Peli päättyi! Voittaja: ${winner}`,
@@ -994,6 +1018,16 @@ const en: T = {
   auctionActorWaiting: (name) => `⏳ ${name} is bidding…`,
   auctionConfirmWin: '🏆 Confirm win',
   auctionWonWaiting: (name) => `⏳ Waiting for confirmation — ${name} is confirming their purchase…`,
+  auctionForSaleLabel: '🔨 Up for auction',
+  auctionLeadTag: 'leading',
+  auctionActorTag: 'to bid',
+  auctionPassedTag: 'passed',
+  auctionYouWon: '🏆 You won the auction!',
+  auctionPlayerWon: (name) => `🏆 ${name} won the auction`,
+  auctionYouPay: (amount) => `you pay €${amount}`,
+  bidLabelYourTurn: 'Bid — your turn',
+  bidLabel: 'Bid',
+  auctionNoFundsInfo: (cash) => `💸 Only €${cash} in cash — you cannot bid higher`,
   placeBidBtn: 'Bid',
   passAuctionBtn: '🚫 Pass',
   passAuctionBtnKbd: '🚫 Pass  [P]',
@@ -1366,6 +1400,8 @@ const en: T = {
   playersTabLabel: '👥 Players',
 
   // Events
+  cashTooltip: (cash) => `cash €${cash}`,
+  kbdSpace: 'Space',
   ev: {
     drewCard: (name, text) => `${name} drew: ${text}`,
     gameOver: (winner) => `Game over! Winner: ${winner}`,

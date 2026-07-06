@@ -273,7 +273,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <span>{['🥇', '🥈', '🥉'][i] ?? `${i + 1}.`}</span>
               <span style={{ width: 12, height: 12, borderRadius: '50%', background: seat?.tokenColorHex ?? '#888', display: 'inline-block', flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{p.name}</span>
-              <span style={{ fontWeight: 700 }} title={`käteinen €${p.cash}`}>
+              <span style={{ fontWeight: 700 }} title={t.cashTooltip(p.cash)}>
                 {p.bankrupt ? t.bankruptLabel : `€${netWorth}`}
               </span>
             </div>
@@ -801,7 +801,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
       {/* Property header — hidden once resolved (property shown in won-box instead) */}
       {auction.status !== 'WON_PENDING_RESOLUTION' && (
         <div className={styles.auctionPropHeader}>
-          <span className={styles.auctionInlineLabel}>🔨 Huutokaupattavana</span>
+          <span className={styles.auctionInlineLabel}>{t.auctionForSaleLabel}</span>
           <PropertyChip id={auction.propertyId} rightText={spotPrice > 0 ? `€${spotPrice}` : undefined} />
         </div>
       )}
@@ -824,9 +824,9 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               <span className={styles.auctionPlayerName}>{player?.name ?? '?'}</span>
               <span className={styles.auctionPlayerRight}>
                 {isLeader && <span className={styles.auctionLeadBid}>€{auction.currentBid}</span>}
-                {isLeader && <span className={styles.auctionLeadTag}>johtaa</span>}
-                {isActor && !passed && <span className={styles.auctionActorTag}>vuorossa</span>}
-                {passed && <span className={styles.auctionPassTag}>luovutti</span>}
+                {isLeader && <span className={styles.auctionLeadTag}>{t.auctionLeadTag}</span>}
+                {isActor && !passed && <span className={styles.auctionActorTag}>{t.auctionActorTag}</span>}
+                {passed && <span className={styles.auctionPassTag}>{t.auctionPassedTag}</span>}
               </span>
             </div>
           )
@@ -853,12 +853,12 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               }
               <div className={styles.auctionWonBox} style={{ borderColor: color, background: color + '18' }}>
                 <div className={styles.auctionWonTitle}>
-                  {isMe ? '🏆 Voitit huutokaupan!' : `🏆 ${winner?.name ?? '?'} voitti huutokaupan`}
+                  {isMe ? t.auctionYouWon : t.auctionPlayerWon(winner?.name ?? '?')}
                 </div>
                 <div className={styles.auctionWonDetail}>
                   <PropertyChip id={auction.propertyId} />
                   <span className={styles.auctionWonPrice}>
-                    {isMe ? `maksat €${auction.currentBid}` : `€${auction.currentBid}`}
+                    {isMe ? t.auctionYouPay(auction.currentBid) : `€${auction.currentBid}`}
                   </span>
                 </div>
               </div>
@@ -869,11 +869,11 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
         <>
           {/* Bid label */}
           <div className={styles.debtChipLabel} style={{ color: isMyTurnToBid ? '#1b5e20' : '#888' }}>
-            {isMyTurnToBid ? 'Tarjoa — sinun vuorosi' : 'Tarjoa'}
+            {isMyTurnToBid ? t.bidLabelYourTurn : t.bidLabel}
           </div>
           {myCash < minBid && (
             <div className={styles.auctionNoFunds}>
-              💸 Kassassa vain €{myCash} — et pysty tarjoamaan enempää
+              {t.auctionNoFundsInfo(myCash)}
             </div>
           )}
           {header && myCash < minBid && (

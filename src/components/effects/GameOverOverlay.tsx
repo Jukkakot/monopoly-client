@@ -77,7 +77,7 @@ export default function GameOverOverlay({ state }: Props) {
                   {p.bankrupt ? (
                     <span className={styles.bankrupt}>{t.bankruptLabel}</span>
                   ) : (
-                    <span title={`käteinen €${p.cash}`}>€{calcNetWorth(p, state)}</span>
+                    <span title={t.cashTooltip(p.cash)}>€{calcNetWorth(p, state)}</span>
                   )}
                 </span>
               </div>
