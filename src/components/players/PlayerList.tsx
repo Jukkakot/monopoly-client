@@ -100,6 +100,8 @@ function PropertyExpanded({ player, state, onSpotClick, onTradeWith }: { player:
               key={prop.propertyId}
               id={prop.propertyId}
               mortgaged={prop.mortgaged}
+              houses={prop.houseCount}
+              hotel={prop.hotelCount > 0}
               onClick={onSpotClick ? () => onSpotClick(prop.propertyId) : undefined}
             />
           ))

@@ -613,6 +613,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                           key={prop.propertyId}
                           id={prop.propertyId}
                           mortgaged={prop.mortgaged}
+                          houses={prop.houseCount}
+                          hotel={prop.hotelCount > 0}
                         />
                       ))
                     )}

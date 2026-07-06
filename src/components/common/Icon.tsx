@@ -5,7 +5,7 @@ import type { CSSProperties, ReactElement } from 'react'
  * bottom nav). Strokes inherit `currentColor` so icons take the theme colour of
  * their context. Playful game emoji are intentionally kept elsewhere.
  */
-export type IconName = 'people' | 'actions' | 'list' | 'board' | 'sound' | 'muted' | 'menu'
+export type IconName = 'people' | 'actions' | 'list' | 'board' | 'sound' | 'muted' | 'menu' | 'house' | 'hotel' | 'lock'
 
 const PATHS: Record<IconName, ReactElement> = {
   people: (
@@ -48,6 +48,20 @@ const PATHS: Record<IconName, ReactElement> = {
       <circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none" />
       <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
       <circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none" />
+    </>
+  ),
+  house: (
+    <>
+      <path d="M3.2 11.4 12 4l8.8 7.4" />
+      <path d="M5.6 9.8V20h12.8V9.8" />
+    </>
+  ),
+  // Filled solid house — the max upgrade (hotel), visually distinct from outline houses.
+  hotel: <path d="M12 3.2 21.2 11v9.3H2.8V11z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />,
+  lock: (
+    <>
+      <rect x="5" y="10.5" width="14" height="9.5" rx="2" />
+      <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
     </>
   ),
 }
