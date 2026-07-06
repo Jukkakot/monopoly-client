@@ -430,6 +430,7 @@ export interface T {
   // ── Events (deriveEvents, non-React) ─────────────────────────────────────────
   cashTooltip: (cash: number) => string
   kbdSpace: string
+  tradeMortgagedDivider: string
   ev: {
     drewCard: (name: string, text: string) => string
     gameOver: (winner: string) => string
@@ -914,6 +915,7 @@ const fi: T = {
   // Events
   cashTooltip: (cash) => `käteinen €${cash}`,
   kbdSpace: 'Välilyönti',
+  tradeMortgagedDivider: '🔒 Pantatut',
   ev: {
     drewCard: (name, text) => `${name} nosti: ${text}`,
     gameOver: (winner) => `Peli päättyi! Voittaja: ${winner}`,
@@ -1402,6 +1404,7 @@ const en: T = {
   // Events
   cashTooltip: (cash) => `cash €${cash}`,
   kbdSpace: 'Space',
+  tradeMortgagedDivider: '🔒 Mortgaged',
   ev: {
     drewCard: (name, text) => `${name} drew: ${text}`,
     gameOver: (winner) => `Game over! Winner: ${winner}`,

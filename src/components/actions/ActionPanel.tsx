@@ -1281,7 +1281,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         {free.length > 0 && <PropertyChipWrap>{free.map(renderChip)}</PropertyChipWrap>}
         {pledged.length > 0 && (
           <>
-            <div className={styles.tradeMortgagedDivider}>🔒 Pantatut</div>
+            <div className={styles.tradeMortgagedDivider}>{t.tradeMortgagedDivider}</div>
             <PropertyChipWrap>{pledged.map(renderChip)}</PropertyChipWrap>
           </>
         )}
