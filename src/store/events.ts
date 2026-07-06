@@ -47,7 +47,8 @@ function moveDelay(fromIdx: number, toIdx: number, goingToJail: boolean, cfg: An
  * Call with only the NEW entries (id > lastSeenEventId).
  */
 export function translateBackendEvents(entries: GameEventEntry[], players: PlayerSnapshot[]): GameEvent[] {
-  const t = translations[getLang()].ev
+  const tr = translations[getLang()]
+  const t = tr.ev
   const cfg = getAnimationConfig(loadAnimationSpeed())
   const events: GameEvent[] = []
   // Tracks last movement delay per player so subsequent events appear after animation
@@ -180,9 +181,10 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const to = e.data.to ?? ''
         const amount = parseInt(e.data.amount ?? '0')
         const reason = e.data.reason ?? ''
-        const fromName = from ? (players.find(p => p.playerId === from)?.name ?? from) : 'Pankki'
-        const toName = to ? (players.find(p => p.playerId === to)?.name ?? to) : 'Pankki'
-        events.push(ev('💵', `${fromName} → ${toName} €${amount} (${reason})`, e.playerIds.filter(Boolean)))
+        const fromName = from ? (players.find(p => p.playerId === from)?.name ?? from) : tr.bankLabel
+        const toName = to ? (players.find(p => p.playerId === to)?.name ?? to) : tr.bankLabel
+        const reasonLabel = t.moneyReasons[reason] ?? reason
+        events.push(ev('💵', `${fromName} → ${toName} €${amount} (${reasonLabel})`, e.playerIds.filter(Boolean)))
         break
       }
     }
@@ -207,21 +209,28 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
     return events
   }
 
-  // Monopoly gained (property purchase completing a color set)
+  // Monopoly gained — any ownership change (purchase, auction, trade, bankruptcy
+  // transfer) that completes a color set for the new owner. Deduped per group so a
+  // multi-property transfer announces each completed set once.
+  const announcedMonopolies = new Set<string>()
   for (const np of next.properties) {
     const pp = prev.properties.find(p => p.propertyId === np.propertyId)
     if (!pp) continue
 
-    if (np.ownerPlayerId && !pp.ownerPlayerId) {
+    if (np.ownerPlayerId && np.ownerPlayerId !== pp.ownerPlayerId) {
       const spot = SPOTS.find(s => s.id === np.propertyId)
       const owner = next.players.find(p => p.playerId === np.ownerPlayerId)
-      if (spot && owner && !['RAILROAD', 'UTILITY', 'CORNER', 'COMMUNITY', 'CHANCE', 'TAX'].includes(spot.streetType)) {
+      if (spot && owner && !announcedMonopolies.has(spot.streetType)
+          && !['RAILROAD', 'UTILITY', 'CORNER', 'COMMUNITY', 'CHANCE', 'TAX'].includes(spot.streetType)) {
         const groupProps = next.properties.filter(p => {
           const s = SPOTS.find(ss => ss.id === p.propertyId)
           return s?.streetType === spot.streetType
         })
         const ownerGroupCount = groupProps.filter(p => p.ownerPlayerId === owner.playerId).length
-        if (ownerGroupCount === groupProps.length) {
+        const hadMonopolyBefore = groupProps.every(p =>
+          prev.properties.find(pr => pr.propertyId === p.propertyId)?.ownerPlayerId === owner.playerId)
+        if (ownerGroupCount === groupProps.length && !hadMonopolyBefore) {
+          announcedMonopolies.add(spot.streetType)
           events.push(ev('🏆', t.gotMonopoly(owner.name, spot.streetType), [owner.playerId]))
         }
       }

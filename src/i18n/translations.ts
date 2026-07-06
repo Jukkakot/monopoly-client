@@ -442,6 +442,8 @@ export interface T {
     tradeDeclined: (name: string) => string
     tradeCancelled: string
     rolledDice: (name: string, d1: number, d2: number) => string
+    /** Money-flow reason labels keyed by the backend's Finnish category strings. */
+    moneyReasons: Record<string, string>
   }
 }
 
@@ -912,6 +914,12 @@ const fi: T = {
     tradeDeclined: (name) => `${name} hylkäsi kauppatarjouksen`,
     tradeCancelled: 'Kaupankäynti peruutettu',
     rolledDice: (name, d1, d2) => `${name} heitti ${d1}+${d2}=${d1+d2}${d1===d2?' (tupla)':''}`,
+    moneyReasons: {
+      vuokra: 'vuokra', vero: 'vero', kortti: 'kortti', velka: 'velka',
+      kauppa: 'kauppa', osto: 'osto', myynti: 'myynti', rakennus: 'rakennus',
+      kiinnitys: 'kiinnitys', lunastus: 'lunastus', huutokauppa: 'huutokauppa',
+      vankilamaksu: 'vankilamaksu',
+    },
   },
 }
 
@@ -1382,6 +1390,12 @@ const en: T = {
     tradeDeclined: (name) => `${name} declined the trade offer`,
     tradeCancelled: 'Trade cancelled',
     rolledDice: (name, d1, d2) => `${name} rolled ${d1}+${d2}=${d1+d2}${d1===d2?' (doubles)':''}`,
+    moneyReasons: {
+      vuokra: 'rent', vero: 'tax', kortti: 'card', velka: 'debt',
+      kauppa: 'trade', osto: 'purchase', myynti: 'sale', rakennus: 'building',
+      kiinnitys: 'mortgage', lunastus: 'redeemed', huutokauppa: 'auction',
+      vankilamaksu: 'jail fee',
+    },
   },
 }
 
