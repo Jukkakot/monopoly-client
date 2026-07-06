@@ -1,52 +1,59 @@
 .chip {
   display: inline-flex;
-  align-items: stretch;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  overflow: hidden;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px 3px 5px;
+  border: 1px solid rgba(20, 50, 20, 0.08);
+  border-radius: 9px;
+  box-shadow: var(--e1, 0 1px 2px rgba(15, 45, 15, 0.07));
   min-height: 28px;
   font-size: 0.78rem;
-  font-weight: 600;
-  color: #333;
+  font-weight: 650;
+  color: var(--ink, #17331b);
   text-align: left;
   cursor: default;
 }
 
 button.chip {
   cursor: pointer;
-  transition: filter 0.12s;
+  transition: box-shadow 0.14s, transform 0.1s, filter 0.12s;
 }
-button.chip:hover  { filter: brightness(0.92); }
-button.chip:active { filter: brightness(0.82); }
+button.chip:hover  { box-shadow: var(--e2, 0 2px 8px rgba(15, 45, 15, 0.10)); filter: brightness(1.02); }
+button.chip:active { transform: translateY(0.5px) scale(0.985); box-shadow: var(--e1, 0 1px 2px rgba(15, 45, 15, 0.07)); }
 
+/* Group-colour accent — a rounded floating pill instead of a hard edge bar.
+   The inner highlight + hairline keep it crisp on both dark and pale groups. */
 .bar {
   width: 5px;
+  align-self: stretch;
+  margin: 4px 0;
+  border-radius: 3px;
   flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
 }
 
 .name {
-  padding: 4px 6px;
   display: flex;
   align-items: center;
   white-space: nowrap;
+  letter-spacing: 0.1px;
 }
 
 .right {
-  font-size: 0.68rem;
-  color: #666;
-  padding: 4px 6px 4px 0;
+  font-size: 0.7rem;
+  color: var(--ink-soft, #5a6d5c);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
 }
 
 .selected {
-  outline: 2px solid #43a047;
-  outline-offset: -1px;
+  box-shadow: 0 0 0 2px var(--g-500, #43a047), var(--e1, 0 1px 2px rgba(15, 45, 15, 0.07));
+  border-color: transparent;
 }
 
 .mortgaged {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 .mortgaged .name {
   text-decoration: line-through;
@@ -56,5 +63,5 @@ button.chip:active { filter: brightness(0.82); }
 .wrap {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 5px;
 }
