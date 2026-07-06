@@ -84,7 +84,8 @@
 .center {
   grid-column: 2 / 11;
   grid-row: 2 / 11;
-  background: #c2dfc0;
+  /* Subtle radial felt so the play area has depth instead of a flat fill */
+  background: radial-gradient(120% 120% at 50% 42%, #d0e8ce 0%, #c2dfc0 55%, #b3d4b1 100%);
   display: flex;
   align-items: center;
   z-index: 0;

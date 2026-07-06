@@ -668,6 +668,9 @@
     user-select: none;
     background: linear-gradient(180deg, var(--g-100) 0%, #dfeee0 100%);
     border-bottom: 1px solid var(--g-200);
+    box-shadow: 0 1px 3px rgba(15, 45, 15, 0.06);
+    position: relative;
+    z-index: 1;
   }
   .sideSectionHeader:hover { background: linear-gradient(180deg, #e2f1e3 0%, #d4e8d5 100%); }
 

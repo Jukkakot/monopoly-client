@@ -94,27 +94,28 @@
 
 .btn {
   width: 100%;
-  padding: 10px 14px;
+  padding: 11px 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-md, 10px);
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  transition: filter 0.15s, transform 0.1s;
+  transition: filter 0.15s, transform 0.1s, box-shadow 0.15s;
   letter-spacing: 0.3px;
   font-family: 'Arial Narrow', Arial, sans-serif;
+  box-shadow: var(--e1), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-.btn:hover { filter: brightness(1.1); }
-.btn:active { transform: scale(0.97); }
-.btn:disabled { opacity: 0.45; cursor: default; filter: none; }
+.btn:hover { filter: brightness(1.06); box-shadow: var(--e2), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.btn:active { transform: translateY(1px) scale(0.99); box-shadow: var(--e1); }
+.btn:disabled { opacity: 0.45; cursor: default; filter: none; box-shadow: none; }
 
-.primary  { background: #2e7d32; color: #fff; }
-.secondary { background: #f9a825; color: #fff; }
-.danger   { background: #c62828; color: #fff; }
-.neutral  { background: #546e7a; color: #fff; }
-.info     { background: #1565c0; color: #fff; }
-.ghost    { background: transparent; color: #555; border: 1.5px solid #ccc; }
+.primary  { background: linear-gradient(180deg, #3a9a40 0%, #2e7d32 100%); color: #fff; }
+.secondary { background: linear-gradient(180deg, #fbb130 0%, #f9a825 100%); color: #fff; }
+.danger   { background: linear-gradient(180deg, #d63535 0%, #c62828 100%); color: #fff; }
+.neutral  { background: linear-gradient(180deg, #607d8b 0%, #546e7a 100%); color: #fff; }
+.info     { background: linear-gradient(180deg, #1976d2 0%, #1565c0 100%); color: #fff; }
+.ghost    { background: transparent; color: #555; border: 1.5px solid #ccc; box-shadow: none; }
 
 /* Inline row — buttons share available width equally */
 .btnRow {
