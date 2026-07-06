@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
@@ -38,7 +39,9 @@ export default function OverflowMenu() {
         <Icon name="menu" size={20} />
       </button>
 
-      {showSound && (
+      {/* Full-screen modals are portaled to <body> so they escape the header's
+          stacking context — otherwise board tokens (higher z-index) paint over them. */}
+      {showSound && createPortal(
         <div className={styles.soundOverlay} onClick={() => setShowSound(false)}>
           <div onClick={e => e.stopPropagation()}>
             <SoundSettings
@@ -53,10 +56,11 @@ export default function OverflowMenu() {
               }}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
-      {showHelp && (
+      {showHelp && createPortal(
         <div className={styles.soundOverlay} onClick={() => setShowHelp(false)}>
           <div className={styles.helpModal} onClick={e => e.stopPropagation()}>
             <div className={styles.buildModalHeader}>
@@ -69,7 +73,8 @@ export default function OverflowMenu() {
               <div className={styles.helpRow}><kbd>M</kbd><span>{t.kbdMute}</span></div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {open && (

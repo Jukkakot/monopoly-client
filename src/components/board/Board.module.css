@@ -242,7 +242,7 @@
 /* ── Spot hover tooltip ── */
 .tooltip {
   position: fixed;
-  z-index: 9999;
+  z-index: 300;
   pointer-events: none;
   background: #fff;
   border-radius: 6px;
