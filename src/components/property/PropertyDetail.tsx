@@ -6,6 +6,18 @@ import type { SessionState } from '../../types/api'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { setPendingTradeProperty } from '../actions/ActionPanel'
+import Icon from '../common/Icon'
+
+/** Row of little green house icons — mirrors the property-chip building glyphs. */
+function HouseIcons({ n }: { n: number }) {
+  return (
+    <span className={styles.houseIcons}>
+      {Array.from({ length: n }).map((_, i) => (
+        <Icon key={i} name="house" size={12} strokeWidth={2.4} style={{ color: '#2e7d32' }} />
+      ))}
+    </span>
+  )
+}
 
 interface Props {
   spotId: string
@@ -190,11 +202,11 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
               <div className={styles.rentTable}>
                 <div className={styles.rentTitle}>{t.rentsTitle}</div>
                 <div className={r(0)}><span>{t.emptyRentRow(isMonopoly)}</span><span>€{isMonopoly ? rents[0] * 2 : rents[0]}</span></div>
-                <div className={r(1)}><span>🏠 1 {t.houseLabel}</span><span>€{rents[1]}</span></div>
-                <div className={r(2)}><span>🏠🏠 2 {t.houseLabel}</span><span>€{rents[2]}</span></div>
-                <div className={r(3)}><span>🏠🏠🏠 3 {t.houseLabel}</span><span>€{rents[3]}</span></div>
-                <div className={r(4)}><span>🏠×4</span><span>€{rents[4]}</span></div>
-                <div className={`${r(5)} ${styles.hotelRow}`}><span>{t.hotelOwnedLabel}</span><span>€{rents[5]}</span></div>
+                <div className={r(1)}><span className={styles.rentLabel}><HouseIcons n={1} /> 1 {t.houseLabel}</span><span>€{rents[1]}</span></div>
+                <div className={r(2)}><span className={styles.rentLabel}><HouseIcons n={2} /> 2 {t.houseLabel}</span><span>€{rents[2]}</span></div>
+                <div className={r(3)}><span className={styles.rentLabel}><HouseIcons n={3} /> 3 {t.houseLabel}</span><span>€{rents[3]}</span></div>
+                <div className={r(4)}><span className={styles.rentLabel}><HouseIcons n={4} /> 4 {t.houseLabel}</span><span>€{rents[4]}</span></div>
+                <div className={`${r(5)} ${styles.hotelRow}`}><span className={styles.rentLabel}><Icon name="hotel" size={12} style={{ color: '#d32f2f' }} /> {t.hotelOwnedLabel}</span><span>€{rents[5]}</span></div>
               </div>
             )
           })()}

@@ -6,6 +6,7 @@ import { loadTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { useT } from '../../i18n/LanguageContext'
 import { calcNetWorth } from '../../utils/netWorth'
+import Icon from '../common/Icon'
 
 interface Props {
   state: SessionState
@@ -70,8 +71,16 @@ export default function GameOverOverlay({ state }: Props) {
                   {!p.bankrupt && propCount > 0 && (
                     <span className={styles.rankStat}>{t.propAbbr(propCount)}</span>
                   )}
-                  {hotels > 0 && <span className={styles.rankStat}>🏨{hotels}</span>}
-                  {houses > 0 && <span className={styles.rankStat}>🏠{houses}</span>}
+                  {hotels > 0 && (
+                    <span className={styles.rankStat}>
+                      <Icon name="hotel" size={12} style={{ color: '#d32f2f' }} />{hotels}
+                    </span>
+                  )}
+                  {houses > 0 && (
+                    <span className={styles.rankStat}>
+                      <Icon name="house" size={12} strokeWidth={2.4} style={{ color: '#2e7d32' }} />{houses}
+                    </span>
+                  )}
                 </div>
                 <span className={styles.rankCash}>
                   {p.bankrupt ? (

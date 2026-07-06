@@ -185,6 +185,19 @@
   border-left: 3px solid #2e7d32;
 }
 
+.rentLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.houseIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+.houseIcons svg { flex-shrink: 0; }
+
 .hotelRow {
   border-top: 1px solid #e0e0e0;
   margin-top: 2px;

@@ -10,6 +10,7 @@ import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
 import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../../utils/animationSettings'
+import Icon from '../common/Icon'
 import { AnimatedDice } from '../common/DiceDisplay'
 import { getCardText } from '../../i18n/cards'
 
@@ -59,13 +60,13 @@ function BoardStats({ state }: { state: SessionState }) {
     <div className={styles.centerStats}>
       <span title={t.soldPropsTitle}>{soldProps}/{totalProps} kiin.</span>
       {houses > 0 && (
-        <span title={t.housesStockTitle(houses, housesLeft)} className={housesLeft <= 4 ? styles.centerStatWarn : undefined}>
-          🏠{housesLeft}
+        <span title={t.housesStockTitle(houses, housesLeft)} className={`${styles.centerStat} ${housesLeft <= 4 ? styles.centerStatWarn : ''}`}>
+          <Icon name="house" size={13} strokeWidth={2.4} />{housesLeft}
         </span>
       )}
       {hotels > 0 && (
-        <span title={t.hotelsStockTitle(hotels, hotelsLeft)} className={hotelsLeft <= 2 ? styles.centerStatWarn : undefined}>
-          🏨{hotelsLeft}
+        <span title={t.hotelsStockTitle(hotels, hotelsLeft)} className={`${styles.centerStat} ${hotelsLeft <= 2 ? styles.centerStatWarn : ''}`}>
+          <Icon name="hotel" size={13} />{hotelsLeft}
         </span>
       )}
     </div>

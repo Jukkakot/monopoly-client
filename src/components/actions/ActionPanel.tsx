@@ -1271,7 +1271,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
           id={prop.propertyId}
           selected={included}
           mortgaged={prop.mortgaged}
-          rightText={displayPrice !== null ? (prop.mortgaged ? `🔒€${displayPrice}` : `€${displayPrice}`) : undefined}
+          rightText={displayPrice !== null ? `€${displayPrice}` : undefined}
           onClick={() => { playButtonClick(); toggleProp(offerSide, prop.propertyId, included) }}
         />
       )

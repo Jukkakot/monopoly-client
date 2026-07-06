@@ -119,12 +119,16 @@
 }
 
 .rankStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-size: 0.72rem;
   color: #555;
   background: rgba(0,0,0,0.06);
   border-radius: 4px;
   padding: 1px 5px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .rankCash {

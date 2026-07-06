@@ -234,6 +234,15 @@
   letter-spacing: 0.5px;
 }
 
+.centerStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.centerStat svg {
+  flex-shrink: 0;
+}
+
 .centerStatWarn {
   color: #c62828;
   font-weight: 900;
