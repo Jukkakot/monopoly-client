@@ -4,6 +4,7 @@ import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+import Icon from '../common/Icon'
 import { type BotSpeed, saveAnimationSpeed, applyAnimationSpeedToCss } from '../../utils/animationSettings'
 import { applySessionSettings } from '../../api/sessionApi'
 
@@ -34,7 +35,7 @@ export default function OverflowMenu() {
   return (
     <div className={styles.root}>
       <button className={styles.trigger} onClick={() => setOpen(v => !v)} title={t.moreActionsTitle}>
-        ⋯
+        <Icon name="menu" size={20} />
       </button>
 
       {showSound && (

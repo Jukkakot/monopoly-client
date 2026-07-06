@@ -6,6 +6,7 @@ import { useT, useLang, useLangToggle } from '../../i18n/LanguageContext'
 import { useGame } from '../../store/GameContext'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { DieFace } from '../common/DiceDisplay'
+import Icon from '../common/Icon'
 
 interface Props {
   isSpectator?: boolean
@@ -60,7 +61,7 @@ export default function Header({ isSpectator }: Props) {
       <div className={styles.controls}>
         {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
         <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>
-          {muted ? '🔇' : '🔊'}
+          <Icon name={muted ? 'muted' : 'sound'} size={18} />
         </button>
         <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
           <img

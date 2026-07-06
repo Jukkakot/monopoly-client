@@ -6,6 +6,7 @@ import { SPOTS } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 import { TokenSvg } from '../board/TokenSvg'
 import { useTokenShapes } from '../../utils/tokenShapes'
+import Icon, { type IconName } from '../common/Icon'
 
 type AnimDir = 'right' | 'left'
 
@@ -52,6 +53,7 @@ function loadMobileBoardHeight(): number {
 type MobileTab = 'board' | 'players' | 'log'
 
 const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log']
+const NAV_ICONS: Record<MobileTab, IconName> = { board: 'board', players: 'people', log: 'list' }
 
 /** Smoothly counts a number to a new value over ~350 ms. */
 function AnimatedCash({ value }: { value: number }) {
@@ -424,7 +426,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           <div className={styles.upperSections}>
             <div className={styles.sideSectionHeader}
               onClick={() => { const v = !playersCollapsed; setPlayersCollapsed(v); try { localStorage.setItem('monopoly_players_collapsed', v ? '1' : '0') } catch {} }}>
-              <span className={styles.sideSectionTitle}>👥 Pelaajat</span>
+              <span className={styles.sideSectionTitle}><Icon name="people" size={14} /> Pelaajat</span>
               <span className={styles.sideSectionChevron}>{playersCollapsed ? '▸' : '▾'}</span>
             </div>
             {!playersCollapsed && (
@@ -440,7 +442,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
             />
             <div className={styles.sideSectionHeader}
               onClick={() => { const v = !actionsCollapsed; setActionsCollapsed(v); try { localStorage.setItem('monopoly_actions_collapsed', v ? '1' : '0') } catch {} }}>
-              <span className={styles.sideSectionTitle}>🎮 Toiminnot</span>
+              <span className={styles.sideSectionTitle}><Icon name="actions" size={14} /> Toiminnot</span>
               <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
             </div>
             {!isMobile && !actionsCollapsed && (
@@ -461,7 +463,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               />
               <div className={styles.sideSectionHeader}
                 onClick={() => { const v = !logCollapsed; setLogCollapsed(v); try { localStorage.setItem('monopoly_log_collapsed', v ? '1' : '0') } catch {} }}>
-                <span className={styles.sideSectionTitle}>📋 Tapahtumaloki</span>
+                <span className={styles.sideSectionTitle}><Icon name="list" size={14} /> Tapahtumaloki</span>
                 <span className={styles.sideSectionChevron}>{logCollapsed ? '▸' : '▾'}</span>
               </div>
               {!logCollapsed && (
@@ -561,7 +563,8 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                 className={`${styles.navBtn} ${mobileTab === tab ? styles.navActive : ''}`}
                 onClick={() => switchTab(tab)}
               >
-                {t.mobileTabs[tab]}
+                <Icon name={NAV_ICONS[tab]} size={19} strokeWidth={2} />
+                <span>{t.mobileTabs[tab]}</span>
                 {tab === 'board' && isMyTurn && mobileTab !== 'board' && (
                   <span className={styles.navAlert} data-testid="mobile-board-alert" />
                 )}

@@ -908,10 +908,10 @@ const fi: T = {
 
   // AppLayout
   mobileTabs: {
-    board: '🎲 Lauta',
-    players: '👥 Pelaajat',
-    log: '📋 Loki',
-    actions: '⚡ Toiminnot',
+    board: 'Lauta',
+    players: 'Pelaajat',
+    log: 'Loki',
+    actions: 'Toiminnot',
   },
   resizeHandleTitle: 'Vedä muuttaaksesi leveyttä',
   playersTabLabel: '👥 Pelaajat',
@@ -1399,10 +1399,10 @@ const en: T = {
 
   // AppLayout
   mobileTabs: {
-    board: '🎲 Board',
-    players: '👥 Players',
-    log: '📋 Log',
-    actions: '⚡ Actions',
+    board: 'Board',
+    players: 'Players',
+    log: 'Log',
+    actions: 'Actions',
   },
   resizeHandleTitle: 'Drag to resize',
   playersTabLabel: '👥 Players',
