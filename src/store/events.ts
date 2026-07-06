@@ -19,6 +19,7 @@ export interface GameEvent {
   message: string
   relatedPlayerIds: string[]
   kind?: string
+  group?: string  // street/color group key, set on 'monopoly' events for the celebration
   releaseAt?: number  // hide in event log until this timestamp
   historical?: boolean  // loaded from existing log on reconnect/refresh — no sounds
 }
@@ -231,7 +232,9 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
           prev.properties.find(pr => pr.propertyId === p.propertyId)?.ownerPlayerId === owner.playerId)
         if (ownerGroupCount === groupProps.length && !hadMonopolyBefore) {
           announcedMonopolies.add(spot.streetType)
-          events.push(ev('🏆', t.gotMonopoly(owner.name, spot.streetType), [owner.playerId]))
+          const mev = ev('🏆', t.gotMonopoly(owner.name, spot.streetType), [owner.playerId], 'monopoly')
+          mev.group = spot.streetType
+          events.push(mev)
         }
       }
     }

@@ -290,6 +290,8 @@ export interface T {
 
   // ── PropertyDetail ───────────────────────────────────────────────────────────
   streetTypeNames: Partial<Record<string, string>>
+  monopolyCelebrationTitle: string
+  monopolyCelebrationSub: (group: string) => string
   noOwnerMsg: string
   mortgagedBadge: string
   currentRentLabel: string
@@ -770,6 +772,8 @@ const fi: T = {
     RAILROAD:   'Rautatieasema',
     UTILITY:    'Laitos',
   },
+  monopolyCelebrationTitle: 'MONOPOLI!',
+  monopolyCelebrationSub: (group) => `${group}-ryhmä haltuun`,
   noOwnerMsg: 'Ei omistajaa',
   mortgagedBadge: 'PANTATTU',
   currentRentLabel: 'Nykyinen vuokra',
@@ -1259,6 +1263,8 @@ const en: T = {
     RAILROAD:   'Railroad',
     UTILITY:    'Utility',
   },
+  monopolyCelebrationTitle: 'MONOPOLY!',
+  monopolyCelebrationSub: (group) => `${group} set complete`,
   noOwnerMsg: 'No owner',
   mortgagedBadge: 'MORTGAGED',
   currentRentLabel: 'Current rent',
