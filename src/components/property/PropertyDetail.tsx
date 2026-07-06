@@ -242,8 +242,8 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
           {isStreet && prop && (prop.houseCount > 0 || prop.hotelCount > 0) && (
             <div className={styles.buildingsRow}>
               {prop.hotelCount > 0
-                ? <span>{t.hotelOwnedLabel}</span>
-                : <span>{t.houseCountLabel(prop.houseCount)}</span>
+                ? <span className={styles.rentLabel}><Icon name="hotel" size={14} style={{ color: '#d32f2f' }} /> {t.hotelOwnedLabel}</span>
+                : <span className={styles.rentLabel}><HouseIcons n={prop.houseCount} /> {t.houseCountLabel(prop.houseCount)}</span>
               }
             </div>
           )}

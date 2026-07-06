@@ -797,8 +797,8 @@ const fi: T = {
   tradeBtnPD: '🤝 Tee kauppa',
   closeBtnPD: 'Sulje',
   monopolyBadge: 'MONOPOLI',
-  houseCountLabel: (n) => `${'🏠'.repeat(n)} ${n} talo${n !== 1 ? 'a' : ''}`,
-  hotelOwnedLabel: '🏨 Hotelli',
+  houseCountLabel: (n) => `${n} talo${n !== 1 ? 'a' : ''}`,
+  hotelOwnedLabel: 'Hotelli',
 
   // OverflowMenu
   moreActionsTitle: 'Lisätoiminnot',
@@ -1289,8 +1289,8 @@ const en: T = {
   tradeBtnPD: '🤝 Trade',
   closeBtnPD: 'Close',
   monopolyBadge: 'MONOPOLY',
-  houseCountLabel: (n) => `${'🏠'.repeat(n)} ${n} house${n !== 1 ? 's' : ''}`,
-  hotelOwnedLabel: '🏨 Hotel',
+  houseCountLabel: (n) => `${n} house${n !== 1 ? 's' : ''}`,
+  hotelOwnedLabel: 'Hotel',
 
   // OverflowMenu
   moreActionsTitle: 'More actions',

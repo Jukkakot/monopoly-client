@@ -1174,6 +1174,14 @@ button.tradePropChip:active { filter: brightness(0.84); }
 .sellBtn { border-color: #ef9a9a; color: #b71c1c; }
 .sellBtn:hover:not(:disabled) { background: #ffebee; }
 
+.buildBtnGlyph {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  line-height: 1;
+}
+.buildBtnGlyph svg { flex-shrink: 0; }
+
 .mortgageVal {
   font-size: 0.72rem;
   font-weight: 700;

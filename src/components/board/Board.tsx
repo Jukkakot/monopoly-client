@@ -117,8 +117,14 @@ function SpotTooltip({ spotId, state, pos }: { spotId: string; state: SessionSta
 
   const buildings = (() => {
     if (!prop || !isStreet) return null
-    if ((prop.hotelCount ?? 0) > 0) return '🏨 Hotelli'
-    if ((prop.houseCount ?? 0) > 0) return `🏠`.repeat(prop.houseCount)
+    if ((prop.hotelCount ?? 0) > 0) return (
+      <><Icon name="hotel" size={13} style={{ color: '#d32f2f' }} /> {t.hotelOwnedLabel}</>
+    )
+    if ((prop.houseCount ?? 0) > 0) return (
+      <>{Array.from({ length: prop.houseCount }).map((_, i) => (
+        <Icon key={i} name="house" size={13} strokeWidth={2.4} style={{ color: '#2e7d32' }} />
+      ))}</>
+    )
     return null
   })()
 

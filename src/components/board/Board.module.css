@@ -329,9 +329,13 @@
 }
 
 .tooltipBuildings {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   font-size: 0.7rem;
   padding: 0 8px 5px;
 }
+.tooltipBuildings svg { flex-shrink: 0; }
 
 /* Hide tooltip on touch devices */
 @media (hover: none) {

@@ -6,6 +6,7 @@ import { getCardText } from '../../i18n/cards'
 import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
+import Icon from '../common/Icon'
 import { playButtonClick, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
@@ -670,13 +671,13 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                         <button className={`${styles.buildBtn} ${styles.sellBtn}`}
                           data-testid={`action-sell-house-${prop.propertyId}`}
                           onClick={() => sendCmd({ type: 'SellBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                          −🏠
+                          <span className={styles.buildBtnGlyph}>−<Icon name="house" size={14} strokeWidth={2.4} /></span>
                         </button>
                       )}
                       <button className={styles.buildBtn} disabled={!canBuy}
                         data-testid={`action-buy-house-${prop.propertyId}`}
                         onClick={() => sendCmd({ type: 'BuyBuildingRound', sessionId: sid, actorPlayerId: myPlayerId, propertyId: prop.propertyId })}>
-                        +🏠
+                        <span className={styles.buildBtnGlyph}>+<Icon name="house" size={14} strokeWidth={2.4} /></span>
                       </button>
                     </div>
                   )
