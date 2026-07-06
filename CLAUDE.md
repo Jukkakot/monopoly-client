@@ -77,6 +77,8 @@ All user-configurable settings belong in `src/components/menu/SoundSettings.tsx`
 - **UI tests** (`e2e/ui/`, Playwright): full browser E2E; `e2e/globalSetup.ts` waits for the backend.
 - **Debug panel** (`src/debug/DebugPanel.tsx`, `useDebugMode.ts`): in-app tool for loading scenario states and inspecting snapshots during development.
 - Visual checks: use Playwright MCP screenshots at mobile portrait, mobile landscape, and desktop narrow widths.
+- **Known-flaky UI tests:** the Playwright `e2e/ui/` suite is chronically broken in the owner's environment and failures there are usually NOT caused by the change under review. Do not sink time into them during bug-hunting sessions unless explicitly asked. Rely on `npm run build`, unit tests (`vitest --project unit`), and the `e2e/rules/` suite (against a live backend) for validation.
+- **Unit tests** (`src/**/*.test.ts`, vitest `unit` project): pure-logic tests with no backend/DOM. Fast — run `npx vitest run --project unit` on every client change.
 
 ## Project docs
 
@@ -88,3 +90,12 @@ All user-configurable settings belong in `src/components/menu/SoundSettings.tsx`
 The Vite base path is `/monopoly-client/` for GitHub Pages. This is set in `vite.config.ts` — do not remove it.
 
 GitHub Actions (`deploy.yml`) runs rule tests on every push to master; deploy is blocked if they fail. Playwright E2E failures warn but do not block.
+
+## Autonomous bug-hunting workflow
+
+Standing conventions for autonomous "find & fix bugs" sessions (persisted so a fresh cold start behaves right without the owner re-stating them):
+
+- **Push each fix to BOTH the working branch AND `master`** (`git push origin HEAD:master`). Same rule in the sibling `monopoly-backend` repo.
+- **Every fix gets a regression test** and `npm run build` + `npx vitest run --project unit` must pass before committing. When a change touches game rules, also run the `e2e/rules/` suite against a live backend.
+- **Any new UI string goes through the i18n tables** (`src/i18n/translations.ts`, both `fi` and `en`) — hardcoded Finnish in components is a recurring bug class.
+- Client deploys to GitHub Pages on push to `master`; backend fixes need a separate Render deploy to take effect.
