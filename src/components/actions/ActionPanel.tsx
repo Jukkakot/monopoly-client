@@ -936,6 +936,7 @@ function formatDebtReason(reason: string, creditorType: string, t: ReturnType<ty
   if (reason === 'Tax') return t.debtReasonTax
   if (reason === 'Card repairs') return t.debtReasonRepairs
   if (reason === 'Card payment') return t.debtReasonCard
+  if (reason === 'vankilamaksu') return t.debtReasonJail
   return reason
 }
 

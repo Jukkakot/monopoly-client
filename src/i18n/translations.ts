@@ -86,6 +86,7 @@ export interface T {
   debtReasonTax: string
   debtReasonCard: string
   debtReasonRepairs: string
+  debtReasonJail: string
   debtCashLabel: string
   debtLiquidationLabel: string
   debtCash: (n: number) => string
@@ -559,6 +560,7 @@ const fi: T = {
   debtReasonTax: 'Veromaksu',
   debtReasonCard: 'Korttimaksu',
   debtReasonRepairs: 'Korttimaksu (korjaukset)',
+  debtReasonJail: 'Vankilamaksu',
   debtCashLabel: 'Kassassa',
   debtLiquidationLabel: 'Realisoitavissa',
   debtCash: (n) => `Käteinen: €${n}`,
@@ -1051,6 +1053,7 @@ const en: T = {
   debtReasonTax: 'Tax',
   debtReasonCard: 'Card payment',
   debtReasonRepairs: 'Card payment (repairs)',
+  debtReasonJail: 'Jail fine',
   debtCashLabel: 'Cash',
   debtLiquidationLabel: 'Liquidatable',
   debtCash: (n) => `Cash: €${n}`,
