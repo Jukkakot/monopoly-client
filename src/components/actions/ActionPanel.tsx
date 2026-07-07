@@ -652,8 +652,9 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
     if (!spot) return false
     return !prop.mortgaged && completedGroups.has(spot.streetType) && prop.hotelCount === 0 && !mortgagedGroups.has(spot.streetType)
   })
-  // Mortgage section only shows properties with no buildings (can't mortgage a built property)
-  const mortgageable = myProps.filter(p => p.houseCount === 0 && p.hotelCount === 0)
+  // Mortgage section only shows properties whose color group is building-free (matches
+  // the actual mortgage list below and the backend rule).
+  const mortgageable = myProps.filter(p => !isBlockedByGroupBuildings(p.propertyId, state.properties))
 
   if (buildableProps.length === 0 && mortgageable.length === 0) return null
 
@@ -714,7 +715,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
         // A street cannot be mortgaged while ANY property in its color group has buildings
         // (backend rule) — sell the buildings first. Exclude those from the mortgage list so
         // we never offer an action the backend will reject with BUILDINGS_PRESENT.
-        const mortgageProps = myProps.filter(p => !isBlockedByGroupBuildings(p.propertyId, myProps))
+        const mortgageProps = myProps.filter(p => !isBlockedByGroupBuildings(p.propertyId, state.properties))
         if (mortgageProps.length === 0) return null
         const mortgagedProps = mortgageProps.filter(p => p.mortgaged)
         const mortgagedCount = mortgagedProps.length
@@ -1026,7 +1027,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
       )}
       {myPlayerId !== null && debt.allowedActions.includes('MORTGAGE_PROPERTY') && (() => {
         const mortgageables = state.properties
-          .filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged && p.houseCount === 0 && p.hotelCount === 0)
+          .filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged && !isBlockedByGroupBuildings(p.propertyId, state.properties))
         if (mortgageables.length === 0) return null
         const TYPE_ORDER = ['BROWN','LIGHT_BLUE','PURPLE','ORANGE','RED','YELLOW','GREEN','DARK_BLUE','RAILROAD','UTILITY']
         const groups = new Map<string, typeof mortgageables>()
