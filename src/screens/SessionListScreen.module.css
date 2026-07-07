@@ -81,23 +81,23 @@
 .newBtn:hover { filter: brightness(1.1); }
 
 .quickDivider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: center;
   font-size: 0.72rem;
   color: #767676;
   letter-spacing: 0.5px;
-  position: relative;
 }
 
+/* Flex rules fill the space on either side of the label, so the line never
+   strikes through the text regardless of the label's length. */
 .quickDivider::before, .quickDivider::after {
   content: '';
-  position: absolute;
-  top: 50%;
-  width: 30%;
+  flex: 1;
   height: 1px;
   background: #ddd;
 }
-.quickDivider::before { left: 0; }
-.quickDivider::after { right: 0; }
 
 .quickHint {
   font-size: 0.72rem;
