@@ -341,6 +341,7 @@ export interface T {
   hintFirstBuild: string
   hintFirstJail: string
   leaveGameBtn: string
+  leaveGameConfirmMsg: string
   endGameForAllBtn: string
   endGameConfirmMsg: string
   onlyHostCanEndGame: string
@@ -851,6 +852,7 @@ const fi: T = {
   hintFirstBuild: 'Rakenna taloja tasaisesti koko väriryhmään. Rakennukset nostavat vuokraa rajusti.',
   hintFirstJail: 'Vankilassa: pääset pois heittämällä kaksoisluvun, maksamalla €50 tai vapautuskortilla.',
   leaveGameBtn: '🚪 Poistu pelistä',
+  leaveGameConfirmMsg: 'Poistutko pelistä? Menetät paikkasi tässä pelissä.',
   endGameForAllBtn: '🛑 Lopeta peli kaikille',
   endGameConfirmMsg: 'Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.',
   onlyHostCanEndGame: 'Vain host voi sulkea pelin',
@@ -1370,6 +1372,7 @@ const en: T = {
   hintFirstBuild: 'Build houses evenly across a whole colour group. Buildings raise rent steeply.',
   hintFirstJail: 'In jail: get out by rolling doubles, paying €50, or using a get-out-of-jail card.',
   leaveGameBtn: '🚪 Leave game',
+  leaveGameConfirmMsg: 'Leave the game? You will lose your place in this game.',
   endGameForAllBtn: '🛑 End game for all',
   endGameConfirmMsg: 'End game? This ends the game for all players and cannot be undone.',
   onlyHostCanEndGame: 'Only the host can end the game',

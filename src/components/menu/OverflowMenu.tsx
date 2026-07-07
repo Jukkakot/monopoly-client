@@ -5,6 +5,7 @@ import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+import { useEscapeKey } from '../../hooks/useEscapeKey'
 import Icon from '../common/Icon'
 import { type BotSpeed, saveAnimationSpeed, applyAnimationSpeedToCss } from '../../utils/animationSettings'
 import { applySessionSettings } from '../../api/sessionApi'
@@ -19,6 +20,11 @@ export default function OverflowMenu() {
   const [showSound, setShowSound] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
+
+  // Escape closes whichever layer is topmost.
+  useEscapeKey(() => setShowSound(false), showSound)
+  useEscapeKey(() => setShowHelp(false), showHelp)
+  useEscapeKey(() => setOpen(false), open && !showSound && !showHelp)
 
   function copyInviteLink() {
     if (!snapshot) return
@@ -100,10 +106,12 @@ export default function OverflowMenu() {
                 <div className={styles.divider} />
                 <button className={`${styles.menuItem} ${styles.danger}`}
                   onClick={() => {
-                    setOpen(false)
+                    // Leaving an in-progress game forfeits your place — confirm first.
                     if (myPlayerId && snapshot.status === 'IN_PROGRESS') {
+                      if (!confirm(t.leaveGameConfirmMsg)) return
                       sendCmd({ type: 'LeaveGame', sessionId: sid, actorPlayerId: myPlayerId })
                     }
+                    setOpen(false)
                     navigate('/')
                   }}>
                   {t.leaveGameBtn}

@@ -1,5 +1,6 @@
 import styles from './HowToPlay.module.css'
 import { useT } from '../../i18n/LanguageContext'
+import { useEscapeKey } from '../../hooks/useEscapeKey'
 
 /**
  * A concise "how to play" panel for first-time players — the game is
@@ -8,6 +9,7 @@ import { useT } from '../../i18n/LanguageContext'
  */
 export default function HowToPlay({ onClose }: { onClose: () => void }) {
   const t = useT()
+  useEscapeKey(onClose)
   return (
     <div className={styles.modal} role="dialog" aria-modal="true" aria-label={t.howToPlayTitle}>
       <div className={styles.header}>
