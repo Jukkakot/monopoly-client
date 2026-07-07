@@ -182,12 +182,18 @@
   color: rgba(255,255,255,0.85);
   font-family: 'Arial Narrow', Arial, sans-serif;
   animation: fadeIn 0.2s ease-out;
+  /* Fill turnInfo and allow shrinking so the NAME truncates when space is tight —
+     otherwise the dice (at the right end) get clipped behind the control icons. */
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .movingDots {
   display: flex;
   gap: 3px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .movingDots span {
@@ -214,6 +220,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 120px;
+  /* Truncate the name before the dice get squeezed out. */
+  flex-shrink: 1;
+  min-width: 0;
   /* color set inline to token color */
   filter: brightness(1.4) saturate(0.7);
 }
