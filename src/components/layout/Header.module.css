@@ -22,20 +22,22 @@
 }
 
 .logo {
-  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+  /* Crisp flat red brand mark, matching the board's centre wordmark — not the old
+     outlined-Impact treatment. */
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 900;
   font-style: italic;
   font-size: 1.7rem;
-  color: #e8352f;
-  letter-spacing: 2px;
+  color: #d81f27;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  text-shadow: 1px 1px 0 #8a1410, 2px 2px 3px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
   line-height: 1;
   user-select: none;
   padding: 3px 10px;
   border-radius: var(--r-sm, 6px);
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: var(--e1), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
