@@ -16,37 +16,37 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 18px;
-  background: #1b5e20;
+  padding: 11px 18px;
+  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
   color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-radius: 11px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   font-size: 14px;
-  font-family: 'Arial Narrow', Arial, sans-serif;
   font-weight: 700;
+  letter-spacing: 0.1px;
   animation: slideIn 0.25s ease-out;
 }
 
 .banner.myTurn {
-  background: #e65100;
+  background: linear-gradient(180deg, #f57c00 0%, #e65100 100%);
   font-size: 16px;
-  padding: 12px 22px;
-  box-shadow: 0 4px 20px rgba(230, 81, 0, 0.5);
+  padding: 13px 22px;
+  box-shadow: 0 6px 22px rgba(230, 81, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .banner.error {
-  background: #b71c1c;
+  background: linear-gradient(180deg, #d32f2f 0%, #b71c1c 100%);
 }
 
 .banner.reconnecting {
-  background: #37474f;
+  background: linear-gradient(180deg, #455a64 0%, #37474f 100%);
   font-size: 13px;
 }
 
 .banner.rentReceived {
-  background: #1565c0;
-  box-shadow: 0 4px 16px rgba(21, 101, 192, 0.4);
+  background: linear-gradient(180deg, #1976d2 0%, #1565c0 100%);
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 @keyframes popIn {
