@@ -57,14 +57,16 @@ export async function sessionExists(sessionId: string): Promise<boolean> {
   return res.ok
 }
 
-export async function createLobby(hostName: string, hostColor?: string): Promise<{
+export async function createLobby(hostName: string, hostColor?: string, initialBots = 0): Promise<{
   sessionId: string
   hostToken: string
   playerId: string
   playerToken: string
 }> {
+  // initialBots seats the bot opponents atomically in the create call, so the waiting
+  // room is fully populated the moment it opens (no per-bot round-trips that trickle in).
   return fetchJson(`${BASE}/sessions`, {
-    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ lobbyMode: true, hostName, hostColor }),
+    method: 'POST', headers: JSON_HEADERS, body: JSON.stringify({ lobbyMode: true, hostName, hostColor, initialBots }),
   })
 }
 

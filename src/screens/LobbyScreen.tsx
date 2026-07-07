@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { createLobby, createBotsOnlySession, addLobbyBot, setLobbyReady, ApiError } from '../api/sessionApi'
+import { createLobby, createBotsOnlySession, setLobbyReady, ApiError } from '../api/sessionApi'
 import { ALL_SHAPES, savePlayerTokenShape, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName } from '../utils/playerNames'
 import { playButtonClick } from '../utils/sounds'
@@ -60,15 +60,14 @@ export default function LobbyScreen() {
     playButtonClick()
     setLoading(true)
     try {
-      const result = await createLobby(name.trim(), color)
+      // Seat the bots atomically in the create call so the waiting room opens fully
+      // populated — no per-bot round-trips that make players trickle in with a delay.
+      const result = await createLobby(name.trim(), color, botCount)
       savePlayerTokenShape(result.sessionId, result.playerId, tokenShape)
       try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
       try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}
       try { sessionStorage.setItem(`monopoly_token_${result.sessionId}`, result.playerToken) } catch {}
       try { localStorage.setItem(`monopoly_token_${result.sessionId}_${result.playerId}`, result.playerToken) } catch {}
-      for (let i = 0; i < botCount; i++) {
-        await addLobbyBot(result.sessionId, result.hostToken)
-      }
       joinSession(result.sessionId)
       navigate(`/lobby-wait/${result.sessionId}`)
     } catch (e) {
@@ -88,15 +87,12 @@ export default function LobbyScreen() {
         joinSession(sessionId)
         navigate(`/game/${sessionId}`)
       } else {
-        const result = await createLobby(name.trim(), color)
+        const result = await createLobby(name.trim(), color, botCount)
         savePlayerTokenShape(result.sessionId, result.playerId, tokenShape)
         try { localStorage.setItem(`monopoly_host_${result.sessionId}`, result.hostToken) } catch {}
         try { sessionStorage.setItem(`monopoly_player_${result.sessionId}`, result.playerId) } catch {}
         try { sessionStorage.setItem(`monopoly_token_${result.sessionId}`, result.playerToken) } catch {}
         try { localStorage.setItem(`monopoly_token_${result.sessionId}_${result.playerId}`, result.playerToken) } catch {}
-        for (let i = 0; i < botCount; i++) {
-          await addLobbyBot(result.sessionId, result.hostToken)
-        }
         await setLobbyReady(result.sessionId, result.playerId, result.playerToken, true)
         joinSession(result.sessionId)
         navigate(`/game/${result.sessionId}`)
