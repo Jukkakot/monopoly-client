@@ -336,6 +336,10 @@ export interface T {
   hintFirstBuy: string
   hintFirstAuction: string
   hintFirstDebt: string
+  hintFirstTradeEdit: string
+  hintFirstTradeReceive: string
+  hintFirstBuild: string
+  hintFirstJail: string
   leaveGameBtn: string
   endGameForAllBtn: string
   endGameConfirmMsg: string
@@ -842,6 +846,10 @@ const fi: T = {
   hintFirstBuy: 'Voit ostaa tämän kadun pankilta tai jättää sen huutokauppaan muille pelaajille.',
   hintFirstAuction: 'Huutokauppa: tarjoa summa tai jää pois. Korkein tarjous voittaa kadun.',
   hintFirstDebt: 'Maksa velka panttaamalla tai myymällä kiinteistöjä — tai julista vararikko.',
+  hintFirstTradeEdit: 'Rakenna kauppa: lisää rahaa ja katuja molemmille puolille, sitten lähetä tarjous.',
+  hintFirstTradeReceive: 'Sait kauppatarjouksen: voit hyväksyä, hylätä tai tehdä vastatarjouksen.',
+  hintFirstBuild: 'Rakenna taloja tasaisesti koko väriryhmään. Rakennukset nostavat vuokraa rajusti.',
+  hintFirstJail: 'Vankilassa: pääset pois heittämällä kaksoisluvun, maksamalla €50 tai vapautuskortilla.',
   leaveGameBtn: '🚪 Poistu pelistä',
   endGameForAllBtn: '🛑 Lopeta peli kaikille',
   endGameConfirmMsg: 'Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.',
@@ -1357,6 +1365,10 @@ const en: T = {
   hintFirstBuy: 'You can buy this street from the bank, or leave it to auction for the other players.',
   hintFirstAuction: 'Auction: place a bid or pass. The highest bid wins the street.',
   hintFirstDebt: 'Settle the debt by mortgaging or selling properties — or declare bankruptcy.',
+  hintFirstTradeEdit: 'Build a trade: add money and streets to each side, then send the offer.',
+  hintFirstTradeReceive: 'You received a trade offer: you can accept, decline or make a counter-offer.',
+  hintFirstBuild: 'Build houses evenly across a whole colour group. Buildings raise rent steeply.',
+  hintFirstJail: 'In jail: get out by rolling doubles, paying €50, or using a get-out-of-jail card.',
   leaveGameBtn: '🚪 Leave game',
   endGameForAllBtn: '🛑 End game for all',
   endGameConfirmMsg: 'End game? This ends the game for all players and cannot be undone.',

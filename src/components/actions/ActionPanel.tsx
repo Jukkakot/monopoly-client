@@ -476,6 +476,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               const hasButtons = hasCard || canPay
               return (
                 <>
+                  <FirstTimeHint id="jail" text={t.hintFirstJail} />
                   {/* Last-round warning always shown; regular rounds info only when no buttons */}
                   {(isLastRound || !hasButtons) && (
                     <div className={isLastRound ? styles.warningBox : styles.infoBox}>
@@ -659,6 +660,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
     <div className={styles.buildSection}>
       {buildableProps.length > 0 && (
         <>
+          <FirstTimeHint id="build" text={t.hintFirstBuild} />
           <div className={styles.sectionTitle}>{t.buildHousesSectionTitle}</div>
           {(() => {
             const groups = new Map<string, typeof buildableProps>()
@@ -1330,6 +1332,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
 
   return (
     <div className={styles.panel}>
+      <FirstTimeHint id="tradeEdit" text={t.hintFirstTradeEdit} />
       <div className={styles.tradeColumns}>
         {/* Left: what I give */}
         <div className={styles.tradeCol} style={mySeat ? { background: mySeat.tokenColorHex + '14', borderRadius: 8, padding: '6px 6px 8px' } : undefined}>
@@ -1526,6 +1529,7 @@ function TradeReceiver({ state, myPlayerId, sendCmd }: {
 
   return (
     <div className={styles.panel}>
+      <FirstTimeHint id="tradeReceive" text={t.hintFirstTradeReceive} />
       <div className={styles.tradeOfferHeader}>
         <PlayerName name={partner?.name ?? '?'} color={partnerSeat?.tokenColorHex ?? '#888'} shape={tokenShapes.get(partnerPlayerId) ?? 'circle'} size={13} />
         <span className={styles.tradeOfferHeaderLabel}>{t.tradeMadeOffer}</span>
