@@ -286,6 +286,30 @@
   display: none;
 }
 
+/* Faint brand watermark filling the empty space below a short action panel on the
+   board tab, so the negative space reads as intentional (mirrors the desktop
+   sidebar watermark). flex:1 + min-height:0 makes it fill when the actions are
+   short and collapse to nothing when they're tall (trade builder, building list). */
+.mobileBrandMark {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 2.1rem;
+  letter-spacing: 4px;
+  color: var(--g-700);
+  opacity: 0.06;
+  transform: rotate(-4deg);
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 /* Nav is now in-flow at the bottom of .mobileRight */
 .mobileNav {
   height: calc(52px + env(safe-area-inset-bottom, 0px));

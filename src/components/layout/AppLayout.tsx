@@ -546,7 +546,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               styles.mobileActionWrapper,
               mobileTab !== 'board' ? styles.mobileHidden : '',
               boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
-            ].join(' ')}><div ref={mobileActionsContentRef}>{actions}</div></div>}
+            ].join(' ')}><div ref={mobileActionsContentRef}>{actions}</div><div className={styles.mobileBrandMark} aria-hidden="true">MONOPOLY</div></div>}
             {mobileTab === 'players' && (
               <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
             )}
