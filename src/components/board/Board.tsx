@@ -9,6 +9,7 @@ import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimati
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
+import { panOffsetPercent } from '../../utils/boardPan'
 import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../../utils/animationSettings'
 import Icon from '../common/Icon'
 import { AnimatedDice } from '../common/DiceDisplay'
@@ -435,10 +436,10 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     } else if (g.type === 'pan' && e.touches.length === 1) {
       const touch = e.touches[0]
       const maxT = 50 * (g.startScale - 1)
-      const newTx = Math.max(-maxT, Math.min(maxT,
-        g.startTx + (touch.clientX - g.startTouchX) / g.boardW * 100))
-      const newTy = Math.max(-maxT, Math.min(maxT,
-        g.startTy + (touch.clientY - g.startTouchY) / g.boardH * 100))
+      // Track the finger 1:1. boardW/boardH are the SCALED on-screen size, but translate(%)
+      // is relative to the unscaled box, so the delta is multiplied by the scale (see helper).
+      const newTx = panOffsetPercent(g.startTx, touch.clientX - g.startTouchX, g.boardW, g.startScale, maxT)
+      const newTy = panOffsetPercent(g.startTy, touch.clientY - g.startTouchY, g.boardH, g.startScale, maxT)
       setPinch({ scale: g.startScale, tx: newTx, ty: newTy })
     }
   }
