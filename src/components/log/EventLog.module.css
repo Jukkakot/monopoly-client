@@ -125,10 +125,16 @@
 }
 
 @media (hover: none) {
+  /* Touch devices: enlarge the emoji filter chips to a comfortable ~44px tap
+     target (Apple HIG minimum) — they measured ~36px, below the recommended size. */
   .filterBtn {
-    min-height: 36px;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 4px 12px;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     position: relative;
   }
 
