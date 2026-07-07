@@ -142,6 +142,17 @@
 
 .muteBtn:hover { opacity: 1; background: rgba(255,255,255,0.15); }
 
+/* Touch devices: give the mute toggle a 44px minimum tap target. */
+@media (hover: none) {
+  .muteBtn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .sessionIdBtn {
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.25);

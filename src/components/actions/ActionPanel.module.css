@@ -1526,6 +1526,20 @@ button.tradePropChip:active { filter: brightness(0.84); }
 
 /* ── Touch devices: minimum 44px tap targets ── */
 @media (hover: none) {
+  /* Primary/secondary action buttons — the mobile compaction block above
+     shrinks these to ~36px; restore a 44px minimum for thumb reach. */
+  .btn {
+    min-height: 44px;
+    padding: 11px 14px;
+  }
+
+  /* Vuoro / Kiinteistöt tab switcher — measured ~27px tall, far below the
+     44px minimum for a primary navigation control used every turn. */
+  .tab {
+    min-height: 44px;
+    padding: 10px 8px;
+  }
+
   .propCheck {
     min-height: 44px;
     padding: 6px 4px;
@@ -1538,8 +1552,8 @@ button.tradePropChip:active { filter: brightness(0.84); }
   }
 
   .buildBtn {
-    min-height: 36px;
-    padding: 6px 12px;
+    min-height: 44px;
+    padding: 8px 12px;
   }
 
   .bidQuick {
