@@ -41,7 +41,8 @@ export default function OverflowMenu() {
 
   return (
     <div className={styles.root}>
-      <button className={styles.trigger} onClick={() => setOpen(v => !v)} title={t.moreActionsTitle}>
+      <button className={styles.trigger} onClick={() => setOpen(v => !v)} title={t.moreActionsTitle}
+        aria-label={t.moreActionsTitle} aria-haspopup="menu" aria-expanded={open}>
         <Icon name="menu" size={20} />
       </button>
 

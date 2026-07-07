@@ -7,6 +7,7 @@ export interface T {
   spectatorBadge: string
   soundMuted: string
   soundOn: string
+  languageToggleLabel: string
   langLabel: string
 
   // Connection
@@ -486,6 +487,7 @@ const fi: T = {
   spectatorBadge: '👁 Katsoja',
   soundMuted: 'Äänet pois päältä (paina M)',
   soundOn: 'Äänet päällä (paina M)',
+  languageToggleLabel: 'Vaihda englanniksi',
   langLabel: '🇫🇮',
 
   connecting: 'Yhdistetään…',
@@ -1006,6 +1008,7 @@ const en: T = {
   spectatorBadge: '👁 Spectator',
   soundMuted: 'Sound off (press M)',
   soundOn: 'Sound on (press M)',
+  languageToggleLabel: 'Switch to Finnish',
   langLabel: '🇬🇧',
 
   connecting: 'Connecting…',

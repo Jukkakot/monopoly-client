@@ -42,6 +42,12 @@
   --header-grad: linear-gradient(180deg, #338537 0%, #2a6f2d 100%);
 }
 
+html, body {
+  /* Prevent mobile pull-to-refresh / overscroll chaining from reloading the
+     page (and losing the session view) during a game. */
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;

@@ -173,6 +173,7 @@ export default memo(function EventLog({ events, myPlayerId, seats, sessionId }: 
         <button
           className={`${styles.filterBtn} ${activeFilters.size === 0 ? styles.filterActive : ''}`}
           onClick={() => setActiveFilters(new Set())}
+          aria-pressed={activeFilters.size === 0}
         >
           {t.filterAll}
         </button>
@@ -182,6 +183,8 @@ export default memo(function EventLog({ events, myPlayerId, seats, sessionId }: 
             className={`${styles.filterBtn} ${activeFilters.has(f) ? styles.filterActive : ''}`}
             onClick={() => toggleFilter(f)}
             title={t.filterTitles[f]}
+            aria-label={t.filterTitles[f]}
+            aria-pressed={activeFilters.has(f)}
             data-label={t.filterTitles[f]}
           >
             {FILTER_LABELS[f]}
@@ -192,6 +195,8 @@ export default memo(function EventLog({ events, myPlayerId, seats, sessionId }: 
             className={`${styles.filterBtn} ${mineOnly ? styles.filterMine : ''}`}
             onClick={() => setMineOnly(v => !v)}
             title={t.showMineOnly}
+            aria-label={t.showMineOnly}
+            aria-pressed={mineOnly}
           >
             ⭐
           </button>

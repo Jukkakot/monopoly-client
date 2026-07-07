@@ -80,10 +80,10 @@ export default function Header({ isSpectator }: Props) {
         <button className={styles.muteBtn} onClick={() => setShowHelp(true)} title={t.howToPlayBtn} aria-label={t.howToPlayBtn}>
           <Icon name="help" size={19} />
         </button>
-        <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>
+        <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn} aria-label={muted ? t.soundMuted : t.soundOn}>
           <Icon name={muted ? 'muted' : 'sound'} size={18} />
         </button>
-        <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
+        <button className={styles.muteBtn} onClick={toggleLang} title={t.languageToggleLabel} aria-label={t.languageToggleLabel}>
           <Flag country={lang === 'fi' ? 'fi' : 'gb'} size={20} />
         </button>
         <OverflowMenu />
