@@ -7,6 +7,7 @@ import { useGame } from '../../store/GameContext'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { DieFace } from '../common/DiceDisplay'
 import Icon from '../common/Icon'
+import Flag from '../common/Flag'
 
 interface Props {
   isSpectator?: boolean
@@ -64,12 +65,7 @@ export default function Header({ isSpectator }: Props) {
           <Icon name={muted ? 'muted' : 'sound'} size={18} />
         </button>
         <button className={styles.muteBtn} onClick={toggleLang} title={lang === 'fi' ? 'Vaihda englanniksi' : 'Switch to Finnish'}>
-          <img
-            src={lang === 'fi' ? 'https://flagcdn.com/40x30/fi.png' : 'https://flagcdn.com/40x30/gb.png'}
-            width={20} height={15}
-            alt={lang === 'fi' ? 'FI' : 'EN'}
-            style={{ display: 'block', borderRadius: 2 }}
-          />
+          <Flag country={lang === 'fi' ? 'fi' : 'gb'} size={20} />
         </button>
         <OverflowMenu />
       </div>

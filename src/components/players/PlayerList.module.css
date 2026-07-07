@@ -45,11 +45,12 @@
 .meBadge {
   font-size: 0.62rem;
   font-weight: 800;
-  background: #1565c0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 1px 5px;
-  letter-spacing: 0.3px;
+  background: #e3f0fb;
+  color: #1565c0;
+  border: 1px solid rgba(21, 101, 192, 0.25);
+  border-radius: 999px;
+  padding: 1px 7px;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -57,10 +58,11 @@
 .hostBadge {
   font-size: 0.62rem;
   font-weight: 800;
-  background: #e65100;
-  color: #fff;
-  border-radius: 4px;
-  padding: 1px 5px;
+  background: #fff2e0;
+  color: #c2560a;
+  border: 1px solid rgba(230, 81, 0, 0.28);
+  border-radius: 999px;
+  padding: 1px 7px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   flex-shrink: 0;
