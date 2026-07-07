@@ -430,7 +430,7 @@
     inset 0 0 0 1px rgba(255,255,255,0.15);
   display: flex;
   flex-direction: column;
-  animation: cardDeal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cardDeal 0.44s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 /* ── Tail direction → card placement relative to anchor (token center) ── */
@@ -588,8 +588,12 @@
   letter-spacing: 0.3px;
 }
 
+/* Uses the individual `scale`/`rotate` properties (not `transform`) so it composes
+   with the inline `transform: translate(...)` that positions the card by its anchor.
+   A small deal-rotation + spring overshoot makes it feel flicked onto the board. */
 @keyframes cardDeal {
-  0%   { scale: 0.55; opacity: 0; }
-  60%  { scale: 1.06; opacity: 1; }
-  100% { scale: 1;    opacity: 1; }
+  0%   { scale: 0.5;  rotate: -5deg; opacity: 0; }
+  55%  { scale: 1.08; rotate: 2deg;  opacity: 1; }
+  78%  { scale: 0.97; rotate: -1deg; opacity: 1; }
+  100% { scale: 1;    rotate: 0deg;  opacity: 1; }
 }

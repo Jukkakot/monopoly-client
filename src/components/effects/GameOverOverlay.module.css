@@ -38,12 +38,14 @@
 .trophy {
   font-size: 2.8rem;
   line-height: 1;
-  animation: bounce 1s ease-in-out infinite alternate;
+  animation: bounce 1.4s ease-in-out infinite alternate;
+  transform-origin: center bottom;
 }
 
+/* A lively victory bob: rises while rotating and swelling, then rocks back. */
 @keyframes bounce {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-8px); }
+  from { transform: translateY(0) rotate(-5deg) scale(1); }
+  to   { transform: translateY(-10px) rotate(5deg) scale(1.06); }
 }
 
 .title {

@@ -60,3 +60,18 @@ h1, h2, h3 { margin: 0; }
 p { margin: 0; }
 button { cursor: pointer; font-family: inherit; }
 input, select { font-family: inherit; }
+
+/* Accessibility: honour the OS "reduce motion" preference. Collapse animations and
+   transitions to near-instant so their final state is preserved (fill: forwards keeps
+   working) while the motion itself is removed, and stop infinite loops (glows, pulses,
+   spinners) from running. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
