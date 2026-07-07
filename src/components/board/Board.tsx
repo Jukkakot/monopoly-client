@@ -303,14 +303,19 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   // GO corner flash: briefly highlight GO spot when any player passes it
   const [goFlashing, setGoFlashing] = useState(false)
   const lastPassedGoIdRef = useRef(-1)
+  const goFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     const newGo = gameState.events.filter(e => e.icon === '💰' && e.id > lastPassedGoIdRef.current)
     if (newGo.length === 0) return
     lastPassedGoIdRef.current = Math.max(...newGo.map(e => e.id))
     setGoFlashing(true)
-    const tid = setTimeout(() => setGoFlashing(false), 750)
-    return () => clearTimeout(tid)
+    // Hold the clear-timer in a ref, not the effect cleanup: this effect re-runs on every
+    // events change, so returning the timer as cleanup let the next (non-GO) event cancel
+    // the clear without rescheduling it — leaving the GO corner stuck lit.
+    if (goFlashTimerRef.current) clearTimeout(goFlashTimerRef.current)
+    goFlashTimerRef.current = setTimeout(() => setGoFlashing(false), 750)
   }, [gameState.events])
+  useEffect(() => () => { if (goFlashTimerRef.current) clearTimeout(goFlashTimerRef.current) }, [])
 
   // Dice zoom: zoom to board center when new dice arrive, hold until first token step.
   // diceZoomBlockRef prevents animatedPositions/animatingPlayers effects from overriding

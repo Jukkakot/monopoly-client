@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './MonopolyCelebration.module.css'
 import { STREET_COLORS } from '../../types/spots'
 import { useT } from '../../i18n/LanguageContext'
@@ -24,11 +24,17 @@ export default function MonopolyCelebration({ data, onDone }: {
   const groupColor = STREET_COLORS[data.group] ?? '#2e7d32'
   const groupName = t.streetTypeNames[data.group] ?? data.group
 
+  // Keep the latest onDone without making it an effect dependency: the parent passes an
+  // inline arrow that changes every render, and it re-renders constantly during play. If
+  // onDone were a dep, the fade/dismiss timers would reset on every parent render and the
+  // celebration could linger far past 2.5s. Run the timers once per celebration (data.id).
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
   useEffect(() => {
     const fade = setTimeout(() => setLeaving(true), 2000)
-    const done = setTimeout(onDone, 2500)
+    const done = setTimeout(() => onDoneRef.current(), 2500)
     return () => { clearTimeout(fade); clearTimeout(done) }
-  }, [data.id, onDone])
+  }, [data.id])
 
   return (
     <div className={`${styles.overlay} ${leaving ? styles.leaving : ''}`} aria-hidden="true">
