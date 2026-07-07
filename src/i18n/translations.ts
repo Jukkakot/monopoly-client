@@ -29,6 +29,8 @@ export interface T {
   skipToAuctionKbd: string
   insufficientFunds: string
   bankSupplyExhausted: string
+  buildingsPresent: string
+  mortgageToggleFailed: string
   netWorthLabel: string
   rentalIncomeLabel: string
   yourTurnIn: (n: number) => string
@@ -515,6 +517,8 @@ const fi: T = {
   skipToAuctionKbd: '🏷 Ohita → huutokauppa  [D]',
   insufficientFunds: 'Rahat eivät riitä',
   bankSupplyExhausted: 'Pankissa ei ole enempää rakennuksia',
+  buildingsPresent: 'Myy ensin talot ja hotellit tästä väriryhmästä',
+  mortgageToggleFailed: 'Kiinnityksen muutos ei onnistunut',
   netWorthLabel: 'Nettovarallisuus',
   rentalIncomeLabel: 'Vuokratulot/kierros',
   yourTurnIn: (n) => `${n} pelaajan jälkeen`,
@@ -1036,6 +1040,8 @@ const en: T = {
   skipToAuctionKbd: '🏷 Skip → auction  [D]',
   insufficientFunds: 'Not enough money',
   bankSupplyExhausted: 'No more buildings in the bank',
+  buildingsPresent: 'Sell the houses and hotels in this colour group first',
+  mortgageToggleFailed: 'Could not change the mortgage',
   netWorthLabel: 'Net worth',
   rentalIncomeLabel: 'Rental income/round',
   yourTurnIn: (n) => `after ${n} player${n !== 1 ? 's' : ''}`,

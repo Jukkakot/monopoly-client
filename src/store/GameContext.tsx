@@ -582,6 +582,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
           const translatedMsg: Record<string, string> = {
             INSUFFICIENT_FUNDS: t.insufficientFunds,
             BANK_SUPPLY_EXHAUSTED: t.bankSupplyExhausted,
+            BUILDINGS_PRESENT: t.buildingsPresent,
+            MORTGAGE_TOGGLE_FAILED: t.mortgageToggleFailed,
           }
           const msg = translatedMsg[userFacingRejection.code] ?? msgs
           dispatch({ type: 'SET_COMMAND_ERROR', message: msg })
