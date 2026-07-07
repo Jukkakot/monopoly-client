@@ -203,10 +203,12 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
   const events: GameEvent[] = []
   const t = translations[getLang()].ev
 
-  // Game over
+  // Game over. winnerPlayerId is null when the host aborted the game — no winner, so log a
+  // neutral line rather than "winner: ?" (mirrors the game-over overlay).
   if (next.status === 'GAME_OVER' && prev.status !== 'GAME_OVER') {
-    const winner = next.players.find(p => p.playerId === next.winnerPlayerId)
-    events.push(ev('🎊', t.gameOver(winner?.name ?? '?'), [], undefined, 0, 'GAME_OVER'))
+    const winner = next.winnerPlayerId ? next.players.find(p => p.playerId === next.winnerPlayerId) : null
+    const msg = winner ? t.gameOver(winner.name) : translations[getLang()].gameEndedNoWinner
+    events.push(ev(winner ? '🎊' : '🏁', msg, [], undefined, 0, 'GAME_OVER'))
     return events
   }
 
