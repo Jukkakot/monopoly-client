@@ -158,14 +158,16 @@
   opacity: 0.55;
 }
 
-/* Black X cross overlay on the whole spot for mortgaged properties */
+/* Mortgaged: desaturating wash + a soft slim X so the tile clearly reads as
+   out-of-play without the harsh hard-black cross. */
 .mortgagedSpot::after {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(0,0,0,0.45) calc(50% - 1px), rgba(0,0,0,0.45) calc(50% + 1px), transparent calc(50% + 1px)),
-    linear-gradient(to bottom left,  transparent calc(50% - 1px), rgba(0,0,0,0.45) calc(50% - 1px), rgba(0,0,0,0.45) calc(50% + 1px), transparent calc(50% + 1px));
+    linear-gradient(rgba(120, 120, 120, 0.18), rgba(120, 120, 120, 0.18)),
+    linear-gradient(to bottom right, transparent calc(50% - 0.75px), rgba(60,60,60,0.28) calc(50% - 0.75px), rgba(60,60,60,0.28) calc(50% + 0.75px), transparent calc(50% + 0.75px)),
+    linear-gradient(to bottom left,  transparent calc(50% - 0.75px), rgba(60,60,60,0.28) calc(50% - 0.75px), rgba(60,60,60,0.28) calc(50% + 0.75px), transparent calc(50% + 0.75px));
   pointer-events: none;
   z-index: 3;
 }
@@ -280,11 +282,11 @@
   font-size: clamp(9px, 2.2cqw, 22px);
   font-weight: 900;
   font-style: italic;
-  color: #cc0000;
-  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
-  letter-spacing: 2px;
+  color: #d81f27;
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 1px;
   line-height: 1;
-  text-shadow: 1px 1px 0 #880000;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .goSub {
