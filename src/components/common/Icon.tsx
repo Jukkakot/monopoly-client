@@ -5,7 +5,7 @@ import type { CSSProperties, ReactElement } from 'react'
  * bottom nav). Strokes inherit `currentColor` so icons take the theme colour of
  * their context. Playful game emoji are intentionally kept elsewhere.
  */
-export type IconName = 'people' | 'actions' | 'list' | 'board' | 'sound' | 'muted' | 'menu' | 'house' | 'hotel' | 'lock'
+export type IconName = 'people' | 'actions' | 'list' | 'board' | 'sound' | 'muted' | 'menu' | 'house' | 'hotel' | 'lock' | 'help'
 
 const PATHS: Record<IconName, ReactElement> = {
   people: (
@@ -62,6 +62,13 @@ const PATHS: Record<IconName, ReactElement> = {
     <>
       <rect x="5" y="10.5" width="14" height="9.5" rx="2" />
       <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.3 9.4a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.2-2.7 4" />
+      <circle cx="12" cy="17.3" r="0.9" fill="currentColor" stroke="none" />
     </>
   ),
 }

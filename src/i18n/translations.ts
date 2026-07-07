@@ -328,6 +328,11 @@ export interface T {
   linkCopied: string
   soundSettingsBtn: string
   keyboardShortcutsBtn: string
+  howToPlayBtn: string
+  howToPlayTitle: string
+  howToPlaySections: { title: string; body: string }[]
+  howToPlayTipsTitle: string
+  howToPlayTips: string[]
   leaveGameBtn: string
   endGameForAllBtn: string
   endGameConfirmMsg: string
@@ -814,6 +819,23 @@ const fi: T = {
   linkCopied: '✓ Linkki kopioitu!',
   soundSettingsBtn: '⚙️ Asetukset',
   keyboardShortcutsBtn: '⌨ Pikanäppäimet',
+  howToPlayBtn: 'Näin pelaat',
+  howToPlayTitle: 'Näin pelaat',
+  howToPlaySections: [
+    { title: '🎯 Tavoite', body: 'Ole viimeinen pelaaja joka ei ole vararikossa. Osta katuja, rakenna taloja ja kerää vuokraa vastustajilta.' },
+    { title: '🎲 Vuorosi', body: 'Heitä noppaa (välilyönti tai “Heitä nopat”). Pelinappisi liikkuu, ja ruudun tapahtuma toteutuu. Kaksoisluku antaa uuden heiton. Lopeta vuoro kun olet valmis.' },
+    { title: '🏠 Osto & huutokauppa', body: 'Kun laskeudut omistamattomaan katuun, voit ostaa sen pankilta. Jos jätät ostamatta, katu menee huutokauppaan — kaikki pelaajat voivat tarjota siitä.' },
+    { title: '🏗 Rakentaminen', body: 'Kun omistat kokonaisen väriryhmän, voit rakentaa taloja ja hotelleja “Kiinteistöt”-välilehdeltä. Rakennukset nostavat vuokraa rajusti. Rakenna tasaisesti koko ryhmään.' },
+    { title: '🔒 Vankila', body: 'Vankilasta pääset heittämällä kaksoisluvun, maksamalla €50 tai vapautuskortilla. Kolmannella kierroksella maksu on pakollinen.' },
+    { title: '🤝 Kauppa', body: 'Voit tarjota rahaa ja katuja muille pelaajille (“Aloita kauppa”). Paras tapa täydentää oma väriryhmä tai estää vastustajaa.' },
+  ],
+  howToPlayTipsTitle: '💡 Hyvä tietää',
+  howToPlayTips: [
+    '~€-luku on nettovarallisuutesi (käteinen + katujen ja rakennusten arvo).',
+    'Mitalit 🥇🥈🥉 näyttävät varallisuussijasi.',
+    'Pelinappisi tunnistat väristä ja muodosta — sama kaikkialla.',
+    'Välilyönti heittää nopat tai lopettaa vuoron nopeasti.',
+  ],
   leaveGameBtn: '🚪 Poistu pelistä',
   endGameForAllBtn: '🛑 Lopeta peli kaikille',
   endGameConfirmMsg: 'Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.',
@@ -1309,6 +1331,23 @@ const en: T = {
   linkCopied: '✓ Link copied!',
   soundSettingsBtn: '⚙️ Settings',
   keyboardShortcutsBtn: '⌨ Keyboard shortcuts',
+  howToPlayBtn: 'How to play',
+  howToPlayTitle: 'How to play',
+  howToPlaySections: [
+    { title: '🎯 Goal', body: 'Be the last player standing (not bankrupt). Buy streets, build houses and collect rent from your opponents.' },
+    { title: '🎲 Your turn', body: 'Roll the dice (spacebar or “Roll dice”). Your token moves and the space’s effect happens. Doubles give you another roll. End your turn when you’re done.' },
+    { title: '🏠 Buy & auction', body: 'When you land on an unowned street you may buy it from the bank. If you decline, it goes to auction — every player can bid for it.' },
+    { title: '🏗 Building', body: 'Once you own a whole colour group you can build houses and hotels from the “Properties” tab. Buildings raise rent steeply. Build evenly across the group.' },
+    { title: '🔒 Jail', body: 'Get out of jail by rolling doubles, paying €50, or with a get-out card. On the third round the fee is mandatory.' },
+    { title: '🤝 Trading', body: 'Offer money and streets to other players (“Start trade”). The best way to complete your own colour group or block an opponent.' },
+  ],
+  howToPlayTipsTitle: '💡 Good to know',
+  howToPlayTips: [
+    'The ~€ figure is your net worth (cash + value of streets and buildings).',
+    'Medals 🥇🥈🥉 show your wealth ranking.',
+    'You recognise your token by its colour and shape — the same everywhere.',
+    'Spacebar rolls the dice or ends your turn quickly.',
+  ],
   leaveGameBtn: '🚪 Leave game',
   endGameForAllBtn: '🛑 End game for all',
   endGameConfirmMsg: 'End game? This ends the game for all players and cannot be undone.',

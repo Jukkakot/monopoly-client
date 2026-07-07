@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './Header.module.css'
 import OverflowMenu from '../menu/OverflowMenu'
+import HowToPlay from '../menu/HowToPlay'
 import { loadSoundConfig, saveSoundConfig } from '../menu/SoundSettings'
 import { useT, useLang, useLangToggle } from '../../i18n/LanguageContext'
 import { useGame } from '../../store/GameContext'
@@ -18,6 +20,7 @@ export default function Header({ isSpectator }: Props) {
   const lang = useLang()
   const toggleLang = useLangToggle()
   const [muted, setMuted] = useState(() => loadSoundConfig().volume === 0)
+  const [showHelp, setShowHelp] = useState(false)
   const { state } = useGame()
   const tokenAnimating = useIsAnimating()
 
@@ -61,6 +64,9 @@ export default function Header({ isSpectator }: Props) {
       </div>
       <div className={styles.controls}>
         {isSpectator && <span className={styles.spectatorBadge}>{t.spectatorBadge}</span>}
+        <button className={styles.muteBtn} onClick={() => setShowHelp(true)} title={t.howToPlayBtn} aria-label={t.howToPlayBtn}>
+          <Icon name="help" size={19} />
+        </button>
         <button className={styles.muteBtn} onClick={toggleMute} title={muted ? t.soundMuted : t.soundOn}>
           <Icon name={muted ? 'muted' : 'sound'} size={18} />
         </button>
@@ -69,6 +75,17 @@ export default function Header({ isSpectator }: Props) {
         </button>
         <OverflowMenu />
       </div>
+
+      {/* Portaled to body so it escapes the header's stacking context (board tokens
+          have a higher z-index and would otherwise paint over it). */}
+      {showHelp && createPortal(
+        <div className={styles.helpOverlay} onClick={() => setShowHelp(false)}>
+          <div onClick={e => e.stopPropagation()}>
+            <HowToPlay onClose={() => setShowHelp(false)} />
+          </div>
+        </div>,
+        document.body,
+      )}
     </header>
   )
 }
