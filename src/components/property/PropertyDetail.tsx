@@ -6,7 +6,7 @@ import type { SessionState } from '../../types/api'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { setPendingTradeProperty } from '../actions/ActionPanel'
-import { isMortgageBlockedByGroupBuildings } from '../../utils/mortgage'
+import { isBlockedByGroupBuildings } from '../../utils/mortgage'
 import Icon from '../common/Icon'
 
 /** Row of little green house icons — mirrors the property-chip building glyphs. */
@@ -79,7 +79,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
   // Backend rule: a street cannot be mortgaged while ANY property in its color group
   // has buildings — sell all buildings in the group first. (Shared helper so the
   // ActionPanel mortgage list stays in sync.)
-  const mortgageBlockedByBuildings = isMortgageBlockedByGroupBuildings(spotId, state.properties)
+  const mortgageBlockedByBuildings = isBlockedByGroupBuildings(spotId, state.properties)
   const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
   const housePrice = HOUSE_PRICES[spot.streetType as StreetType] ?? 0
 

@@ -14,7 +14,7 @@ import { retriggerBot } from '../../api/sessionApi'
 import { useTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
-import { isMortgageBlockedByGroupBuildings } from '../../utils/mortgage'
+import { isBlockedByGroupBuildings } from '../../utils/mortgage'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -714,7 +714,7 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
         // A street cannot be mortgaged while ANY property in its color group has buildings
         // (backend rule) — sell the buildings first. Exclude those from the mortgage list so
         // we never offer an action the backend will reject with BUILDINGS_PRESENT.
-        const mortgageProps = myProps.filter(p => !isMortgageBlockedByGroupBuildings(p.propertyId, myProps))
+        const mortgageProps = myProps.filter(p => !isBlockedByGroupBuildings(p.propertyId, myProps))
         if (mortgageProps.length === 0) return null
         const mortgagedProps = mortgageProps.filter(p => p.mortgaged)
         const mortgagedCount = mortgagedProps.length
@@ -1220,9 +1220,11 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
   const myOfferSide = isProposer  // true = offeredToRecipient
   const myRequestSide = !isProposer
 
-  // Include mortgaged but exclude properties with buildings (can't trade those)
-  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && p.houseCount === 0 && p.hotelCount === 0)
-  const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && p.houseCount === 0 && p.hotelCount === 0)
+  // Include mortgaged but exclude any property whose color group has buildings — the
+  // backend rejects trading those (all buildings in the group must be sold first), so
+  // offering them in the picker would only produce an invalid-offer error on submit.
+  const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId && !isBlockedByGroupBuildings(p.propertyId, state.properties))
+  const partnerProps = state.properties.filter(p => p.ownerPlayerId === partnerId && !isBlockedByGroupBuildings(p.propertyId, state.properties))
   const myCash = state.players.find(p => p.playerId === myPlayerId)?.cash ?? 0
 
 
