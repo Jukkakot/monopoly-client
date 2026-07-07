@@ -281,6 +281,7 @@ export interface T {
   // ── GameOverOverlay ──────────────────────────────────────────────────────────
   gameOverScreenTitle: string
   wonLabel: (name: string) => string
+  gameEndedNoWinner: string
   shareResultsBtn: string
   copiedBtn: string
   continueWatchingBtn: string
@@ -772,6 +773,7 @@ const fi: T = {
   // GameOverOverlay
   gameOverScreenTitle: 'Peli päättyi!',
   wonLabel: (name) => `${name} voitti!`,
+  gameEndedNoWinner: 'Peli keskeytettiin — ei voittajaa',
   shareResultsBtn: '📋 Jaa tulokset',
   copiedBtn: '✓ Kopioitu!',
   continueWatchingBtn: 'Jatka katselemaan',
@@ -1295,6 +1297,7 @@ const en: T = {
   // GameOverOverlay
   gameOverScreenTitle: 'Game over!',
   wonLabel: (name) => `${name} wins!`,
+  gameEndedNoWinner: 'Game ended early — no winner',
   shareResultsBtn: '📋 Share results',
   copiedBtn: '✓ Copied!',
   continueWatchingBtn: 'Continue watching',

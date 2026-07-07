@@ -6,6 +6,7 @@ import { useTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { useT } from '../../i18n/LanguageContext'
 import { calcNetWorth } from '../../utils/netWorth'
+import { resolveDeclaredWinner } from '../../utils/gameOver'
 import Icon from '../common/Icon'
 
 interface Props {
@@ -28,15 +29,19 @@ export default function GameOverOverlay({ state }: Props) {
     return calcNetWorth(b, state) - calcNetWorth(a, state)
   })
 
-  const winner = sorted[0]
-  const winnerSeat = state.seats.find(s => s.playerId === winner?.playerId)
+  // Trust the backend's declared winner (never re-derive it). winnerPlayerId is null when
+  // the host aborted the game — an aborted game has no winner, so we must NOT crown the
+  // net-worth leader (the backend is the authoritative rule enforcer). In every real win
+  // the backend sets winnerPlayerId to the sole survivor, who is also sorted[0].
+  const winner = resolveDeclaredWinner(state)
+  const winnerSeat = winner ? state.seats.find(s => s.playerId === winner.playerId) : undefined
 
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <div className={styles.trophy}>🏆</div>
+        <div className={styles.trophy}>{winner ? '🏆' : '🏁'}</div>
         <div className={styles.title}>{t.gameOverScreenTitle}</div>
-        {winner && (
+        {winner ? (
           <div className={styles.winnerRow}>
             {winnerSeat && (
               <TokenSvg
@@ -46,6 +51,10 @@ export default function GameOverOverlay({ state }: Props) {
               />
             )}
             <span className={styles.winnerName} data-testid="game-over-winner">{t.wonLabel(winner.name)}</span>
+          </div>
+        ) : (
+          <div className={styles.winnerRow}>
+            <span className={styles.winnerName}>{t.gameEndedNoWinner}</span>
           </div>
         )}
 
