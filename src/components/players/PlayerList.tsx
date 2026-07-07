@@ -184,6 +184,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
   const activeId = state.turn?.activePlayerId
   const prevCash = useRef<Map<string, number>>(new Map())
   const [flashMap, setFlashMap] = useState<Map<string, 'up' | 'down'>>(new Map())
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { state: gs } = useGame()
   const [expandedId, setExpandedId] = useState<string | null>(() => gs.myPlayerId ?? null)
   const tokenShapes = useTokenShapes(state)
@@ -216,10 +217,17 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
     }
     if (newFlash.size > 0) {
       setFlashMap(newFlash)
-      const t = setTimeout(() => setFlashMap(new Map()), 600)
-      return () => clearTimeout(t)
+      // Hold the clear-timer in a ref rather than returning it as effect cleanup.
+      // This effect re-runs on every snapshot ([state.players] is a fresh ref each time);
+      // returning the timer as cleanup meant a later no-cash-change snapshot cancelled the
+      // pending clear without scheduling a new one, leaving the up/down flash stuck on.
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current)
+      flashTimerRef.current = setTimeout(() => setFlashMap(new Map()), 600)
     }
   }, [state.players])
+
+  // Clear the flash timer only on unmount.
+  useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current) }, [])
 
   // Static rotation: "me" (or host if spectating) is always at the top.
   // The rest follow seat order rotated from that anchor, so turn neighbours
