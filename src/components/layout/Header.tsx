@@ -37,6 +37,19 @@ export default function Header({ isSpectator }: Props) {
   }
 
   const snap = state.snapshot
+
+  // First-run onboarding: auto-open the how-to-play panel the very first time a
+  // player is in a game (once ever, remembered in localStorage). They can always
+  // reopen it via the ❓ button.
+  useEffect(() => {
+    if (!snap) return
+    try {
+      if (!localStorage.getItem('monopoly_seen_howto')) {
+        localStorage.setItem('monopoly_seen_howto', '1')
+        setShowHelp(true)
+      }
+    } catch { /* ignore */ }
+  }, [snap])
   const activePlayer = snap?.players.find(p => p.playerId === snap?.turn?.activePlayerId)
   const activeSeat = snap?.seats.find(s => s.playerId === snap?.turn?.activePlayerId)
   const lastDice = snap?.turn?.lastDice
