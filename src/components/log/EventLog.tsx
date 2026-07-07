@@ -4,7 +4,7 @@ import type { GameEvent } from '../../store/events'
 import { useT } from '../../i18n/LanguageContext'
 import { STREET_COLORS } from '../../types/spots'
 import type { SeatState } from '../../types/api'
-import { ALL_SHAPES, loadTokenShapes } from '../../utils/tokenShapes'
+import { ALL_SHAPES, resolveTokenShapes } from '../../utils/tokenShapes'
 
 const ICON_CLASS: Record<string, string> = {
   '🎲': styles.typeDice,
@@ -108,14 +108,12 @@ export default memo(function EventLog({ events, myPlayerId, seats, sessionId }: 
   }, [seats])
   const seatSymbolFn = useMemo(() => {
     if (!seats || seats.length === 0 || !sessionId) return (_id: string) => null
-    const shapes = loadTokenShapes(sessionId, seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
-    const shapeMap = new Map<string, string>()
-    for (const seat of seats) {
-      const shape = shapes[seat.seatIndex]
-      const entry = shape ? ALL_SHAPES.find(s => s.key === shape) : null
-      shapeMap.set(seat.playerId, entry?.label ?? ALL_SHAPES[seat.seatIndex % ALL_SHAPES.length].label)
+    const resolved = resolveTokenShapes(sessionId, seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
+    const labelOf = (key: string) => ALL_SHAPES.find(s => s.key === key)?.label ?? '●'
+    return (id: string) => {
+      const key = resolved.get(id)
+      return key ? labelOf(key) : null
     }
-    return (id: string) => shapeMap.get(id) ?? null
   }, [seats, sessionId])
   const [activeFilters, setActiveFilters] = useState<Set<FilterGroup>>(new Set())
   const [mineOnly, setMineOnly] = useState(false)

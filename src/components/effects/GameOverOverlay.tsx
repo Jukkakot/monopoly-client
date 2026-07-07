@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './GameOverOverlay.module.css'
 import type { SessionState } from '../../types/api'
-import { loadTokenShapes } from '../../utils/tokenShapes'
+import { useTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { useT } from '../../i18n/LanguageContext'
 import { calcNetWorth } from '../../utils/netWorth'
@@ -18,10 +18,9 @@ export default function GameOverOverlay({ state }: Props) {
   const navigate = useNavigate()
   const t = useT()
   const [dismissed, setDismissed] = useState(false)
+  const tokenShapes = useTokenShapes(state)
 
   if (dismissed) return null
-
-  const tokenShapes = loadTokenShapes(state.sessionId)
 
   const sorted = [...state.players].sort((a, b) => {
     if (a.bankrupt && !b.bankrupt) return 1
@@ -42,7 +41,7 @@ export default function GameOverOverlay({ state }: Props) {
             {winnerSeat && (
               <TokenSvg
                 color={winnerSeat.tokenColorHex}
-                shape={tokenShapes[winnerSeat.seatIndex] ?? 'circle'}
+                shape={tokenShapes.get(winner.playerId) ?? 'circle'}
                 size={40}
               />
             )}
@@ -62,7 +61,7 @@ export default function GameOverOverlay({ state }: Props) {
                 {seat && (
                   <TokenSvg
                     color={seat.tokenColorHex}
-                    shape={tokenShapes[seat.seatIndex] ?? 'circle'}
+                    shape={tokenShapes.get(p.playerId) ?? 'circle'}
                     size={24}
                   />
                 )}

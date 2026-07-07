@@ -4,7 +4,7 @@ import type { SessionState, PlayerSnapshot } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 import Icon from '../common/Icon'
-import { loadTokenShapes } from '../../utils/tokenShapes'
+import { useTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
 import { useGame } from '../../store/GameContext'
@@ -186,7 +186,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
   const [flashMap, setFlashMap] = useState<Map<string, 'up' | 'down'>>(new Map())
   const { state: gs } = useGame()
   const [expandedId, setExpandedId] = useState<string | null>(() => gs.myPlayerId ?? null)
-  const tokenShapes = loadTokenShapes(state.sessionId)
+  const tokenShapes = useTokenShapes(state)
 
   // Auto-expand own card when myPlayerId becomes known (e.g. after SSE connect)
   const autoExpanded = useRef(gs.myPlayerId != null)
@@ -263,7 +263,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
               <div className={styles.token}>
                 <TokenSvg
                   color={seat?.tokenColorHex ?? '#888'}
-                  shape={tokenShapes[seat?.seatIndex ?? -1] ?? 'circle'}
+                  shape={tokenShapes.get(player.playerId) ?? 'circle'}
                   size={28}
                 />
               </div>

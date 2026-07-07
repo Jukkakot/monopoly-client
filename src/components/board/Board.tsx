@@ -4,7 +4,7 @@ import BoardSpot from './BoardSpot'
 import { SPOTS, STREET_COLORS, indexToGridPos } from '../../types/spots'
 import { RENT_TABLE, GROUP_SIZE } from '../../types/rents'
 import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, SeatState } from '../../types/api'
-import { loadTokenShapes, type TokenShape } from '../../utils/tokenShapes'
+import { useTokenShapes } from '../../utils/tokenShapes'
 import { useTokenAnimation, useJailingPlayers, useCardJumpingPlayers, useAnimatingPlayers, useSteppingPlayers, useLandingPlayers, skipAllAnimations, startDiceAnimation } from '../../hooks/useTokenAnimation'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
@@ -571,15 +571,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   }, [state.players, animatedPositions])
 
   // Token shapes come from localStorage and sessionId — stable for a session's lifetime.
-  const tokenShapes = useMemo(() => {
-    const map = new Map<string, TokenShape>()
-    const savedShapes = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
-    for (const seat of state.seats) {
-      map.set(seat.playerId, savedShapes[seat.seatIndex] ?? 'circle')
-    }
-    return map
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.sessionId, state.seats])
+  // Canonical resolver: distinct shape per player, consistent with every other view.
+  const tokenShapes = useTokenShapes(state)
 
   const activeTurnPlayer = state.turn
     ? state.players.find(p => p.playerId === state.turn!.activePlayerId)

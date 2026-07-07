@@ -31,32 +31,46 @@ export function savePlayerTokenShape(sessionId: string, playerId: string, shape:
   try { localStorage.setItem(OVERRIDE_KEY(sessionId, playerId), shape) } catch { /* ignore */ }
 }
 
+/**
+ * Canonical token-shape resolver. Reads any saved/overridden shapes, then
+ * fills every remaining player with a *distinct* shape from the pool so no two
+ * players ever share a shape and every player has a stable, non-circle-collapsed
+ * identity even when nobody customized. Pure — safe to unit-test and to share
+ * across every component so the board, sidebar, panels and log always agree.
+ */
+export function resolveTokenShapes(
+  sessionId: string,
+  seats: { playerId: string; seatIndex: number }[],
+): Map<string, TokenShape> {
+  const map = new Map<string, TokenShape>()
+  const saved = loadTokenShapes(sessionId, seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
+  const usedShapes = new Set<TokenShape>()
+  // First pass: assign saved shapes (only if not already taken by an earlier seat)
+  for (const seat of seats) {
+    const shape = saved[seat.seatIndex]
+    if (shape && !usedShapes.has(shape)) {
+      map.set(seat.playerId, shape)
+      usedShapes.add(shape)
+    }
+  }
+  // Second pass: give any unassigned player a distinct shape from the pool
+  const pool = ALL_SHAPES.map(s => s.key)
+  let poolIdx = 0
+  for (const seat of seats) {
+    if (!map.has(seat.playerId)) {
+      while (poolIdx < pool.length && usedShapes.has(pool[poolIdx])) poolIdx++
+      const assigned = poolIdx < pool.length ? pool[poolIdx++] : pool[seat.seatIndex % pool.length]
+      map.set(seat.playerId, assigned)
+      usedShapes.add(assigned)
+    }
+  }
+  return map
+}
+
 export function useTokenShapes(state: SessionState | null): Map<string, TokenShape> {
   return useMemo(() => {
     if (!state) return new Map()
-    const map = new Map<string, TokenShape>()
-    const saved = loadTokenShapes(state.sessionId, state.seats.map(s => ({ playerId: s.playerId, seatIndex: s.seatIndex })))
-    const usedShapes = new Set<TokenShape>()
-    // First pass: assign saved shapes (only if not already taken by an earlier seat)
-    for (const seat of state.seats) {
-      const shape = saved[seat.seatIndex]
-      if (shape && !usedShapes.has(shape)) {
-        map.set(seat.playerId, shape)
-        usedShapes.add(shape)
-      }
-    }
-    // Second pass: give any unassigned player a distinct shape from the pool
-    const pool = ALL_SHAPES.map(s => s.key)
-    let poolIdx = 0
-    for (const seat of state.seats) {
-      if (!map.has(seat.playerId)) {
-        while (poolIdx < pool.length && usedShapes.has(pool[poolIdx])) poolIdx++
-        const assigned = poolIdx < pool.length ? pool[poolIdx++] : pool[seat.seatIndex % pool.length]
-        map.set(seat.playerId, assigned)
-        usedShapes.add(assigned)
-      }
-    }
-    return map
+    return resolveTokenShapes(state.sessionId, state.seats)
   }, [state?.sessionId, state?.seats]) // eslint-disable-line react-hooks/exhaustive-deps
 }
 
