@@ -15,6 +15,7 @@ import { useTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
 import { isBlockedByGroupBuildings } from '../../utils/mortgage'
+import { bankHasBuildingFor } from '../../utils/buildSupply'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -682,8 +683,9 @@ function BuildingButtons({ state, myPlayerId, sendCmd }: {
                   const myLevel = prop.hotelCount > 0 ? 5 : prop.houseCount
                   const canSell = myLevel > 0 && myLevel >= maxLevel
                   const housePrice = HOUSE_PRICES[spot.streetType as keyof typeof HOUSE_PRICES] ?? 0
-                  // Even-build rule + affordability check
+                  // Even-build rule + affordability + bank must have the building in stock
                   const canBuy = myLevel === minLevel && myCash >= housePrice
+                    && bankHasBuildingFor(prop.houseCount, state.properties)
                   return (
                     <div key={prop.propertyId} className={styles.buildRow} style={color ? { background: color + '22' } : undefined}>
                       <span className={styles.buildName}>{spot.name}</span>

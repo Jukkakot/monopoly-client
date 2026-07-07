@@ -7,6 +7,7 @@ import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { setPendingTradeProperty } from '../actions/ActionPanel'
 import { isBlockedByGroupBuildings } from '../../utils/mortgage'
+import { bankHasBuildingFor } from '../../utils/buildSupply'
 import Icon from '../common/Icon'
 
 /** Row of little green house icons — mirrors the property-chip building glyphs. */
@@ -119,12 +120,17 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
     onClose()
   }
 
-  const canBuild = isMyProp && isStreet && isMonopoly
+  const buildEligible = isMyProp && isStreet && isMonopoly
     && !anyGroupMortgaged
     && (prop?.hotelCount ?? 0) === 0
     && myLevel <= minLevelInGroup
     && myCash >= housePrice
     && isMyTurn && !isGameOver
+  // The bank can run out of houses/hotels — the backend rejects a build then, so only
+  // offer it when the bank actually has the building this step needs.
+  const bankHasBuilding = bankHasBuildingFor(prop?.houseCount ?? 0, state.properties)
+  const canBuild = buildEligible && bankHasBuilding
+  const buildBlockedBySupply = buildEligible && !bankHasBuilding
 
   const canSell = isMyProp && isStreet && myLevel > 0 && myLevel >= maxLevelInGroup
     && isMyTurn && !isGameOver
@@ -281,6 +287,9 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
               <button className={`${styles.btn} ${styles.build}`} onClick={buildHouse}>
                 {t.buildHouseBtn}
               </button>
+            )}
+            {buildBlockedBySupply && (
+              <div className={styles.mortgageBlockedNote}>{t.bankSupplyExhausted}</div>
             )}
             {canSell && (
               <button className={`${styles.btn} ${styles.secondary}`} onClick={() => {
