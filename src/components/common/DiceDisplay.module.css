@@ -2,44 +2,56 @@
   display: flex;
   align-items: center;
   gap: min(0.6cqw, 8px);
+  /* Perspective gives the roll real depth — the dice tumble in 3D instead of
+     spinning flat on the page. */
+  perspective: 620px;
 }
 
-/* ── Rolling animation ── */
+/* ── Rolling animation ──
+   A pseudo-3D tumble: a full Z-spin plus X/Y tilts that stay under ~24° so the
+   face never goes edge-on (invisible), while the perspective on .row reads it as
+   a die tumbling through the air. Scale gives the toss its arc. */
 @keyframes dieRoll {
-  0%   { transform: rotate(0deg) scale(1); }
-  18%  { transform: rotate(-38deg) scale(1.2); }
-  38%  { transform: rotate(26deg) scale(0.83); }
-  58%  { transform: rotate(-16deg) scale(1.1); }
-  76%  { transform: rotate(9deg) scale(0.94); }
-  90%  { transform: rotate(-3deg) scale(1.03); }
-  100% { transform: rotate(0deg) scale(1); }
+  0%   { transform: rotateZ(0) rotateX(0) rotateY(0) scale(1); }
+  15%  { transform: rotateZ(96deg) rotateX(22deg) rotateY(-18deg) scale(1.22); }
+  35%  { transform: rotateZ(196deg) rotateX(-22deg) rotateY(20deg) scale(0.84); }
+  55%  { transform: rotateZ(294deg) rotateX(16deg) rotateY(-12deg) scale(1.12); }
+  73%  { transform: rotateZ(344deg) rotateX(-9deg) rotateY(7deg) scale(0.94); }
+  89%  { transform: rotateZ(370deg) rotateX(4deg) rotateY(-3deg) scale(1.04); }
+  100% { transform: rotateZ(360deg) rotateX(0) rotateY(0) scale(1); }
 }
 
+/* The second die tumbles the opposite way and starts a touch later, so the pair
+   never move in lockstep. */
 @keyframes dieRollDelayed {
-  0%   { transform: rotate(0deg) scale(1); }
-  10%  { transform: rotate(0deg) scale(1); }
-  28%  { transform: rotate(32deg) scale(1.18); }
-  48%  { transform: rotate(-22deg) scale(0.85); }
-  66%  { transform: rotate(12deg) scale(1.08); }
-  82%  { transform: rotate(-5deg) scale(0.96); }
-  92%  { transform: rotate(2deg) scale(1.02); }
-  100% { transform: rotate(0deg) scale(1); }
+  0%   { transform: rotateZ(0) rotateX(0) rotateY(0) scale(1); }
+  10%  { transform: rotateZ(0) rotateX(0) rotateY(0) scale(1); }
+  26%  { transform: rotateZ(-104deg) rotateX(-20deg) rotateY(18deg) scale(1.2); }
+  46%  { transform: rotateZ(-206deg) rotateX(22deg) rotateY(-20deg) scale(0.85); }
+  64%  { transform: rotateZ(-300deg) rotateX(-14deg) rotateY(12deg) scale(1.1); }
+  82%  { transform: rotateZ(-346deg) rotateX(7deg) rotateY(-6deg) scale(0.96); }
+  92%  { transform: rotateZ(-368deg) rotateX(-3deg) rotateY(2deg) scale(1.02); }
+  100% { transform: rotateZ(-360deg) rotateX(0) rotateY(0) scale(1); }
 }
 
+/* Springy settle — a small overshoot so the die "lands" with weight. */
 @keyframes dieSettle {
-  0%   { transform: scale(1.12); }
-  60%  { transform: scale(0.94); }
+  0%   { transform: scale(1.18); }
+  45%  { transform: scale(0.9); }
+  72%  { transform: scale(1.06); }
   100% { transform: scale(1); }
 }
 
 .rolling {
   display: inline-block;
-  animation: dieRoll 0.58s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-style: preserve-3d;
+  animation: dieRoll 0.62s cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .rollingDelayed {
   display: inline-block;
-  animation: dieRollDelayed 0.62s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-style: preserve-3d;
+  animation: dieRollDelayed 0.66s cubic-bezier(0.3, 0.7, 0.4, 1);
 }
 
 .settled {
