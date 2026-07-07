@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { listSessions, sessionExists, deleteSession, createSession } from '../api/sessionApi'
+import { listSessions, sessionExists, deleteSession, createSession, getBackendVersion, type BackendVersion } from '../api/sessionApi'
 import type { SessionSummary } from '../types/api'
 import { saveTokenShapes, ALL_SHAPES } from '../utils/tokenShapes'
 import { randomHumanName, randomBotName } from '../utils/playerNames'
@@ -9,6 +9,17 @@ import styles from './SessionListScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 import Header from '../components/layout/Header'
 import DiceSpinner from '../components/common/DiceSpinner'
+
+/** Format the backend's ISO-8601 build timestamp the same way the client build
+ *  time is formatted (Helsinki local), so both lines read consistently. */
+function formatBuildTime(iso: string): string {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return iso
+  return d.toLocaleString('fi-FI', {
+    day: 'numeric', month: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Helsinki',
+  })
+}
 
 function CollapsibleSection({ title, defaultOpen, children }: { title: string; defaultOpen: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -37,6 +48,16 @@ export default function SessionListScreen() {
     try { return localStorage.getItem('monopoly_last_session') } catch { return null }
   })
   const [lastSessionExists, setLastSessionExists] = useState<boolean | null>(null)
+  const [backend, setBackend] = useState<BackendVersion | null>(null)
+
+  // Fetch the connected backend's build info once, to display alongside the client's.
+  useEffect(() => {
+    let cancelled = false
+    getBackendVersion()
+      .then(v => { if (!cancelled) setBackend(v) })
+      .catch(() => { if (!cancelled) setBackend(null) })
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     if (!lastSession) return
@@ -157,7 +178,10 @@ export default function SessionListScreen() {
             <div className={styles.logoBox}>
               <div className={styles.logo}>Monopoly</div>
               <div className={styles.sub}>Helsinki Edition</div>
-              <div className={styles.version}>v{__APP_VERSION__} · {__BUILD_TIME__}</div>
+              <div className={styles.version}>{t.appVersionLabel} v{__APP_VERSION__} · {__BUILD_TIME__}</div>
+              {backend && (
+                <div className={styles.version}>{t.backendVersionLabel} v{backend.version} · {backend.buildTime ? formatBuildTime(backend.buildTime) : '—'}</div>
+              )}
             </div>
             <div className={styles.quickSection}>
               <button className={styles.newBtn} onClick={() => navigate('/lobby')}>

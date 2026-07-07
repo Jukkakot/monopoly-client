@@ -23,6 +23,20 @@ export class ApiError extends Error {
   }
 }
 
+/** The backend this client is currently pointed at (for display). */
+export const BACKEND_BASE = BASE
+
+export interface BackendVersion {
+  version: string
+  /** ISO-8601 UTC timestamp of when the backend jar was built. */
+  buildTime: string
+}
+
+/** Fetches the connected backend's build info (version + build time). */
+export async function getBackendVersion(): Promise<BackendVersion> {
+  return fetchJson<BackendVersion>(`${BASE}/version`)
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init)
   if (!res.ok) {

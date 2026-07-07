@@ -186,6 +186,8 @@ export interface T {
   quickStartFailed: string
   quickStartLabel: string
   quickStartHint: string
+  appVersionLabel: string
+  backendVersionLabel: string
   rejoinBanner: string
   waitingRoomsTitle: string
   activeGamesTitle: string
@@ -663,6 +665,8 @@ const fi: T = {
   gameNotFoundErr: 'Peliä ei löydy. Tarkista koodi.',
   connectionErr: 'Yhteysongelma. Yritä uudelleen.',
   quickStartFailed: 'Pikapelin luonti epäonnistui.',
+  appVersionLabel: 'Sovellus',
+  backendVersionLabel: 'Palvelin',
   quickStartLabel: 'tai aloita heti bottia vastaan',
   quickStartHint: 'Luo pelin heti sinulle + boteille',
   rejoinBanner: '↩ Jatkasitko viime peliä?',
@@ -1156,6 +1160,8 @@ const en: T = {
   gameNotFoundErr: 'Game not found. Check the code.',
   connectionErr: 'Connection error. Try again.',
   quickStartFailed: 'Failed to create quick game.',
+  appVersionLabel: 'App',
+  backendVersionLabel: 'Backend',
   quickStartLabel: 'or start instantly vs bots',
   quickStartHint: 'Creates a game for you + bots immediately',
   rejoinBanner: '↩ Continue last game?',
