@@ -333,6 +333,9 @@ export interface T {
   howToPlaySections: { title: string; body: string }[]
   howToPlayTipsTitle: string
   howToPlayTips: string[]
+  hintFirstBuy: string
+  hintFirstAuction: string
+  hintFirstDebt: string
   leaveGameBtn: string
   endGameForAllBtn: string
   endGameConfirmMsg: string
@@ -836,6 +839,9 @@ const fi: T = {
     'Pelinappisi tunnistat väristä ja muodosta — sama kaikkialla.',
     'Välilyönti heittää nopat tai lopettaa vuoron nopeasti.',
   ],
+  hintFirstBuy: 'Voit ostaa tämän kadun pankilta tai jättää sen huutokauppaan muille pelaajille.',
+  hintFirstAuction: 'Huutokauppa: tarjoa summa tai jää pois. Korkein tarjous voittaa kadun.',
+  hintFirstDebt: 'Maksa velka panttaamalla tai myymällä kiinteistöjä — tai julista vararikko.',
   leaveGameBtn: '🚪 Poistu pelistä',
   endGameForAllBtn: '🛑 Lopeta peli kaikille',
   endGameConfirmMsg: 'Lopeta peli? Tämä päättää pelin kaikille pelaajille eikä ole peruutettavissa.',
@@ -1348,6 +1354,9 @@ const en: T = {
     'You recognise your token by its colour and shape — the same everywhere.',
     'Spacebar rolls the dice or ends your turn quickly.',
   ],
+  hintFirstBuy: 'You can buy this street from the bank, or leave it to auction for the other players.',
+  hintFirstAuction: 'Auction: place a bid or pass. The highest bid wins the street.',
+  hintFirstDebt: 'Settle the debt by mortgaging or selling properties — or declare bankruptcy.',
   leaveGameBtn: '🚪 Leave game',
   endGameForAllBtn: '🛑 End game for all',
   endGameConfirmMsg: 'End game? This ends the game for all players and cannot be undone.',

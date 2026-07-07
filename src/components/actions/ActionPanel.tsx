@@ -17,6 +17,25 @@ import { calcNetWorth } from '../../utils/netWorth'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
+/**
+ * A one-time contextual hint shown the first time a new player meets a mechanic
+ * (buy decision, auction, debt). Remembered per-id in localStorage, so it appears
+ * exactly once and never nags again.
+ */
+function FirstTimeHint({ id, text }: { id: string; text: string }) {
+  const key = `monopoly_hint_${id}`
+  const [show, setShow] = useState(() => { try { return !localStorage.getItem(key) } catch { return false } })
+  useEffect(() => { if (show) { try { localStorage.setItem(key, '1') } catch { /* ignore */ } } }, [show, key])
+  if (!show) return null
+  return (
+    <div className={styles.firstHint}>
+      <span className={styles.firstHintIcon}>💡</span>
+      <span className={styles.firstHintText}>{text}</span>
+      <button className={styles.firstHintClose} onClick={() => setShow(false)} aria-label="OK">✕</button>
+    </div>
+  )
+}
+
 // Cross-component handshake: PropertyDetail sets this before sending OpenTrade so that
 // TradeEditor auto-adds the property to the request side on first mount.
 let _pendingTradeProperty: { propertyId: string; offeredSide: boolean } | null = null
@@ -336,6 +355,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
               <span className={styles.propBuyName}>{spot?.name ?? p.propertyDisplayName}</span>
               <span className={styles.propBuyPrice}>{t.priceLabel(p.price)}</span>
             </div>
+            <FirstTimeHint id="buy" text={t.hintFirstBuy} />
             {!canAfford && <div className={styles.warningBox}>{t.insufficientFunds}</div>}
             <div className={styles.btnRow}>
               <Btn label={t.buyBtn(p.price)} disabled={!canAfford}
@@ -806,6 +826,7 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
           <PropertyChip id={auction.propertyId} rightText={spotPrice > 0 ? `€${spotPrice}` : undefined} />
         </div>
       )}
+      {auction.status === 'ACTIVE' && <FirstTimeHint id="auction" text={t.hintFirstAuction} />}
 
       {/* Player list — hidden once auction is resolved */}
       {auction.status !== 'WON_PENDING_RESOLUTION' && <div className={styles.auctionPlayerList}>
@@ -990,6 +1011,7 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
           )}
         </div>
       </div>
+      {myPlayerId !== null && <FirstTimeHint id="debt" text={t.hintFirstDebt} />}
       {myPlayerId !== null && debt.allowedActions.includes('PAY_DEBT_NOW') && (
         <Btn label={t.payDebtBtn}
           disabled={!hasEnoughCash}

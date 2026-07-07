@@ -5,6 +5,34 @@
   animation: panelIn 0.2s ease-out;
 }
 
+/* One-time contextual hint for first-time players (buy/auction/debt). */
+.firstHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: #6b5300;
+  animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.firstHintIcon { flex-shrink: 0; line-height: 1.35; }
+.firstHintText { flex: 1; }
+.firstHintClose {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: #a58a2a;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+.firstHintClose:hover { color: #6b5300; }
+
 .tabBar {
   display: flex;
   gap: 2px;
