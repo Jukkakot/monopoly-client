@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useGame } from '../store/GameContext'
-import { joinLobby, addLobbyBot, removeLobbyBot, setLobbyReady, sseUrl, LobbyJoinError } from '../api/sessionApi'
+import { joinLobby, addLobbyBot, removeLobbyBot, setLobbyReady, sseUrl, fetchSnapshot, LobbyJoinError } from '../api/sessionApi'
 import type { ClientSessionSnapshot, SeatState } from '../types/api'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './LobbyWaitingScreen.module.css'
@@ -76,11 +76,24 @@ export default function LobbyWaitingScreen() {
 
   useEffect(() => {
     if (!sessionId) return
+    let sseReceived = false
+    // Seed the seat list immediately via a one-shot snapshot fetch so the room shows its
+    // players right away, instead of flashing empty until the SSE connection is established
+    // and delivers the first snapshot. The SSE guard prevents a slow fetch from clobbering
+    // fresher SSE state.
+    fetchSnapshot(sessionId).then(state => {
+      if (state && !sseReceived) {
+        setSeats(state.seats)
+        setStatus(state.status)
+        setHostPlayerId(state.hostPlayerId)
+      }
+    }).catch(() => {})
     const es = new EventSource(sseUrl(sessionId))
     es.onmessage = (e) => {
       try {
         const snap: ClientSessionSnapshot = JSON.parse(e.data)
         if (snap.state) {
+          sseReceived = true
           setSeats(snap.state.seats)
           setStatus(snap.state.status)
           setHostPlayerId(snap.state.hostPlayerId)
