@@ -20,6 +20,7 @@ export interface GameEvent {
   relatedPlayerIds: string[]
   kind?: string
   group?: string  // street/color group key, set on 'monopoly' events for the celebration
+  propertyId?: string  // set on purchase/auction/hotel events so the celebration can look up the spot
   releaseAt?: number  // hide in event log until this timestamp
   historical?: boolean  // loaded from existing log on reconnect/refresh — no sounds
 }
@@ -111,7 +112,9 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const spot = SPOTS.find(s => s.id === e.data.property)
         const propName = spot?.name ?? e.data.property ?? '?'
         const delay = playerDelayMs.get(pid) ?? 0
-        events.push(ev('🏠', t.bought(name, propName), [pid], undefined, delay, 'BOUGHT_PROPERTY'))
+        const bev = ev('🏠', t.bought(name, propName), [pid], undefined, delay, 'BOUGHT_PROPERTY')
+        bev.propertyId = e.data.property
+        events.push(bev)
         break
       }
       case 'BUILT_HOUSE': {
@@ -121,7 +124,9 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
       }
       case 'BUILT_HOTEL': {
         const spot = SPOTS.find(s => s.id === e.data.property)
-        events.push(ev('🏗', t.builtHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `hotel:${spot?.streetType ?? ''}`, 0, 'BUILT_HOTEL'))
+        const hev = ev('🏗', t.builtHotel(name, spot?.name ?? e.data.property ?? '?'), [pid], `hotel:${spot?.streetType ?? ''}`, 0, 'BUILT_HOTEL')
+        hev.propertyId = e.data.property
+        events.push(hev)
         break
       }
       case 'SOLD_HOUSE': {
@@ -257,7 +262,9 @@ export function deriveMiscEvents(prev: SessionState | null, next: SessionState):
     const winner = winId ? next.players.find(p => p.playerId === winId) : null
     const spot = SPOTS.find(s => s.id === prev.auctionState!.propertyId)
     if (winner) {
-      events.push(ev('🔨', t.auctionWon(winner.name, spot?.name ?? '?'), [winner.playerId], undefined, 0, 'AUCTION_WON'))
+      const aev = ev('🔨', t.auctionWon(winner.name, spot?.name ?? '?'), [winner.playerId], undefined, 0, 'AUCTION_WON')
+      aev.propertyId = prev.auctionState.propertyId
+      events.push(aev)
     } else {
       events.push(ev('🔨', t.auctionNoWinner, []))
     }

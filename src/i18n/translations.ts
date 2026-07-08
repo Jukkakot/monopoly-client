@@ -300,6 +300,9 @@ export interface T {
   streetTypeNames: Partial<Record<string, string>>
   monopolyCelebrationTitle: string
   monopolyCelebrationSub: (group: string) => string
+  celebBoughtTitle: string
+  celebAuctionWonTitle: string
+  celebHotelTitle: string
   noOwnerMsg: string
   mortgagedBadge: string
   currentRentLabel: string
@@ -803,6 +806,9 @@ const fi: T = {
   },
   monopolyCelebrationTitle: 'MONOPOLI!',
   monopolyCelebrationSub: (group) => `${group}-ryhmä haltuun`,
+  celebBoughtTitle: 'OSTETTU!',
+  celebAuctionWonTitle: 'HUUTOKAUPPA VOITETTU!',
+  celebHotelTitle: 'HOTELLI RAKENNETTU!',
   noOwnerMsg: 'Ei omistajaa',
   mortgagedBadge: 'PANTATTU',
   currentRentLabel: 'Nykyinen vuokra',
@@ -1327,6 +1333,9 @@ const en: T = {
   },
   monopolyCelebrationTitle: 'MONOPOLY!',
   monopolyCelebrationSub: (group) => `${group} set complete`,
+  celebBoughtTitle: 'PURCHASED!',
+  celebAuctionWonTitle: 'AUCTION WON!',
+  celebHotelTitle: 'HOTEL BUILT!',
   noOwnerMsg: 'No owner',
   mortgagedBadge: 'MORTGAGED',
   currentRentLabel: 'Current rent',

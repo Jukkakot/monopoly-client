@@ -53,6 +53,7 @@
     0 0 0 3px var(--group, #2e7d32),
     0 0 40px -6px var(--group, #2e7d32);
   animation: cardPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 88vw;
 }
 
 @keyframes cardPop {
@@ -61,14 +62,14 @@
   100% { transform: scale(1); }
 }
 
-.trophy {
+.icon {
   font-size: 3.2rem;
   line-height: 1;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25));
-  animation: trophyBob 1.4s ease-in-out infinite;
+  animation: iconBob 1.4s ease-in-out infinite;
 }
 
-@keyframes trophyBob {
+@keyframes iconBob {
   0%, 100% { transform: translateY(0) rotate(-4deg); }
   50%      { transform: translateY(-6px) rotate(4deg); }
 }
@@ -81,6 +82,7 @@
   letter-spacing: 2px;
   color: #17331b;
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.12);
+  text-align: center;
 }
 
 .swatch {
@@ -91,11 +93,18 @@
 }
 
 .sub {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #5a6d5c;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #2e7d32;
 }
 
 .player {
@@ -107,11 +116,11 @@
 @media (max-width: 480px) {
   .card { padding: 20px 28px 18px; }
   .title { font-size: 1.7rem; }
-  .trophy { font-size: 2.6rem; }
+  .icon { font-size: 2.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rays { animation: none; opacity: 0.12; }
   .card { animation: none; }
-  .trophy { animation: none; }
+  .icon { animation: none; }
 }

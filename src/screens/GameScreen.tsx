@@ -12,7 +12,8 @@ import FlashBanner from '../components/notification/FlashBanner'
 import PropertyDetail from '../components/property/PropertyDetail'
 import Confetti from '../components/effects/Confetti'
 import GameOverOverlay from '../components/effects/GameOverOverlay'
-import MonopolyCelebration, { type MonopolyCelebrationData } from '../components/effects/MonopolyCelebration'
+import Celebration from '../components/effects/Celebration'
+import { pickCelebration, type CelebrationData } from '../utils/celebration'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './GameScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
@@ -40,23 +41,17 @@ export default function GameScreen() {
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [highlightGroupType, setHighlightGroupType] = useState<string | null>(null)
 
-  // Monopoly-completed celebration: fire a brief flourish on each new 'monopoly' event.
-  const [celebration, setCelebration] = useState<MonopolyCelebrationData | null>(null)
+  // Milestone celebration: a brief flourish for a completed monopoly (any player) or the
+  // local player's own auction win / hotel / purchase. Picks the most important new one.
+  const [celebration, setCelebration] = useState<CelebrationData | null>(null)
   const lastCelebId = useRef(-1)
   useEffect(() => {
-    const fresh = state.events.filter(e => e.kind === 'monopoly' && e.id > lastCelebId.current && !e.historical)
+    const fresh = state.events.filter(e => e.id > lastCelebId.current && !e.historical)
     if (fresh.length === 0) return
     lastCelebId.current = state.events.reduce((m, e) => Math.max(m, e.id), lastCelebId.current)
-    const e = fresh[fresh.length - 1]
-    const pid = e.relatedPlayerIds[0]
-    const seat = state.snapshot?.seats.find(s => s.playerId === pid)
-    const player = state.snapshot?.players.find(p => p.playerId === pid)
-    setCelebration({
-      id: e.id,
-      group: e.group ?? '',
-      playerName: player?.name ?? seat?.displayName ?? '',
-      tokenColorHex: seat?.tokenColorHex ?? '#2e7d32',
-    })
+    if (!state.snapshot) return
+    const next = pickCelebration(fresh, state.snapshot, state.myPlayerId, t)
+    if (next) setCelebration(next)
   }, [state.events])
   const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
@@ -210,7 +205,7 @@ export default function GameScreen() {
       {isGameOver && <Confetti />}
       {isGameOver && <GameOverOverlay state={state.prevSnapshot ?? state.snapshot} />}
       {!isGameOver && celebration && (
-        <MonopolyCelebration data={celebration} onDone={() => setCelebration(null)} />
+        <Celebration data={celebration} onDone={() => setCelebration(null)} />
       )}
       {state.duplicateClient && (
         <div className={styles.duplicateClientOverlay}>
