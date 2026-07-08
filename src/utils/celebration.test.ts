@@ -67,6 +67,25 @@ describe('pickCelebration', () => {
     expect(c?.title).toBe(t.celebAuctionWonTitle)
   })
 
+  it('celebrates a big rent paid TO me (I am the creditor), with payer and amount', () => {
+    // relatedPlayerIds = [payer, receiver]; receiver must be me.
+    const c = pickCelebration([gev({ id: 20, soundKey: 'PAID_RENT', relatedPlayerIds: [OTHER, ME], amount: 450 })], state, ME, t)
+    expect(c?.title).toBe(t.celebBigRentTitle)
+    expect(c?.subtitle).toBe('Botti') // the payer
+    expect(c?.price).toBe('€450')
+    expect(c?.icon).toBe('💰')
+  })
+
+  it('does NOT celebrate a small rent', () => {
+    const c = pickCelebration([gev({ id: 21, soundKey: 'PAID_RENT', relatedPlayerIds: [OTHER, ME], amount: 12 })], state, ME, t)
+    expect(c).toBeNull()
+  })
+
+  it('does NOT celebrate rent that I PAID (I am the payer, not the receiver)', () => {
+    const c = pickCelebration([gev({ id: 22, soundKey: 'PAID_RENT', relatedPlayerIds: [ME, OTHER], amount: 450 })], state, ME, t)
+    expect(c).toBeNull()
+  })
+
   it('returns null when nothing is celebration-worthy', () => {
     const c = pickCelebration([gev({ id: 1, soundKey: 'DICE_ROLLED', relatedPlayerIds: [ME] })], state, ME, t)
     expect(c).toBeNull()

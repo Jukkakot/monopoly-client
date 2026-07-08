@@ -20,6 +20,9 @@ export interface CelebrationData {
 
 const GREEN = '#2e7d32'
 
+/** Only rents at or above this land a celebration — small base rents would be spammy. */
+export const BIG_RENT_MIN = 200
+
 function spotColor(propertyId?: string): string {
   const st = propertyId ? SPOTS.find(s => s.id === propertyId)?.streetType : undefined
   return (st && STREET_COLORS[st]) || GREEN
@@ -83,6 +86,17 @@ export function pickCelebration(
       id: buy.id, icon: '🏠', title: t.celebBoughtTitle,
       subtitle: spotName(buy.propertyId), price: price ? `€${price}` : undefined,
       accentColor: spotColor(buy.propertyId),
+    }
+  }
+
+  // 5. A big rent paid TO me (I'm the creditor = relatedPlayerIds[1]).
+  const rent = [...freshEvents].reverse().find(e =>
+    e.soundKey === 'PAID_RENT' && e.relatedPlayerIds[1] === myPlayerId && (e.amount ?? 0) >= BIG_RENT_MIN)
+  if (rent) {
+    const payer = state.players.find(p => p.playerId === rent.relatedPlayerIds[0])
+    return {
+      id: rent.id, icon: '💰', title: t.celebBigRentTitle,
+      subtitle: payer?.name, price: `€${rent.amount}`, accentColor: GREEN,
     }
   }
 

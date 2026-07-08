@@ -303,6 +303,7 @@ export interface T {
   celebBoughtTitle: string
   celebAuctionWonTitle: string
   celebHotelTitle: string
+  celebBigRentTitle: string
   noOwnerMsg: string
   mortgagedBadge: string
   currentRentLabel: string
@@ -809,6 +810,7 @@ const fi: T = {
   celebBoughtTitle: 'OSTETTU!',
   celebAuctionWonTitle: 'HUUTOKAUPPA VOITETTU!',
   celebHotelTitle: 'HOTELLI RAKENNETTU!',
+  celebBigRentTitle: 'VUOKRAA KILAHTI!',
   noOwnerMsg: 'Ei omistajaa',
   mortgagedBadge: 'PANTATTU',
   currentRentLabel: 'Nykyinen vuokra',
@@ -1336,6 +1338,7 @@ const en: T = {
   celebBoughtTitle: 'PURCHASED!',
   celebAuctionWonTitle: 'AUCTION WON!',
   celebHotelTitle: 'HOTEL BUILT!',
+  celebBigRentTitle: 'RENT COLLECTED!',
   noOwnerMsg: 'No owner',
   mortgagedBadge: 'MORTGAGED',
   currentRentLabel: 'Current rent',

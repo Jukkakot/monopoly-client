@@ -21,6 +21,7 @@ export interface GameEvent {
   kind?: string
   group?: string  // street/color group key, set on 'monopoly' events for the celebration
   propertyId?: string  // set on purchase/auction/hotel events so the celebration can look up the spot
+  amount?: number  // set on PAID_RENT so the celebration can gate on / show the rent amount
   releaseAt?: number  // hide in event log until this timestamp
   historical?: boolean  // loaded from existing log on reconnect/refresh — no sounds
 }
@@ -105,7 +106,9 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const creditor = players.find(p => p.playerId === pid2)
         const amount = parseInt(e.data.amount ?? '0')
         const delay = playerDelayMs.get(pid) ?? 0
-        events.push(ev('💸', t.paidRent(name, amount, creditor?.name ?? '?'), e.playerIds.slice(0, 2), undefined, delay, 'PAID_RENT'))
+        const rev = ev('💸', t.paidRent(name, amount, creditor?.name ?? '?'), e.playerIds.slice(0, 2), undefined, delay, 'PAID_RENT')
+        rev.amount = amount
+        events.push(rev)
         break
       }
       case 'BOUGHT_PROPERTY': {
