@@ -11,6 +11,12 @@ env:
 permissions:
   contents: write
 
+# Only the newest push to a branch matters — cancel superseded in-progress runs so
+# rapid pushes don't pile up full test+deploy runs (and hammer the backend).
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-rules:
     runs-on: ubuntu-latest
@@ -25,25 +31,6 @@ jobs:
       - run: npm ci
 
       - run: npm run test:rules
-
-  test-ui:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      - run: npx playwright install --with-deps chromium
-
-      - run: npm run test:ui
-        env:
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
 
   deploy:
     needs: [test-rules]

@@ -1,0 +1,39 @@
+name: E2E UI tests
+
+# The Playwright UI suite (47 specs, full browser) drives the live backend, so it is NOT
+# run on every push — only once nightly and on demand. It is informational (does not gate
+# deploys). Trigger manually from the Actions tab via "Run workflow".
+on:
+  schedule:
+    - cron: '0 3 * * *'   # ~05:00–06:00 Europe/Helsinki — low-traffic window
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run test:ui
+        env:
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
