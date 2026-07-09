@@ -8,6 +8,9 @@
   justify-content: center;
   padding: 16px;
   animation: fadeIn 0.18s ease-out;
+  /* iOS: cursor:pointer makes this tap-to-dismiss <div> capture taps instead of letting
+     them fall through to the board behind. */
+  cursor: pointer;
 }
 
 @keyframes fadeIn {

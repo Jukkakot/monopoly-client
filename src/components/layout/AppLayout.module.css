@@ -478,6 +478,9 @@
   align-items: flex-end;
   justify-content: center;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* iOS: cursor:pointer makes this tap-to-dismiss <div> capture taps instead of letting
+     them fall through to the game behind. */
+  cursor: pointer;
 }
 
 .playerPopup {

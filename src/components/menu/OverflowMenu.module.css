@@ -37,6 +37,9 @@
   position: fixed;
   inset: 0;
   z-index: 400;
+  /* iOS Safari treats a React-delegated onClick <div> as clickable ONLY when it has
+     cursor:pointer — without it, taps fall through to the game elements behind. */
+  cursor: pointer;
 }
 
 .menu {
@@ -114,6 +117,9 @@
   background: rgba(0,0,0,0.55);
   /* Above every in-board element (portaled to <body>, so this competes at root) */
   z-index: 10000;
+  /* iOS Safari only captures taps on a React-delegated onClick <div> when it has
+     cursor:pointer; without it, taps pass through to the game behind the panel. */
+  cursor: pointer;
   display: flex;
   align-items: flex-start;
   justify-content: center;
