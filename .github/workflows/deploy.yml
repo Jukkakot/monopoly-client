@@ -32,6 +32,25 @@ jobs:
 
       - run: npm run test:rules
 
+  test-ui:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run test:ui
+        env:
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+
   deploy:
     needs: [test-rules]
     runs-on: ubuntu-latest
