@@ -25,6 +25,14 @@ function loadSidebarWidth(): number {
 const MOBILE_PANEL_MIN = 160
 const MOBILE_PANEL_MAX = 500
 
+/** True while any modal/overlay (tagged with data-modal) is open. Board resize and
+ *  tab-swipe gestures bail on this so interacting with a modal never drives the game
+ *  behind it — robust regardless of how the event reached the handler (React portal
+ *  bubbling, native window listeners, browser quirks). */
+function isModalOpen(): boolean {
+  return typeof document !== 'undefined' && document.querySelector('[data-modal]') !== null
+}
+
 function loadMobilePanelWidth(): number {
   try {
     const v = localStorage.getItem('monopoly_mobile_panel_width')
@@ -195,6 +203,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
 
   useEffect(() => {
     function onTouchMove(e: TouchEvent) {
+      if (isModalOpen()) return
       if (mobileDragRef.current) {
         const delta = mobileDragRef.current.startX - e.touches[0].clientX
         const newW = Math.min(MOBILE_PANEL_MAX, Math.max(MOBILE_PANEL_MIN, mobileDragRef.current.startW + delta))
@@ -224,19 +233,20 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   }, [])
 
   function onMobileHandleTouchStart(e: React.TouchEvent) {
-    // Ignore touches that React-bubbled here from a portaled overlay (settings/help
-    // modals render inside this subtree in the React tree but live in <body> in the DOM,
-    // so their touches must not start a resize drag). Real handle touches are DOM children.
-    if (!e.currentTarget.contains(e.target as Node)) return
+    // Don't start a resize while a modal is open, and ignore touches that React-bubbled
+    // here from a portaled overlay (settings/help modals render inside this subtree in the
+    // React tree but live in <body> in the DOM). Real handle touches are DOM children.
+    if (isModalOpen() || !e.currentTarget.contains(e.target as Node)) return
     e.stopPropagation() // prevent tab swipe from firing
     mobileDragRef.current = { startX: e.touches[0].clientX, startW: mobilePanelWidthRef.current }
   }
 
   function onPortraitHandleTouchStart(e: React.TouchEvent) {
     if (isLandscape) return
-    // See onMobileHandleTouchStart: skip touches bubbled from a portaled modal (a DOM
-    // <body> child), which would otherwise resize the board when scrolling the settings.
-    if (!e.currentTarget.contains(e.target as Node)) return
+    // See onMobileHandleTouchStart: no resize while a modal is open, and skip touches
+    // bubbled from a portaled modal (a DOM <body> child) — otherwise scrolling the
+    // settings resizes the board behind it.
+    if (isModalOpen() || !e.currentTarget.contains(e.target as Node)) return
     portraitDragRef.current = { startY: e.touches[0].clientY, startH: mobileBoardHeightRef.current }
     mobileBoardRef.current?.classList.add(styles.mobileBoardDragging)
   }
@@ -408,12 +418,12 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   function handleTouchStart(e: React.TouchEvent) {
     // Skip touches React-bubbled from a portaled modal (see onPortraitHandleTouchStart) —
     // otherwise swiping inside the settings panel switches the tab behind it.
-    if (!e.currentTarget.contains(e.target as Node)) { touchStartX.current = null; return }
+    if (isModalOpen() || !e.currentTarget.contains(e.target as Node)) { touchStartX.current = null; return }
     touchStartX.current = e.touches[0].clientX
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null || !e.currentTarget.contains(e.target as Node)) return
+    if (touchStartX.current === null || isModalOpen() || !e.currentTarget.contains(e.target as Node)) return
     const dx = e.changedTouches[0].clientX - touchStartX.current
     if (Math.abs(dx) < 50) return
     if (dx < 0 && tabIdx < MOBILE_TABS.length - 1) switchTab(MOBILE_TABS[tabIdx + 1])
@@ -605,7 +615,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
         })
         return (
-          <div className={styles.playerPopupOverlay} onClick={() => setCashPopupPlayerId(null)}>
+          <div className={styles.playerPopupOverlay} data-modal onClick={() => setCashPopupPlayerId(null)}>
             <div className={styles.playerPopup} onClick={e => e.stopPropagation()}>
               <div className={styles.playerPopupHeader}>
                 <span className={styles.playerPopupDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />

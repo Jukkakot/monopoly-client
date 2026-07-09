@@ -92,7 +92,7 @@ export default function Header({ isSpectator }: Props) {
       {/* Portaled to body so it escapes the header's stacking context (board tokens
           have a higher z-index and would otherwise paint over it). */}
       {showHelp && createPortal(
-        <div className={styles.helpOverlay} onClick={() => setShowHelp(false)}>
+        <div className={styles.helpOverlay} data-modal onClick={() => setShowHelp(false)}>
           <div onClick={e => e.stopPropagation()}>
             <HowToPlay onClose={() => setShowHelp(false)} />
           </div>

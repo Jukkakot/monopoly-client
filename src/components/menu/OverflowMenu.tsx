@@ -49,7 +49,7 @@ export default function OverflowMenu() {
       {/* Full-screen modals are portaled to <body> so they escape the header's
           stacking context — otherwise board tokens (higher z-index) paint over them. */}
       {showSound && createPortal(
-        <div className={styles.soundOverlay} onClick={() => setShowSound(false)}>
+        <div className={styles.soundOverlay} data-modal onClick={() => setShowSound(false)}>
           <div onClick={e => e.stopPropagation()}>
             <SoundSettings
               onClose={() => setShowSound(false)}
@@ -68,7 +68,7 @@ export default function OverflowMenu() {
       )}
 
       {showHelp && createPortal(
-        <div className={styles.soundOverlay} onClick={() => setShowHelp(false)}>
+        <div className={styles.soundOverlay} data-modal onClick={() => setShowHelp(false)}>
           <div className={styles.helpModal} onClick={e => e.stopPropagation()}>
             <div className={styles.buildModalHeader}>
               <span>{t.keyboardShortcutsBtn}</span>
@@ -86,7 +86,7 @@ export default function OverflowMenu() {
 
       {open && (
         <>
-          <div className={styles.backdrop} onClick={() => setOpen(false)} />
+          <div className={styles.backdrop} data-modal onClick={() => setOpen(false)} />
           <div className={styles.menu}>
             <div className={styles.menuTitle}>{t.moreActionsTitle}</div>
 

@@ -136,7 +136,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
     && isMyTurn && !isGameOver
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} data-modal onClick={onClose}>
       <div className={styles.card} onClick={e => e.stopPropagation()}>
         {/* Color header */}
         <div className={styles.header} style={{ background: color ?? '#888' }}>
