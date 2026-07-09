@@ -224,12 +224,19 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   }, [])
 
   function onMobileHandleTouchStart(e: React.TouchEvent) {
+    // Ignore touches that React-bubbled here from a portaled overlay (settings/help
+    // modals render inside this subtree in the React tree but live in <body> in the DOM,
+    // so their touches must not start a resize drag). Real handle touches are DOM children.
+    if (!e.currentTarget.contains(e.target as Node)) return
     e.stopPropagation() // prevent tab swipe from firing
     mobileDragRef.current = { startX: e.touches[0].clientX, startW: mobilePanelWidthRef.current }
   }
 
   function onPortraitHandleTouchStart(e: React.TouchEvent) {
     if (isLandscape) return
+    // See onMobileHandleTouchStart: skip touches bubbled from a portaled modal (a DOM
+    // <body> child), which would otherwise resize the board when scrolling the settings.
+    if (!e.currentTarget.contains(e.target as Node)) return
     portraitDragRef.current = { startY: e.touches[0].clientY, startH: mobileBoardHeightRef.current }
     mobileBoardRef.current?.classList.add(styles.mobileBoardDragging)
   }
@@ -381,7 +388,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     snap.turn.activePlayerId === state.myPlayerId &&
     snap.status !== 'GAME_OVER')
 
-  const touchStartX = useRef(0)
+  const touchStartX = useRef<number | null>(0)
   const tabIdx = MOBILE_TABS.indexOf(mobileTab)
 
   const switchTab = useCallback((tab: MobileTab) => {
@@ -399,10 +406,14 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   }, [mobileTab])
 
   function handleTouchStart(e: React.TouchEvent) {
+    // Skip touches React-bubbled from a portaled modal (see onPortraitHandleTouchStart) —
+    // otherwise swiping inside the settings panel switches the tab behind it.
+    if (!e.currentTarget.contains(e.target as Node)) { touchStartX.current = null; return }
     touchStartX.current = e.touches[0].clientX
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null || !e.currentTarget.contains(e.target as Node)) return
     const dx = e.changedTouches[0].clientX - touchStartX.current
     if (Math.abs(dx) < 50) return
     if (dx < 0 && tabIdx < MOBILE_TABS.length - 1) switchTab(MOBILE_TABS[tabIdx + 1])
