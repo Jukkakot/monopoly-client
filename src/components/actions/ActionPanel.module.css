@@ -136,14 +136,20 @@
 
 .btn:hover { filter: brightness(1.06); box-shadow: var(--e2), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
 .btn:active { transform: translateY(1px) scale(0.99); box-shadow: var(--e1); }
-.btn:disabled { opacity: 0.45; cursor: default; filter: none; box-shadow: none; }
+/* Disabled reads as clearly inert: dimmer AND desaturated, so enabled coloured buttons
+   (and the filled ghost) plainly look pressable next to it — this is the tell that a
+   button IS actionable. */
+.btn:disabled { opacity: 0.4; cursor: default; filter: grayscale(0.5); box-shadow: none; }
 
 .primary  { background: linear-gradient(180deg, #3a9a40 0%, #2e7d32 100%); color: #fff; }
 .secondary { background: linear-gradient(180deg, #fbb130 0%, #f9a825 100%); color: #fff; }
 .danger   { background: linear-gradient(180deg, #d63535 0%, #c62828 100%); color: #fff; }
 .neutral  { background: linear-gradient(180deg, #607d8b 0%, #546e7a 100%); color: #fff; }
 .info     { background: linear-gradient(180deg, #1976d2 0%, #1565c0 100%); color: #fff; }
-.ghost    { background: transparent; color: #555; border: 1.5px solid var(--hairline); box-shadow: none; }
+/* Ghost = a secondary action (e.g. "skip to auction"). It must still read as pressable,
+   so give it a real (subtle) fill and bright ink rather than transparent + grey text,
+   which looked disabled on the dark panel. */
+.ghost    { background: var(--surface-sunken); color: var(--ink); border: 1.5px solid var(--hairline); box-shadow: var(--e1); }
 
 /* Inline row — buttons share available width equally */
 .btnRow {
