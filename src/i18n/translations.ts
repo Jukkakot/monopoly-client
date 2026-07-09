@@ -282,6 +282,8 @@ export interface T {
   gameOverScreenTitle: string
   wonLabel: (name: string) => string
   gameEndedNoWinner: string
+  netWorthChartTitle: string
+  richestMomentLabel: string
   shareResultsBtn: string
   copiedBtn: string
   continueWatchingBtn: string
@@ -778,6 +780,8 @@ const fi: T = {
   gameOverScreenTitle: 'Peli päättyi!',
   wonLabel: (name) => `${name} voitti!`,
   gameEndedNoWinner: 'Peli keskeytettiin — ei voittajaa',
+  netWorthChartTitle: 'Varallisuuden kehitys',
+  richestMomentLabel: 'Rikkain hetki',
   shareResultsBtn: '📋 Jaa tulokset',
   copiedBtn: '✓ Kopioitu!',
   continueWatchingBtn: 'Jatka katselemaan',
@@ -1303,6 +1307,8 @@ const en: T = {
   retriggerBotBtn: '▶ Unstick bot',
 
   // GameOverOverlay
+  netWorthChartTitle: 'Net worth over time',
+  richestMomentLabel: 'Richest moment',
   gameOverScreenTitle: 'Game over!',
   wonLabel: (name) => `${name} wins!`,
   gameEndedNoWinner: 'Game ended early — no winner',

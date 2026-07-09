@@ -7,6 +7,8 @@ import { TokenSvg } from '../board/TokenSvg'
 import { useT } from '../../i18n/LanguageContext'
 import { calcNetWorth } from '../../utils/netWorth'
 import { resolveDeclaredWinner } from '../../utils/gameOver'
+import { richestMoment } from '../../utils/recapStats'
+import { useGame } from '../../store/GameContext'
 import Icon from '../common/Icon'
 
 interface Props {
@@ -15,13 +17,54 @@ interface Props {
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
+/** Compact multi-line chart of every player's net-worth trajectory over the game. */
+function NetWorthChart({ history, colorFor }: { history: Map<string, number[]>; colorFor: (playerId: string) => string }) {
+  const series = [...history.entries()].filter(([, v]) => v.length >= 2)
+  if (series.length === 0) return null
+
+  const W = 280
+  const H = 88
+  const PAD = 4
+  const globalMax = Math.max(1, ...series.flatMap(([, v]) => v))
+
+  return (
+    <svg className={styles.chart} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img">
+      {series.map(([playerId, values]) => {
+        const pts = values.map((v, i) => {
+          const x = (i / (values.length - 1)) * W
+          const y = PAD + (1 - v / globalMax) * (H - PAD * 2)
+          return `${x.toFixed(1)},${y.toFixed(1)}`
+        }).join(' ')
+        return (
+          <polyline
+            key={playerId}
+            points={pts}
+            fill="none"
+            stroke={colorFor(playerId)}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            opacity={0.9}
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
 export default function GameOverOverlay({ state }: Props) {
   const navigate = useNavigate()
   const t = useT()
+  const { state: gs } = useGame()
   const [dismissed, setDismissed] = useState(false)
   const tokenShapes = useTokenShapes(state)
 
   if (dismissed) return null
+
+  const colorFor = (playerId: string) => state.seats.find(s => s.playerId === playerId)?.tokenColorHex ?? '#888'
+  const peak = richestMoment(gs.netWorthHistory)
+  const peakPlayer = peak ? state.players.find(p => p.playerId === peak.playerId) : undefined
 
   const sorted = [...state.players].sort((a, b) => {
     if (a.bankrupt && !b.bankrupt) return 1
@@ -101,6 +144,22 @@ export default function GameOverOverlay({ state }: Props) {
             )
           })}
         </div>
+
+        {gs.netWorthHistory.size > 0 && (
+          <div className={styles.recap}>
+            <div className={styles.recapTitle}>{t.netWorthChartTitle}</div>
+            <NetWorthChart history={gs.netWorthHistory} colorFor={colorFor} />
+            {peak && peakPlayer && (
+              <div className={styles.recapStat}>
+                <span className={styles.recapStatLabel}>{t.richestMomentLabel}</span>
+                <span className={styles.recapStatValue}>
+                  <span className={styles.recapDot} style={{ background: colorFor(peak.playerId) }} />
+                  {peakPlayer.name} · €{peak.value}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className={styles.buttons}>
           <button className={styles.btnSecondary} onClick={() => setDismissed(true)}>
