@@ -253,7 +253,7 @@
   flex-shrink: 0;
 }
 
-.buildBtn:hover { background: #e8e8e8; }
+.buildBtn:hover { background: var(--surface-sunken); }
 
 /* Keyboard help modal */
 .helpModal {

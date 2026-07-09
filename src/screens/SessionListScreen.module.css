@@ -248,7 +248,7 @@
 .deleteBtn:hover {
   color: var(--c-red);
   border-color: var(--c-red);
-  background: #fff5f5;
+  background: var(--tint-danger);
 }
 
 .hint {

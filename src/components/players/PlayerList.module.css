@@ -45,7 +45,7 @@
 .meBadge {
   font-size: 0.62rem;
   font-weight: 800;
-  background: #e3f0fb;
+  background: var(--tint-info);
   color: var(--c-blue);
   border: 1px solid rgba(21, 101, 192, 0.25);
   border-radius: 999px;
@@ -58,7 +58,7 @@
 .hostBadge {
   font-size: 0.62rem;
   font-weight: 800;
-  background: #fff2e0;
+  background: var(--tint-warn);
   color: #c2560a;
   border: 1px solid rgba(230, 81, 0, 0.28);
   border-radius: 999px;
@@ -181,7 +181,7 @@
 
 .badge {
   font-size: 0.7rem;
-  background: #ef9a9a;
+  background: var(--tint-danger);
   color: var(--c-red);
   border-radius: 4px;
   padding: 1px 5px;

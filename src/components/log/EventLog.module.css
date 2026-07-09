@@ -80,16 +80,16 @@
 /* Event type color stripes */
 .entry.typeDice    { border-left-color: #b0bec5; color: #546e7a; }
 .entry.typeMove    { border-left-color: #90a4ae; }
-.entry.typeJail    { border-left-color: #4a148c; background: #f3e5f5; }
+.entry.typeJail    { border-left-color: #4a148c; background: var(--surface-sunken); }
 .entry.typeCard    { border-left-color: var(--c-orange); background: var(--tint-warn); }
 .entry.typeBuy     { border-left-color: var(--c-blue); background: var(--tint-info); }
 .entry.typeBuild   { border-left-color: var(--c-green); background: var(--tint-success); }
-.entry.typeMortgage{ border-left-color: #795548; background: #efebe9; }
+.entry.typeMortgage{ border-left-color: #795548; background: var(--surface-sunken); }
 .entry.typeAuction { border-left-color: var(--c-orange); background: var(--tint-warn); }
 .entry.typeTrade   { border-left-color: #00695c; background: var(--tint-success); }
 .entry.typeBankrupt{ border-left-color: var(--c-red); background: var(--tint-danger); }
 .entry.typeGameOver{ border-left-color: #f9a825; background: var(--tint-warn); }
-.entry.typeRent    { border-left-color: #e57373; background: #fff3f3; }
+.entry.typeRent    { border-left-color: #e57373; background: var(--tint-danger); }
 
 .icon {
   flex-shrink: 0;
