@@ -16,7 +16,7 @@
   border-radius: 9px;
   font-size: 0.8rem;
   line-height: 1.35;
-  color: #6b5300;
+  color: var(--c-amber);
   animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .firstHintIcon { flex-shrink: 0; line-height: 1.35; }
@@ -31,7 +31,7 @@
   padding: 0 2px;
   line-height: 1;
 }
-.firstHintClose:hover { color: #6b5300; }
+.firstHintClose:hover { color: var(--c-amber); }
 
 .tabBar {
   display: flex;
@@ -111,7 +111,7 @@
   padding: 8px 10px;
   background: var(--tint-success);
   border-radius: 8px;
-  border: 1px solid #c8e6c9;
+  border: 1px solid var(--hairline);
   animation: panelIn 0.2s ease-out;
 }
 
@@ -143,7 +143,7 @@
 .danger   { background: linear-gradient(180deg, #d63535 0%, #c62828 100%); color: #fff; }
 .neutral  { background: linear-gradient(180deg, #607d8b 0%, #546e7a 100%); color: #fff; }
 .info     { background: linear-gradient(180deg, #1976d2 0%, #1565c0 100%); color: #fff; }
-.ghost    { background: transparent; color: #555; border: 1.5px solid #ccc; box-shadow: none; }
+.ghost    { background: transparent; color: #555; border: 1.5px solid var(--hairline); box-shadow: none; }
 
 /* Inline row — buttons share available width equally */
 .btnRow {
@@ -181,7 +181,7 @@
   gap: 8px;
   width: 100%;
   background: var(--surface-sunken);
-  border: 1.5px solid #c8d8c8;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.78rem;
@@ -197,7 +197,7 @@
 
 .sectionToggle:hover {
   background: var(--surface-sunken);
-  border-color: #a5c4a5;
+  border-color: var(--hairline);
   color: var(--c-green);
 }
 
@@ -518,7 +518,7 @@
 
 .auctionMortgageHint {
   font-size: 0.72rem;
-  color: #795548;
+  color: var(--c-amber);
   background: var(--surface-sunken);
   border-radius: 6px;
   padding: 4px 10px;
@@ -552,7 +552,7 @@
 
 .auctionListPriceTag {
   font-size: 0.75rem;
-  color: #5d4037;
+  color: var(--c-amber);
   background: var(--tint-warn);
   border: 1px solid #ffb74d;
   border-radius: 5px;
@@ -654,7 +654,7 @@
 
 .auctionHint {
   font-size: 0.78rem;
-  color: #5d4037;
+  color: var(--c-amber);
   background: var(--tint-warn);
   border: 1px solid #ffb74d;
   border-radius: 6px;
@@ -1120,7 +1120,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
 /* ── Building UI ── */
 .buildSection {
   background: var(--surface-sunken);
-  border: 1px solid #c8e6c9;
+  border: 1px solid var(--hairline);
   border-radius: 8px;
   padding: 6px 8px;
   display: flex;
@@ -1229,7 +1229,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
   border-radius: 12px;
   padding: 16px 14px 12px;
   font-size: 0.92rem;
-  color: #5d4037;
+  color: var(--c-amber);
   line-height: 1.5;
   font-style: italic;
   text-align: center;
@@ -1392,7 +1392,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
   gap: 8px;
   padding: 8px 12px;
   background: var(--tint-info);
-  border: 1.5px solid #cfd8dc;
+  border: 1.5px solid var(--hairline);
   border-radius: 6px;
   font-size: 0.87rem;
   font-weight: 600;
@@ -1417,7 +1417,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
   justify-content: space-between;
   gap: 8px;
   background: var(--tint-success);
-  border: 1px solid #c8e6c9;
+  border: 1px solid var(--hairline);
   border-left: 7px solid #a5d6a7;  /* color overridden inline */
   border-radius: 8px;
   padding: 8px 12px;

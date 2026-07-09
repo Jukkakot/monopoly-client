@@ -66,7 +66,7 @@ button.chip:active { transform: translateY(0.5px) scale(0.985); box-shadow: var(
 
 .lock {
   margin-left: 4px;
-  color: #b0392f;
+  color: var(--c-red);
   flex-shrink: 0;
 }
 

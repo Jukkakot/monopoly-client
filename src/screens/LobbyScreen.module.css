@@ -96,7 +96,7 @@
 .nameInput {
   flex: 1;
   padding: 10px 12px;
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   font-size: 0.95rem;
   color: var(--c-green);
@@ -113,7 +113,7 @@
 .randomizeBtn {
   padding: 0 12px;
   background: var(--brand-wash);
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   font-size: 1.1rem;
   cursor: pointer;
@@ -212,7 +212,7 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   background: var(--brand-wash);
   color: var(--c-green);
   font-size: 1.1rem;

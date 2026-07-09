@@ -78,7 +78,7 @@
 }
 
 /* Event type color stripes */
-.entry.typeDice    { border-left-color: #b0bec5; color: #546e7a; }
+.entry.typeDice    { border-left-color: var(--hairline); color: var(--ink-soft); }
 .entry.typeMove    { border-left-color: #90a4ae; }
 .entry.typeJail    { border-left-color: #4a148c; background: var(--surface-sunken); }
 .entry.typeCard    { border-left-color: var(--c-orange); background: var(--tint-warn); }

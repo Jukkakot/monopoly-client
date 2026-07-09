@@ -88,7 +88,7 @@
   gap: 10px;
   text-align: center;
   font-size: 0.72rem;
-  color: #767676;
+  color: var(--ink-soft);
   letter-spacing: 0.5px;
 }
 
@@ -103,7 +103,7 @@
 
 .quickHint {
   font-size: 0.72rem;
-  color: #767676;
+  color: var(--ink-soft);
   text-align: center;
 }
 
@@ -140,7 +140,7 @@
   justify-content: space-between;
   width: 100%;
   background: var(--brand-wash);
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   padding: 8px 12px;
   cursor: pointer;
@@ -156,7 +156,7 @@
 .sectionTitle {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #2e5e32;
+  color: var(--c-green);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -203,7 +203,7 @@
   padding: 1px 5px;
   font-size: 0.75rem;
   background: transparent;
-  border: 1px solid #c8e6c9;
+  border: 1px solid var(--hairline);
   border-radius: 4px;
   color: var(--ink-faint);
   cursor: pointer;
@@ -291,7 +291,7 @@
 .joinCodeInput {
   flex: 1;
   padding: 10px 12px;
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   font-size: 0.95rem;
   font-family: ui-monospace, monospace;

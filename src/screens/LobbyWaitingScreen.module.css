@@ -40,7 +40,7 @@
   gap: 8px;
   padding: 10px 12px;
   background: var(--brand-wash);
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
 }
 
@@ -63,7 +63,7 @@
   padding: 2px 6px;
   font-size: 0.75rem;
   background: transparent;
-  border: 1px solid #c8e6c9;
+  border: 1px solid var(--hairline);
   border-radius: 4px;
   color: var(--ink-faint);
   cursor: pointer;
@@ -106,7 +106,7 @@
   gap: 10px;
   padding: 8px 12px;
   background: var(--surface-sunken);
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
 }
 
@@ -178,7 +178,7 @@
 .nameInput {
   flex: 1;
   padding: 10px 12px;
-  border: 1.5px solid #c8e6c9;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   font-size: 0.95rem;
   outline: none;
@@ -229,7 +229,7 @@
 .addBotBtn {
   padding: 10px;
   background: var(--tint-warn);
-  color: #5d4037;
+  color: var(--c-amber);
   border: 2px dashed #ffe082;
   border-radius: 10px;
   font-size: 0.95rem;
@@ -324,7 +324,7 @@
   justify-content: center;
   transition: border-color 0.12s;
 }
-.shapeBtn:hover { border-color: #aaa; }
+.shapeBtn:hover { border-color: var(--hairline); }
 .shapeBtnSelected {
   background: var(--surface-sunken);
 }

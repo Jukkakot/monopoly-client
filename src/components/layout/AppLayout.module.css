@@ -315,7 +315,7 @@
   height: calc(52px + env(safe-area-inset-bottom, 0px));
   display: flex;
   background: var(--surface-raised);
-  border-top: 1px solid #c8e6c9;
+  border-top: 1px solid var(--hairline);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   align-items: center;
   flex-shrink: 0;
