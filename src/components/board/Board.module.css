@@ -1,22 +1,7 @@
-/* Dark mode: dim the whole board uniformly so it doesn't glare against the dark UI.
-   A brightness filter scales squares AND their text together, so contrast is preserved
-   (no light-on-light risk) — the board just reads as a darker, muted physical board. */
-:global(:root[data-theme="dark"]) .board {
-  filter: brightness(0.72) saturate(1.05);
-}
-
 .board {
-  /* The board keeps its "physical board" light look in BOTH themes — restore the light
-     token values for the whole board subtree so square text stays dark on the cream
-     squares (felt/coloured bands are hard-coded and already dark-friendly). */
-  --surface: #f5f9f5;
-  --surface-raised: #ffffff;
-  --surface-sunken: #eef3ee;
-  --ink: #17331b;
-  --ink-soft: #5a6d5c;
-  --ink-faint: #8a9a8c;
-  --hairline: #d8e8d6;
-
+  /* Board follows the global theme tokens: light squares/dark text in light mode, dark
+     squares/light text in dark mode (square backgrounds are darkened per-tile below in
+     BoardSpot's dark-mode overrides). */
   display: grid;
   grid-template-columns: repeat(11, 1fr);
   grid-template-rows: repeat(11, 1fr);
@@ -114,6 +99,11 @@
   gap: min(0.55cqw, 6px);
   overflow: hidden;
   position: relative;
+}
+
+/* Dark mode: darker green felt for the play area. */
+:global(:root[data-theme="dark"]) .center {
+  background: radial-gradient(120% 120% at 50% 42%, #1f3a26 0%, #17301d 55%, #12271a 100%);
 }
 
 /* Ownership strips rendered inside the center area at each edge */

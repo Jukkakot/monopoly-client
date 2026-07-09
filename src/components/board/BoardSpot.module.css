@@ -461,3 +461,27 @@
 .goCornerFlash {
   animation: goSpotFlash 700ms ease-out forwards;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Dark mode: darken the physical board tiles so the board reads
+   as a dark board (not a dimmed light one). The property colour
+   bands, house/hotel indicators and player tokens are separate
+   elements and keep their vivid colours; only the tile paper and
+   the low-contrast brown labels change here. Tile text is
+   var(--ink), which the global dark theme already flips to light.
+   ───────────────────────────────────────────────────────────── */
+:global(:root[data-theme="dark"]) .spotWrapper,
+:global(:root[data-theme="dark"]) .corner {
+  background: linear-gradient(177deg, #2b322e 0%, #232926 100%);
+}
+:global(:root[data-theme="dark"]) .goCorner   { background: #2c322b; }
+:global(:root[data-theme="dark"]) .jailCorner { background: #2b302a; }
+:global(:root[data-theme="dark"]) .parkingCorner { background: #1e3325; }
+:global(:root[data-theme="dark"]) .goJailCorner  { background: #331f1f; }
+:global(:root[data-theme="dark"]) .community  { background: #1b2a38; }
+:global(:root[data-theme="dark"]) .chance     { background: #332b18; }
+:global(:root[data-theme="dark"]) .tax        { background: #331f1f; }
+:global(:root[data-theme="dark"]) .utility    { background: #2a2438; }
+:global(:root[data-theme="dark"]) .jailPrisoners { background: #33301a; border-color: #5c4a1e; }
+:global(:root[data-theme="dark"]) .jailRounds { color: #e6b566; }
+:global(:root[data-theme="dark"]) .chanceIcon { color: #ff9257; }
