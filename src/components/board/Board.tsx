@@ -456,9 +456,13 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   // Double-tap on a property: zoom to it (and DON'T open its card). A single tap still
   // opens the card, but is deferred briefly so a second tap can cancel it. The user chose
   // this trade-off (tap-to-open gains ~260 ms latency) over the gestures conflicting.
-  const tapRef = useRef<{ idx: number; t: number; timer: ReturnType<typeof setTimeout> } | null>(null)
-  const DOUBLE_TAP_MS = 300
-  const OPEN_DELAY_MS = 260
+  const tapRef = useRef<{ idx: number; t: number; x: number; y: number; timer: ReturnType<typeof setTimeout> } | null>(null)
+  // Open must be deferred at least as long as the double-tap window, or a fast second tap
+  // arrives after the card already opened. Distance tolerance means the two taps don't have
+  // to land on the exact same (small) square — a natural double-tap nearby still counts.
+  const DOUBLE_TAP_MS = 320
+  const DOUBLE_TAP_DIST = 50
+  const OPEN_DELAY_MS = 320
 
   function zoomToSpot(idx: number) {
     userZoomedOutRef.current = true  // suspend auto-zoom
@@ -466,11 +470,12 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     setPinch(zoomTargetForSpot(idx))
   }
 
-  function handleSpotTap(idx: number, spotId: string) {
+  function handleSpotTap(idx: number, spotId: string, e: React.MouseEvent) {
     const now = Date.now()
+    const x = e.clientX, y = e.clientY
     const prev = tapRef.current
-    if (prev && prev.idx === idx && now - prev.t < DOUBLE_TAP_MS) {
-      // Second tap on the same property → zoom, cancel the pending card-open.
+    if (prev && now - prev.t < DOUBLE_TAP_MS && Math.hypot(x - prev.x, y - prev.y) < DOUBLE_TAP_DIST) {
+      // Double tap → zoom to the property, cancel the pending card-open.
       clearTimeout(prev.timer)
       tapRef.current = null
       zoomToSpot(idx)
@@ -478,7 +483,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     }
     if (prev) clearTimeout(prev.timer)
     const timer = setTimeout(() => { tapRef.current = null; onSpotClick?.(spotId) }, OPEN_DELAY_MS)
-    tapRef.current = { idx, t: now, timer }
+    tapRef.current = { idx, t: now, x, y, timer }
   }
 
   useEffect(() => () => { if (tapRef.current) clearTimeout(tapRef.current.timer) }, [])
@@ -745,7 +750,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             property={property}
             players={playersBySpot.get(idx) ?? EMPTY_PLAYERS}
             seats={state.seats}
-            onClick={spot.isProperty ? () => handleSpotTap(idx, spot.id) : undefined}
+            onClick={spot.isProperty ? (e) => handleSpotTap(idx, spot.id, e) : undefined}
             tokenShapes={tokenShapes}
             jailingPlayers={jailingPlayers}
             cardJumpingPlayers={cardJumpingPlayers}

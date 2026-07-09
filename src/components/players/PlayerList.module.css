@@ -28,6 +28,11 @@
   border-color: var(--c-green);
   background: #dcedc8;
 }
+/* Dark mode: a distinct (brighter-than-base) dark-green highlight instead of the light
+   #dcedc8, so the active player's card — and its property chips — stay readable. */
+:global(:root[data-theme="dark"]) .card.active {
+  background: #24492c;
+}
 
 .card.bankrupt {
   opacity: 0.45;
@@ -406,6 +411,6 @@
 }
 
 .tradeBtn:hover {
-  background: #c8e6c9;
+  background: var(--tint-success);
   border-color: #81c784;
 }

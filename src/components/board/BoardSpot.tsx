@@ -13,7 +13,7 @@ interface Props {
   property?: PropertyStateSnapshot
   players: PlayerSnapshot[]
   seats: SeatState[]
-  onClick?: () => void
+  onClick?: (e: import('react').MouseEvent) => void
   tokenShapes?: Map<string, TokenShape>
   jailingPlayers?: Set<string>
   cardJumpingPlayers?: Set<string>

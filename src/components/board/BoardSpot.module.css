@@ -3,6 +3,9 @@
   position: relative;
   min-width: 0;
   min-height: 0;
+  /* Disable the browser's own double-tap-to-zoom (and the ~300ms click delay) on tiles so
+     our double-tap-to-zoom-a-property gesture receives the taps instead. */
+  touch-action: manipulation;
   /* Warm paper gradient instead of a flat cream fill — gives the tiles a
      subtle printed-card depth without changing the familiar tone. */
   background: linear-gradient(177deg, #fffdf5 0%, #fbf6e6 100%);
