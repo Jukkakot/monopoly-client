@@ -10,6 +10,7 @@ import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
 import { panOffsetPercent } from '../../utils/boardPan'
+import { zoomTargetForSpot } from '../../utils/boardZoom'
 import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../../utils/animationSettings'
 import Icon from '../common/Icon'
 import { AnimatedDice } from '../common/DiceDisplay'
@@ -367,6 +368,8 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
 
   // Manual pinch-to-zoom state
   const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 })
+  // True while a zoom change should animate (double-tap), false while a finger drives it 1:1.
+  const [pinchSmooth, setPinchSmooth] = useState(false)
   const pinchGestureRef = useRef<{
     type: 'pinch' | 'pan'
     startDist: number
@@ -382,6 +385,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   } | null>(null)
 
   function handlePinchTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    if (e.touches.length >= 1) setPinchSmooth(false)  // finger gestures track 1:1, no animation
     if (e.touches.length === 2) {
       e.preventDefault()
       userZoomedOutRef.current = true  // suspend auto-zoom while manually zooming
@@ -448,6 +452,36 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     pinchGestureRef.current = null
     setPinch(p => p.scale < 1.15 ? { scale: 1, tx: 0, ty: 0 } : p)
   }
+
+  // Double-tap on a property: zoom to it (and DON'T open its card). A single tap still
+  // opens the card, but is deferred briefly so a second tap can cancel it. The user chose
+  // this trade-off (tap-to-open gains ~260 ms latency) over the gestures conflicting.
+  const tapRef = useRef<{ idx: number; t: number; timer: ReturnType<typeof setTimeout> } | null>(null)
+  const DOUBLE_TAP_MS = 300
+  const OPEN_DELAY_MS = 260
+
+  function zoomToSpot(idx: number) {
+    userZoomedOutRef.current = true  // suspend auto-zoom
+    setPinchSmooth(true)
+    setPinch(zoomTargetForSpot(idx))
+  }
+
+  function handleSpotTap(idx: number, spotId: string) {
+    const now = Date.now()
+    const prev = tapRef.current
+    if (prev && prev.idx === idx && now - prev.t < DOUBLE_TAP_MS) {
+      // Second tap on the same property → zoom, cancel the pending card-open.
+      clearTimeout(prev.timer)
+      tapRef.current = null
+      zoomToSpot(idx)
+      return
+    }
+    if (prev) clearTimeout(prev.timer)
+    const timer = setTimeout(() => { tapRef.current = null; onSpotClick?.(spotId) }, OPEN_DELAY_MS)
+    tapRef.current = { idx, t: now, timer }
+  }
+
+  useEffect(() => () => { if (tapRef.current) clearTimeout(tapRef.current.timer) }, [])
 
   useEffect(() => onZoomSettingChange(() => {
     const mode = loadZoomMode()
@@ -680,7 +714,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const boardStyle: React.CSSProperties = {}
   if (hasPinch) {
     boardStyle.transform = `translate(${pinch.tx}%, ${pinch.ty}%) scale(${pinch.scale})`
-    boardStyle.transition = 'none'
+    boardStyle.transition = pinchSmooth ? 'transform 0.22s ease-out' : 'none'
   } else if (zoomedSpot !== null) {
     boardStyle.transform = computeZoomTransform(zoomedSpot)
   }
@@ -711,7 +745,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             property={property}
             players={playersBySpot.get(idx) ?? EMPTY_PLAYERS}
             seats={state.seats}
-            onClick={spot.isProperty ? () => onSpotClick?.(spot.id) : undefined}
+            onClick={spot.isProperty ? () => handleSpotTap(idx, spot.id) : undefined}
             tokenShapes={tokenShapes}
             jailingPlayers={jailingPlayers}
             cardJumpingPlayers={cardJumpingPlayers}
