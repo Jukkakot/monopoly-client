@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
+import BottomSheet from '../common/BottomSheet'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { useEscapeKey } from '../../hooks/useEscapeKey'
@@ -48,23 +49,20 @@ export default function OverflowMenu() {
 
       {/* Full-screen modals are portaled to <body> so they escape the header's
           stacking context — otherwise board tokens (higher z-index) paint over them. */}
-      {showSound && createPortal(
-        <div className={styles.soundOverlay} data-modal onClick={() => setShowSound(false)}>
-          <div onClick={e => e.stopPropagation()}>
-            <SoundSettings
-              onClose={() => setShowSound(false)}
-              isSpectator={!myPlayerId}
-              onBotSpeedChange={(speed: BotSpeed) => {
-                if (state.sessionId) {
-                  applySessionSettings(state.sessionId, { botSpeed: speed })
-                  saveAnimationSpeed(speed)
-                  applyAnimationSpeedToCss(speed)
-                }
-              }}
-            />
-          </div>
-        </div>,
-        document.body,
+      {showSound && (
+        <BottomSheet onClose={() => setShowSound(false)}>
+          <SoundSettings
+            onClose={() => setShowSound(false)}
+            isSpectator={!myPlayerId}
+            onBotSpeedChange={(speed: BotSpeed) => {
+              if (state.sessionId) {
+                applySessionSettings(state.sessionId, { botSpeed: speed })
+                saveAnimationSpeed(speed)
+                applyAnimationSpeedToCss(speed)
+              }
+            }}
+          />
+        </BottomSheet>
       )}
 
       {showHelp && createPortal(

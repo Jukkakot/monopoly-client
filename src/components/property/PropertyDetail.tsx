@@ -9,6 +9,7 @@ import { setPendingTradeProperty } from '../actions/ActionPanel'
 import { isBlockedByGroupBuildings } from '../../utils/mortgage'
 import { bankHasBuildingFor } from '../../utils/buildSupply'
 import Icon from '../common/Icon'
+import BottomSheet from '../common/BottomSheet'
 
 /** Row of little green house icons — mirrors the property-chip building glyphs. */
 function HouseIcons({ n }: { n: number }) {
@@ -136,8 +137,7 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
     && isMyTurn && !isGameOver
 
   return (
-    <div className={styles.overlay} data-modal onClick={onClose}>
-      <div className={styles.card} onClick={e => e.stopPropagation()}>
+    <BottomSheet onClose={onClose} ariaLabel={spot.name}>
         {/* Color header */}
         <div className={styles.header} style={{ background: color ?? '#888' }}>
           <div className={styles.headerName}>{spot.name}</div>
@@ -322,7 +322,6 @@ export default function PropertyDetail({ spotId, state, onClose }: Props) {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </BottomSheet>
   )
 }
