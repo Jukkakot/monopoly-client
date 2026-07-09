@@ -370,6 +370,9 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   const [pinch, setPinch] = useState({ scale: 1, tx: 0, ty: 0 })
   // True while a zoom change should animate (double-tap), false while a finger drives it 1:1.
   const [pinchSmooth, setPinchSmooth] = useState(false)
+  // Latest scale readable from the (memoised, stale) spot onClick closures.
+  const pinchScaleRef = useRef(1)
+  pinchScaleRef.current = pinch.scale
   const pinchGestureRef = useRef<{
     type: 'pinch' | 'pan'
     startDist: number
@@ -475,10 +478,17 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     const x = e.clientX, y = e.clientY
     const prev = tapRef.current
     if (prev && now - prev.t < DOUBLE_TAP_MS && Math.hypot(x - prev.x, y - prev.y) < DOUBLE_TAP_DIST) {
-      // Double tap → zoom to the property, cancel the pending card-open.
+      // Double tap toggles zoom, cancelling the pending card-open: zoom out if already
+      // zoomed (standard behaviour), otherwise zoom in to the tapped property.
       clearTimeout(prev.timer)
       tapRef.current = null
-      zoomToSpot(idx)
+      if (pinchScaleRef.current > 1.05) {
+        userZoomedOutRef.current = true
+        setPinchSmooth(true)
+        setPinch({ scale: 1, tx: 0, ty: 0 })
+      } else {
+        zoomToSpot(idx)
+      }
       return
     }
     if (prev) clearTimeout(prev.timer)
