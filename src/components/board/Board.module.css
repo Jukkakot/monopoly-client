@@ -1,3 +1,10 @@
+/* Dark mode: dim the whole board uniformly so it doesn't glare against the dark UI.
+   A brightness filter scales squares AND their text together, so contrast is preserved
+   (no light-on-light risk) — the board just reads as a darker, muted physical board. */
+:global(:root[data-theme="dark"]) .board {
+  filter: brightness(0.72) saturate(1.05);
+}
+
 .board {
   /* The board keeps its "physical board" light look in BOTH themes — restore the light
      token values for the whole board subtree so square text stays dark on the cream
