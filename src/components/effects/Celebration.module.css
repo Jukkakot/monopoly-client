@@ -5,6 +5,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Sit over the board (upper area) rather than the dead centre of the screen — the
+     bottom padding pulls the vertically-centred card up. */
+  padding-bottom: 30vh;
   pointer-events: none;
   animation: overlayIn 0.25s ease-out;
 }
@@ -56,6 +59,18 @@
   max-width: 88vw;
 }
 
+/* Dark mode: darken the celebration card so it isn't a glaring white panel; its text
+   uses --ink/--ink-soft below, which flip to light. */
+:global(:root[data-theme="dark"]) .card {
+  background: rgba(26, 32, 28, 0.97);
+  box-shadow:
+    0 18px 60px rgba(10, 35, 10, 0.4),
+    0 0 0 3px var(--group, #2e7d32),
+    0 0 40px -6px var(--group, #2e7d32);
+  animation: cardPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 88vw;
+}
+
 @keyframes cardPop {
   0%   { transform: scale(0.5) translateY(20px); opacity: 0; }
   60%  { transform: scale(1.06); opacity: 1; }
@@ -80,7 +95,7 @@
   font-weight: 900;
   font-size: 2.1rem;
   letter-spacing: 2px;
-  color: #17331b;
+  color: var(--ink);
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.12);
   text-align: center;
 }
@@ -95,7 +110,7 @@
 .sub {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #5a6d5c;
+  color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-align: center;
@@ -111,6 +126,7 @@
   font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: 0.2px;
+  color: var(--ink);
 }
 
 @media (max-width: 480px) {
