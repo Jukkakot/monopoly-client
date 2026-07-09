@@ -79,7 +79,7 @@
   font-size: inherit;
   font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
   font-weight: 700;
-  color: #000;
+  color: var(--ink);
   line-height: 1.1;
   word-break: normal;
   overflow-wrap: break-word;
@@ -89,7 +89,7 @@
 
 .price {
   font-size: 0.85em;
-  color: #222;
+  color: var(--ink);
   font-weight: 500;
   margin-top: 1px;
   font-family: 'Arial Narrow', Arial, sans-serif;
@@ -251,7 +251,7 @@
 .cornerLabel {
   font-size: clamp(4.5px, 0.95cqw, 9.5px);
   font-weight: 900;
-  color: #000;
+  color: var(--ink);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   font-family: 'Arial Narrow', Arial, sans-serif;
@@ -262,7 +262,7 @@
 
 .cornerSub {
   font-size: clamp(3px, 0.55cqw, 5.5px);
-  color: #444;
+  color: var(--ink);
   font-style: italic;
 }
 
@@ -291,7 +291,7 @@
 
 .goSub {
   font-size: clamp(3px, 0.55cqw, 5.5px);
-  color: #444;
+  color: var(--ink);
   font-style: italic;
 }
 
@@ -308,16 +308,16 @@
 .jailLabel {
   font-size: clamp(4.5px, 1cqw, 10px);
   font-weight: 900;
-  color: #000;
+  color: var(--ink);
   text-transform: uppercase;
   font-family: 'Arial Narrow', Arial, sans-serif;
 }
 
 .jailSub {
   font-size: clamp(3px, 0.55cqw, 5.5px);
-  color: #666;
+  color: var(--ink-soft);
   font-style: italic;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--hairline);
   padding-top: 2px;
   margin-top: 1px;
 }
@@ -360,7 +360,7 @@
 .community { background: #e8f4ff; }
 .chance    { background: #fff6dd; }
 .tax       { background: #ffe8e8; }
-.railroad  { background: #f0f0f0; }
+.railroad  { background: var(--surface-sunken); }
 .utility   { background: #f0eaff; }
 
 

@@ -23,9 +23,20 @@
   /* Surfaces & ink */
   --surface:        #f5f9f5;   /* app panel background */
   --surface-raised: #ffffff;   /* cards that lift off the surface */
+  --surface-sunken: #eef3ee;   /* insets, list rows, tables (was #f5f5f5/#fafafa) */
   --ink:      #17331b;         /* primary text */
   --ink-soft: #5a6d5c;         /* secondary text */
+  --ink-faint:#8a9a8c;         /* tertiary / placeholder text (was #999/#aaa) */
   --hairline: #d8e8d6;         /* subtle borders */
+  --on-accent: #ffffff;        /* text/icons on a coloured (green/red/…) fill — stays light */
+
+  /* Tinted status surfaces (highlight rows, badges) */
+  --tint-success: #e8f5e9; --tint-success-ink: #1b5e20;
+  --tint-warn:    #fff8e1; --tint-warn-ink:    #b26a00;
+  --tint-danger:  #ffebee; --tint-danger-ink:  #c62828;
+
+  /* Green page/section wash (full-screen backgrounds, green accent panels) */
+  --brand-wash: #e8f5e9;
 
   /* Elevation — soft, green-tinted shadows for a cohesive depth system */
   --e1: 0 1px 2px rgba(15, 45, 15, .07), 0 1px 1px rgba(15, 45, 15, .04);
@@ -40,6 +51,38 @@
   /* Premium board "felt": a subtle vignette instead of a flat fill */
   --felt: radial-gradient(135% 120% at 50% 22%, #237023 0%, #185818 48%, #0f3d0f 100%);
   --header-grad: linear-gradient(180deg, #338537 0%, #2a6f2d 100%);
+
+  color-scheme: light;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Dark theme — the boot script (main.tsx) resolves 'system' to an
+   explicit data-theme, so only [data-theme="dark"] is needed here.
+   The board felt and coloured accents stay green; only the light
+   surfaces, ink and hairlines flip.
+   ────────────────────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --surface:        #10161a;
+  --surface-raised: #1b242a;
+  --surface-sunken: #151d22;
+  --ink:      #e7efe9;
+  --ink-soft: #a2b2a6;
+  --ink-faint:#7c8c80;
+  --hairline: #2b3841;
+  /* on-accent stays #ffffff */
+
+  --tint-success: #17361f; --tint-success-ink: #a5d6a7;
+  --tint-warn:    #3a2f14; --tint-warn-ink:    #ffca7a;
+  --tint-danger:  #3a1d1f; --tint-danger-ink:  #ff9a9a;
+  --brand-wash:   #12211a;
+
+  --e1: 0 1px 2px rgba(0, 0, 0, .40), 0 1px 1px rgba(0, 0, 0, .30);
+  --e2: 0 2px 8px rgba(0, 0, 0, .45), 0 1px 3px rgba(0, 0, 0, .35);
+  --e3: 0 10px 30px rgba(0, 0, 0, .60), 0 3px 10px rgba(0, 0, 0, .45);
+
+  --header-grad: linear-gradient(180deg, #1e5a22 0%, #16451a 100%);
+
+  color-scheme: dark;
 }
 
 html, body {
@@ -51,8 +94,8 @@ html, body {
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  background: var(--g-50);
-  color: var(--g-700);
+  background: var(--surface);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern' 1;

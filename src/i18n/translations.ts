@@ -361,6 +361,10 @@ export interface T {
   redeemSectionMenuTitle: string
   mortgageBtnMenu: string
   redeemBtnMenu: string
+  themeLabel: string
+  themeSystem: string
+  themeLight: string
+  themeDark: string
   zoomModeLabel: string
   zoomModeOff: string
   zoomModeOwn: string
@@ -882,6 +886,10 @@ const fi: T = {
   redeemSectionMenuTitle: '💳 Lunasta pantit',
   mortgageBtnMenu: 'Panttaa',
   redeemBtnMenu: 'Lunasta',
+  themeLabel: 'Teema',
+  themeSystem: 'Järjestelmä',
+  themeLight: 'Vaalea',
+  themeDark: 'Tumma',
   zoomModeLabel: 'Automaattinen lähennys',
   zoomModeOff: 'Pois päältä',
   zoomModeOwn: 'Seuraa omaa nappulaa',
@@ -1412,6 +1420,10 @@ const en: T = {
   redeemSectionMenuTitle: '💳 Redeem mortgages',
   mortgageBtnMenu: 'Mortgage',
   redeemBtnMenu: 'Redeem',
+  themeLabel: 'Theme',
+  themeSystem: 'System',
+  themeLight: 'Light',
+  themeDark: 'Dark',
   zoomModeLabel: 'Auto-zoom',
   zoomModeOff: 'Off',
   zoomModeOwn: 'Follow own token',

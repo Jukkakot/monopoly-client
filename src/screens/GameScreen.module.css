@@ -47,13 +47,13 @@
 
 .btnSecondary {
   background: transparent;
-  color: #555;
-  border: 1.5px solid #ccc;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--hairline);
 }
 
 .sessionIdHint {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--ink-soft);
 }
 
 .coldStartHint {
@@ -68,8 +68,8 @@
 }
 
 .sessionIdHint code {
-  background: #f5f5f5;
-  border: 1px solid #ddd;
+  background: var(--surface-sunken);
+  border: 1px solid var(--hairline);
   border-radius: 4px;
   padding: 2px 6px;
   font-family: ui-monospace, monospace;
@@ -88,7 +88,7 @@
 }
 
 .duplicateClientBox {
-  background: #fff;
+  background: var(--surface-raised);
   border-radius: 12px;
   padding: 24px 28px;
   max-width: 360px;
@@ -107,7 +107,7 @@
 
 .duplicateClientMsg {
   font-size: 0.9rem;
-  color: #444;
+  color: var(--ink);
   line-height: 1.5;
 }
 

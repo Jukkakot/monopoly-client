@@ -257,7 +257,7 @@
   position: fixed;
   z-index: 300;
   pointer-events: none;
-  background: #fff;
+  background: var(--surface-raised);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.12);
   overflow: hidden;
@@ -280,14 +280,14 @@
 .tooltipName {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #111;
+  color: var(--ink);
   padding: 5px 8px 2px;
   line-height: 1.2;
 }
 
 .tooltipPrice {
   font-size: 0.7rem;
-  color: #444;
+  color: var(--ink);
   padding: 0 8px 3px;
   font-weight: 600;
 }
@@ -297,7 +297,7 @@
   align-items: center;
   gap: 5px;
   font-size: 0.7rem;
-  color: #333;
+  color: var(--ink);
   padding: 2px 8px 3px;
   font-weight: 600;
 }
@@ -320,7 +320,7 @@
 
 .tooltipFree {
   font-size: 0.68rem;
-  color: #888;
+  color: var(--ink-faint);
   padding: 2px 8px 3px;
   font-style: italic;
 }
@@ -554,7 +554,7 @@
 
 .cardBubbleText {
   font-size: clamp(0.6rem, 1.1cqw, 0.88rem);
-  color: #1a1a1a;
+  color: var(--ink);
   font-weight: 700;
   line-height: 1.35;
   text-align: center;
@@ -564,11 +564,11 @@
 .cardBubblePlayer {
   font-size: clamp(0.42rem, 0.8cqw, 0.64rem);
   font-weight: 600;
-  color: #888;
+  color: var(--ink-faint);
   font-family: 'Arial Narrow', Arial, sans-serif;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--hairline);
   padding-top: 4px;
   width: 100%;
   text-align: center;

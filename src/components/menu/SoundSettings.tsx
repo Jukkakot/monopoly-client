@@ -4,6 +4,7 @@ import styles from './SoundSettings.module.css'
 import { useT } from '../../i18n/LanguageContext'
 import { type AnimationSpeed, loadAnimationSpeed, saveAnimationSpeed, applyAnimationSpeedToCss, type BotSpeed, loadBotSpeed, saveBotSpeed, loadDiceZoomEnabled, saveDiceZoomEnabled } from '../../utils/animationSettings'
 import { type ZoomMode, loadZoomMode, saveZoomMode } from '../../utils/zoomSettings'
+import { type ThemePref, loadThemePref, saveThemePref, applyTheme } from '../../utils/theme'
 
 const PING_URL = (import.meta.env.VITE_API_BASE ?? 'http://localhost:8080') + '/ping'
 const PING_INTERVAL_MS = 5_000
@@ -119,6 +120,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
   const [animSpeed, setAnimSpeed] = useState<AnimationSpeed>(loadAnimationSpeed)
   const [botSpeed, setBotSpeedState] = useState<BotSpeed>(loadBotSpeed)
   const [zoomMode, setZoomMode] = useState<ZoomMode>(loadZoomMode)
+  const [theme, setTheme] = useState<ThemePref>(loadThemePref)
   const [diceZoom, setDiceZoom] = useState(loadDiceZoomEnabled)
   const [haptics, setHaptics] = useState(loadHapticsEnabled)
   const isIOS = isIOSDevice()
@@ -194,6 +196,19 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
       ))}
 
       <div className={styles.divider} />
+
+      <div className={styles.row}>
+        <label className={styles.label}>{t.themeLabel}</label>
+        <select
+          className={styles.select}
+          value={theme}
+          onChange={e => { const v = e.target.value as ThemePref; setTheme(v); saveThemePref(v); applyTheme(v) }}
+        >
+          <option value="system">{t.themeSystem}</option>
+          <option value="light">{t.themeLight}</option>
+          <option value="dark">{t.themeDark}</option>
+        </select>
+      </div>
 
       <div className={styles.row}>
         <label className={styles.label}>{t.animSpeedLabel}</label>

@@ -314,7 +314,7 @@
 .mobileNav {
   height: calc(52px + env(safe-area-inset-bottom, 0px));
   display: flex;
-  background: #fff;
+  background: var(--surface-raised);
   border-top: 1px solid #c8e6c9;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   align-items: center;
@@ -327,7 +327,7 @@
   background: transparent;
   font-size: 12px;
   font-weight: 600;
-  color: #888;
+  color: var(--ink-faint);
   cursor: pointer;
   padding: 6px 4px;
   display: flex;
@@ -484,7 +484,7 @@
 }
 
 .playerPopup {
-  background: #fff;
+  background: var(--surface-raised);
   border-radius: 16px 16px 0 0;
   width: 100%;
   max-width: 480px;
@@ -500,7 +500,7 @@
   align-items: center;
   gap: 8px;
   padding: 14px 16px 10px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--hairline);
   flex-shrink: 0;
 }
 
@@ -528,7 +528,7 @@
   background: none;
   border: none;
   font-size: 1rem;
-  color: #888;
+  color: var(--ink-faint);
   cursor: pointer;
   padding: 4px 6px;
   line-height: 1;
@@ -544,7 +544,7 @@
 
 .playerPopupNoProps {
   padding: 16px;
-  color: #888;
+  color: var(--ink-faint);
   font-size: 0.9rem;
 }
 

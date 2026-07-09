@@ -4,6 +4,10 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { logger } from './utils/logger.ts'
+import { initTheme } from './utils/theme.ts'
+
+// Apply the saved (or system) colour theme before first paint.
+initTheme()
 
 // Persistent error log — readable by Playwright tests via page.evaluate()
 window.__monopolyErrorLog = []

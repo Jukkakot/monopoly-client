@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #e8f5e9;
+  background: var(--brand-wash);
   padding-bottom: 24px;
 }
 
@@ -12,7 +12,7 @@
 }
 
 .card {
-  background: #fff;
+  background: var(--surface-raised);
   border: 2px solid #a5d6a7;
   border-radius: 16px;
   padding: 24px;
@@ -38,7 +38,7 @@
 
 .sub {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--ink-soft);
   margin-top: 2px;
 }
 
@@ -54,7 +54,7 @@
   flex: 1;
   padding: 10px 8px;
   background: transparent;
-  color: #555;
+  color: var(--ink-soft);
   border: none;
   font-size: 0.9rem;
   font-weight: 600;
@@ -82,7 +82,7 @@
 .sectionTitle {
   font-weight: 700;
   font-size: 0.8rem;
-  color: #777;
+  color: var(--ink-faint);
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
@@ -100,7 +100,7 @@
   border-radius: 8px;
   font-size: 0.95rem;
   color: #1b5e20;
-  background: #fff;
+  background: var(--surface-raised);
   box-sizing: border-box;
   min-width: 0;
 }
@@ -112,7 +112,7 @@
 
 .randomizeBtn {
   padding: 0 12px;
-  background: #f1f8e9;
+  background: var(--brand-wash);
   border: 1.5px solid #c8e6c9;
   border-radius: 8px;
   font-size: 1.1rem;
@@ -157,9 +157,9 @@
 .shapeBtn {
   width: 32px;
   height: 32px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--hairline);
   border-radius: 6px;
-  background: #f9f9f9;
+  background: var(--surface-sunken);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -168,10 +168,10 @@
   padding: 0;
 }
 
-.shapeBtn:hover { background: #f0f0f0; }
+.shapeBtn:hover { background: var(--surface-sunken); }
 
 .shapeSelected {
-  background: #fff;
+  background: var(--surface-raised);
   box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
 }
 
@@ -182,16 +182,16 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface-raised);
   flex-shrink: 0;
 }
 
 /* ── Divider ── */
 .divider {
   border: none;
-  border-top: 1.5px dashed #d0d0d0;
+  border-top: 1.5px dashed var(--hairline);
   margin: 0;
 }
 
@@ -213,7 +213,7 @@
   height: 32px;
   border-radius: 6px;
   border: 1.5px solid #c8e6c9;
-  background: #f1f8e9;
+  background: var(--brand-wash);
   color: #2e7d32;
   font-size: 1.1rem;
   font-weight: 700;
@@ -231,7 +231,7 @@
 .botCountLabel {
   font-weight: 700;
   font-size: 0.95rem;
-  color: #333;
+  color: var(--ink);
 }
 
 /* ── Error ── */
@@ -259,7 +259,7 @@
 
 .btnHint {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--ink-faint);
   line-height: 1.3;
   padding: 0 2px;
 }
@@ -308,8 +308,8 @@
 .backBtn {
   padding: 10px;
   background: transparent;
-  color: #555;
-  border: 1.5px solid #ccc;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--hairline);
   border-radius: 8px;
   font-size: 0.9rem;
   cursor: pointer;
@@ -317,7 +317,7 @@
   width: 100%;
 }
 
-.backBtn:hover { background: #f5f5f5; }
+.backBtn:hover { background: var(--surface-sunken); }
 
 @media (max-width: 480px) {
   .shapeRow {
@@ -340,7 +340,7 @@
   .tokenPreview::before {
     content: 'Valittu:';
     font-size: 0.72rem;
-    color: #666;
+    color: var(--ink-soft);
     white-space: nowrap;
   }
 }
