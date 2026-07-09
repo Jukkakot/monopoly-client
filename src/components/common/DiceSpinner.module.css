@@ -38,6 +38,11 @@
   padding: 24px;
 }
 
+/* Loading screen follows the theme instead of always being a light-green wash. */
+:global(:root[data-theme="dark"]) .overlay {
+  background: rgba(15, 21, 25, 0.92);
+}
+
 .dice {
   font-size: 3rem;
   animation: diceSpin 1.4s ease-in-out infinite;
