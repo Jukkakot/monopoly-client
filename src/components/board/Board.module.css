@@ -559,12 +559,18 @@
 .cardBubbleBody {
   background: #fffdf0;
   border-radius: 0 0 6px 6px;
+  /* Body text uses --ink/--ink-faint (theme-aware), so the body must darken in dark
+     mode or the light text lands on the light card and vanishes. */
   padding: clamp(6px, 1.2cqw, 12px) clamp(6px, 1.2cqw, 10px);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   flex: 1;
+}
+
+:global(:root[data-theme="dark"]) .cardBubbleBody {
+  background: #262d28;
 }
 
 .cardBubbleText {
