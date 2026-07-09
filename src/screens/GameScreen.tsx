@@ -18,6 +18,7 @@ import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './GameScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
 import { useScreenShake } from '../hooks/useScreenShake'
+import { useWakeLock } from '../hooks/useWakeLock'
 import { didMyTurnStart } from '../utils/turnTransitions'
 
 const DebugPanel = import.meta.env.DEV
@@ -42,6 +43,9 @@ export default function GameScreen() {
 
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null)
   const [highlightGroupType, setHighlightGroupType] = useState<string | null>(null)
+
+  // Keep the screen awake while a game is actively in progress.
+  useWakeLock(state.snapshot?.status === 'IN_PROGRESS')
 
   // Milestone celebration: a brief flourish for a completed monopoly (any player) or the
   // local player's own auction win / hotel / purchase. Picks the most important new one.
