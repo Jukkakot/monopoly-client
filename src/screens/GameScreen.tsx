@@ -17,6 +17,8 @@ import { pickCelebration, type CelebrationData } from '../utils/celebration'
 import DiceSpinner from '../components/common/DiceSpinner'
 import styles from './GameScreen.module.css'
 import { useT } from '../i18n/LanguageContext'
+import { useScreenShake } from '../hooks/useScreenShake'
+import { didMyTurnStart } from '../utils/turnTransitions'
 
 const DebugPanel = import.meta.env.DEV
   ? lazy(() => import('../debug/DebugPanel'))
@@ -53,6 +55,32 @@ export default function GameScreen() {
     const next = pickCelebration(fresh, state.snapshot, state.myPlayerId, t)
     if (next) setCelebration(next)
   }, [state.events])
+
+  // Screen shake when a player goes bankrupt — a dramatic jolt for a dramatic moment.
+  const shake = useScreenShake()
+  const lastBankruptId = useRef(-1)
+  useEffect(() => {
+    const fresh = state.events.filter(e => e.id > lastBankruptId.current && !e.historical)
+    if (fresh.length === 0) return
+    lastBankruptId.current = state.events.reduce((m, e) => Math.max(m, e.id), lastBankruptId.current)
+    if (fresh.some(e => e.soundKey === 'WENT_BANKRUPT')) shake()
+  }, [state.events, shake])
+
+  // "Your turn" glow — a soft green vignette pulse when the turn passes to me, so I
+  // notice even if I glanced away. Complements the tab-title change below.
+  const [turnGlow, setTurnGlow] = useState(false)
+  const prevActiveRef = useRef<string | null>(null)
+  const glowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    const active = state.snapshot?.turn?.activePlayerId ?? null
+    if (didMyTurnStart(prevActiveRef.current, active, state.myPlayerId)) {
+      setTurnGlow(true)
+      if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+      glowTimerRef.current = setTimeout(() => setTurnGlow(false), 1300)
+    }
+    prevActiveRef.current = active
+  }, [state.snapshot?.turn?.activePlayerId, state.myPlayerId])
+  useEffect(() => () => { if (glowTimerRef.current) clearTimeout(glowTimerRef.current) }, [])
   const [debugPlayerId, setDebugPlayerId] = useState<string | null>(null)
   const { sendCmd } = useGame()
   const [isDebugMode, toggleDebug] = useDebugMode()
@@ -207,6 +235,7 @@ export default function GameScreen() {
       {!isGameOver && celebration && (
         <Celebration data={celebration} onDone={() => setCelebration(null)} />
       )}
+      {turnGlow && <div className={styles.turnGlow} aria-hidden="true" />}
       {state.duplicateClient && (
         <div className={styles.duplicateClientOverlay}>
           <div className={styles.duplicateClientBox}>
