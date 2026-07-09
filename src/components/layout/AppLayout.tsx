@@ -7,6 +7,7 @@ import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 import { TokenSvg } from '../board/TokenSvg'
 import { useTokenShapes } from '../../utils/tokenShapes'
 import Icon, { type IconName } from '../common/Icon'
+import AnimatedCash from '../common/AnimatedCash'
 
 type AnimDir = 'right' | 'left'
 
@@ -62,31 +63,6 @@ type MobileTab = 'board' | 'players' | 'log'
 
 const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log']
 const NAV_ICONS: Record<MobileTab, IconName> = { board: 'board', players: 'people', log: 'list' }
-
-/** Smoothly counts a number to a new value over ~350 ms. */
-function AnimatedCash({ value }: { value: number }) {
-  const [display, setDisplay] = useState(value)
-  const prevRef = useRef(value)
-  const frameRef = useRef(0)
-
-  useEffect(() => {
-    const from = prevRef.current
-    prevRef.current = value
-    if (from === value) return
-    const duration = 350
-    const start = performance.now()
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration)
-      const eased = 1 - Math.pow(1 - t, 3)
-      setDisplay(Math.round(from + (value - from) * eased))
-      if (t < 1) frameRef.current = requestAnimationFrame(tick)
-    }
-    frameRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frameRef.current)
-  }, [value])
-
-  return <>{display}</>
-}
 
 interface Props {
   header: ReactNode

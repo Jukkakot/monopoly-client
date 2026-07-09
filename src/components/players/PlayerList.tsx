@@ -3,6 +3,7 @@ import styles from './PlayerList.module.css'
 import type { SessionState, PlayerSnapshot } from '../../types/api'
 import { SPOTS, STREET_COLORS } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
+import AnimatedCash from '../common/AnimatedCash'
 import Icon from '../common/Icon'
 import { useTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
@@ -156,27 +157,6 @@ function GroupDots({ player, state }: { player: PlayerSnapshot; state: SessionSt
       })}
     </div>
   )
-}
-
-function AnimatedCash({ value }: { value: number }) {
-  const [display, setDisplay] = useState(value)
-  const prevRef = useRef(value)
-  const frameRef = useRef(0)
-  useEffect(() => {
-    const from = prevRef.current
-    prevRef.current = value
-    if (from === value) return
-    const duration = 350
-    const start = performance.now()
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration)
-      setDisplay(Math.round(from + (value - from) * (1 - Math.pow(1 - t, 3))))
-      if (t < 1) frameRef.current = requestAnimationFrame(tick)
-    }
-    frameRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frameRef.current)
-  }, [value])
-  return <>{display}</>
 }
 
 export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {

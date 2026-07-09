@@ -1,0 +1,41 @@
+.wrap {
+  position: relative;
+  display: inline-block;
+  /* Let the floating delta chip escape upward without adding layout height. */
+  overflow: visible;
+}
+
+.deltaUp,
+.deltaDown {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  font-weight: 800;
+  font-size: 0.82em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: 'Arial Narrow', Arial, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+  animation: floatUp 0.95s ease-out forwards;
+}
+
+.deltaUp { color: #2e9d3a; }
+.deltaDown { color: #e03a2c; }
+
+@keyframes floatUp {
+  0%   { opacity: 0; transform: translate(-50%, 4px); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -18px); }
+}
+
+/* Respect reduced-motion: collapse the chip near-instantly (onAnimationEnd still
+   fires, so the chip is cleaned up). */
+@media (prefers-reduced-motion: reduce) {
+  .deltaUp,
+  .deltaDown {
+    animation-duration: 0.01s;
+    opacity: 0;
+  }
+}
