@@ -10,7 +10,7 @@ import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { loadZoomMode, onZoomSettingChange } from '../../utils/zoomSettings'
 import { panOffsetPercent } from '../../utils/boardPan'
-import { zoomTargetForSpot } from '../../utils/boardZoom'
+import { zoomTargetForPoint } from '../../utils/boardZoom'
 import { loadDiceZoomEnabled, getAnimationConfig, loadAnimationSpeed } from '../../utils/animationSettings'
 import Icon from '../common/Icon'
 import { AnimatedDice } from '../common/DiceDisplay'
@@ -459,44 +459,49 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
   // Double-tap on a property: zoom to it (and DON'T open its card). A single tap still
   // opens the card, but is deferred briefly so a second tap can cancel it. The user chose
   // this trade-off (tap-to-open gains ~260 ms latency) over the gestures conflicting.
-  const tapRef = useRef<{ idx: number; t: number; x: number; y: number; timer: ReturnType<typeof setTimeout> } | null>(null)
-  // Open must be deferred at least as long as the double-tap window, or a fast second tap
-  // arrives after the card already opened. Distance tolerance means the two taps don't have
-  // to land on the exact same (small) square — a natural double-tap nearby still counts.
+  // Double-tap ANYWHERE on the board toggles zoom (in→point / out); a single tap on a
+  // property opens its card. The open is deferred ≥ the double-tap window and the board-level
+  // handler cancels it on a double-tap, so the two gestures don't fight. Distance tolerance
+  // means the two taps needn't land on the exact same pixel.
+  const lastTapRef = useRef<{ t: number; x: number; y: number } | null>(null)
+  const pendingOpenRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const DOUBLE_TAP_MS = 320
-  const DOUBLE_TAP_DIST = 50
+  const DOUBLE_TAP_DIST = 60
   const OPEN_DELAY_MS = 320
 
-  function zoomToSpot(idx: number) {
-    userZoomedOutRef.current = true  // suspend auto-zoom
-    setPinchSmooth(true)
-    setPinch(zoomTargetForSpot(idx))
+  function handleSpotOpen(spotId: string) {
+    // Just schedule the open; the board-level double-tap handler cancels it if a second tap
+    // follows. (Runs on every property tap, incl. the first tap of a double-tap.)
+    if (pendingOpenRef.current) clearTimeout(pendingOpenRef.current)
+    pendingOpenRef.current = setTimeout(() => { pendingOpenRef.current = null; onSpotClick?.(spotId) }, OPEN_DELAY_MS)
   }
 
-  function handleSpotTap(idx: number, spotId: string, e: React.MouseEvent) {
+  function handleBoardClick(e: React.MouseEvent) {
+    // Ignore clicks on interactive overlays (zoom-out button, skip-anim, card bubble).
+    if ((e.target as HTMLElement).closest('button')) return
     const now = Date.now()
     const x = e.clientX, y = e.clientY
-    const prev = tapRef.current
+    const prev = lastTapRef.current
     if (prev && now - prev.t < DOUBLE_TAP_MS && Math.hypot(x - prev.x, y - prev.y) < DOUBLE_TAP_DIST) {
-      // Double tap toggles zoom, cancelling the pending card-open: zoom out if already
-      // zoomed (standard behaviour), otherwise zoom in to the tapped property.
-      clearTimeout(prev.timer)
-      tapRef.current = null
+      // Double tap → cancel any pending card-open and toggle zoom.
+      lastTapRef.current = null
+      if (pendingOpenRef.current) { clearTimeout(pendingOpenRef.current); pendingOpenRef.current = null }
+      userZoomedOutRef.current = true
+      setPinchSmooth(true)
       if (pinchScaleRef.current > 1.05) {
-        userZoomedOutRef.current = true
-        setPinchSmooth(true)
         setPinch({ scale: 1, tx: 0, ty: 0 })
       } else {
-        zoomToSpot(idx)
+        const rect = e.currentTarget.getBoundingClientRect()
+        const fx = rect.width ? (x - rect.left) / rect.width : 0.5
+        const fy = rect.height ? (y - rect.top) / rect.height : 0.5
+        setPinch(zoomTargetForPoint(fx, fy))
       }
       return
     }
-    if (prev) clearTimeout(prev.timer)
-    const timer = setTimeout(() => { tapRef.current = null; onSpotClick?.(spotId) }, OPEN_DELAY_MS)
-    tapRef.current = { idx, t: now, x, y, timer }
+    lastTapRef.current = { t: now, x, y }
   }
 
-  useEffect(() => () => { if (tapRef.current) clearTimeout(tapRef.current.timer) }, [])
+  useEffect(() => () => { if (pendingOpenRef.current) clearTimeout(pendingOpenRef.current) }, [])
 
   useEffect(() => onZoomSettingChange(() => {
     const mode = loadZoomMode()
@@ -739,6 +744,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     <div
       className={styles.board}
       style={boardStyle}
+      onClick={handleBoardClick}
       onMouseMove={handleBoardMouseMove}
       onMouseLeave={() => setHoveredSpotId(null)}
       onTouchStart={handlePinchTouchStart}
@@ -760,7 +766,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
             property={property}
             players={playersBySpot.get(idx) ?? EMPTY_PLAYERS}
             seats={state.seats}
-            onClick={spot.isProperty ? (e) => handleSpotTap(idx, spot.id, e) : undefined}
+            onClick={spot.isProperty ? () => handleSpotOpen(spot.id) : undefined}
             tokenShapes={tokenShapes}
             jailingPlayers={jailingPlayers}
             cardJumpingPlayers={cardJumpingPlayers}

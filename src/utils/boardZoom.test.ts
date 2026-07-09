@@ -1,5 +1,28 @@
 import { describe, it, expect } from 'vitest'
-import { zoomTargetForSpot } from './boardZoom'
+import { zoomTargetForSpot, zoomTargetForPoint } from './boardZoom'
+
+describe('zoomTargetForPoint', () => {
+  it('does not pan when centred (0.5, 0.5)', () => {
+    const { scale, tx, ty } = zoomTargetForPoint(0.5, 0.5)
+    expect(scale).toBe(2.6)
+    expect(tx).toBeCloseTo(0)
+    expect(ty).toBeCloseTo(0)
+  })
+
+  it('pans up-left toward a bottom-right tap', () => {
+    const { tx, ty } = zoomTargetForPoint(0.9, 0.9)
+    expect(tx).toBeLessThan(0)
+    expect(ty).toBeLessThan(0)
+  })
+
+  it('clamps to the pannable range for extreme corners', () => {
+    const scale = 2.6
+    const maxT = 50 * (scale - 1)
+    const { tx, ty } = zoomTargetForPoint(0, 0, scale)
+    expect(tx).toBeCloseTo(maxT)
+    expect(ty).toBeCloseTo(maxT)
+  })
+})
 
 describe('zoomTargetForSpot', () => {
   it('keeps the requested scale', () => {

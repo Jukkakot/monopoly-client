@@ -271,6 +271,13 @@
 }
 
 /* ── Spot hover tooltip ── */
+/* Touch devices have no real hover — a synthesized mousemove on tap would leave the
+   tooltip stuck on the board. Tapping a spot already opens the full property card, so the
+   hover tooltip is redundant on touch: hide it. */
+@media (hover: none) {
+  .tooltip { display: none !important; }
+}
+
 .tooltip {
   position: fixed;
   z-index: 300;
