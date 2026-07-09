@@ -57,7 +57,7 @@
 .sectionTitle {
   font-size: 0.95rem;
   font-weight: 800;
-  color: var(--g-800, #1b5e20);
+  color: var(--g-800, var(--c-green));
 }
 
 .sectionBody {
@@ -69,14 +69,14 @@
 .tips {
   margin-top: 2px;
   padding: 12px 14px;
-  background: #e8f5e9;
+  background: var(--tint-success);
   border-radius: 12px;
 }
 
 .tipsTitle {
   font-size: 0.9rem;
   font-weight: 800;
-  color: var(--g-800, #1b5e20);
+  color: var(--g-800, var(--c-green));
   margin-bottom: 5px;
 }
 

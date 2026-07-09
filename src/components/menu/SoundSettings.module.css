@@ -48,7 +48,7 @@
 
 .slider {
   flex: 1;
-  accent-color: #2e7d32;
+  accent-color: var(--c-green);
 }
 
 .volNum {
@@ -188,5 +188,5 @@
   font-size: 0.85rem;
   background: var(--surface-sunken);
   cursor: pointer;
-  accent-color: #2e7d32;
+  accent-color: var(--c-green);
 }

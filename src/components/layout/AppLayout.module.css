@@ -341,7 +341,7 @@
 }
 
 .navActive {
-  color: #2e7d32;
+  color: var(--c-green);
   border-top: 2px solid #2e7d32;
 }
 
@@ -520,7 +520,7 @@
 .playerPopupCash {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--c-green);
   font-variant-numeric: tabular-nums;
 }
 
@@ -582,8 +582,8 @@
 
 .playerPopupMortgagedTag {
   font-size: 0.7rem;
-  background: #ffebee;
-  color: #b71c1c;
+  background: var(--tint-danger);
+  color: var(--c-red);
   border-radius: 3px;
   padding: 0 4px;
   font-weight: 700;

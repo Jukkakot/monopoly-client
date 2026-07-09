@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 /* "Your turn" cue — a soft green vignette that pulses once around the viewport edge
@@ -58,8 +58,8 @@
 
 .coldStartHint {
   font-size: 0.9rem;
-  color: #e65100;
-  background: #fff3e0;
+  color: var(--c-orange);
+  background: var(--tint-warn);
   border: 1px solid #ffcc80;
   border-radius: 8px;
   padding: 8px 16px;
@@ -102,7 +102,7 @@
 .duplicateClientTitle {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #b71c1c;
+  color: var(--c-red);
 }
 
 .duplicateClientMsg {

@@ -30,16 +30,16 @@
 .filterBtn:hover { background: var(--surface-sunken); }
 
 .filterActive {
-  background: #e8f5e9;
-  border-color: #2e7d32;
-  color: #1b5e20;
+  background: var(--tint-success);
+  border-color: var(--c-green);
+  color: var(--c-green);
   font-weight: 700;
 }
 
 .filterMine {
-  background: #fff8e1;
+  background: var(--tint-warn);
   border-color: #f9a825;
-  color: #e65100;
+  color: var(--c-orange);
   font-weight: 700;
 }
 
@@ -73,22 +73,22 @@
 }
 
 .entry.mine {
-  background: #e8f5e9;
-  border-left-color: #2e7d32;
+  background: var(--tint-success);
+  border-left-color: var(--c-green);
 }
 
 /* Event type color stripes */
 .entry.typeDice    { border-left-color: #b0bec5; color: #546e7a; }
 .entry.typeMove    { border-left-color: #90a4ae; }
 .entry.typeJail    { border-left-color: #4a148c; background: #f3e5f5; }
-.entry.typeCard    { border-left-color: #f57f17; background: #fff8e1; }
-.entry.typeBuy     { border-left-color: #1565c0; background: #e3f2fd; }
-.entry.typeBuild   { border-left-color: #2e7d32; background: #e8f5e9; }
+.entry.typeCard    { border-left-color: var(--c-orange); background: var(--tint-warn); }
+.entry.typeBuy     { border-left-color: var(--c-blue); background: var(--tint-info); }
+.entry.typeBuild   { border-left-color: var(--c-green); background: var(--tint-success); }
 .entry.typeMortgage{ border-left-color: #795548; background: #efebe9; }
-.entry.typeAuction { border-left-color: #e65100; background: #fff3e0; }
-.entry.typeTrade   { border-left-color: #00695c; background: #e0f2f1; }
-.entry.typeBankrupt{ border-left-color: #b71c1c; background: #ffebee; }
-.entry.typeGameOver{ border-left-color: #f9a825; background: #fff8e1; }
+.entry.typeAuction { border-left-color: var(--c-orange); background: var(--tint-warn); }
+.entry.typeTrade   { border-left-color: #00695c; background: var(--tint-success); }
+.entry.typeBankrupt{ border-left-color: var(--c-red); background: var(--tint-danger); }
+.entry.typeGameOver{ border-left-color: #f9a825; background: var(--tint-warn); }
 .entry.typeRent    { border-left-color: #e57373; background: #fff3f3; }
 
 .icon {

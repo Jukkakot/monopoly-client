@@ -24,7 +24,7 @@
 .logo {
   font-size: 2.2rem;
   font-weight: 900;
-  color: #2e7d32;
+  color: var(--c-green);
   letter-spacing: -1px;
 }
 
@@ -55,7 +55,7 @@
   font-family: ui-monospace, monospace;
   font-size: 0.9rem;
   font-weight: 700;
-  color: #1b5e20;
+  color: var(--c-green);
   word-break: break-all;
 }
 
@@ -71,7 +71,7 @@
   transition: color 0.15s, border-color 0.15s;
 }
 
-.copyBtn:hover { color: #2e7d32; border-color: #2e7d32; }
+.copyBtn:hover { color: var(--c-green); border-color: var(--c-green); }
 
 .sectionHeader {
   display: flex;
@@ -91,7 +91,7 @@
 .readyCount {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 .seatSection {
@@ -121,7 +121,7 @@
   flex: 1;
   font-weight: 700;
   font-size: 0.95rem;
-  color: #1b5e20;
+  color: var(--c-green);
 }
 
 .hostTag {
@@ -146,7 +146,7 @@
   flex-shrink: 0;
 }
 
-.readyBadgeYes { color: #2e7d32; }
+.readyBadgeYes { color: var(--c-green); }
 .readyBadgeNo  { color: #bbb; }
 
 
@@ -162,7 +162,7 @@
   transition: color 0.1s, border-color 0.1s;
 }
 
-.removeBotBtn:hover { color: #e53935; border-color: #e53935; }
+.removeBotBtn:hover { color: var(--c-red); border-color: var(--c-red); }
 
 .joinSection {
   display: flex;
@@ -185,7 +185,7 @@
   transition: border-color 0.15s;
 }
 
-.nameInput:focus { border-color: #2e7d32; }
+.nameInput:focus { border-color: var(--c-green); }
 .nameInput:disabled { opacity: 0.6; }
 
 .joinBtn {
@@ -207,7 +207,7 @@
 .readyBtn {
   padding: 14px;
   background: var(--surface-raised);
-  color: #2e7d32;
+  color: var(--c-green);
   border: 2px solid #2e7d32;
   border-radius: 10px;
   font-size: 1rem;
@@ -228,7 +228,7 @@
 
 .addBotBtn {
   padding: 10px;
-  background: #fffde7;
+  background: var(--tint-warn);
   color: #5d4037;
   border: 2px dashed #ffe082;
   border-radius: 10px;
@@ -238,15 +238,15 @@
   transition: background 0.15s;
 }
 
-.addBotBtn:hover:not(:disabled) { background: #fff9c4; }
+.addBotBtn:hover:not(:disabled) { background: var(--tint-warn); }
 .addBotBtn:disabled { opacity: 0.5; cursor: default; }
 
 .errorMsg {
-  background: #ffebee;
+  background: var(--tint-danger);
   border: 1px solid #ef9a9a;
   border-radius: 6px;
   padding: 10px 12px;
-  color: #b71c1c;
+  color: var(--c-red);
   font-size: 0.9rem;
 }
 

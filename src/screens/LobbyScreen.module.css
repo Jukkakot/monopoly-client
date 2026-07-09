@@ -32,7 +32,7 @@
 .logo {
   font-size: 2.2rem;
   font-weight: 900;
-  color: #2e7d32;
+  color: var(--c-green);
   letter-spacing: -1px;
 }
 
@@ -99,7 +99,7 @@
   border: 1.5px solid #c8e6c9;
   border-radius: 8px;
   font-size: 0.95rem;
-  color: #1b5e20;
+  color: var(--c-green);
   background: var(--surface-raised);
   box-sizing: border-box;
   min-width: 0;
@@ -107,7 +107,7 @@
 
 .nameInput:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--c-green);
 }
 
 .randomizeBtn {
@@ -142,7 +142,7 @@
 }
 
 .colorDot.selected {
-  border-color: #1b5e20;
+  border-color: var(--c-green);
   transform: scale(1.2);
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1b5e20;
 }
@@ -214,7 +214,7 @@
   border-radius: 6px;
   border: 1.5px solid #c8e6c9;
   background: var(--brand-wash);
-  color: #2e7d32;
+  color: var(--c-green);
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
@@ -236,11 +236,11 @@
 
 /* ── Error ── */
 .errorMsg {
-  background: #ffebee;
+  background: var(--tint-danger);
   border: 1px solid #ef9a9a;
   border-radius: 6px;
   padding: 10px 12px;
-  color: #b71c1c;
+  color: var(--c-red);
   font-size: 0.9rem;
 }
 

@@ -60,7 +60,7 @@ button.chip:active { transform: translateY(0.5px) scale(0.985); box-shadow: var(
 .buildCount {
   font-size: 0.66rem;
   font-weight: 800;
-  color: var(--g-700, #2e7d32);
+  color: var(--c-green);
   line-height: 1;
 }
 

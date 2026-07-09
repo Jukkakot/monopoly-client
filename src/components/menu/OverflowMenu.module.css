@@ -83,8 +83,8 @@
 
 .menuItem:hover { background: var(--surface-sunken); }
 
-.menuItem.danger { color: #c62828; }
-.menuItem.danger:hover { background: #ffebee; }
+.menuItem.danger { color: var(--c-red); }
+.menuItem.danger:hover { background: var(--tint-danger); }
 
 .menuItemDisabled {
   opacity: 0.45;
@@ -137,7 +137,7 @@
 .tradeBtn {
   padding-left: 22px !important;
   font-size: 0.85rem !important;
-  color: #1b5e20 !important;
+  color: var(--c-green) !important;
 }
 
 .tradeColor {

@@ -104,7 +104,7 @@
 .price {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 .player {

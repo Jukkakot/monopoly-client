@@ -68,7 +68,7 @@
 .sum {
   font-size: min(1.5cqw, 1.2rem);
   font-weight: 900;
-  color: #1a5c0a;
+  color: var(--c-green);
   font-family: 'Impact', 'Arial Black', Arial, sans-serif;
   line-height: 1;
   margin-left: min(0.25cqw, 4px);

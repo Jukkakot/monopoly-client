@@ -11,7 +11,7 @@
   align-items: flex-start;
   gap: 8px;
   padding: 9px 11px;
-  background: #fff8e1;
+  background: var(--tint-warn);
   border: 1px solid #ffe082;
   border-radius: 9px;
   font-size: 0.8rem;
@@ -58,11 +58,11 @@
   transition: background 0.15s, color 0.15s;
 }
 
-.tab:hover { background: #e8f5e9; color: #388e3c; }
+.tab:hover { background: var(--tint-success); color: var(--c-green); }
 
 .tabActive {
   background: var(--surface-raised);
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 /* Sliding underline indicator — translates to position of active tab */
@@ -101,7 +101,7 @@
 }
 
 @keyframes myTurnPulse {
-  0%, 100% { outline-color: #2e7d32; }
+  0%, 100% { outline-color: var(--c-green); }
   50%       { outline-color: #66bb6a; }
 }
 
@@ -109,7 +109,7 @@
   display: flex;
   justify-content: center;
   padding: 8px 10px;
-  background: #f1f8e9;
+  background: var(--tint-success);
   border-radius: 8px;
   border: 1px solid #c8e6c9;
   animation: panelIn 0.2s ease-out;
@@ -198,12 +198,12 @@
 .sectionToggle:hover {
   background: #e4ede4;
   border-color: #a5c4a5;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 .sectionBadge {
   background: #c8e6c9;
-  color: #2e7d32;
+  color: var(--c-green);
   border-radius: 8px;
   padding: 1px 6px;
   font-size: 0.68rem;
@@ -219,22 +219,22 @@
 }
 
 .infoBox {
-  background: #e8f5e9;
+  background: var(--tint-success);
   border: 1px solid #a5d6a7;
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 0.88rem;
-  color: #2e7d32;
+  color: var(--c-green);
   line-height: 1.4;
 }
 
 .warningBox {
-  background: #fff3e0;
+  background: var(--tint-warn);
   border: 1px solid #ffb74d;
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.82rem;
-  color: #e65100;
+  color: var(--c-orange);
   line-height: 1.4;
 }
 
@@ -244,7 +244,7 @@
   gap: 10px;
   background: #f3f8ff;
   border-color: #90caf9;
-  color: #1565c0;
+  color: var(--c-blue);
   font-style: italic;
 }
 
@@ -271,9 +271,9 @@
   40%           { transform: translateY(-5px); opacity: 1; }
 }
 
-.infoBox.debt    { background: #ffebee; border-color: #ef9a9a; color: #b71c1c; }
-.infoBox.auction { background: #fff8e1; border-color: #ffe082; color: #f57f17; }
-.infoBox.doubles { background: #fff3e0; border-color: #ffb74d; color: #e65100; }
+.infoBox.debt    { background: var(--tint-danger); border-color: #ef9a9a; color: var(--c-red); }
+.infoBox.auction { background: var(--tint-warn); border-color: #ffe082; color: var(--c-orange); }
+.infoBox.doubles { background: var(--tint-warn); border-color: #ffb74d; color: var(--c-orange); }
 
 /* Debt card */
 .debtCard {
@@ -317,7 +317,7 @@
 }
 
 .debtCardBody {
-  background: #ffebee;
+  background: var(--tint-danger);
   padding: 6px 12px 7px;
   display: flex;
   flex-direction: column;
@@ -327,7 +327,7 @@
 .debtCardReason {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #b71c1c;
+  color: var(--c-red);
   line-height: 1.3;
 }
 
@@ -349,7 +349,7 @@
 
 .debtCardRowValRed {
   font-weight: 700;
-  color: #c62828;
+  color: var(--c-red);
 }
 
 /* Debt property/building chip buttons */
@@ -371,7 +371,7 @@
 .debtChipLabel {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #b71c1c;
+  color: var(--c-red);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 2px;
@@ -396,7 +396,7 @@
 .debtInsufficientFunds {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #c62828;
+  color: var(--c-red);
   padding: 1px 0;
 }
 
@@ -408,7 +408,7 @@
 
 .debtBankruptConfirm {
   font-size: 0.78rem;
-  color: #b71c1c;
+  color: var(--c-red);
   font-weight: 600;
   padding: 2px 0 4px;
 }
@@ -417,9 +417,9 @@
   text-align: center;
   font-size: 1.4rem;
   font-weight: 900;
-  color: #f57f17;
+  color: var(--c-orange);
   padding: 16px;
-  background: #fff8e1;
+  background: var(--tint-warn);
   border-radius: 12px;
   border: 2px solid #ffe082;
 }
@@ -469,7 +469,7 @@
 .auctionYouLeadTag {
   font-size: 0.68rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--c-green);
   margin-left: 4px;
 }
 
@@ -491,7 +491,7 @@
 .auctionWonTitle {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #1b5e20;
+  color: var(--c-green);
 }
 
 .auctionWonDetail {
@@ -504,14 +504,14 @@
 .auctionWonPrice {
   font-size: 1.4rem;
   font-weight: 900;
-  color: #1b5e20;
+  color: var(--c-green);
 }
 
 .auctionNoFunds {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #c62828;
-  background: #ffebee;
+  color: var(--c-red);
+  background: var(--tint-danger);
   border-radius: 6px;
   padding: 5px 10px;
 }
@@ -553,7 +553,7 @@
 .auctionListPriceTag {
   font-size: 0.75rem;
   color: #5d4037;
-  background: #fff3e0;
+  background: var(--tint-warn);
   border: 1px solid #ffb74d;
   border-radius: 5px;
   padding: 2px 7px;
@@ -610,15 +610,15 @@
 .auctionLeadBid {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #2e7d32;
+  color: var(--c-green);
   line-height: 1;
 }
 
 .auctionLeadTag {
   font-size: 0.58rem;
   font-weight: 700;
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--tint-success);
+  color: var(--c-green);
   border-radius: 4px;
   padding: 1px 4px;
   text-transform: uppercase;
@@ -628,8 +628,8 @@
 .auctionActorTag {
   font-size: 0.62rem;
   font-weight: 700;
-  background: #fff8e1;
-  color: #e65100;
+  background: var(--tint-warn);
+  color: var(--c-orange);
   border-radius: 4px;
   padding: 1px 4px;
   text-transform: uppercase;
@@ -655,7 +655,7 @@
 .auctionHint {
   font-size: 0.78rem;
   color: #5d4037;
-  background: #fff3e0;
+  background: var(--tint-warn);
   border: 1px solid #ffb74d;
   border-radius: 6px;
   padding: 6px 10px;
@@ -757,7 +757,7 @@
 .moneyBtnMinus {
   border-color: #e57373 !important;
   background: #fff5f5;
-  color: #c62828;
+  color: var(--c-red);
   padding: 5px 4px;
   font-size: 0.7rem;
   font-weight: 700;
@@ -766,11 +766,11 @@
   cursor: pointer;
   min-width: 32px;
 }
-.moneyBtnMinus:hover:not(:disabled) { background: #ffebee; }
+.moneyBtnMinus:hover:not(:disabled) { background: var(--tint-danger); }
 .moneyBtnPlus {
   border-color: #81c784 !important;
-  background: #f1f8e9;
-  color: #2e7d32;
+  background: var(--tint-success);
+  color: var(--c-green);
   padding: 5px 4px;
   font-size: 0.7rem;
   font-weight: 700;
@@ -779,7 +779,7 @@
   cursor: pointer;
   min-width: 32px;
 }
-.moneyBtnPlus:hover:not(:disabled) { background: #e8f5e9; }
+.moneyBtnPlus:hover:not(:disabled) { background: var(--tint-success); }
 
 .moneyBtnMinus:disabled,
 .moneyBtnPlus:disabled { opacity: 0.3; cursor: default; }
@@ -792,9 +792,9 @@
   border-radius: 6px;
   text-align: center;
 }
-.tradeBalanceEven { background: #e8f5e9; color: #2e7d32; }
-.tradeBalancePos  { background: #e3f2fd; color: #1565c0; }
-.tradeBalanceNeg  { background: #fff3e0; color: #e65100; }
+.tradeBalanceEven { background: var(--tint-success); color: var(--c-green); }
+.tradeBalancePos  { background: var(--tint-info); color: var(--c-blue); }
+.tradeBalanceNeg  { background: var(--tint-warn); color: var(--c-orange); }
 
 /* Send + cancel on one row */
 .tradeActions {
@@ -847,7 +847,7 @@
 .tradeMortgagedDivider {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #c62828;
+  color: var(--c-red);
   text-transform: uppercase;
   letter-spacing: 0.4px;
   padding-top: 2px;
@@ -869,8 +869,8 @@
 
 .propMortgagedTag {
   font-size: 0.65rem;
-  color: #b71c1c;
-  background: #ffebee;
+  color: var(--c-red);
+  background: var(--tint-danger);
   border-radius: 3px;
   padding: 1px 4px;
   flex-shrink: 0;
@@ -941,8 +941,8 @@
 }
 
 .offerItem {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--tint-success);
+  color: var(--c-green);
   border-radius: 4px;
   padding: 2px 6px;
   font-size: 0.78rem;
@@ -1046,7 +1046,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
   display: flex;
   align-items: center;
   gap: 2px;
-  background: #e8f5e9;
+  background: var(--tint-success);
   border: 1px solid #a5d6a7;
   border-radius: 6px;
   padding: 4px 8px;
@@ -1056,13 +1056,13 @@ button.tradePropChip:active { filter: brightness(0.84); }
 .tradeMoneyChipIcon {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #388e3c;
+  color: var(--c-green);
 }
 
 .tradeMoneyChipAmount {
   font-size: 0.88rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 .tradeEmptyNote {
@@ -1100,15 +1100,15 @@ button.tradePropChip:active { filter: brightness(0.84); }
 }
 
 .tradeBalanceGood {
-  background: #e8f5e9;
+  background: var(--tint-success);
   border: 1px solid #a5d6a7;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 .tradeBalanceBad {
-  background: #ffebee;
+  background: var(--tint-danger);
   border: 1px solid #ef9a9a;
-  color: #c62828;
+  color: var(--c-red);
 }
 
 .tradeBalanceNeutral {
@@ -1135,7 +1135,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
 .buildGroup {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--c-green);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 4px;
@@ -1199,8 +1199,8 @@ button.tradePropChip:active { filter: brightness(0.84); }
 .buildBtn:hover:not(:disabled) { background: var(--surface-sunken); }
 .buildBtn:disabled { opacity: 0.35; cursor: default; }
 
-.sellBtn { border-color: #ef9a9a; color: #b71c1c; }
-.sellBtn:hover:not(:disabled) { background: #ffebee; }
+.sellBtn { border-color: #ef9a9a; color: var(--c-red); }
+.sellBtn:hover:not(:disabled) { background: var(--tint-danger); }
 
 .buildBtnGlyph {
   display: inline-flex;
@@ -1224,7 +1224,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  background: #fffde7;
+  background: var(--tint-warn);
   border: 2px solid #f9a825;
   border-radius: 12px;
   padding: 16px 14px 12px;
@@ -1268,9 +1268,9 @@ button.tradePropChip:active { filter: brightness(0.84); }
 
 /* Rent popup — red tint variant */
 .rentPopup {
-  background: #ffebee;
+  background: var(--tint-danger);
   border-color: #ef9a9a;
-  color: #b71c1c;
+  color: var(--c-red);
 }
 .rentPopup .cardPopupOk {
   background: #c62828;
@@ -1296,7 +1296,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
 .diceTotal {
   font-size: 1.4rem;
   font-weight: 900;
-  color: #1b5e20;
+  color: var(--c-green);
   line-height: 1;
   font-family: 'Arial Narrow', Arial, sans-serif;
 }
@@ -1336,7 +1336,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
 }
 
 .turnTimerAfk {
-  color: #e65100;
+  color: var(--c-orange);
   animation: blink 1s step-end infinite;
 }
 
@@ -1369,7 +1369,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
 
 .myStatVal {
   font-weight: 700;
-  color: #2e7d32;
+  color: var(--c-green);
 }
 
 /* ── Trade initiation picker ── */
@@ -1416,7 +1416,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: #e8f5e9;
+  background: var(--tint-success);
   border: 1px solid #c8e6c9;
   border-left: 7px solid #a5d6a7;  /* color overridden inline */
   border-radius: 8px;
@@ -1474,7 +1474,7 @@ button.tradePropChip:active { filter: brightness(0.84); }
 .propBuyPrice {
   font-size: 0.92rem;
   font-weight: 800;
-  color: #2e7d32;
+  color: var(--c-green);
   flex-shrink: 0;
 }
 
