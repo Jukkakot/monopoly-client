@@ -17,6 +17,7 @@ import { calcNetWorth } from '../../utils/netWorth'
 import { tradeVerdict } from '../../utils/tradeFairness'
 import { isBlockedByGroupBuildings } from '../../utils/mortgage'
 import { bankHasBuildingFor } from '../../utils/buildSupply'
+import { planDebtCoverage } from '../../utils/debtPlan'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -985,6 +986,18 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
   const hasEnoughCash = debt.currentCash >= debt.amountRemaining
   const [confirmBankruptcy, setConfirmBankruptcy] = useState(false)
 
+  // Debt-coverage helper: how much more is still needed and the fewest mortgages
+  // that cover it — so the debtor doesn't have to do the arithmetic under pressure.
+  const mortgageOptions = state.properties
+    .filter(p => p.ownerPlayerId === debt.debtorPlayerId && !p.mortgaged
+      && !isBlockedByGroupBuildings(p.propertyId, state.properties))
+    .map(p => {
+      const price = SPOTS.find(s => s.id === p.propertyId)?.price ?? 0
+      return { propertyId: p.propertyId, value: Math.floor(price / 2) }
+    })
+  const plan = planDebtCoverage(debt.amountRemaining, debt.currentCash, mortgageOptions)
+  const suggestionNames = plan.suggestion.map(id => SPOTS.find(s => s.id === id)?.name ?? id)
+
   const headerTitle = debt.creditorType === 'PLAYER'
     ? `${t.debtCardTitle} — ${creditorName}`
     : reason
@@ -1011,7 +1024,13 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
             <span className={hasEnoughCash ? styles.debtCardRowVal : styles.debtCardRowValRed}>€{debt.currentCash}</span>
           </div>
           {!hasEnoughCash && myPlayerId !== null && (
-            <div className={styles.debtInsufficientFunds}>⚠️ {t.insufficientFunds}</div>
+            <>
+              <div className={styles.debtInsufficientFunds}>⚠️ {t.insufficientFunds}</div>
+              <div className={styles.debtCardRow}>
+                <span className={styles.debtCardRowLabel}>{t.debtShortfallLabel}</span>
+                <span className={styles.debtCardRowValRed}>€{plan.shortfall}</span>
+              </div>
+            </>
           )}
           {debt.estimatedLiquidationValue > 0 && (
             <div className={styles.debtCardRow}>
@@ -1046,6 +1065,9 @@ function DebtSection({ state, myPlayerId, sendCmd }: {
         return (
           <>
             <div className={styles.debtChipLabel}>{t.debtMortgageGroupTitle}</div>
+            {!hasEnoughCash && plan.covers && suggestionNames.length > 0 && (
+              <div className={styles.debtSuggestion}>{t.debtSuggestionLabel} {suggestionNames.join(' + ')}</div>
+            )}
             <PropertyChipWrap>
               {flatProps.map(prop => {
                 const spot = SPOTS.find(s => s.id === prop.propertyId)

@@ -95,6 +95,8 @@ export interface T {
   debtCash: (n: number) => string
   debtLiquidation: (n: number) => string
   payDebtBtn: string
+  debtShortfallLabel: string
+  debtSuggestionLabel: string
   debtMortgageGroupTitle: string
   debtSellBuildingTitle: string
   mortgagePropBtn: (name: string) => string
@@ -604,6 +606,8 @@ const fi: T = {
   debtCash: (n) => `Käteinen: €${n}`,
   debtLiquidation: (n) => `Likvidointiarvo: ~€${n}`,
   payDebtBtn: '💸 Maksa velka',
+  debtShortfallLabel: 'Puuttuu vielä',
+  debtSuggestionLabel: '💡 Ehdotus: panttaa',
   debtMortgageGroupTitle: 'Panttaa kiinteistö',
   debtSellBuildingTitle: 'Myy rakennuksia',
   mortgagePropBtn: (name) => `🏦 Panttaa ${name}`,
@@ -1144,6 +1148,8 @@ const en: T = {
   debtCash: (n) => `Cash: €${n}`,
   debtLiquidation: (n) => `Liquidation value: ~€${n}`,
   payDebtBtn: '💸 Pay debt',
+  debtShortfallLabel: 'Still short',
+  debtSuggestionLabel: '💡 Suggestion: mortgage',
   debtMortgageGroupTitle: 'Mortgage property',
   debtSellBuildingTitle: 'Sell buildings',
   mortgagePropBtn: (name) => `🏦 Mortgage ${name}`,

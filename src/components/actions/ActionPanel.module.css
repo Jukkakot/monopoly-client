@@ -383,6 +383,17 @@
   margin-top: 2px;
 }
 
+.debtSuggestion {
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--tint-info-ink, var(--c-blue));
+  background: var(--tint-info);
+  border-radius: 8px;
+  padding: 6px 9px;
+  margin-bottom: 2px;
+}
+
 .debtChip {
   padding: 5px 9px;
   border-radius: 8px;
