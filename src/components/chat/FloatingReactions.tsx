@@ -59,11 +59,11 @@ export default function FloatingReactions() {
     // On first run, mark all existing chat events as seen so a page load doesn't replay them.
     if (!seededRef.current) {
       seededRef.current = true
-      const ids = state.events.filter(e => e.chat).map(e => e.id)
+      const ids = state.chatEvents.map(e => e.id)
       lastSeenId.current = ids.length ? Math.max(...ids) : -1
       return
     }
-    const fresh = state.events.filter(e => e.chat && !e.historical && e.id > lastSeenId.current)
+    const fresh = state.chatEvents.filter(e => e.chat && !e.historical && e.id > lastSeenId.current)
     if (fresh.length === 0) return
     lastSeenId.current = Math.max(lastSeenId.current, ...fresh.map(e => e.id))
 
@@ -88,7 +88,7 @@ export default function FloatingReactions() {
       const ttl = item.kind === 'message' ? MESSAGE_MS : REACTION_MS
       setTimeout(() => setFloaters(f => f.filter(x => x.key !== item.key)), ttl)
     }
-  }, [state.events, state.snapshot?.seats, t])
+  }, [state.chatEvents, state.snapshot?.seats, t])
 
   if (floaters.length === 0) return null
 

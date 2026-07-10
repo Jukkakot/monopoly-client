@@ -19,7 +19,7 @@ export default memo(function ChatPanel() {
   const [sending, setSending] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
-  const messages = useMemo<GameEvent[]>(() => state.events.filter(e => e.chat), [state.events])
+  const messages = useMemo<GameEvent[]>(() => state.chatEvents.filter(e => e.chat), [state.chatEvents])
 
   // A bot line is localized live into the viewer's language; a human line is verbatim.
   const messageText = (chat: NonNullable<GameEvent['chat']>) => resolveChatText(chat, t.botChat)

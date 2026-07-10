@@ -90,7 +90,7 @@ export default function AppLayout({ header, board, players, log, chat, actions }
   const t = useT()
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
-  const chatCount = state.events.reduce((n, e) => (e.chat ? n + 1 : n), 0)
+  const chatCount = state.chatEvents.length
   const [unreadChat, setUnreadChat] = useState(0)
   const lastSeenChatCount = useRef(chatCount)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)

@@ -85,6 +85,10 @@ interface GameState {
   connectionQuality: ConnectionQuality  // link health while connected: good / slow / unstable
   reconnectAttempts: number  // how many consecutive SSE reconnect attempts since last success
   events: GameEvent[]
+  // Chat + emoji reactions, kept in their own slice so they can surface the instant they arrive
+  // over SSE — bypassing the snapshot animation queue that paces board events. This is what lets
+  // a reaction pop up in real time regardless of whatever token-move animation is playing.
+  chatEvents: GameEvent[]
   myPlayerId: string | null
   lastDice: [number, number] | null
   diceHistory: [number, number][]
@@ -102,6 +106,7 @@ type Action =
   | { type: 'SET_SESSION'; sessionId: string }
   | { type: 'LEAVE_SESSION' }
   | { type: 'SET_SNAPSHOT'; snapshot: ClientSessionSnapshot }
+  | { type: 'ADD_CHAT_EVENTS'; events: GameEvent[] }
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
   | { type: 'SET_CONNECTION_QUALITY'; quality: ConnectionQuality }
   | { type: 'SET_RECONNECT_ATTEMPTS'; count: number }
@@ -148,6 +153,7 @@ function reducer(state: GameState, action: Action): GameState {
         connectionQuality: 'good',
         reconnectAttempts: 0,
         events: [],
+        chatEvents: [],
         myPlayerId: null,
         lastDice: null,
         diceHistory: [],
@@ -176,7 +182,8 @@ function reducer(state: GameState, action: Action): GameState {
           firstSnapshotAt = Date.now()
           if (backendLog.length > 0) {
             lastSeenEventId = Math.max(...backendLog.map(e => e.id))
-            newEvents.push(...translateBackendEvents(backendLog, newSnapshot.players)
+            // CHAT events are handled by the real-time chat path (ingestChat), not here.
+            newEvents.push(...translateBackendEvents(backendLog.filter(e => e.type !== 'CHAT'), newSnapshot.players)
               .map(e => ({ ...e, historical: true, releaseAt: undefined })))
           }
         } else {
@@ -186,7 +193,8 @@ function reducer(state: GameState, action: Action): GameState {
           const newEntries = backendLog.filter(e => e.id > lastSeenEventId)
           if (newEntries.length > 0) {
             lastSeenEventId = Math.max(...newEntries.map(e => e.id))
-            const translated = translateBackendEvents(newEntries, newSnapshot.players)
+            // CHAT events are handled by the real-time chat path (ingestChat), not here.
+            const translated = translateBackendEvents(newEntries.filter(e => e.type !== 'CHAT'), newSnapshot.players)
             newEvents.push(...inGracePeriod
               ? translated.map(e => ({ ...e, historical: true, releaseAt: undefined }))
               : translated)
@@ -265,6 +273,14 @@ function reducer(state: GameState, action: Action): GameState {
         firstSnapshotAt,
       }
     }
+    case 'ADD_CHAT_EVENTS': {
+      if (action.events.length === 0) return state
+      // Dedupe by id — a resent/duplicate snapshot could re-deliver the same CHAT entry.
+      const seen = new Set(state.chatEvents.map(e => e.id))
+      const fresh = action.events.filter(e => !seen.has(e.id))
+      if (fresh.length === 0) return state
+      return { ...state, chatEvents: [...state.chatEvents, ...fresh].slice(-200) }
+    }
     case 'LEAVE_SESSION':
       return {
         ...state,
@@ -273,6 +289,7 @@ function reducer(state: GameState, action: Action): GameState {
         version: 0,
         reconnectAttempts: 0,
         events: [],
+        chatEvents: [],
         myPlayerId: null,
         lastDice: null,
         diceHistory: [],
@@ -330,6 +347,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     connectionQuality: 'good',
     reconnectAttempts: 0,
     events: [],
+    chatEvents: [],
     myPlayerId: null,
     lastDice: null,
     diceHistory: [],
@@ -354,6 +372,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const lastEventTimestamp = useRef<number | null>(null)
   const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
   const prevPhaseRef = useRef<string | undefined>(undefined)
+  // Real-time chat ingestion cursor — advances independently of the snapshot animation queue so
+  // reactions/messages surface the instant their snapshot arrives, not when the queue drains.
+  const chatLastIdRef = useRef(-1)
+  const chatSeededRef = useRef(false)
+  const chatFirstSnapshotAtRef = useRef<number | null>(null)
   // Briefly true after any direct dispatch — blocks incoming SSE snaps from bypassing the queue
   // before the animation useEffect has had a chance to set isAnyPlayerAnimating().
   const settlingRef = useRef(false)
@@ -457,6 +480,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     lastSoundedId.current = -1
     prevPhaseRef.current = undefined
     lastEventTimestamp.current = null
+    chatLastIdRef.current = -1
+    chatSeededRef.current = false
+    chatFirstSnapshotAtRef.current = null
     dispatch({ type: 'SET_SESSION', sessionId })
     retryCount.current = 0
     versionRef.current = 0
@@ -469,6 +495,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const leaveSession = useCallback(() => {
     pendingSnapshots.current = []
     settlingRef.current = false
+    chatLastIdRef.current = -1
+    chatSeededRef.current = false
+    chatFirstSnapshotAtRef.current = null
     dispatch({ type: 'LEAVE_SESSION' })
     retryCount.current = 0
     versionRef.current = 0
@@ -510,6 +539,34 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const injectDebugSnapshot = useCallback((snapshot: SessionState) => {
     dispatch({ type: 'INJECT_DEBUG_SNAPSHOT', snapshot })
+  }, [])
+
+  // Pull any new CHAT events out of an incoming snapshot and surface them immediately, without
+  // going through the animation-gated snapshot queue. Called for every SSE snapshot at receipt.
+  const ingestChat = useCallback((snap: ClientSessionSnapshot) => {
+    const log = snap.state?.eventLog
+    if (!log || log.length === 0) return
+    const players = snap.state!.players
+    if (!chatSeededRef.current) {
+      // First snapshot after connect/refresh: existing chat is history — show it in the Chat tab
+      // but flag it historical so FloatingReactions doesn't replay a burst of old reactions.
+      chatSeededRef.current = true
+      chatFirstSnapshotAtRef.current = Date.now()
+      const chatEntries = log.filter(e => e.type === 'CHAT')
+      if (chatEntries.length > 0) {
+        dispatch({ type: 'ADD_CHAT_EVENTS', events: translateBackendEvents(chatEntries, players).map(e => ({ ...e, historical: true })) })
+      }
+      chatLastIdRef.current = log.reduce((m, e) => Math.max(m, e.id), chatLastIdRef.current)
+      return
+    }
+    const prevId = chatLastIdRef.current
+    const newChat = log.filter(e => e.type === 'CHAT' && e.id > prevId)
+    chatLastIdRef.current = log.reduce((m, e) => Math.max(m, e.id), prevId)
+    if (newChat.length === 0) return
+    // Grace window after (re)connect: mark as historical so a reconnect that replays several
+    // seconds of chat doesn't float them all at once.
+    const inGrace = chatFirstSnapshotAtRef.current !== null && (Date.now() - chatFirstSnapshotAtRef.current) < 2000
+    dispatch({ type: 'ADD_CHAT_EVENTS', events: translateBackendEvents(newChat, players).map(e => inGrace ? { ...e, historical: true } : e) })
   }, [])
 
   // ── Duplicate-tab detection via BroadcastChannel ─────────────────────────────
@@ -676,6 +733,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         try {
           const snap: ClientSessionSnapshot = JSON.parse(e.data)
+
+          // Surface chat/reactions immediately, before the version gate and animation queue, so
+          // they appear in real time no matter what board animation is playing.
+          ingestChat(snap)
 
           // Drop stale or duplicate snapshots: on connect the backend can race the initial
           // snapshot write with a concurrent update pushed through the listener, delivering
