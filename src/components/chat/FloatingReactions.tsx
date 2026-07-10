@@ -8,13 +8,32 @@ interface Floater {
   emoji: string
   name: string
   color: string
-  left: number  // vw offset for horizontal jitter
+  x: number  // px, viewport coords — horizontal centre of the float
+  y: number  // px, viewport coords — where it starts rising from
+  anchored: boolean  // true when pinned to the sender's on-screen chip
+}
+
+/** Looks up the sender's cash-chip on screen so a reaction rises out of the player's own
+ *  name/money chip — you can see who reacted. Falls back to a spread-out lower-screen spot
+ *  when the chip isn't visible (e.g. the reactor is on a different tab). */
+function anchorFor(playerId: string): { x: number; y: number; anchored: boolean } {
+  const el = typeof document !== 'undefined'
+    ? document.querySelector(`[data-player-chip="${CSS.escape(playerId)}"]`)
+    : null
+  if (el) {
+    const r = el.getBoundingClientRect()
+    if (r.width > 0 && r.height > 0) {
+      return { x: r.left + r.width / 2, y: r.top, anchored: true }
+    }
+  }
+  const w = typeof window !== 'undefined' ? window.innerWidth : 360
+  const h = typeof window !== 'undefined' ? window.innerHeight : 640
+  return { x: w * (0.12 + Math.random() * 0.4), y: h * 0.72, anchored: false }
 }
 
 /** Floats emoji reactions up over the game view whenever any player reacts — so everyone
- *  sees a reaction the moment it's sent, not just readers of the Chat tab. Driven by the
- *  same SSE event log (REACTION chat events); historical events (loaded on reconnect) are
- *  skipped so a refresh doesn't replay a burst of old reactions. */
+ *  sees a reaction the moment it's sent. Driven by the SSE event log (REACTION chat events);
+ *  historical events (loaded on reconnect) are skipped so a refresh doesn't replay old ones. */
 export default function FloatingReactions() {
   const { state } = useGame()
   const [floaters, setFloaters] = useState<Floater[]>([])
@@ -37,13 +56,16 @@ export default function FloatingReactions() {
     lastSeenId.current = Math.max(lastSeenId.current, ...fresh.map(e => e.id))
 
     const seatColor = new Map((state.snapshot?.seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
-    const added = fresh.map(e => ({
-      key: keyRef.current++,
-      emoji: e.chat!.content,
-      name: e.chat!.name,
-      color: seatColor.get(e.chat!.playerId) ?? '#888',
-      left: 8 + Math.random() * 40,  // spread across the lower-left region
-    }))
+    const added = fresh.map(e => {
+      const a = anchorFor(e.chat!.playerId)
+      return {
+        key: keyRef.current++,
+        emoji: e.chat!.content,
+        name: e.chat!.name,
+        color: seatColor.get(e.chat!.playerId) ?? '#888',
+        x: a.x, y: a.y, anchored: a.anchored,
+      }
+    })
     setFloaters(f => [...f, ...added])
     // Remove each floater after its animation completes.
     for (const a of added) {
@@ -56,7 +78,7 @@ export default function FloatingReactions() {
   return createPortal(
     <div className={styles.layer} aria-hidden="true">
       {floaters.map(f => (
-        <div key={f.key} className={styles.floater} style={{ left: `${f.left}%` }}>
+        <div key={f.key} className={styles.floater} style={{ left: f.x, top: f.y }}>
           <span className={styles.emoji}>{f.emoji}</span>
           <span className={styles.name} style={{ color: f.color }}>{f.name}</span>
         </div>

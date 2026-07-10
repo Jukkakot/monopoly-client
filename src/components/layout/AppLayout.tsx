@@ -9,6 +9,7 @@ import { useTokenShapes } from '../../utils/tokenShapes'
 import Icon, { type IconName } from '../common/Icon'
 import AnimatedCash from '../common/AnimatedCash'
 import BottomSheet from '../common/BottomSheet'
+import ReactionButton from '../chat/ReactionButton'
 import { fitBoardHeight } from '../../utils/mobileFit'
 
 type AnimDir = 'right' | 'left'
@@ -466,6 +467,10 @@ export default function AppLayout({ header, board, players, log, chat, actions }
 
   return (
     <div className={styles.root}>
+      {/* Reaction FAB — hidden on the chat tab (which has its own reaction bar) to avoid
+          overlapping its send button. */}
+      {(!isMobile || mobileTab !== 'chat') && <ReactionButton />}
+
       {/* ── Desktop: board column ── */}
       <div className={styles.boardCol}>
         {!isMobile && board}
@@ -566,6 +571,7 @@ export default function AppLayout({ header, board, players, log, chat, actions }
                   const isMe = p.playerId === state.myPlayerId
                   return (
                     <div key={p.playerId}
+                      data-player-chip={p.playerId}
                       className={[
                         styles.cashChip,
                         isActive ? styles.cashChipActive : '',

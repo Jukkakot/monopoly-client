@@ -477,6 +477,7 @@ export interface T {
   chatEmpty: string
   chatReactionsLabel: string
   chatSpectatorHint: string
+  reactionButtonLabel: string
   // Bot chat phrases, keyed by situation. Bots send a (key, variant) pair; the client renders
   // the matching pool entry in its own language. Pool lengths mirror BotChatter.java on the
   // backend; a mismatched variant index is clamped modulo the pool length (never crashes).
@@ -1029,6 +1030,7 @@ const fi: T = {
   chatEmpty: 'Ei viestejä vielä. Sano jotain! 👋',
   chatReactionsLabel: 'Reaktiot',
   chatSpectatorHint: 'Vain pelaajat voivat lähettää viestejä.',
+  reactionButtonLabel: 'Lähetä reaktio',
   botChat: {
     boughtProperty: [
       'Tää tontti on nyt mun. 😎', 'Hyvä sijoitus!', 'Tästä tulee hyvä.',
@@ -1060,6 +1062,21 @@ const fi: T = {
     ],
     tradeDone: [
       'Hyvä diili! 🤝', 'Kaupat kunnossa.', 'Molemmat voittaa — tai ainakin minä. 😏',
+    ],
+    greeting: [
+      'Aloitetaan! 🎲', 'Tsemppiä kaikille! 🍀', 'Nyt pelataan. 😎', 'Onnea matkaan, tarvitsette sitä. 😏',
+    ],
+    passedGo: [
+      'Kierros täynnä, +200! 💰', 'Kiitos, pankki. 💵', 'Taas 200 taskuun.',
+    ],
+    releasedFromJail: [
+      'Vapaana taas! 🔓', 'Takaisin peliin. 😎', 'Ei minua kauaa pidellä.',
+    ],
+    mortgaged: [
+      'Pakko kiinnittää... 😬', 'Tarvitaan käteistä nopeasti.', 'Ei muuta vaihtoehtoa nyt.',
+    ],
+    tradeDeclined: [
+      'No ei sitten. 🤷', 'Harmi, olisi ollut hyvä diili.', 'Ehkä ensi kerralla. 🤔',
     ],
   },
 
@@ -1614,6 +1631,7 @@ const en: T = {
   chatEmpty: 'No messages yet. Say something! 👋',
   chatReactionsLabel: 'Reactions',
   chatSpectatorHint: 'Only players can send messages.',
+  reactionButtonLabel: 'Send a reaction',
   botChat: {
     boughtProperty: [
       'This one\'s mine now. 😎', 'Good investment!', 'This\'ll pay off.',
@@ -1645,6 +1663,21 @@ const en: T = {
     ],
     tradeDone: [
       'Nice deal! 🤝', 'Deal\'s done.', 'Everybody wins — well, me at least. 😏',
+    ],
+    greeting: [
+      'Let\'s go! 🎲', 'Good luck, everyone! 🍀', 'Game on. 😎', 'Good luck — you\'ll need it. 😏',
+    ],
+    passedGo: [
+      'Lap done, +200! 💰', 'Thanks, bank. 💵', 'Another 200 in the pocket.',
+    ],
+    releasedFromJail: [
+      'Free again! 🔓', 'Back in the game. 😎', 'Can\'t hold me for long.',
+    ],
+    mortgaged: [
+      'Gotta mortgage... 😬', 'Need cash, fast.', 'No other choice right now.',
+    ],
+    tradeDeclined: [
+      'Guess not. 🤷', 'Shame, that was a good deal.', 'Maybe next time. 🤔',
     ],
   },
 

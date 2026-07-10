@@ -71,7 +71,7 @@ export default memo(function ChatPanel() {
           const shape = tokenShapes.get(chat.playerId) ?? 'circle'
           if (chat.kind === 'REACTION') {
             return (
-              <div key={e.id} className={styles.reactionLine}>
+              <div key={e.id} className={`${styles.reactionLine} ${mine ? styles.reactionLineMine : ''}`}>
                 <TokenSvg size={13} color={color} shape={shape} style={{ verticalAlign: 'middle' }} />
                 <span className={styles.reactionName} style={{ color }}>{chat.name}</span>
                 <span className={styles.reactionEmoji}>{chat.content}</span>

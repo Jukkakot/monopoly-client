@@ -76,6 +76,14 @@
   font-size: 13px;
   color: var(--ink-soft);
   padding: 1px 4px;
+  align-self: flex-start;
+}
+
+/* My own reactions align to the right, matching my chat bubbles — otherwise it reads oddly
+   to have my messages on the right but my reactions on the left. */
+.reactionLineMine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 
 .reactionName {

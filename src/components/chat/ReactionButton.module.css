@@ -1,0 +1,61 @@
+/* Floating action button, bottom-right, clear of the mobile bottom nav and safe-area inset.
+   Fixed + portaled to body so it rides above the board on every tab and on desktop. */
+.fab {
+  position: fixed;
+  right: 12px;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: 140;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-raised);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--hairline);
+  font-size: 24px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.fab:hover { transform: scale(1.06); }
+.fab:active { transform: scale(0.92); }
+
+/* On wider screens the mobile nav is gone — sit lower, in the corner. */
+@media (min-width: 768px) {
+  .fab {
+    bottom: 18px;
+    right: 18px;
+  }
+}
+
+.pickerTitle {
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  padding: 4px 0 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+.emojiBtn {
+  border: none;
+  background: var(--surface-sunken);
+  border-radius: 12px;
+  font-size: 30px;
+  line-height: 1;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.12s ease;
+}
+
+.emojiBtn:hover { background: var(--hairline); }
+.emojiBtn:active { transform: scale(1.3); }
