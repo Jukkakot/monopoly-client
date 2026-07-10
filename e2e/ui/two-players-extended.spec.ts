@@ -129,7 +129,6 @@ test("H2's turn: H1 sees phase indicator, H2 rolls and ends turn, H1 gets roll",
   try {
     const [page1, page2] = await Promise.all([ctx1.newPage(), ctx2.newPage()])
     const snap0 = await getSnapshot(session.sid)
-    const h1Seat = seatOf(snap0, session.p1.playerId)
     const h2Seat = seatOf(snap0, session.p2.playerId)
 
     // H2's turn; H2 at pos 15, owns RR2, dice [2,3]=5 → FREE_PARKING (pos 20)

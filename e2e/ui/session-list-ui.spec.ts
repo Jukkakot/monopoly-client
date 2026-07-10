@@ -5,7 +5,7 @@
  * UI actions available on each row: copy ID, join, delete, rejoin banner.
  */
 import { test, expect } from '@playwright/test'
-import { createBotSession, createHumanBotSession, deleteSession } from '../helpers/api'
+import { createBotSession, deleteSession } from '../helpers/api'
 import { recordSession } from '../helpers/sessionTracker'
 
 // ─── Session rows ─────────────────────────────────────────────────────────────

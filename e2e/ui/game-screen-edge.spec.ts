@@ -8,7 +8,7 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import {
-  createHumanBotSession, createBotSession, createBotSessionDetailed, getSnapshot,
+  createHumanBotSession, createBotSession, getSnapshot,
   injectState, setBotSpeed, deleteSession,
 } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
@@ -108,7 +108,6 @@ test('game screen: M key toggles mute (volume icon changes)', async ({ page }) =
     // Find the mute button (shows volume icon or 🔇)
     const muteBtn = page.locator('[class*=muteBtn]').first()
     await expect(muteBtn).toBeVisible({ timeout: 5000 })
-    const initialTitle = await muteBtn.getAttribute('title')
 
     // Press M to toggle mute
     await page.evaluate(() => {

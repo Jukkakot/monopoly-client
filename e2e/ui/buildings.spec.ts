@@ -24,7 +24,6 @@ test('buy house button visible with full monopoly in WAITING_FOR_END_TURN', asyn
     await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
-    const botSeat = 1 - humanSeat
 
     // Human owns full BROWN monopoly (B1+B2), WAITING_FOR_END_TURN
     await injectState(sid, buildPatch({

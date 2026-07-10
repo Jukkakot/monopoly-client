@@ -62,20 +62,7 @@ describe('Game over', () => {
       expect(snap.status).toBe('IN_PROGRESS')  // still going, seat1+seat2 remain
 
       // Now seat1 goes bankrupt — inject new state with seat1 broke owing seat2
-      const patch2 = buildPatch({
-        description: '', rules: [],
-        players: [
-          { cash: 0,    boardIndex: 10 },  // seat0: already bankrupt/eliminated (cash 0)
-          { cash: 1,    boardIndex: 0  },  // seat1: active, broke
-          { cash: 1500, boardIndex: 20 },  // seat2: rich, owns DB2 (hotel)
-        ],
-        ownedProperties: { 2: ['DB1', 'DB2'] },
-        propertyOverrides: { DB2: { hotelCount: 1 } },
-        turn: { seat: 1, phase: 'WAITING_FOR_ROLL' },
-        forcedDice: [1, 2],  // 0+3=3... wait seat1 is at 0, 0+3=3 = B2 not DB2
-        expectedAfter: {},
-      }, snap)
-      // Actually let's use dice that land on DB2 from seat1's position
+      // Use dice that land on DB2 from seat1's position:
       // seat1 at 36 (CHANCE3), dice [2,1]=3 → 39 = DB2
       const patch2b = buildPatch({
         description: '', rules: [],

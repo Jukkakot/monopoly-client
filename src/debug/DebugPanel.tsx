@@ -116,6 +116,8 @@ interface Props {
   sessionId: string
 }
 
+// Backs the SectionKey union below via `typeof` — referenced as a type, not at runtime.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SECTIONS = ['scenarios', 'capture', 'force', 'sse', 'players', 'properties'] as const
 type SectionKey = typeof SECTIONS[number]
 const SECTION_LABELS: Record<SectionKey, string> = {

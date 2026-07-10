@@ -2,7 +2,7 @@
  * Advanced mobile tests — auctions, building, card acknowledgement, game over,
  * and cross-device (mobile + desktop) scenarios.
  */
-import { test, expect, type Page, type Browser } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import type { ClientSessionSnapshot } from '../../src/types/api'
 import {
   createHumanBotSession, createTwoHumanSession, getSnapshot, injectState,

@@ -1,6 +1,4 @@
 import { describe, test, expect } from 'vitest'
-import { createBotSession, getSnapshot, injectState, sendCmd, sendCmdRaw, deleteSession } from '../helpers/api'
-import { buildPatch } from '../helpers/scenario'
 import { runCmds, rollAs } from '../helpers/run'
 import type { CmdFactory } from '../helpers/run'
 import { buyPropertyScenario } from '../scenarios/buying/buy-property'
@@ -9,7 +7,6 @@ import { winAuctionScenario } from '../scenarios/buying/win-auction'
 import { allPassAuctionScenario } from '../scenarios/buying/all-pass-auction'
 import { ineligibleBidderScenario } from '../scenarios/buying/ineligible-bidder'
 import { noEligibleBiddersScenario } from '../scenarios/buying/no-eligible-bidders'
-import type { ClientSessionSnapshot } from '../../src/types/api'
 
 const decline: CmdFactory = (ids, snap) => ({
   type: 'DeclineProperty',

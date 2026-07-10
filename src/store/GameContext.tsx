@@ -160,7 +160,7 @@ function reducer(state: GameState, action: Action): GameState {
       const newSnapshot = action.snapshot.state
 
       // Translate backend-persisted events (new entries only) + derive misc events from state diff
-      let newEvents: GameEvent[] = []
+      const newEvents: GameEvent[] = []
       let lastSeenEventId = state.lastSeenEventId
       let firstSnapshotAt = state.firstSnapshotAt
       const INITIAL_SYNC_GRACE_MS = 2000

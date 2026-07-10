@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import type { ClientSessionSnapshot } from '../../src/types/api'
-import { createHumanBotSession, createBotSession, getSnapshot, injectState, setBotSpeed, deleteSession } from '../helpers/api'
+import { createHumanBotSession, getSnapshot, injectState, setBotSpeed, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 
 /**
@@ -30,7 +30,6 @@ test('roll button → end-turn button: ActionPanel päivittyy nopan heiton jälk
     await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
-    const botSeat = 1 - humanSeat
 
     // Human owns B2 → landing on own property → no rent/decision → WAITING_FOR_END_TURN
     await injectState(sid, buildPatch({

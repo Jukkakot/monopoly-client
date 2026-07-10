@@ -5,7 +5,7 @@
 import { test, expect, type Page, type Browser } from '@playwright/test'
 import type { ClientSessionSnapshot } from '../../src/types/api'
 import {
-  createHumanBotSession, createBotSession, getSnapshot, injectState, setBotSpeed, deleteSession,
+  createHumanBotSession, getSnapshot, injectState, setBotSpeed, deleteSession,
 } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 

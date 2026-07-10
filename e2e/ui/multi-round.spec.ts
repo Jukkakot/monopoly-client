@@ -25,7 +25,6 @@ test('end turn → bot acts → human can roll again', async ({ page }) => {
     await setBotSpeed(sid, 'fast')
     const snap0 = await getSnapshot(sid)
     const humanSeat = humanSeatOf(snap0, humanPlayerId)
-    const botSeat = 1 - humanSeat
 
     // Human WAITING_FOR_END_TURN at FREE_PARKING; bot is in jail (quick turn: roll, stay in jail, end turn)
     await injectState(sid, buildPatch({

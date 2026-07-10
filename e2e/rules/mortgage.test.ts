@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { createBotSession, getSnapshot, injectState, sendCmdRaw, setBotSpeed, deleteSession } from '../helpers/api'
+import { createBotSession, getSnapshot, injectState, sendCmdRaw, deleteSession } from '../helpers/api'
 import { buildPatch } from '../helpers/scenario'
 import { runCmds } from '../helpers/run'
 import type { CmdFactory } from '../helpers/run'

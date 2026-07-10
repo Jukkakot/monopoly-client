@@ -53,7 +53,7 @@ export default function OverflowMenu() {
       {/* Full-screen modals are portaled to <body> so they escape the header's
           stacking context — otherwise board tokens (higher z-index) paint over them. */}
       {showSound && (
-        <BottomSheet onClose={() => setShowSound(false)}>
+        <BottomSheet onClose={() => setShowSound(false)} ariaLabel={t.soundSettingsBtn}>
           <SoundSettings
             onClose={() => setShowSound(false)}
             isSpectator={!myPlayerId}

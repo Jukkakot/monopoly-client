@@ -3,7 +3,6 @@ import { createBotSession, getSnapshot, injectState, sendCmd, deleteSession } fr
 import { buildPatch } from '../helpers/scenario'
 import { runCmds, rollAs } from '../helpers/run'
 import type { CmdFactory } from '../helpers/run'
-import type { ClientSessionSnapshot } from '../../src/types/api'
 
 // Seat 0 has €1, owes rent to seat 1 who owns B2 with hotel (rent €450)
 // Seat 0 at 0, dice [1,2]=3 → B2 → RESOLVING_DEBT
@@ -19,19 +18,6 @@ const debtBaseScenario = (seat0Cash = 1, seat0Props: string[] = []) => ({
   turn: { seat: 0, phase: 'WAITING_FOR_ROLL' },
   forcedDice: [1, 2] as [number, number],  // → B2
   expectedAfter: {},
-})
-
-const mortgageForDebt = (propId: string): CmdFactory => (ids, snap) => ({
-  type: 'MortgagePropertyForDebt',
-  actorPlayerId: ids[0],
-  debtId: snap.state!.activeDebt!.debtId,
-  propertyId: propId,
-})
-
-const payDebt: CmdFactory = (ids, snap) => ({
-  type: 'PayDebt',
-  actorPlayerId: ids[0],
-  debtId: snap.state!.activeDebt!.debtId,
 })
 
 const declareBankruptcy: CmdFactory = (ids, snap) => ({
@@ -118,8 +104,6 @@ describe('Debt & bankruptcy', () => {
       rollAs(scenario as any),
       declareBankruptcy,
     ])
-    const b2 = snap.state!.properties.find(p => p.propertyId === 'B2')!
-    const seat1Id = snap.state!.players[1].playerId
     // seat1 owns B2 already; after bankruptcy seat0's empty set still transfers (nothing to transfer here)
     // Key check: seat0 is eliminated
     expect(snap.state?.players[0].eliminated).toBe(true)

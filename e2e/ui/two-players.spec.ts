@@ -5,7 +5,7 @@
  * Commands require playerToken in the body because the session has human players:
  *   { type, actorPlayerId, playerToken, ...rest }
  */
-import { test, expect, type Page, type BrowserContext } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import type { ClientSessionSnapshot } from '../../src/types/api'
 import {
   createTwoHumanSession, getSnapshot, injectState, sendCmd, sendCmdRaw, deleteSession,

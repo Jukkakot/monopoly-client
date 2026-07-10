@@ -3,7 +3,7 @@
  * fills in their name, and joins. Covers the join form UI and the transition to
  * the ready state after joining.
  */
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import { deleteSession } from '../helpers/api'
 import { recordSession } from '../helpers/sessionTracker'
 
