@@ -200,6 +200,37 @@
 
 .botBadge { background: var(--tint-info); color: #3949ab; }
 
+/* Live turn-duration chip on the active player's card. */
+.turnTimer,
+.turnTimerSlow,
+.turnTimerIdle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+.turnTimer { background: var(--surface-sunken); color: var(--ink-soft); }
+.turnTimerSlow { background: var(--tint-warn); color: var(--c-orange); }
+.turnTimerIdle {
+  background: var(--tint-danger);
+  color: var(--c-red);
+  animation: turnTimerPulse 1.4s ease-in-out infinite;
+}
+.turnAfk { font-weight: 800; letter-spacing: 0.02em; }
+
+@keyframes turnTimerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turnTimerIdle { animation: none; }
+}
+
 .chevron {
   font-size: 0.7rem;
   color: var(--ink-faint);

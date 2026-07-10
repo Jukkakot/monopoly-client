@@ -8,8 +8,36 @@ import Icon from '../common/Icon'
 import { useTokenShapes } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
+import { turnUrgency, formatTurnDuration } from '../../utils/turnTimer'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
+
+/**
+ * Live "how long has this turn taken" chip for the active player. The backend
+ * doesn't stamp a turn-start time, so we count from when this badge mounts —
+ * which, because it only renders on the active card, is a fresh mount each time
+ * the active player changes. Stays hidden for the first few seconds so fast
+ * (and bot) turns don't flicker; turns amber then red as an AFK hint.
+ */
+function TurnTimerBadge() {
+  const t = useT()
+  const [start] = useState(() => Date.now())
+  const [elapsed, setElapsed] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000)
+    return () => clearInterval(id)
+  }, [start])
+  const urgency = turnUrgency(elapsed)
+  if (urgency === 'hidden') return null
+  const cls = urgency === 'idle' ? styles.turnTimerIdle
+    : urgency === 'slow' ? styles.turnTimerSlow : styles.turnTimer
+  return (
+    <span className={cls} aria-label={`${t.turnTimerLabel}: ${formatTurnDuration(elapsed)}`}>
+      ⏱ {formatTurnDuration(elapsed)}
+      {urgency === 'idle' && <span className={styles.turnAfk}>{t.turnAfkHint}</span>}
+    </span>
+  )
+}
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   if (values.length < 2) return null
@@ -271,6 +299,7 @@ export default function PlayerList({ state, onSpotClick, onTradeWith }: Props) {
                   {player.getOutOfJailCards > 0 && !isBankrupt && (
                     <span className={`${styles.badge} ${styles.cardBadge}`}>🃏×{player.getOutOfJailCards}</span>
                   )}
+                  {isActive && !isBankrupt && state.status === 'IN_PROGRESS' && <TurnTimerBadge />}
                 </div>
                 <div className={styles.details}>
                   {spotName} · {t.propAbbr(player.ownedPropertyIds.length)}

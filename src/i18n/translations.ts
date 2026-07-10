@@ -295,6 +295,8 @@ export interface T {
   // ── PlayerList ───────────────────────────────────────────────────────────────
   youBadge: string
   bankruptBadge: string
+  turnTimerLabel: string
+  turnAfkHint: string
   noPropertiesMsg: string
   propAbbr: (n: number) => string
   mortgagedStat: (n: number) => string
@@ -801,6 +803,8 @@ const fi: T = {
   // PlayerList
   youBadge: 'sinä',
   bankruptBadge: 'konkurssi',
+  turnTimerLabel: 'Vuoron kesto',
+  turnAfkHint: 'AFK?',
   noPropertiesMsg: 'Ei kiinteistöjä',
   propAbbr: (n) => `${n} kiin.`,
   mortgagedStat: (n) => `${n} pantattu`,
@@ -1339,6 +1343,8 @@ const en: T = {
   // PlayerList
   youBadge: 'you',
   bankruptBadge: 'bankrupt',
+  turnTimerLabel: 'Turn time',
+  turnAfkHint: 'AFK?',
   noPropertiesMsg: 'No properties',
   propAbbr: (n) => `${n} prop.`,
   mortgagedStat: (n) => `${n} mortgaged`,
