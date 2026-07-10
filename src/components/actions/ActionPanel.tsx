@@ -7,6 +7,7 @@ import { useT } from '../../i18n/LanguageContext'
 import { SPOTS, STREET_COLORS, HOUSE_PRICES } from '../../types/spots'
 import { PropertyChip, PropertyChipWrap } from '../common/PropertyChip'
 import Icon from '../common/Icon'
+import { useConfirm } from '../common/ConfirmDialog'
 import { playButtonClick, playAuctionBid } from '../../utils/sounds'
 import { useIsAnimating } from '../../hooks/useTokenAnimation'
 import { markCardAcknowledged } from '../board/Board'
@@ -135,6 +136,7 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
   const isMyTurn = activeId === myPlayerId
   const turnSeconds = useTurnTimer(activeId, phase)
   const tokenAnimating = useIsAnimating()
+  const { confirm, dialog: confirmDialog } = useConfirm()
 
   const me = state.players.find(p => p.playerId === myPlayerId)
   const myProps = state.properties.filter(p => p.ownerPlayerId === myPlayerId)
@@ -268,12 +270,18 @@ export default function ActionPanel({ state, myPlayerId }: Props) {
     const canRetrigger = hasHostToken || state.seats.every(s => s.seatKind === 'BOT')
     return (
       <div className={styles.panel}>
+        {confirmDialog}
         {phaseContent}
         {botStuckGlobal && canRetrigger && (
           <Btn label={t.retriggerBotBtn} variant="secondary" onClick={() => retriggerBot(sid)} />
         )}
         {hasHostToken && (
-          <Btn label={t.endGameBtn} onClick={() => { if (confirm(t.endGameConfirmMsg)) cmd('AbortGame') }} variant="danger" />
+          <Btn label={t.endGameBtn} variant="danger"
+            onClick={() => confirm({
+              message: t.endGameConfirmMsg,
+              confirmLabel: t.endGameBtn,
+              onConfirm: () => cmd('AbortGame'),
+            })} />
         )}
       </div>
     )

@@ -8,6 +8,7 @@ import { TokenSvg } from '../board/TokenSvg'
 import { useTokenShapes } from '../../utils/tokenShapes'
 import Icon, { type IconName } from '../common/Icon'
 import AnimatedCash from '../common/AnimatedCash'
+import BottomSheet from '../common/BottomSheet'
 
 type AnimDir = 'right' | 'left'
 
@@ -591,35 +592,33 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi)
         })
         return (
-          <div className={styles.playerPopupOverlay} data-modal onClick={() => setCashPopupPlayerId(null)}>
-            <div className={styles.playerPopup} onClick={e => e.stopPropagation()}>
-              <div className={styles.playerPopupHeader}>
-                <span className={styles.playerPopupDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
-                <span className={styles.playerPopupName}>{player.name}</span>
-                <span className={styles.playerPopupCash}>€<AnimatedCash value={player.cash} /></span>
-                <button className={styles.playerPopupClose} aria-label={t.closeLabel} onClick={() => setCashPopupPlayerId(null)}>✕</button>
-              </div>
-              {ownedProps.length === 0 ? (
-                <div className={styles.playerPopupNoProps}>{t.noPropertiesMsg}</div>
-              ) : (
-                <div className={styles.playerPopupProps}>
-                  <PropertyChipWrap>
-                    {sorted.flatMap(([, props]) =>
-                      props.map(prop => (
-                        <PropertyChip
-                          key={prop.propertyId}
-                          id={prop.propertyId}
-                          mortgaged={prop.mortgaged}
-                          houses={prop.houseCount}
-                          hotel={prop.hotelCount > 0}
-                        />
-                      ))
-                    )}
-                  </PropertyChipWrap>
-                </div>
-              )}
+          <BottomSheet onClose={() => setCashPopupPlayerId(null)} ariaLabel={player.name}>
+            <div className={styles.playerPopupHeader}>
+              <span className={styles.playerPopupDot} style={{ background: seat?.tokenColorHex ?? '#888' }} />
+              <span className={styles.playerPopupName}>{player.name}</span>
+              <span className={styles.playerPopupCash}>€<AnimatedCash value={player.cash} /></span>
+              <button className={styles.playerPopupClose} aria-label={t.closeLabel} onClick={() => setCashPopupPlayerId(null)}>✕</button>
             </div>
-          </div>
+            {ownedProps.length === 0 ? (
+              <div className={styles.playerPopupNoProps}>{t.noPropertiesMsg}</div>
+            ) : (
+              <div className={styles.playerPopupProps}>
+                <PropertyChipWrap>
+                  {sorted.flatMap(([, props]) =>
+                    props.map(prop => (
+                      <PropertyChip
+                        key={prop.propertyId}
+                        id={prop.propertyId}
+                        mortgaged={prop.mortgaged}
+                        houses={prop.houseCount}
+                        hotel={prop.hotelCount > 0}
+                      />
+                    ))
+                  )}
+                </PropertyChipWrap>
+              </div>
+            )}
+          </BottomSheet>
         )
       })()}
     </div>

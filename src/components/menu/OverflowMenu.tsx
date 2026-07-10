@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
 import BottomSheet from '../common/BottomSheet'
+import { useConfirm } from '../common/ConfirmDialog'
 import { useGame } from '../../store/GameContext'
 import { useT } from '../../i18n/LanguageContext'
 import { useEscapeKey } from '../../hooks/useEscapeKey'
@@ -20,6 +21,7 @@ export default function OverflowMenu() {
   const [showSound, setShowSound] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
+  const { confirm, dialog: confirmDialog } = useConfirm()
 
   // Escape closes whichever layer is topmost.
   useEscapeKey(() => setShowSound(false), showSound)
@@ -45,6 +47,8 @@ export default function OverflowMenu() {
         aria-label={t.moreActionsTitle} aria-haspopup="menu" aria-expanded={open}>
         <Icon name="menu" size={20} />
       </button>
+
+      {confirmDialog}
 
       {/* Full-screen modals are portaled to <body> so they escape the header's
           stacking context — otherwise board tokens (higher z-index) paint over them. */}
@@ -101,13 +105,20 @@ export default function OverflowMenu() {
                 <div className={styles.divider} />
                 <button className={`${styles.menuItem} ${styles.danger}`}
                   onClick={() => {
+                    setOpen(false)
                     // Leaving an in-progress game forfeits your place — confirm first.
                     if (myPlayerId && snapshot.status === 'IN_PROGRESS') {
-                      if (!confirm(t.leaveGameConfirmMsg)) return
-                      sendCmd({ type: 'LeaveGame', sessionId: sid, actorPlayerId: myPlayerId })
+                      confirm({
+                        message: t.leaveGameConfirmMsg,
+                        confirmLabel: t.leaveGameBtn,
+                        onConfirm: () => {
+                          sendCmd({ type: 'LeaveGame', sessionId: sid, actorPlayerId: myPlayerId })
+                          navigate('/')
+                        },
+                      })
+                    } else {
+                      navigate('/')
                     }
-                    setOpen(false)
-                    navigate('/')
                   }}>
                   {t.leaveGameBtn}
                 </button>
@@ -118,8 +129,11 @@ export default function OverflowMenu() {
                 <button className={`${styles.menuItem} ${styles.danger}`}
                   onClick={() => {
                     setOpen(false)
-                    if (confirm(t.endGameConfirmMsg))
-                      sendCmd({ type: 'AbortGame', sessionId: sid, actorPlayerId: myPlayerId })
+                    confirm({
+                      message: t.endGameConfirmMsg,
+                      confirmLabel: t.endGameForAllBtn,
+                      onConfirm: () => sendCmd({ type: 'AbortGame', sessionId: sid, actorPlayerId: myPlayerId }),
+                    })
                   }}>
                   {t.endGameForAllBtn}
                 </button>

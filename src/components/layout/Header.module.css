@@ -41,21 +41,6 @@
   box-shadow: var(--e1), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
-.helpOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: rgba(0, 0, 0, 0.55);
-  /* iOS Safari only hit-tests a React-onClick <div> as clickable when it has
-     cursor:pointer; without it taps pass through to the game behind. Inherited by the
-     panel too, so taps anywhere over the overlay are captured. */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
 .turnInfo {
   flex: 1;
   font-size: 0.9rem;

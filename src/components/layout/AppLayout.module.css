@@ -469,32 +469,8 @@
 }
 
 /* ── Player summary popup (mobile cash-bar tap) ── */
-.playerPopupOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 200;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  /* iOS: cursor:pointer makes this tap-to-dismiss <div> capture taps instead of letting
-     them fall through to the game behind. */
-  cursor: pointer;
-}
-
-.playerPopup {
-  background: var(--surface-raised);
-  border-radius: 16px 16px 0 0;
-  width: 100%;
-  max-width: 480px;
-  max-height: 70svh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
-}
-
+/* The player summary popup renders inside a shared BottomSheet, which owns the
+   overlay, surface, rounding and dismissal — only the inner content is styled here. */
 .playerPopupHeader {
   display: flex;
   align-items: center;

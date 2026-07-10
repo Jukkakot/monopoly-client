@@ -109,10 +109,10 @@ test('abort game: aborting sends game to GAME_OVER state', async ({ page }) => {
     await page.getByTitle('Lisätoiminnot').first().click()
     const endBtn = page.getByRole('button', { name: /Lopeta peli kaikille/ })
     await expect(endBtn).toBeEnabled({ timeout: 3000 })
-
-    // The button calls window.confirm() — bypass it so the abort fires immediately
-    await page.evaluate(() => { (window as Window & { confirm: () => boolean }).confirm = () => true })
     await endBtn.click()
+
+    // Clicking opens a styled confirmation dialog — accept it to fire the abort.
+    await page.getByTestId('confirm-accept').click()
 
     // Game transitions to GAME_OVER
     await expect(page.getByTestId('game-status').first()).toHaveAttribute('data-status', 'GAME_OVER', { timeout: 10000 })
