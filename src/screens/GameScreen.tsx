@@ -8,6 +8,8 @@ import Board, { markCardAcknowledged } from '../components/board/Board'
 import PlayerList from '../components/players/PlayerList'
 import ActionPanel from '../components/actions/ActionPanel'
 import EventLog from '../components/log/EventLog'
+import ChatPanel from '../components/chat/ChatPanel'
+import FloatingReactions from '../components/chat/FloatingReactions'
 import FlashBanner from '../components/notification/FlashBanner'
 import PropertyDetail from '../components/property/PropertyDetail'
 import Confetti from '../components/effects/Confetti'
@@ -254,6 +256,7 @@ export default function GameScreen() {
         </div>
       )}
       <FlashBanner />
+      <FloatingReactions />
       {selectedSpotId && (
         <PropertyDetail
           spotId={selectedSpotId}
@@ -279,6 +282,7 @@ export default function GameScreen() {
           }
         }} />}
         log={<EventLog events={state.events} myPlayerId={state.myPlayerId} seats={state.snapshot.seats} sessionId={state.snapshot.sessionId} />}
+        chat={<ChatPanel />}
         actions={
           <>
             {isDebugMode && (

@@ -134,7 +134,8 @@ export default memo(function EventLog({ events, myPlayerId, seats, sessionId }: 
   }, [events])
 
   const visibleEvents = useMemo(
-    () => events.filter(e => !e.releaseAt || e.releaseAt <= Date.now() || releasedIds.has(e.id)),
+    // Chat/reaction events live in the Chat tab, not the game log.
+    () => events.filter(e => !e.chat && (!e.releaseAt || e.releaseAt <= Date.now() || releasedIds.has(e.id))),
     [events, releasedIds]
   )
 

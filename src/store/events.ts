@@ -24,6 +24,10 @@ export interface GameEvent {
   amount?: number  // set on PAID_RENT so the celebration can gate on / show the rent amount
   releaseAt?: number  // hide in event log until this timestamp
   historical?: boolean  // loaded from existing log on reconnect/refresh — no sounds
+  // Chat payload — set only on CHAT events. Carried on the same event stream so chat and
+  // reactions ride the existing SSE log. Chat events are excluded from the Tapahtumaloki and
+  // shown in the Chat tab instead; REACTION chat events also float over the board.
+  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string }
 }
 
 let _id = 0
@@ -183,6 +187,17 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
       }
       case 'TRADE_CANCELLED': {
         events.push(ev('🤝', t.tradeCancelled, [pid, pid2]))
+        break
+      }
+      case 'CHAT': {
+        const kind = e.data.kind === 'REACTION' ? 'REACTION' : 'MESSAGE'
+        const content = e.data.content ?? ''
+        const chatName = e.data.name ?? name
+        const icon = kind === 'REACTION' ? content : '💬'
+        const message = kind === 'REACTION' ? `${chatName} ${content}` : `${chatName}: ${content}`
+        const cev = ev(icon, message, [pid])
+        cev.chat = { kind, name: chatName, content, playerId: pid }
+        events.push(cev)
         break
       }
       case 'MONEY_FLOW': {

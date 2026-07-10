@@ -245,6 +245,32 @@ export async function importDebugState(sessionId: string, patch: DebugStateImpor
   })
 }
 
+/** The curated emoji set the backend accepts as reactions (mirrors SessionRegistry.ALLOWED_REACTIONS). */
+export const REACTION_EMOJIS = ['👍', '😂', '😮', '😢', '😡', '🎉', '🔥', '💰', '🎲', '🤝', '😎', '🍀', '👏', '🤔', '😅', '💀'] as const
+
+/** Maximum chat message length the backend accepts (mirrors SessionRegistry.MAX_CHAT_LEN). */
+export const MAX_CHAT_LEN = 200
+
+/** Posts a chat message or emoji reaction. Fire-and-forget: it lands back via the SSE event log.
+ *  Returns true if the backend accepted it. */
+export async function postChat(
+  sessionId: string,
+  playerId: string,
+  playerToken: string,
+  kind: 'MESSAGE' | 'REACTION',
+  content: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE}/sessions/${sessionId}/chat`, {
+      method: 'POST', headers: JSON_HEADERS,
+      body: JSON.stringify({ playerId, playerToken, kind, content }),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 export async function applySessionSettings(sessionId: string, settings: SessionSettings): Promise<void> {
   const res = await fetch(`${BASE}/sessions/${sessionId}/settings`, {
     method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(settings),

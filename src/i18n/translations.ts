@@ -470,6 +470,14 @@ export interface T {
   resizeHandleTitle: string
   playersTabLabel: string
 
+  // ── Chat ─────────────────────────────────────────────────────────────────────
+  chatTitle: string
+  chatInputPlaceholder: string
+  chatSend: string
+  chatEmpty: string
+  chatReactionsLabel: string
+  chatSpectatorHint: string
+
   // ── Events (deriveEvents, non-React) ─────────────────────────────────────────
   cashTooltip: (cash: number) => string
   kbdSpace: string
@@ -1005,10 +1013,18 @@ const fi: T = {
     board: 'Lauta',
     players: 'Pelaajat',
     log: 'Loki',
+    chat: 'Chat',
     actions: 'Toiminnot',
   },
   resizeHandleTitle: 'Vedä muuttaaksesi leveyttä',
   playersTabLabel: '👥 Pelaajat',
+
+  chatTitle: 'Chat',
+  chatInputPlaceholder: 'Kirjoita viesti…',
+  chatSend: 'Lähetä',
+  chatEmpty: 'Ei viestejä vielä. Sano jotain! 👋',
+  chatReactionsLabel: 'Reaktiot',
+  chatSpectatorHint: 'Vain pelaajat voivat lähettää viestejä.',
 
   // Events
   cashTooltip: (cash) => `käteinen €${cash}`,
@@ -1549,10 +1565,18 @@ const en: T = {
     board: 'Board',
     players: 'Players',
     log: 'Log',
+    chat: 'Chat',
     actions: 'Actions',
   },
   resizeHandleTitle: 'Drag to resize',
   playersTabLabel: '👥 Players',
+
+  chatTitle: 'Chat',
+  chatInputPlaceholder: 'Type a message…',
+  chatSend: 'Send',
+  chatEmpty: 'No messages yet. Say something! 👋',
+  chatReactionsLabel: 'Reactions',
+  chatSpectatorHint: 'Only players can send messages.',
 
   // Events
   cashTooltip: (cash) => `cash €${cash}`,

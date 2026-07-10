@@ -67,20 +67,21 @@ function loadMobileBoardHeight(): number {
 }
 
 
-type MobileTab = 'board' | 'players' | 'log'
+type MobileTab = 'board' | 'players' | 'log' | 'chat'
 
-const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log']
-const NAV_ICONS: Record<MobileTab, IconName> = { board: 'board', players: 'people', log: 'list' }
+const MOBILE_TABS: MobileTab[] = ['board', 'players', 'log', 'chat']
+const NAV_ICONS: Record<MobileTab, IconName> = { board: 'board', players: 'people', log: 'list', chat: 'chat' }
 
 interface Props {
   header: ReactNode
   board: ReactNode
   players: ReactNode
   log: ReactNode
+  chat: ReactNode
   actions: ReactNode
 }
 
-export default function AppLayout({ header, board, players, log, actions }: Props) {
+export default function AppLayout({ header, board, players, log, chat, actions }: Props) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('board')
   const { state } = useGame()
   const snap = state.snapshot
@@ -88,6 +89,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const t = useT()
   const [unreadLog, setUnreadLog] = useState(0)
   const lastSeenLogCount = useRef(state.events.length)
+  const chatCount = state.events.reduce((n, e) => (e.chat ? n + 1 : n), 0)
+  const [unreadChat, setUnreadChat] = useState(0)
+  const lastSeenChatCount = useRef(chatCount)
   const [sidebarWidth, setSidebarWidth] = useState(loadSidebarWidth)
   const [mobilePanelWidth, setMobilePanelWidth] = useState(loadMobilePanelWidth)
   const [mobileBoardHeight, setMobileBoardHeight] = useState(loadMobileBoardHeight)
@@ -316,6 +320,16 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       if (newCount > 0) setUnreadLog(newCount)
     }
   }, [state.events.length, mobileTab])
+
+  useEffect(() => {
+    if (mobileTab === 'chat') {
+      lastSeenChatCount.current = chatCount
+      setUnreadChat(0)
+    } else {
+      const newCount = chatCount - lastSeenChatCount.current
+      if (newCount > 0) setUnreadChat(newCount)
+    }
+  }, [chatCount, mobileTab])
 
   // Track cash changes → delta floats + chip shake; track new bankruptcies → collapse anim
   useEffect(() => {
@@ -594,6 +608,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
             {mobileTab === 'log' && (
               <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{log}</div>
             )}
+            {/* Keep chat mounted once opened so the input text and scroll position survive
+                tab switches; hidden (not unmounted) when another tab is active. */}
+            <div className={[
+              styles.mobileChatWrapper,
+              mobileTab !== 'chat' ? styles.mobileHidden : '',
+              mobileTab === 'chat' ? (animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft) : '',
+            ].join(' ')}>{chat}</div>
           </div>
 
           {/* Bottom nav — in-flow inside right panel so it stays in its column in landscape */}
@@ -611,6 +632,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
                 )}
                 {tab === 'log' && unreadLog > 0 && mobileTab !== 'log' && (
                   <span className={styles.navBadge}>{unreadLog > 9 ? '9+' : unreadLog}</span>
+                )}
+                {tab === 'chat' && unreadChat > 0 && mobileTab !== 'chat' && (
+                  <span className={styles.navBadge} data-testid="chat-unread-badge">{unreadChat > 9 ? '9+' : unreadChat}</span>
                 )}
               </button>
             ))}

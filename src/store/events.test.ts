@@ -7,8 +7,8 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { deriveMiscEvents } from './events'
-import type { SessionState, PlayerSnapshot, PropertyStateSnapshot } from '../types/api'
+import { deriveMiscEvents, translateBackendEvents } from './events'
+import type { SessionState, PlayerSnapshot, PropertyStateSnapshot, GameEventEntry } from '../types/api'
 
 function player(playerId: string, name: string): PlayerSnapshot {
   return {
@@ -81,5 +81,33 @@ describe('deriveMiscEvents — monopoly gained', () => {
     const events = deriveMiscEvents(prev, next)
 
     expect(events.filter(e => e.icon === '🏆')).toHaveLength(0)
+  })
+})
+
+describe('translateBackendEvents — CHAT', () => {
+  const players = [player('p1', 'Anna'), player('p2', 'Ben')]
+
+  function chatEntry(id: number, playerId: string, data: Record<string, string>): GameEventEntry {
+    return { id, timestamp: Date.now(), type: 'CHAT', playerIds: [playerId], data }
+  }
+
+  it('carries a message chat payload with a 💬 icon', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(1, 'p1', { kind: 'MESSAGE', content: 'hei kaikki', name: 'Anna' })], players)
+    expect(e.chat).toEqual({ kind: 'MESSAGE', name: 'Anna', content: 'hei kaikki', playerId: 'p1' })
+    expect(e.icon).toBe('💬')
+  })
+
+  it('uses the emoji itself as the icon for a reaction', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(2, 'p2', { kind: 'REACTION', content: '🎉', name: 'Ben' })], players)
+    expect(e.chat).toEqual({ kind: 'REACTION', name: 'Ben', content: '🎉', playerId: 'p2' })
+    expect(e.icon).toBe('🎉')
+  })
+
+  it('falls back to the resolved player name when the event omits one', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(3, 'p1', { kind: 'MESSAGE', content: 'moi' })], players)
+    expect(e.chat?.name).toBe('Anna')
   })
 })
