@@ -122,7 +122,7 @@
   line-height: 1;
 }
 
-.randomizeBtn:hover:not(:disabled) { background: #dcedc8; }
+.randomizeBtn:hover:not(:disabled) { background: var(--tint-success); }
 .randomizeBtn:disabled { opacity: 0.5; cursor: default; }
 
 .colorRow {
@@ -225,7 +225,7 @@
   justify-content: center;
 }
 
-.botCountBtn:hover:not(:disabled) { background: #dcedc8; }
+.botCountBtn:hover:not(:disabled) { background: var(--tint-success); }
 .botCountBtn:disabled { opacity: 0.4; cursor: default; }
 
 .botCountLabel {

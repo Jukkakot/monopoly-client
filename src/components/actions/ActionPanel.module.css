@@ -208,7 +208,7 @@
 }
 
 .sectionBadge {
-  background: #c8e6c9;
+  background: var(--tint-success);
   color: var(--c-green);
   border-radius: 8px;
   padding: 1px 6px;

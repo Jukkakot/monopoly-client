@@ -98,7 +98,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: #ddd;
+  background: var(--hairline);
 }
 
 .quickHint {
@@ -125,7 +125,7 @@
   transition: background 0.15s, border-color 0.15s;
 }
 
-.quickBtn:hover { background: #dcedc8; border-color: var(--c-green); }
+.quickBtn:hover { background: var(--tint-success); border-color: var(--c-green); }
 .quickBtn:disabled { opacity: 0.5; cursor: default; }
 
 .listSection {
@@ -149,7 +149,7 @@
 }
 
 .sectionToggle:hover {
-  background: #dcedc8;
+  background: var(--tint-success);
   border-color: #81c784;
 }
 

@@ -115,6 +115,11 @@
   transition: background 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
 }
+
+/* Dark mode: a darker "off" track so it doesn't glow, while the knob stays white. */
+:global(:root[data-theme="dark"]) .checkbox {
+  background: #3c473f;
+}
 .checkbox::before {
   content: '';
   position: absolute;
@@ -123,7 +128,9 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--surface-raised);
+  /* Knob stays white in both themes (physical-switch look) — using --surface-raised made
+     it dark in dark mode, invisible against the dark track. */
+  background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease;
 }

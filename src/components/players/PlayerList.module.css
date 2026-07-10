@@ -26,7 +26,7 @@
 
 .card.active {
   border-color: var(--c-green);
-  background: #dcedc8;
+  background: var(--tint-success);
 }
 /* Dark mode: a distinct (brighter-than-base) dark-green highlight instead of the light
    #dcedc8, so the active player's card — and its property chips — stay readable. */

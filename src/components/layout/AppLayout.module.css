@@ -635,7 +635,7 @@
   .resizeHandle {
     width: 5px;
     cursor: col-resize;
-    background: #c8e6c9;
+    background: var(--hairline);
     flex-shrink: 0;
     transition: background 0.15s;
     position: relative;
@@ -746,7 +746,7 @@
 
   .sideDivider {
     height: 5px;
-    background: #c8e6c9;
+    background: var(--hairline);
     flex-shrink: 0;
     transition: background 0.15s;
   }
@@ -792,7 +792,7 @@
 
   .actionsDragHandle {
     height: 5px;
-    background: #a5d6a7;
+    background: var(--hairline);
     flex-shrink: 0;
     cursor: row-resize;
     transition: background 0.15s;
