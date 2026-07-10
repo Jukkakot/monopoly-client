@@ -6,6 +6,7 @@
  */
 import { test, expect } from '@playwright/test'
 import { createBotSession, createHumanBotSession, deleteSession } from '../helpers/api'
+import { recordSession } from '../helpers/sessionTracker'
 
 // ─── Session rows ─────────────────────────────────────────────────────────────
 
@@ -71,6 +72,7 @@ test('session list: lobby row shows "Liity odotushuoneeseen" button', async ({ p
     body: JSON.stringify({ lobbyMode: true, hostName: 'HostTest', hostColor: '#e53935' }),
   })
   const { sessionId: sid } = await r.json()
+  recordSession(sid)
   try {
     await page.goto('/')
     await expect(page.locator('[class*=sessionRow]').filter({ hasText: sid }).first()).toBeVisible({ timeout: 15000 })

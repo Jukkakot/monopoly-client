@@ -5,6 +5,7 @@
  */
 import { test, expect, type Page } from '@playwright/test'
 import { deleteSession } from '../helpers/api'
+import { recordSession } from '../helpers/sessionTracker'
 
 const BASE = process.env.VITE_API_BASE ?? 'https://monopoly-backend-bv41.onrender.com'
 const JSON_HEADERS = { 'Content-Type': 'application/json' }
@@ -16,7 +17,9 @@ async function createOpenLobby(): Promise<{ sessionId: string; hostToken: string
     body: JSON.stringify({ lobbyMode: true, hostName: 'TestHost', hostColor: '#e53935' }),
   })
   if (!res.ok) throw new Error(`createOpenLobby failed: ${res.status}`)
-  return res.json()
+  const data = await res.json()
+  recordSession(data.sessionId)
+  return data
 }
 
 // ─── Join form UI ─────────────────────────────────────────────────────────────

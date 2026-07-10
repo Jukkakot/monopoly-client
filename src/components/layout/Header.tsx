@@ -43,6 +43,10 @@ export default function Header({ isSpectator }: Props) {
   // reopen it via the ❓ button.
   useEffect(() => {
     if (!snap) return
+    // Skip the auto-open under browser automation (Playwright sets navigator.webdriver):
+    // the full-screen help sheet intercepts pointer events and blocks every E2E
+    // interaction. Real users never have webdriver set, so they still see it once.
+    if (navigator.webdriver) return
     try {
       if (!localStorage.getItem('monopoly_seen_howto')) {
         localStorage.setItem('monopoly_seen_howto', '1')

@@ -8,6 +8,7 @@
  */
 import { test, expect, type Page, type Browser } from '@playwright/test'
 import { deleteSession } from '../helpers/api'
+import { recordSession } from '../helpers/sessionTracker'
 
 const MOBILE = { width: 390, height: 844 }
 
@@ -19,7 +20,11 @@ async function mobilePage(browser: Browser): Promise<Page> {
 /** Extract session ID from a URL that ends with /game/:id or /lobby-wait/:id */
 function sidFromUrl(url: string): string | null {
   const m = url.match(/\/(game|lobby-wait)\/([^/#?]+)/)
-  return m ? m[2] : null
+  const sid = m ? m[2] : null
+  // These sessions are created through the UI, so register them for guaranteed
+  // teardown just like the api-helper-created ones.
+  if (sid) recordSession(sid)
+  return sid
 }
 
 // ─── SessionListScreen (/') ──────────────────────────────────────────────────

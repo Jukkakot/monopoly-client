@@ -1,4 +1,5 @@
 import type { ClientSessionSnapshot } from '../../src/types/api'
+import { recordSession } from './sessionTracker'
 
 const BASE = process.env.VITE_API_BASE ?? 'https://monopoly-backend-bv41.onrender.com'
 const jsonHeaders = { 'Content-Type': 'application/json' }
@@ -22,7 +23,9 @@ export async function createBotSession(count: 2 | 3 | 4 = 2): Promise<string> {
     colors: ['#e53935', '#1e88e5', '#43a047', '#f9a825'].slice(0, count),
   })
   if (!r.ok) throw new Error(`createSession failed: ${r.status}`)
-  return (await r.json()).sessionId
+  const sid = (await r.json()).sessionId
+  recordSession(sid)
+  return sid
 }
 
 export async function createBotSessionDetailed(count: 2 | 3 | 4 = 2): Promise<{ sid: string; hostToken: string }> {
@@ -34,6 +37,7 @@ export async function createBotSessionDetailed(count: 2 | 3 | 4 = 2): Promise<{ 
   })
   if (!r.ok) throw new Error(`createSession failed: ${r.status}`)
   const data = await r.json()
+  recordSession(data.sessionId)
   return { sid: data.sessionId, hostToken: data.hostToken ?? '' }
 }
 
@@ -129,6 +133,7 @@ export async function createHumanBotSession(): Promise<HumanSession> {
   const r1 = await postWithRetry(`${BASE}/sessions`, { lobbyMode: true, seatCount: 2 })
   if (!r1.ok) throw new Error(`createHumanBotSession: POST /sessions failed ${r1.status}`)
   const { sessionId: sid, hostToken, playerId: humanPlayerId, playerToken: humanPlayerToken } = await r1.json()
+  recordSession(sid)
 
   // Add a bot (seat 1)
   const r2 = await fetch(`${BASE}/sessions/${sid}/lobby/bots`, {
@@ -164,6 +169,7 @@ export async function createTwoHumanSession(): Promise<TwoHumanSession> {
   const r1 = await postWithRetry(`${BASE}/sessions`, { lobbyMode: true, seatCount: 2 })
   if (!r1.ok) throw new Error(`createTwoHumanSession: POST /sessions failed ${r1.status}`)
   const { sessionId: sid, playerId: p1Id, playerToken: p1Token } = await r1.json()
+  recordSession(sid)
 
   const r2 = await fetch(`${BASE}/sessions/${sid}/join`, {
     method: 'POST', headers: jsonHeaders,
