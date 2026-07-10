@@ -1,0 +1,6 @@
+/* Brief fallback shown while a route chunk loads. Themed surface so it doesn't flash
+   white in dark mode; no spinner needed since chunks are small and load fast. */
+.routeFallback {
+  min-height: 100svh;
+  background: var(--surface);
+}

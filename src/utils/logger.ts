@@ -1,28 +1,37 @@
-import { Axiom } from '@axiomhq/js'
+type AxiomClient = import('@axiomhq/js').Axiom
 
 const token = import.meta.env.VITE_AXIOM_TOKEN as string | undefined
 const dataset = import.meta.env.VITE_AXIOM_DATASET as string | undefined
 
-let _axiom: Axiom | null = null
-function getAxiom(): Axiom | null {
-  if (!token || !dataset) return null
-  if (!_axiom) _axiom = new Axiom({ token })
+// Load the (heavy) Axiom SDK lazily on the first log, so it never sits in the initial
+// bundle / critical path. Resolves to null when telemetry isn't configured (e.g. dev).
+let _axiom: Promise<AxiomClient | null> | null = null
+function getAxiom(): Promise<AxiomClient | null> {
+  if (!token || !dataset) return Promise.resolve(null)
+  if (!_axiom) {
+    _axiom = import('@axiomhq/js')
+      .then(({ Axiom }) => new Axiom({ token }))
+      .catch(() => null)
+  }
   return _axiom
 }
 
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
-    getAxiom()?.flush().catch(() => {})
+    // Only flush if Axiom was already loaded — don't pull in the SDK on unload.
+    if (_axiom) _axiom.then(ax => ax?.flush().catch(() => {})).catch(() => {})
   })
 }
 
 type Fields = Record<string, unknown>
 
 function send(level: string, message: string, fields?: Fields) {
-  const ax = getAxiom()
-  if (!ax) return
-  ax.ingest(dataset!, [{ _time: new Date().toISOString(), level, message, env: import.meta.env.MODE, ...fields }])
-  if (level === 'error') ax.flush().catch(() => {})
+  if (!token || !dataset) return
+  getAxiom().then(ax => {
+    if (!ax) return
+    ax.ingest(dataset, [{ _time: new Date().toISOString(), level, message, env: import.meta.env.MODE, ...fields }])
+    if (level === 'error') ax.flush().catch(() => {})
+  }).catch(() => {})
 }
 
 export const logger = {
