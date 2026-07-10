@@ -235,7 +235,11 @@ export default function GameScreen() {
     <>
       <span data-testid="game-status" data-status={state.snapshot.status} style={{ display: 'none' }} />
       {isGameOver && <Confetti />}
-      {isGameOver && <GameOverOverlay state={state.prevSnapshot ?? state.snapshot} />}
+      {/* Render from the current GAME_OVER snapshot (the one this block is gated on):
+          only it carries winnerPlayerId. prevSnapshot is the pre-game-over snapshot where
+          winnerPlayerId is still null, which made the overlay show "no winner". Bankrupt
+          players remain in the array (flagged), so the rankings stay complete. */}
+      {isGameOver && <GameOverOverlay state={state.snapshot} />}
       {!isGameOver && celebration && (
         <Celebration data={celebration} onDone={() => setCelebration(null)} />
       )}

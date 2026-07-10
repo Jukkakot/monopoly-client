@@ -86,7 +86,7 @@ test('property detail: closes when clicking overlay backdrop', async ({ page }) 
     await expect(page.locator(DETAIL_HEADER)).toBeVisible({ timeout: 3000 })
 
     // The overlay div covers the screen; click its top-left corner to close
-    await page.locator('[class*=overlay]').first().click({ position: { x: 5, y: 5 } })
+    await page.locator('[class*=backdrop]').first().click({ position: { x: 5, y: 5 } })
 
     await expect(page.locator(DETAIL_HEADER)).not.toBeVisible({ timeout: 2000 })
   } finally {
@@ -104,7 +104,7 @@ test('property detail: can open a different spot after closing first', async ({ 
     await expect(page.locator(DETAIL_HEADER).filter({ hasText: 'Katajanokka' })).toBeVisible({ timeout: 3000 })
 
     // Close via overlay backdrop click
-    await page.locator('[class*=overlay]').first().click({ position: { x: 5, y: 5 } })
+    await page.locator('[class*=backdrop]').first().click({ position: { x: 5, y: 5 } })
     await expect(page.locator(DETAIL_HEADER)).not.toBeVisible({ timeout: 2000 })
 
     // Open B2 — a fresh panel with different property
@@ -123,7 +123,7 @@ test('property detail: railroad and utility spots open panel correctly', async (
     // Railroad
     await page.locator('[data-spot-id="RR1"]').click()
     await expect(page.locator(DETAIL_HEADER).filter({ hasText: 'Rautatieasema' })).toBeVisible({ timeout: 3000 })
-    await page.locator('[class*=overlay]').first().click({ position: { x: 5, y: 5 } })
+    await page.locator('[class*=backdrop]').first().click({ position: { x: 5, y: 5 } })
 
     // Utility
     await page.locator('[data-spot-id="U1"]').click()
