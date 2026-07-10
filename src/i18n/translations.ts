@@ -1096,6 +1096,20 @@ const fi: T = {
       'Katsotaanpa mitä nopat antavat. 🎲', 'Tuuria peliin!', 'Nyt ei saa mennä vankilaan... 🤞',
       'Rahaa on, uskallan pelata. 💰', 'Tämä kierros on mun. 😎',
     ],
+    drewCard: [
+      'Katsotaan mitä kortti sanoo... 🃏', 'Sattumaa peliin!', 'Toivotaan hyvää korttia. 🤞',
+      'Kortit ratkaisee. 🎴',
+    ],
+    soldBuilding: [
+      'Pakko myydä rakennuksia... 😔', 'Ikävä kyllä, talot lähtee.',
+      'Tarvitsen käteistä, myyn taloja. 💸', 'Askel taaksepäin, mutta pakko.',
+    ],
+    jailTaunt: [
+      'Hei, vankilaan siitä! 😂', 'Nauttikaa selleistä. 😏', 'Yksi vähemmän liikkeellä. 😎',
+    ],
+    playerLeft: [
+      'No sepä harmi, pelaaja lähti.', 'Yksi vähemmän pöydässä.', 'Peli jatkuu ilman häntä. 🤷',
+    ],
   },
 
   // Events
@@ -1714,6 +1728,20 @@ const en: T = {
     banter: [
       'Let\'s see what the dice give. 🎲', 'Some luck, please!', 'Mustn\'t land in jail now... 🤞',
       'I\'ve got cash, I can play bold. 💰', 'This round is mine. 😎',
+    ],
+    drewCard: [
+      'Let\'s see what the card says... 🃏', 'A bit of chance!', 'Hoping for a good card. 🤞',
+      'The cards decide. 🎴',
+    ],
+    soldBuilding: [
+      'Got to sell some buildings... 😔', 'Sadly, the houses go.',
+      'I need cash, selling houses. 💸', 'A step back, but no choice.',
+    ],
+    jailTaunt: [
+      'Off to jail with you! 😂', 'Enjoy the cell. 😏', 'One less on the move. 😎',
+    ],
+    playerLeft: [
+      'Well, a player left. Shame.', 'One fewer at the table.', 'The game goes on without them. 🤷',
     ],
   },
 
