@@ -5,6 +5,7 @@ import { useT } from '../../i18n/LanguageContext'
 import { postChat, REACTION_EMOJIS, MAX_CHAT_LEN } from '../../api/sessionApi'
 import { TokenSvg } from '../board/TokenSvg'
 import { useTokenShapes } from '../../utils/tokenShapes'
+import { resolveChatText } from '../../utils/chatText'
 import type { GameEvent } from '../../store/events'
 
 /** Chat + emoji reactions. Messages ride the same SSE event log as game events
@@ -20,15 +21,8 @@ export default memo(function ChatPanel() {
 
   const messages = useMemo<GameEvent[]>(() => state.events.filter(e => e.chat), [state.events])
 
-  // Resolve a message's display text: a bot line is localized live from (key, variant) into the
-  // viewer's current language (falling back to the stored content); a human line is verbatim.
-  function messageText(chat: NonNullable<GameEvent['chat']>): string {
-    if (chat.botMsgKey) {
-      const pool = t.botChat[chat.botMsgKey]
-      if (pool && pool.length > 0) return pool[(chat.botVariant ?? 0) % pool.length]
-    }
-    return chat.content
-  }
+  // A bot line is localized live into the viewer's language; a human line is verbatim.
+  const messageText = (chat: NonNullable<GameEvent['chat']>) => resolveChatText(chat, t.botChat)
 
   const seatColor = useMemo(() => {
     const map = new Map((snap?.seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
