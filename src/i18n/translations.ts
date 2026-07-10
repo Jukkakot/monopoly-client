@@ -1035,18 +1035,23 @@ const fi: T = {
     boughtProperty: [
       'Tää tontti on nyt mun. 😎', 'Hyvä sijoitus!', 'Tästä tulee hyvä.',
       'Ostoslistaa lyhemmäks. 🏠', 'Mun kokoelma kasvaa.', 'Ei jätetä hyviä tontteja väliin.',
+      'Tää täydentää väriryhmää. 🎯', 'Halpa hinta tästä paikasta.',
+      'Strateginen osto — estän muita. 😏', 'Rautatiet tuottaa varmaa tuloa. 🚂',
     ],
     builtHotel: [
       'Hotelli pystyssä! 🏨', 'Tervetuloa — vuokra ei oo halpa. 😏',
       'Nyt alkaa kilahtaa kassaan.', 'Tästä tuli kallis kulma.',
+      'Hotelli maksaa itsensä pian takaisin. 💰', 'Täältä pesee jos tänne osutte. 💸',
     ],
     rentGloat: [
       'Kiitos vuokrasta! 💰', 'Kassa kasvaa. 😎', 'Mukava lisä tilille.',
       'Aina yhtä kivaa periä vuokraa. 🤑', 'Kohta ostan lisää tontteja näillä.',
+      'Sijoitus tuottaa. 📈', 'Passiivista tuloa parhaimmillaan.',
     ],
     rentPain: [
       'Auts, kallis pysähdys. 😩', 'No tuo sattui.', 'Voi ei, melkein koko kassa meni.',
       'Kallista huseerausta. 💸', 'Pitää alkaa myydä taloja...',
+      'Tuo vei budjetin. 😰', 'Väärä ruutu, väärä hetki.',
     ],
     jail: [
       'No niin, vankilaan taas. 😅', 'Nähdään parin kierroksen päästä.',
@@ -1074,9 +1079,22 @@ const fi: T = {
     ],
     mortgaged: [
       'Pakko kiinnittää... 😬', 'Tarvitaan käteistä nopeasti.', 'Ei muuta vaihtoehtoa nyt.',
+      'Kiinnitän tämän, tarvitsen rahaa ostoon.', 'Väliaikainen kiinnitys — nostan pian takaisin.',
     ],
     tradeDeclined: [
       'No ei sitten. 🤷', 'Harmi, olisi ollut hyvä diili.', 'Ehkä ensi kerralla. 🤔',
+    ],
+    builtHouse: [
+      'Talo nostaa vuokraa mukavasti. 🏠', 'Rakennan tästä vahvan.',
+      'Pieni investointi, iso tuotto. 📈', 'Talo kerrallaan kohti hotellia.',
+    ],
+    redeemed: [
+      'Nostin kiinnityksen — kassa kestää taas. 💪', 'Takaisin omistukseen ilman lainaa.',
+      'Nyt tämä tuottaa taas täyttä vuokraa. 💰',
+    ],
+    banter: [
+      'Katsotaanpa mitä nopat antavat. 🎲', 'Tuuria peliin!', 'Nyt ei saa mennä vankilaan... 🤞',
+      'Rahaa on, uskallan pelata. 💰', 'Tämä kierros on mun. 😎',
     ],
   },
 
@@ -1636,18 +1654,23 @@ const en: T = {
     boughtProperty: [
       'This one\'s mine now. 😎', 'Good investment!', 'This\'ll pay off.',
       'One less on the list. 🏠', 'My collection grows.', 'Never skip a good deed.',
+      'This completes the colour set. 🎯', 'Cheap for this spot.',
+      'Strategic buy — blocking the others. 😏', 'Railroads are steady income. 🚂',
     ],
     builtHotel: [
       'Hotel\'s up! 🏨', 'Welcome — rent won\'t be cheap. 😏',
       'Now the cash starts rolling in.', 'This corner just got expensive.',
+      'The hotel will pay for itself soon. 💰', 'Land here and you\'ll pay dearly. 💸',
     ],
     rentGloat: [
       'Thanks for the rent! 💰', 'Cash pile\'s growing. 😎', 'A nice little top-up.',
       'Collecting rent never gets old. 🤑', 'I\'ll buy more with this.',
+      'The investment pays off. 📈', 'Passive income at its finest.',
     ],
     rentPain: [
       'Ouch, pricey stop. 😩', 'Well, that hurt.', 'Oh no, there goes my cash.',
       'Expensive detour. 💸', 'Time to start selling houses...',
+      'That blew the budget. 😰', 'Wrong square, wrong time.',
     ],
     jail: [
       'Well, jail again. 😅', 'See you in a couple of rounds.',
@@ -1675,9 +1698,22 @@ const en: T = {
     ],
     mortgaged: [
       'Gotta mortgage... 😬', 'Need cash, fast.', 'No other choice right now.',
+      'Mortgaging this — I need money for a buy.', 'Temporary mortgage — I\'ll redeem it soon.',
     ],
     tradeDeclined: [
       'Guess not. 🤷', 'Shame, that was a good deal.', 'Maybe next time. 🤔',
+    ],
+    builtHouse: [
+      'A house bumps the rent nicely. 🏠', 'Building this one up strong.',
+      'Small investment, big return. 📈', 'One house at a time toward a hotel.',
+    ],
+    redeemed: [
+      'Mortgage lifted — cash holds up again. 💪', 'Back in my hands, debt-free.',
+      'Now it earns full rent again. 💰',
+    ],
+    banter: [
+      'Let\'s see what the dice give. 🎲', 'Some luck, please!', 'Mustn\'t land in jail now... 🤞',
+      'I\'ve got cash, I can play bold. 💰', 'This round is mine. 😎',
     ],
   },
 
