@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
@@ -82,7 +83,7 @@ export default function OverflowMenu() {
         </BottomSheet>
       )}
 
-      {open && (
+      {open && createPortal(
         <>
           <div className={styles.backdrop} data-modal onClick={() => setOpen(false)} />
           <div className={styles.menu}>
@@ -146,7 +147,8 @@ export default function OverflowMenu() {
               )
             )}
           </div>
-        </>
+        </>,
+        document.body,
       )}
     </div>
   )
