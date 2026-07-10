@@ -1,20 +1,19 @@
 import styles from './HowToPlay.module.css'
 import { useT } from '../../i18n/LanguageContext'
-import { useEscapeKey } from '../../hooks/useEscapeKey'
 
 /**
  * A concise "how to play" panel for first-time players — the game is
  * phase-driven and drops newcomers straight in, so this explains the turn
  * flow, buying/auctions, building, jail and trading in a few lines.
+ * Rendered inside a BottomSheet (which owns the dialog role, surface and Escape).
  */
 export default function HowToPlay({ onClose }: { onClose: () => void }) {
   const t = useT()
-  useEscapeKey(onClose)
   return (
-    <div className={styles.modal} role="dialog" aria-modal="true" aria-label={t.howToPlayTitle}>
+    <div className={styles.modal}>
       <div className={styles.header}>
         <span>❓ {t.howToPlayTitle}</span>
-        <button className={styles.closeBtn} onClick={onClose} aria-label="Close">✕</button>
+        <button className={styles.closeBtn} onClick={onClose} aria-label={t.closeLabel}>✕</button>
       </div>
       <div className={styles.body}>
         {t.howToPlaySections.map((s, i) => (

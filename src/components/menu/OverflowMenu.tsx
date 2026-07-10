@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import styles from './OverflowMenu.module.css'
 import SoundSettings from './SoundSettings'
@@ -65,21 +64,18 @@ export default function OverflowMenu() {
         </BottomSheet>
       )}
 
-      {showHelp && createPortal(
-        <div className={styles.soundOverlay} data-modal onClick={() => setShowHelp(false)}>
-          <div className={styles.helpModal} onClick={e => e.stopPropagation()}>
-            <div className={styles.buildModalHeader}>
-              <span>{t.keyboardShortcutsBtn}</span>
-              <button className={styles.closeBtn} aria-label={t.closeLabel} onClick={() => setShowHelp(false)}>✕</button>
-            </div>
-            <div className={styles.helpTable}>
-              <div className={styles.helpRow}><kbd>{t.kbdSpace}</kbd><span>{t.kbdRollOrEnd}</span></div>
-              <div className={styles.helpRow}><kbd>Esc</kbd><span>{t.kbdCloseModal}</span></div>
-              <div className={styles.helpRow}><kbd>M</kbd><span>{t.kbdMute}</span></div>
-            </div>
+      {showHelp && (
+        <BottomSheet onClose={() => setShowHelp(false)} ariaLabel={t.keyboardShortcutsBtn}>
+          <div className={styles.buildModalHeader}>
+            <span>{t.keyboardShortcutsBtn}</span>
+            <button className={styles.closeBtn} aria-label={t.closeLabel} onClick={() => setShowHelp(false)}>✕</button>
           </div>
-        </div>,
-        document.body,
+          <div className={styles.helpTable}>
+            <div className={styles.helpRow}><kbd>{t.kbdSpace}</kbd><span>{t.kbdRollOrEnd}</span></div>
+            <div className={styles.helpRow}><kbd>Esc</kbd><span>{t.kbdCloseModal}</span></div>
+            <div className={styles.helpRow}><kbd>M</kbd><span>{t.kbdMute}</span></div>
+          </div>
+        </BottomSheet>
       )}
 
       {open && (

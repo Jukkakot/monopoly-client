@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
+import BottomSheet from '../common/BottomSheet'
 import styles from './Header.module.css'
 import OverflowMenu from '../menu/OverflowMenu'
 import HowToPlay from '../menu/HowToPlay'
@@ -89,15 +89,10 @@ export default function Header({ isSpectator }: Props) {
         <OverflowMenu />
       </div>
 
-      {/* Portaled to body so it escapes the header's stacking context (board tokens
-          have a higher z-index and would otherwise paint over it). */}
-      {showHelp && createPortal(
-        <div className={styles.helpOverlay} data-modal onClick={() => setShowHelp(false)}>
-          <div onClick={e => e.stopPropagation()}>
-            <HowToPlay onClose={() => setShowHelp(false)} />
-          </div>
-        </div>,
-        document.body,
+      {showHelp && (
+        <BottomSheet onClose={() => setShowHelp(false)} ariaLabel={t.howToPlayTitle}>
+          <HowToPlay onClose={() => setShowHelp(false)} />
+        </BottomSheet>
       )}
     </header>
   )

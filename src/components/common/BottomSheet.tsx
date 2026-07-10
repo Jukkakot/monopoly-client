@@ -21,12 +21,43 @@ interface Props {
 export default function BottomSheet({ onClose, children, ariaLabel }: Props) {
   const [dragY, setDragY] = useState(0)
   const startYRef = useRef<number | null>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  // Focus management: move focus into the sheet on open, trap Tab within it, and restore
+  // focus to the previously-focused element on close (a11y — no focus escaping behind a
+  // modal, no lost focus after dismissal).
+  useEffect(() => {
+    const prevFocused = document.activeElement as HTMLElement | null
+    const sheet = sheetRef.current
+    const focusables = () => sheet
+      ? Array.from(sheet.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+        .filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null)
+      : []
+    sheet?.focus()
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const els = focusables()
+      if (els.length === 0) { e.preventDefault(); sheet?.focus(); return }
+      const first = els[0], last = els[els.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey && (active === first || active === sheet)) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      // Only restore if focus is still inside the (now-closing) sheet.
+      if (!sheet || sheet.contains(document.activeElement)) prevFocused?.focus?.()
+    }
+  }, [])
 
   function onGripTouchStart(e: React.TouchEvent) {
     startYRef.current = e.touches[0].clientY
@@ -47,6 +78,8 @@ export default function BottomSheet({ onClose, children, ariaLabel }: Props) {
   return createPortal(
     <div className={styles.backdrop} data-modal onClick={onClose}>
       <div
+        ref={sheetRef}
+        tabIndex={-1}
         className={styles.sheet}
         style={dragY ? { transform: `translateY(${dragY}px)`, transition: 'none' } : undefined}
         onClick={e => e.stopPropagation()}
