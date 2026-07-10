@@ -155,7 +155,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
     <div className={styles.root}>
       <div className={styles.header}>
         <span>{t.soundSettingsTitle}</span>
-        <button className={styles.close} onClick={onClose}>✕</button>
+        <button className={styles.close} aria-label={t.closeLabel} onClick={onClose}>✕</button>
       </div>
 
       <div className={styles.pingRow}>
@@ -173,6 +173,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
           <input
             type="range" min="0" max="100" value={cfg.volume}
             className={styles.slider}
+            aria-label={t.volumeLabel}
             onChange={e => setCfg(p => ({ ...p, volume: +e.target.value }))}
           />
           <span className={styles.volNum}>{cfg.volume}%</span>

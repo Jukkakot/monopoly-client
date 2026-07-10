@@ -139,6 +139,7 @@ export default function LobbyScreen() {
                 className={styles.nameInput}
                 type="text"
                 placeholder={t.yourNamePlaceholder}
+                aria-label={t.yourNamePlaceholder}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleCreateLobby()}

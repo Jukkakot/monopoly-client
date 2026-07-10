@@ -70,7 +70,7 @@ export default function OverflowMenu() {
           <div className={styles.helpModal} onClick={e => e.stopPropagation()}>
             <div className={styles.buildModalHeader}>
               <span>{t.keyboardShortcutsBtn}</span>
-              <button className={styles.closeBtn} onClick={() => setShowHelp(false)}>✕</button>
+              <button className={styles.closeBtn} aria-label={t.closeLabel} onClick={() => setShowHelp(false)}>✕</button>
             </div>
             <div className={styles.helpTable}>
               <div className={styles.helpRow}><kbd>{t.kbdSpace}</kbd><span>{t.kbdRollOrEnd}</span></div>

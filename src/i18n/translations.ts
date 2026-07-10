@@ -326,6 +326,7 @@ export interface T {
   sellHouseBtn: string
   tradeBtnPD: string
   closeBtnPD: string
+  closeLabel: string
   monopolyBadge: string
   houseCountLabel: (n: number) => string
   hotelOwnedLabel: string
@@ -839,6 +840,7 @@ const fi: T = {
   sellHouseBtn: '−🏠 Myy talo',
   tradeBtnPD: '🤝 Tee kauppa',
   closeBtnPD: 'Sulje',
+  closeLabel: 'Sulje',
   monopolyBadge: 'MONOPOLI',
   houseCountLabel: (n) => `${n} talo${n !== 1 ? 'a' : ''}`,
   hotelOwnedLabel: 'Hotelli',
@@ -1373,6 +1375,7 @@ const en: T = {
   sellHouseBtn: '−🏠 Sell house',
   tradeBtnPD: '🤝 Trade',
   closeBtnPD: 'Close',
+  closeLabel: 'Close',
   monopolyBadge: 'MONOPOLY',
   houseCountLabel: (n) => `${n} house${n !== 1 ? 's' : ''}`,
   hotelOwnedLabel: 'Hotel',
