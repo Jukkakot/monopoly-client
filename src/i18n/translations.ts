@@ -1067,6 +1067,12 @@ const fi: T = {
     ],
     tradeDone: [
       'Hyvä diili! 🤝', 'Kaupat kunnossa.', 'Molemmat voittaa — tai ainakin minä. 😏',
+      'Tämä kauppa vahvistaa asemaani. 💼', 'Sain tarvitsemani tontin. 🎯', 'Hyväksyn — tästä on hyötyä.',
+    ],
+    rejectOffer: [
+      'Ei kiitos — tuo ei hyödytä minua.', 'En luovu tästä tontista. 🚫',
+      'Tarjous on liian yksipuolinen. 🤨', 'Pidän omani, kiitos.',
+      'Tuosta kaupasta häviäisin. Ei käy.', 'Mieti parempi tarjous. 😏',
     ],
     greeting: [
       'Aloitetaan! 🎲', 'Tsemppiä kaikille! 🍀', 'Nyt pelataan. 😎', 'Onnea matkaan, tarvitsette sitä. 😏',
@@ -1095,6 +1101,7 @@ const fi: T = {
     banter: [
       'Katsotaanpa mitä nopat antavat. 🎲', 'Tuuria peliin!', 'Nyt ei saa mennä vankilaan... 🤞',
       'Rahaa on, uskallan pelata. 💰', 'Tämä kierros on mun. 😎',
+      'Mietin seuraavaa siirtoa... 🤔', 'Nyt kannattaa säästää käteistä.', 'Kohta iskee monopoli. 😏',
     ],
     drewCard: [
       'Katsotaan mitä kortti sanoo... 🃏', 'Sattumaa peliin!', 'Toivotaan hyvää korttia. 🤞',
@@ -1700,6 +1707,12 @@ const en: T = {
     ],
     tradeDone: [
       'Nice deal! 🤝', 'Deal\'s done.', 'Everybody wins — well, me at least. 😏',
+      'This deal strengthens my position. 💼', 'Got the property I needed. 🎯', 'Accepted — this helps me.',
+    ],
+    rejectOffer: [
+      'No thanks — that doesn\'t help me.', 'I\'m not giving up this property. 🚫',
+      'The offer\'s too one-sided. 🤨', 'I\'ll keep mine, thanks.',
+      'I\'d lose on that deal. No way.', 'Come back with a better offer. 😏',
     ],
     greeting: [
       'Let\'s go! 🎲', 'Good luck, everyone! 🍀', 'Game on. 😎', 'Good luck — you\'ll need it. 😏',
@@ -1728,6 +1741,7 @@ const en: T = {
     banter: [
       'Let\'s see what the dice give. 🎲', 'Some luck, please!', 'Mustn\'t land in jail now... 🤞',
       'I\'ve got cash, I can play bold. 💰', 'This round is mine. 😎',
+      'Thinking about my next move... 🤔', 'Better save some cash now.', 'A monopoly\'s coming soon. 😏',
     ],
     drewCard: [
       'Let\'s see what the card says... 🃏', 'A bit of chance!', 'Hoping for a good card. 🤞',
