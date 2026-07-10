@@ -14,6 +14,7 @@ import { retriggerBot } from '../../api/sessionApi'
 import { useTokenShapes, type TokenShape } from '../../utils/tokenShapes'
 import { TokenSvg } from '../board/TokenSvg'
 import { calcNetWorth } from '../../utils/netWorth'
+import { tradeVerdict } from '../../utils/tradeFairness'
 import { isBlockedByGroupBuildings } from '../../utils/mortgage'
 import { bankHasBuildingFor } from '../../utils/buildSupply'
 
@@ -1335,7 +1336,6 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
     const prop = state.properties.find(p => p.propertyId === id)
     return s + (prop?.mortgaged && spot?.price ? Math.floor(spot.price / 2) : spot?.price ?? 0)
   }, 0)
-  const balanceDiff = myRequestValue - myOfferValue
   const isEmpty = localOfferMoney === 0 && myOffer.propertyIds.length === 0
     && localRequestMoney === 0 && myRequest.propertyIds.length === 0
 
@@ -1382,16 +1382,7 @@ function TradeEditor({ state, myPlayerId, sendCmd }: {
         </div>
       </div>
 
-      {!isEmpty && (myOfferValue > 0 || myRequestValue > 0) && (
-        <div className={`${styles.tradeBalance} ${balanceDiff > 0 ? styles.tradeBalancePos : balanceDiff < 0 ? styles.tradeBalanceNeg : styles.tradeBalanceEven}`}>
-          <span className={styles.tradeBalanceSide}>annat €{myOfferValue}</span>
-          <span className={styles.tradeBalanceSep}>↔</span>
-          <span className={styles.tradeBalanceSide}>saat €{myRequestValue}</span>
-          <span className={styles.tradeBalanceNet}>
-            {balanceDiff === 0 ? '⚖️' : balanceDiff > 0 ? `+€${balanceDiff}` : `−€${Math.abs(balanceDiff)}`}
-          </span>
-        </div>
-      )}
+      {!isEmpty && <TradeValueMeter give={myOfferValue} get={myRequestValue} />}
 
       <div className={styles.tradeActions}>
         <Btn label={t.sendOfferBtn}
@@ -1457,15 +1448,44 @@ function TradeSide({ label, side, playerColor }: { label: ReactNode; side: Trade
 function TradeBalanceBar({ give, want }: { give: TradeSelection; want: TradeSelection }) {
   const giveVal = give.moneyAmount + give.propertyIds.reduce((s, id) => s + (SPOTS.find(x => x.id === id)?.price ?? 0), 0)
   const wantVal = want.moneyAmount + want.propertyIds.reduce((s, id) => s + (SPOTS.find(x => x.id === id)?.price ?? 0), 0)
-  if (giveVal === 0 && wantVal === 0) return null
-  const diff = giveVal - wantVal
-  const cls = diff > 0 ? styles.tradeBalanceGood : diff < 0 ? styles.tradeBalanceBad : styles.tradeBalanceNeutral
-  const icon = diff > 0 ? '↑' : diff < 0 ? '↓' : '⇄'
-  const label = diff > 0 ? `+€${diff} eduksesi` : diff < 0 ? `−€${Math.abs(diff)} tappiolla` : 'Tasadiili'
+  return <TradeValueMeter give={giveVal} get={wantVal} />
+}
+
+/**
+ * Visual value/fairness meter for a trade, from the viewer's perspective.
+ * A proportional bar (give vs get) plus a verdict label classifying the deal as
+ * fair / in-your-favour / against-you (see `tradeVerdict`, ±12% band = fair).
+ * Shared by the trade editor and the incoming-offer view.
+ */
+function TradeValueMeter({ give, get }: { give: number; get: number }) {
+  const t = useT()
+  if (give === 0 && get === 0) return null
+  const verdict = tradeVerdict(give, get)
+  const diff = get - give
+  const total = give + get
+  const givePct = total > 0 ? (give / total) * 100 : 50
+  const verdictClass = verdict === 'fair' ? styles.tradeVerdictFair
+    : verdict === 'favorsYou' ? styles.tradeVerdictGood : styles.tradeVerdictBad
+  const verdictLabel = verdict === 'fair' ? t.tradeFairLabel
+    : verdict === 'favorsYou' ? t.tradeFavorsYouLabel : t.tradeFavorsThemLabel
   return (
-    <div className={`${styles.tradeBalance} ${cls}`}>
-      <span>{icon}</span>
-      <span>{label}</span>
+    <div className={styles.tradeMeterWrap}>
+      <div className={styles.tradeMeterLabels}>
+        <span className={styles.tradeMeterGive}>{t.youGiveLabel} €{give}</span>
+        <span className={styles.tradeMeterGet}>{t.youGetLabel} €{get}</span>
+      </div>
+      <div className={styles.tradeMeterBar} role="img" aria-label={verdictLabel}>
+        <div className={styles.tradeMeterGiveFill} style={{ width: `${givePct}%` }} />
+        <div className={styles.tradeMeterGetFill} style={{ width: `${100 - givePct}%` }} />
+      </div>
+      <div className={`${styles.tradeVerdict} ${verdictClass}`}>
+        {verdictLabel}
+        {diff !== 0 && (
+          <span className={styles.tradeVerdictDiff}>
+            {diff > 0 ? `+€${diff}` : `−€${Math.abs(diff)}`}
+          </span>
+        )}
+      </div>
     </div>
   )
 }

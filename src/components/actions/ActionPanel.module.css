@@ -790,18 +790,6 @@
 .moneyBtnMinus:disabled,
 .moneyBtnPlus:disabled { opacity: 0.3; cursor: default; }
 
-/* Value balance indicator */
-.tradeBalance {
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 6px;
-  text-align: center;
-}
-.tradeBalanceEven { background: var(--tint-success); color: var(--c-green); }
-.tradeBalancePos  { background: var(--tint-info); color: var(--c-blue); }
-.tradeBalanceNeg  { background: var(--tint-warn); color: var(--c-orange); }
-
 /* Send + cancel on one row */
 .tradeActions {
   display: flex;
@@ -1077,50 +1065,67 @@ button.tradePropChip:active { filter: brightness(0.84); }
   font-style: italic;
 }
 
-.tradeBalance {
+/* ── Trade value / fairness meter ── */
+.tradeMeterWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tradeMeterLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.tradeMeterGive { color: var(--c-red); }
+.tradeMeterGet  { color: var(--c-green); }
+
+.tradeMeterBar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface-sunken);
+  border: 1px solid var(--hairline);
+}
+.tradeMeterGiveFill {
+  background: linear-gradient(180deg, #ef5350, #e53935);
+  transition: width 0.25s ease;
+}
+.tradeMeterGetFill {
+  background: linear-gradient(180deg, #66bb6a, #43a047);
+  transition: width 0.25s ease;
+}
+
+.tradeVerdict {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   border-radius: 8px;
-  padding: 7px 12px;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.tradeBalanceSide {
-  font-size: 0.78rem;
-  font-weight: 600;
-  opacity: 0.85;
-}
-
-.tradeBalanceSep {
-  font-size: 0.75rem;
-  opacity: 0.5;
-}
-
-.tradeBalanceNet {
-  margin-left: 4px;
-  font-size: 0.9rem;
+  padding: 5px 10px;
+  font-size: 0.8rem;
   font-weight: 800;
 }
+.tradeVerdictDiff {
+  font-size: 0.82rem;
+  font-weight: 800;
+  opacity: 0.9;
+}
 
-.tradeBalanceGood {
+.tradeVerdictFair {
+  background: var(--tint-info);
+  color: var(--c-blue);
+}
+.tradeVerdictGood {
   background: var(--tint-success);
-  border: 1px solid #a5d6a7;
   color: var(--c-green);
 }
-
-.tradeBalanceBad {
-  background: var(--tint-danger);
-  border: 1px solid #ef9a9a;
-  color: var(--c-red);
-}
-
-.tradeBalanceNeutral {
-  background: var(--surface-sunken);
-  border: 1px solid var(--hairline);
-  color: var(--ink-faint);
+.tradeVerdictBad {
+  background: var(--tint-warn);
+  color: var(--c-orange);
 }
 
 /* ── Building UI ── */
