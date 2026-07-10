@@ -477,6 +477,10 @@ export interface T {
   chatEmpty: string
   chatReactionsLabel: string
   chatSpectatorHint: string
+  // Bot chat phrases, keyed by situation. Bots send a (key, variant) pair; the client renders
+  // the matching pool entry in its own language. Pool lengths mirror BotChatter.java on the
+  // backend; a mismatched variant index is clamped modulo the pool length (never crashes).
+  botChat: Record<string, string[]>
 
   // ── Events (deriveEvents, non-React) ─────────────────────────────────────────
   cashTooltip: (cash: number) => string
@@ -1025,6 +1029,39 @@ const fi: T = {
   chatEmpty: 'Ei viestejä vielä. Sano jotain! 👋',
   chatReactionsLabel: 'Reaktiot',
   chatSpectatorHint: 'Vain pelaajat voivat lähettää viestejä.',
+  botChat: {
+    boughtProperty: [
+      'Tää tontti on nyt mun. 😎', 'Hyvä sijoitus!', 'Tästä tulee hyvä.',
+      'Ostoslistaa lyhemmäks. 🏠', 'Mun kokoelma kasvaa.', 'Ei jätetä hyviä tontteja väliin.',
+    ],
+    builtHotel: [
+      'Hotelli pystyssä! 🏨', 'Tervetuloa — vuokra ei oo halpa. 😏',
+      'Nyt alkaa kilahtaa kassaan.', 'Tästä tuli kallis kulma.',
+    ],
+    rentGloat: [
+      'Kiitos vuokrasta! 💰', 'Kassa kasvaa. 😎', 'Mukava lisä tilille.',
+      'Aina yhtä kivaa periä vuokraa. 🤑', 'Kohta ostan lisää tontteja näillä.',
+    ],
+    rentPain: [
+      'Auts, kallis pysähdys. 😩', 'No tuo sattui.', 'Voi ei, melkein koko kassa meni.',
+      'Kallista huseerausta. 💸', 'Pitää alkaa myydä taloja...',
+    ],
+    jail: [
+      'No niin, vankilaan taas. 😅', 'Nähdään parin kierroksen päästä.',
+      'Ei taas...', 'Vankila kutsuu. 🚔',
+    ],
+    opponentBankrupt: [
+      'Yksi vähemmän. 😎', 'Peli on peli. 🤝', 'Hyvää peliä!',
+      'Sääli, mutta bisnes on bisnestä.',
+    ],
+    selfBankrupt: [
+      'Hyvää peliä kaikille! 💀', 'No tähän se loppui — onnea muille!',
+      'Konkurssi. Hyvin pelattu, muut.',
+    ],
+    tradeDone: [
+      'Hyvä diili! 🤝', 'Kaupat kunnossa.', 'Molemmat voittaa — tai ainakin minä. 😏',
+    ],
+  },
 
   // Events
   cashTooltip: (cash) => `käteinen €${cash}`,
@@ -1577,6 +1614,39 @@ const en: T = {
   chatEmpty: 'No messages yet. Say something! 👋',
   chatReactionsLabel: 'Reactions',
   chatSpectatorHint: 'Only players can send messages.',
+  botChat: {
+    boughtProperty: [
+      'This one\'s mine now. 😎', 'Good investment!', 'This\'ll pay off.',
+      'One less on the list. 🏠', 'My collection grows.', 'Never skip a good deed.',
+    ],
+    builtHotel: [
+      'Hotel\'s up! 🏨', 'Welcome — rent won\'t be cheap. 😏',
+      'Now the cash starts rolling in.', 'This corner just got expensive.',
+    ],
+    rentGloat: [
+      'Thanks for the rent! 💰', 'Cash pile\'s growing. 😎', 'A nice little top-up.',
+      'Collecting rent never gets old. 🤑', 'I\'ll buy more with this.',
+    ],
+    rentPain: [
+      'Ouch, pricey stop. 😩', 'Well, that hurt.', 'Oh no, there goes my cash.',
+      'Expensive detour. 💸', 'Time to start selling houses...',
+    ],
+    jail: [
+      'Well, jail again. 😅', 'See you in a couple of rounds.',
+      'Not again...', 'Jail calls. 🚔',
+    ],
+    opponentBankrupt: [
+      'One down. 😎', 'It\'s just business. 🤝', 'Good game!',
+      'A pity, but business is business.',
+    ],
+    selfBankrupt: [
+      'Good game, everyone! 💀', 'That\'s where it ends — good luck!',
+      'Bankrupt. Well played, folks.',
+    ],
+    tradeDone: [
+      'Nice deal! 🤝', 'Deal\'s done.', 'Everybody wins — well, me at least. 😏',
+    ],
+  },
 
   // Events
   cashTooltip: (cash) => `cash €${cash}`,

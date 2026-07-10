@@ -110,4 +110,18 @@ describe('translateBackendEvents — CHAT', () => {
       [chatEntry(3, 'p1', { kind: 'MESSAGE', content: 'moi' })], players)
     expect(e.chat?.name).toBe('Anna')
   })
+
+  it('carries a bot message localization key + variant through', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(4, 'p2', { kind: 'MESSAGE', content: 'Hyvä diili!', name: 'Botti',
+        botMsgKey: 'tradeDone', botMsgVariant: '2' })], players)
+    expect(e.chat?.botMsgKey).toBe('tradeDone')
+    expect(e.chat?.botVariant).toBe(2)
+  })
+
+  it('leaves human messages without a localization key', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(5, 'p1', { kind: 'MESSAGE', content: 'moi' })], players)
+    expect(e.chat?.botMsgKey).toBeUndefined()
+  })
 })

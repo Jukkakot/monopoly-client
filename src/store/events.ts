@@ -27,7 +27,9 @@ export interface GameEvent {
   // Chat payload — set only on CHAT events. Carried on the same event stream so chat and
   // reactions ride the existing SSE log. Chat events are excluded from the Tapahtumaloki and
   // shown in the Chat tab instead; REACTION chat events also float over the board.
-  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string }
+  // botMsgKey/botVariant localise a bot MESSAGE at render time (see ChatPanel) so it follows the
+  // viewer's current language; `content` is the Finnish fallback. Absent for human messages.
+  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string; botMsgKey?: string; botVariant?: number }
 }
 
 let _id = 0
@@ -197,6 +199,14 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const message = kind === 'REACTION' ? `${chatName} ${content}` : `${chatName}: ${content}`
         const cev = ev(icon, message, [pid])
         cev.chat = { kind, name: chatName, content, playerId: pid }
+        // A bot message arrives as a (key, variant) pair so each client localises it to its own
+        // language; carry them through for ChatPanel to resolve at render time.
+        const botMsgKey = e.data.botMsgKey
+        if (botMsgKey) {
+          cev.chat.botMsgKey = botMsgKey
+          const v = parseInt(e.data.botMsgVariant ?? '0', 10)
+          cev.chat.botVariant = Number.isNaN(v) ? 0 : v
+        }
         events.push(cev)
         break
       }
