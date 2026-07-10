@@ -48,9 +48,12 @@ function loadMobilePanelWidth(): number {
 
 const MOBILE_BOARD_H_MIN = 150
 const MOBILE_BOARD_H_MAX = 560
-// The mobile action area never shrinks below this — enough for the phase tab row plus the
-// primary action button — so the board's auto-grow can't hide the buttons.
-const MOBILE_ACTIONS_MIN = 132
+// Tiny hard floor for the mobile action area — just a safety net so a momentarily-empty
+// panel (e.g. mid-reconnect) can't vanish entirely. Kept well below real action content
+// (a button row is ~85px) so it NEVER forces the panel taller than its content: doing so
+// would both add empty "watermark" space under the buttons AND stop the square board from
+// growing out to the full screen width. The board's own width is the real grow ceiling.
+const MOBILE_ACTIONS_MIN = 48
 
 function loadMobileBoardHeight(): number {
   try {
