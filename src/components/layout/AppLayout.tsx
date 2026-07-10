@@ -9,6 +9,7 @@ import { useTokenShapes } from '../../utils/tokenShapes'
 import Icon, { type IconName } from '../common/Icon'
 import AnimatedCash from '../common/AnimatedCash'
 import BottomSheet from '../common/BottomSheet'
+import { fitBoardHeight } from '../../utils/mobileFit'
 
 type AnimDir = 'right' | 'left'
 
@@ -117,6 +118,9 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const mobileActionsWrapperRef = useRef<HTMLDivElement>(null)
   const mobileActionsContentRef = useRef<HTMLDivElement>(null)
   const [mobileActionsContentH, setMobileActionsContentH] = useState(0)
+  // Bumped whenever the visible viewport height changes (mobile browser chrome / URL bar
+  // collapsing, on-screen keyboard) so the board re-fits the action panel to its content.
+  const [viewportTick, setViewportTick] = useState(0)
   const mobileBoardRef = useRef<HTMLDivElement>(null)
 
   const [playersSplitPx, setPlayersSplitPx] = useState(() => {
@@ -160,8 +164,6 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
   const portraitDragRef = useRef<{ startY: number; startH: number } | null>(null)
   const mobileBoardHeightRef = useRef(mobileBoardHeight)
   useEffect(() => { mobileBoardHeightRef.current = mobileBoardHeight }, [mobileBoardHeight])
-  // Tracks the user's preferred board height (set by dragging); auto-resize shrinks below this but grows back to it
-  const userBoardHeightRef = useRef(mobileBoardHeight)
 
   useEffect(() => {
     const mqLandscape = window.matchMedia('(orientation: landscape) and (max-width: 767px)')
@@ -175,6 +177,25 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     return () => {
       mqLandscape.removeEventListener('change', handlerLandscape)
       mqMobile.removeEventListener('change', handlerMobile)
+    }
+  }, [])
+
+  // Re-fit the board→action split whenever the usable viewport height changes. Mobile
+  // browsers (notably Samsung Internet) grow/shrink innerHeight as the URL bar hides on
+  // scroll; without this, the board keeps its old height and the action panel ends up too
+  // tall or too short until the user drags it. Coalesced via rAF to avoid thrashing.
+  useEffect(() => {
+    let raf = 0
+    const bump = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => setViewportTick(t => t + 1))
+    }
+    window.addEventListener('resize', bump)
+    window.visualViewport?.addEventListener('resize', bump)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', bump)
+      window.visualViewport?.removeEventListener('resize', bump)
     }
   }, [])
 
@@ -200,7 +221,6 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
       if (portraitDragRef.current) {
         portraitDragRef.current = null
         mobileBoardRef.current?.classList.remove(styles.mobileBoardDragging)
-        userBoardHeightRef.current = mobileBoardHeightRef.current
         try { localStorage.setItem('monopoly_mobile_board_height', String(mobileBoardHeightRef.current)) } catch {}
       }
     }
@@ -350,11 +370,13 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     if (!wrapper) return
     const cs = window.getComputedStyle(wrapper)
     const paddingV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
-    const overflow = mobileActionsContentH - (wrapper.clientHeight - paddingV)
-    if (Math.abs(overflow) <= 2) return
-    const target = Math.min(
-      userBoardHeightRef.current,
-      Math.max(MOBILE_BOARD_H_MIN, mobileBoardHeightRef.current - overflow)
+    const available = wrapper.clientHeight - paddingV
+    if (Math.abs(mobileActionsContentH - available) <= 2) return
+    // Resize the board so the action area always hugs its content: shrink when the actions
+    // don't fit, grow to reclaim slack when they're short. Bounded only by the hard min/max.
+    const target = fitBoardHeight(
+      mobileBoardHeightRef.current, mobileActionsContentH, available,
+      MOBILE_BOARD_H_MIN, MOBILE_BOARD_H_MAX,
     )
     if (Math.abs(target - mobileBoardHeightRef.current) > 2) {
       if (target < mobileBoardHeightRef.current) {
@@ -365,11 +387,11 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
           mobileBoardRef.current?.classList.remove(styles.mobileBoardDragging)
         }))
       } else {
-        // Growing back toward user preference: smooth transition feels natural
+        // Growing to reclaim slack: smooth transition feels natural
         setMobileBoardHeight(target)
       }
     }
-  }, [mobileActionsContentH, isMobile, isLandscape, mobileTab]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mobileActionsContentH, viewportTick, isMobile, isLandscape, mobileTab]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isMyTurn = !!(snap && snap.turn &&
     snap.turn.activePlayerId === state.myPlayerId &&
