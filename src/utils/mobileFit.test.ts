@@ -37,4 +37,15 @@ describe('fitBoardHeight', () => {
     const newAvailable = available - (target - current)
     expect(newAvailable).toBe(content)
   })
+
+  it('a maxBoard ceiling keeps the action area at its minimum instead of hiding it', () => {
+    // Tiny content (20px) would want a very tall board, but the caller ceilings growth so the
+    // action area keeps at least ACTIONS_MIN: board ≤ current + available − ACTIONS_MIN.
+    const current = 300, content = 20, available = 250, ACTIONS_MIN = 132
+    const maxBoard = Math.min(MAX, current + available - ACTIONS_MIN) // 418
+    const target = fitBoardHeight(current, content, available, MIN, maxBoard)
+    expect(target).toBe(418)
+    const newAvailable = available - (target - current)
+    expect(newAvailable).toBe(ACTIONS_MIN) // action area never collapses below the floor
+  })
 })

@@ -48,6 +48,9 @@ function loadMobilePanelWidth(): number {
 
 const MOBILE_BOARD_H_MIN = 150
 const MOBILE_BOARD_H_MAX = 560
+// The mobile action area never shrinks below this — enough for the phase tab row plus the
+// primary action button — so the board's auto-grow can't hide the buttons.
+const MOBILE_ACTIONS_MIN = 132
 
 function loadMobileBoardHeight(): number {
   try {
@@ -373,10 +376,18 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     const available = wrapper.clientHeight - paddingV
     if (Math.abs(mobileActionsContentH - available) <= 2) return
     // Resize the board so the action area always hugs its content: shrink when the actions
-    // don't fit, grow to reclaim slack when they're short. Bounded only by the hard min/max.
+    // don't fit, grow to reclaim slack when they're short.
+    // Safety ceiling: never grow the board so far that the action area drops below
+    // MOBILE_ACTIONS_MIN. (board + available are complementary within the viewport, so
+    // keeping available ≥ MIN means board ≤ current + available − MIN.) This guarantees the
+    // primary buttons stay visible even if content is momentarily tiny (e.g. reconnecting).
+    const maxBoard = Math.max(
+      MOBILE_BOARD_H_MIN,
+      Math.min(MOBILE_BOARD_H_MAX, mobileBoardHeightRef.current + available - MOBILE_ACTIONS_MIN),
+    )
     const target = fitBoardHeight(
       mobileBoardHeightRef.current, mobileActionsContentH, available,
-      MOBILE_BOARD_H_MIN, MOBILE_BOARD_H_MAX,
+      MOBILE_BOARD_H_MIN, maxBoard,
     )
     if (Math.abs(target - mobileBoardHeightRef.current) > 2) {
       if (target < mobileBoardHeightRef.current) {
@@ -566,7 +577,7 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
               styles.mobileActionWrapper,
               mobileTab !== 'board' ? styles.mobileHidden : '',
               boardEntering ? (animDir === 'right' ? styles.slideFromLeft : styles.slideFromRight) : '',
-            ].join(' ')}><div ref={mobileActionsContentRef}>{actions}</div><div className={styles.mobileBrandMark} aria-hidden="true">MONOPOLY</div></div>}
+            ].join(' ')}><div ref={mobileActionsContentRef} style={{ flexShrink: 0 }}>{actions}</div><div className={styles.mobileBrandMark} aria-hidden="true">MONOPOLY</div></div>}
             {mobileTab === 'players' && (
               <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{players}</div>
             )}
