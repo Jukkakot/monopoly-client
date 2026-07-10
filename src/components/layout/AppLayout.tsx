@@ -376,14 +376,21 @@ export default function AppLayout({ header, board, players, log, actions }: Prop
     const available = wrapper.clientHeight - paddingV
     if (Math.abs(mobileActionsContentH - available) <= 2) return
     // Resize the board so the action area always hugs its content: shrink when the actions
-    // don't fit, grow to reclaim slack when they're short.
-    // Safety ceiling: never grow the board so far that the action area drops below
-    // MOBILE_ACTIONS_MIN. (board + available are complementary within the viewport, so
-    // keeping available ≥ MIN means board ≤ current + available − MIN.) This guarantees the
-    // primary buttons stay visible even if content is momentarily tiny (e.g. reconnecting).
+    // don't fit, grow to reclaim slack when they're short. Ceilinged by, in order:
+    //  • the board's own square size — it's constrained by width in portrait, so growing the
+    //    container taller than that just pads the board with empty green felt and steals room
+    //    from the actions for nothing. Capping here is what keeps "board as big as possible"
+    //    from wasting space.
+    //  • MOBILE_ACTIONS_MIN — never squeeze the action area below the tab row + primary button,
+    //    so the buttons/notifications stay visible even if content is momentarily tiny.
+    const boardSquareMax = mobileBoardRef.current?.clientWidth ?? MOBILE_BOARD_H_MAX
     const maxBoard = Math.max(
       MOBILE_BOARD_H_MIN,
-      Math.min(MOBILE_BOARD_H_MAX, mobileBoardHeightRef.current + available - MOBILE_ACTIONS_MIN),
+      Math.min(
+        MOBILE_BOARD_H_MAX,
+        boardSquareMax,
+        mobileBoardHeightRef.current + available - MOBILE_ACTIONS_MIN,
+      ),
     )
     const target = fitBoardHeight(
       mobileBoardHeightRef.current, mobileActionsContentH, available,
