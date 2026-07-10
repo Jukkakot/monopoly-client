@@ -11,6 +11,7 @@ import {
   playGameOver, playTradeAccepted, playMortgage, playPassGo, playPayRent, playAuctionWin, playDiceRoll,
 } from '../utils/sounds'
 import { calcNetWorth } from '../utils/netWorth'
+import { assessConnection, RECONNECT_WINDOW_MS, WEAK_LATENCY_MS, type ConnectionQuality, type LatencySample } from '../utils/connectionQuality'
 import { getLang } from '../i18n/lang'
 import { translations } from '../i18n/translations'
 import { isAnyPlayerAnimating, onAnimationIdle } from '../hooks/useTokenAnimation'
@@ -81,6 +82,7 @@ interface GameState {
   prevSnapshot: SessionState | null
   version: number
   connectionStatus: ConnectionStatus
+  connectionQuality: ConnectionQuality  // link health while connected: good / slow / unstable
   reconnectAttempts: number  // how many consecutive SSE reconnect attempts since last success
   events: GameEvent[]
   myPlayerId: string | null
@@ -101,6 +103,7 @@ type Action =
   | { type: 'LEAVE_SESSION' }
   | { type: 'SET_SNAPSHOT'; snapshot: ClientSessionSnapshot }
   | { type: 'SET_CONNECTION'; status: ConnectionStatus }
+  | { type: 'SET_CONNECTION_QUALITY'; quality: ConnectionQuality }
   | { type: 'SET_RECONNECT_ATTEMPTS'; count: number }
   | { type: 'SET_COMMAND_ERROR'; message: string | null }
   | { type: 'SET_SSE_FROZEN'; frozen: boolean }
@@ -142,6 +145,7 @@ function reducer(state: GameState, action: Action): GameState {
         prevSnapshot: null,
         version: 0,
         connectionStatus: 'CONNECTING',
+        connectionQuality: 'good',
         reconnectAttempts: 0,
         events: [],
         myPlayerId: null,
@@ -281,6 +285,9 @@ function reducer(state: GameState, action: Action): GameState {
       }
     case 'SET_CONNECTION':
       return { ...state, connectionStatus: action.status }
+    case 'SET_CONNECTION_QUALITY':
+      // Return the same reference when unchanged so the 4s poll doesn't cause re-renders.
+      return state.connectionQuality === action.quality ? state : { ...state, connectionQuality: action.quality }
     case 'SET_RECONNECT_ATTEMPTS':
       return { ...state, reconnectAttempts: action.count }
     case 'SET_COMMAND_ERROR':
@@ -320,6 +327,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     prevSnapshot: null,
     version: 0,
     connectionStatus: 'CONNECTING',
+    connectionQuality: 'good',
     reconnectAttempts: 0,
     events: [],
     myPlayerId: null,
@@ -336,6 +344,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   })
 
   const retryCount = useRef(0)
+  // Connection-quality signals: timestamps of reconnect episodes + recent command round-trips.
+  const reconnectTimestamps = useRef<number[]>([])
+  const cmdLatencies = useRef<LatencySample[]>([])
   const esRef = useRef<EventSource | null>(null)
   const versionRef = useRef(0)
   const lastSoundedId = useRef(-1)
@@ -544,6 +555,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const lastCmdTimeRef = useRef(new Map<string, number>())
 
+  // Keep the last few command round-trip times (ring buffer) for connection-quality checks.
+  const recordLatency = useCallback((ms: number) => {
+    cmdLatencies.current.push({ t: Date.now(), ms })
+    if (cmdLatencies.current.length > 8) cmdLatencies.current.shift()
+  }, [])
+
   const sendCmd = useCallback(async (command: object) => {
     if (!state.sessionId) return
     if (state.duplicateClient) return  // blocked: another tab is controlling this player
@@ -561,7 +578,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ? (localStorage.getItem(`monopoly_host_${sid}`) ?? undefined)
         : undefined
       const enriched = { ...command, ...(playerToken ? { playerToken } : {}), ...(hostToken ? { hostToken } : {}) }
+      const cmdStart = performance.now()
       const result = await sendCommand(sid, enriched)
+      recordLatency(performance.now() - cmdStart)
       if (result.accepted) {
         logger.info('cmd', { type: cmdType, sessionId: sid })
       } else if (result.rejections.length > 0) {
@@ -593,11 +612,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       // Network error: allow immediate retry
       lastCmdTimeRef.current.delete(cmdType)
+      recordLatency(WEAK_LATENCY_MS + 1)  // a failed round-trip counts toward "slow"
       dispatch({ type: 'SET_COMMAND_ERROR', message: translations[getLang()].commandErrorMsg })
       setTimeout(() => dispatch({ type: 'SET_COMMAND_ERROR', message: null }), 4000)
       window.__monopolyErrorLog?.push(`NETWORK_ERROR: ${String(err)}`)
     }
-  }, [state.sessionId, state.duplicateClient])
+  }, [state.sessionId, state.duplicateClient, recordLatency])
+
+  // Poll connection quality: prune stale reconnect episodes and re-assess from recent
+  // reconnects + command latencies. The reducer no-ops when unchanged, so this is cheap.
+  useEffect(() => {
+    if (!state.sessionId) return
+    const id = setInterval(() => {
+      const now = Date.now()
+      reconnectTimestamps.current = reconnectTimestamps.current.filter(ts => now - ts <= RECONNECT_WINDOW_MS)
+      dispatch({ type: 'SET_CONNECTION_QUALITY', quality: assessConnection(reconnectTimestamps.current, cmdLatencies.current, now) })
+    }, 4000)
+    return () => clearInterval(id)
+  }, [state.sessionId])
 
   useEffect(() => {
     if (!state.sessionId || state.sseFrozen) return
@@ -727,6 +759,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'SET_RECONNECT_ATTEMPTS', count: retryCount.current })
           return
         }
+        // Record one timestamp per drop episode (first failure after being live) so the
+        // connection-quality poll can flag a flapping link.
+        if (retryCount.current === 0) reconnectTimestamps.current.push(Date.now())
         const delay = Math.min(1000 * 2 ** retryCount.current, 30000)
         retryCount.current++
         dispatch({ type: 'SET_RECONNECT_ATTEMPTS', count: retryCount.current })

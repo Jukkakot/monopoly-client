@@ -120,7 +120,10 @@ export default function FlashBanner() {
   }, [hasBanners])
 
   const visible = banners.filter(b => b.visible)
-  const hasContent = visible.length > 0 || !!state.commandError || state.connectionStatus === 'RECONNECTING'
+  // Only warn about weak links while actually connected — reconnecting/failed have their own UI.
+  const weakConn = state.connectionStatus === 'LIVE' && state.connectionQuality !== 'good'
+  const hasContent = visible.length > 0 || !!state.commandError
+    || state.connectionStatus === 'RECONNECTING' || weakConn
 
   if (!hasContent) return null
 
@@ -130,6 +133,14 @@ export default function FlashBanner() {
         <div className={`${styles.banner} ${styles.reconnecting}`}>
           <span className={styles.icon}>📡</span>
           <span className={styles.message}>{t.reconnectingMsg}</span>
+        </div>
+      )}
+      {weakConn && (
+        <div className={`${styles.banner} ${styles.weakConn}`}>
+          <span className={styles.icon}>{state.connectionQuality === 'unstable' ? '📶' : '🐢'}</span>
+          <span className={styles.message}>
+            {state.connectionQuality === 'unstable' ? t.connUnstableMsg : t.connSlowMsg}
+          </span>
         </div>
       )}
       {state.commandError && (

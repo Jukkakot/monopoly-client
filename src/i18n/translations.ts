@@ -461,6 +461,8 @@ export interface T {
   // ── FlashBanner ──────────────────────────────────────────────────────────────
   yourTurnMsg: string
   reconnectingMsg: string
+  connSlowMsg: string
+  connUnstableMsg: string
   commandErrorMsg: string
 
   // ── AppLayout ────────────────────────────────────────────────────────────────
@@ -994,6 +996,8 @@ const fi: T = {
   // FlashBanner
   yourTurnMsg: 'Sinun vuorosi!',
   reconnectingMsg: 'Yhdistetään uudelleen…',
+  connSlowMsg: 'Hidas yhteys palvelimeen — pelissä voi olla viivettä',
+  connUnstableMsg: 'Epävakaa yhteys — peli voi pätkiä',
   commandErrorMsg: 'Komento epäonnistui — tarkista yhteys',
 
   // AppLayout
@@ -1536,6 +1540,8 @@ const en: T = {
   // FlashBanner
   yourTurnMsg: 'Your turn!',
   reconnectingMsg: 'Reconnecting…',
+  connSlowMsg: 'Slow connection to the server — there may be lag',
+  connUnstableMsg: 'Unstable connection — the game may stutter',
   commandErrorMsg: 'Command failed — check connection',
 
   // AppLayout

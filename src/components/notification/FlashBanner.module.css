@@ -44,6 +44,14 @@
   font-size: 13px;
 }
 
+/* Weak/slow/unstable link — an amber advisory, less alarming than the reconnecting banner. */
+.banner.weakConn {
+  background: linear-gradient(180deg, #f0a020 0%, #d97e00 100%);
+  color: #2a1a00;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .banner.rentReceived {
   background: linear-gradient(180deg, #1976d2 0%, #1565c0 100%);
   box-shadow: 0 6px 20px rgba(21, 101, 192, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.2);
