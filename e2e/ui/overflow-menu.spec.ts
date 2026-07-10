@@ -97,7 +97,9 @@ test('settings panel: closes with ✕ button', async ({ page }) => {
     await page.getByRole('button', { name: /Asetukset/ }).click()
     await expect(page.getByText('⚙️ Asetukset').first()).toBeVisible({ timeout: 3000 })
 
-    await page.getByRole('button', { name: '✕' }).first().click()
+    // The close button's accessible name is its aria-label (t.closeLabel = "Sulje"),
+    // which overrides the visible "✕" glyph for role queries.
+    await page.getByRole('button', { name: 'Sulje' }).first().click()
 
     await expect(page.getByText('Volyymi')).not.toBeVisible({ timeout: 2000 })
   } finally {

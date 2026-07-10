@@ -42,8 +42,9 @@ test('event log: sidebar log section visible on desktop', async ({ page }) => {
   try {
     await navigateSpectator(page, sid)
 
-    // Desktop sidebar section header
-    await expect(page.getByText('📋 Tapahtumaloki').first()).toBeVisible({ timeout: 5000 })
+    // Desktop sidebar section header. The title renders an <Icon name="list"> before the
+    // word (previously a 📋 emoji), so match on the text alone.
+    await expect(page.getByText('Tapahtumaloki').first()).toBeVisible({ timeout: 5000 })
 
     // Event log container present
     await expect(page.getByTestId('event-log').first()).toBeVisible({ timeout: 3000 })
