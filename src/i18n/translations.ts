@@ -1033,19 +1033,22 @@ const fi: T = {
   reactionButtonLabel: 'Lähetä reaktio',
   botChat: {
     boughtProperty: [
-      'Joo-o, tää on nyt mun. 😎', 'Hyvä läträys!', 'Täst tulee kultakaivos.',
-      'Yks tontti listalt pois. 🏠', 'Mun imperiumi kasvaa taas.', 'Ei jätetä hyvii paloi muille.',
-      'Tää täydentää setin. 🎯', 'Halvalla sain, kiitti.',
+      'Joo-o, tää on nyt mun. 😎', 'Hyvä läträys!', 'Täst tulee kultakaivos. 💰',
+      'Yks tontti listalt pois. 🏠', 'Mun imperiumi kasvaa taas. 🏰', 'Ei jätetä hyvii paloi muille.',
+      'Tää täydentää setin. 🎯', 'Halvalla sain, kiitti. 🤝',
       'Otin tän vaan et te ette saa. 😏', 'Rautatiet on varmaa fyrkkaa. 🚂',
       'Vieres tontti — nyt on pari kasas. 👫', 'Pakko ottaa, en voinu vastustaa.',
       'Sijainti ratkasee, aina. 📍', 'Nam, hyvä lisä salkkuun. 💼',
+      'Mine mine mine! 😆', 'Täst tulee teille kallista. 😈',
+      'Sori muut, tää oli liian hyvä. 🤷', 'Instabuy, ei mietitty kauaa. ⚡',
     ],
     builtHotel: [
       'Hotelli pystys! 🏨', 'Tervetuloa — ei oo halpaa lystii. 😏',
       'Nyt alkaa kilahtaa kassaan. 🤑', 'Täst tuli kallis kulma teille.',
       'Maksaa ittensä takas ihan just. 💰', 'Jos tänne osutte ni voi voi. 💸',
       'Superhotelli valmis. 🏨', 'Tää ruutu on nyt puhdasta myrkkyy. ☠️',
-      'Tällasii sijotuksii mä diggaan. 📈',
+      'Tällasii sijotuksii mä diggaan. 📈', 'Älkää astuko tänne. Tai astukaa. 😈',
+      'Viiden tähden ansa valmis. ⭐', 'Kassakone käyntiin. 🤑',
     ],
     rentGloat: [
       'Kiitti vuokrist! 💰', 'Kassa kasvaa taas. 😎', 'Nam, kivaa lisää.',
@@ -1053,59 +1056,74 @@ const fi: T = {
       'Sijotus tuottaa, mitäs mä sanoin. 📈', 'Passiivist tuloo, rakastan tätä.',
       'Kiitti vaan, maksa pois. 😌', 'Tää tili paisuu mukavasti.',
       'Vuokralaiset on mun bestii. 🏦', 'Cha-ching! 🤑',
+      'Ez money. 😎', 'Kiitos ku pysähdyit. 😏', 'Mun lompsa kiittää. 💸',
+      'Free real estate. 🏠', 'Rakastan tätä peliä juuri nyt. 🥰',
     ],
     rentPain: [
       'Auts, kallis pysähdys. 😩', 'No täähän sattu.', 'Voi ei, melkein koko kassa meni. 😱',
       'Kallist lystii tää. 💸', 'Nyt pitää alkaa myymään taloi...',
       'Tos meni budjetti. 😰', 'Väärä ruutu, väärä hetki, äh.',
-      'No siin meni säästöt, kiitti.', 'Täst pitää toipuu äkkii.',
+      'No siin meni säästöt, kiitti. 🙃', 'Täst pitää toipuu äkkii.',
       'Kallis oppiläksy tää. 📚', 'Auts, sattu kukkaroon. 😖',
+      'F. 💀', 'Rip mun kassa. ⚰️', 'No tää oli tässä, kiitti vaan. 😤',
+      'Miks aina mä?? 😭', 'Ei nyt yhtään sopinut budjettiin. 🫠',
     ],
     jail: [
       'No niin, koppiin taas. 😅', 'Nähää parin kierroksen päästä.',
       'Ei taas... äh.', 'Vankila kutsuu. 🚔',
+      'No tää meni hyvin. 🙃', 'Linnaan siitä. 😔', 'Vitsi et taas. 🤦',
     ],
     opponentBankrupt: [
       'Yks vähemmän. 😎', 'Peli on peli. 🤝', 'Hyvin pelattu silti!',
-      'Sääli, mut bisnes on bisnestä.',
+      'Sääli, mut bisnes on bisnestä.', 'F sulle. 💀', 'Nähää ens pelis! 👋',
+      'Yks kilpailija pois laskuist. 😏',
     ],
     selfBankrupt: [
       'Hyvää peliä kaikille! 💀', 'No tähän se tyssäs — onnee muille!',
-      'Konkkaan mentiin. Hyvin pelattu, muut.',
+      'Konkkaan mentiin. Hyvin pelattu, muut.', 'GG, mä oon out. 🫡',
+      'No niin, mun peli päätty tähän. 😔',
     ],
     tradeDone: [
       'Hyvä diili! 🤝', 'Kaupat klaari.', 'Molemmat voittaa — tai ainaki mä. 😏',
       'Tää kauppa vahvistaa mun asemaa. 💼', 'Sain just sen tontin mitä tarvin. 🎯', 'Jees, tästä on hyötyy.',
+      'Win-win, painotus mun win. 😎', 'Deal! 🤝', 'Kiva tehä bisnest kaa. 😌',
     ],
     rejectOffer: [
       'Ei kiitti — ei hyödytä mua.', 'En luovu täst tontist. 🚫',
       'Toi tarjous on ihan yksipuolinen. 🤨', 'Pidän omani, kiitti.',
       'Tost mä häviäisin. Ei käy.', 'Keksi parempi tarjous. 😏',
+      'Nice try. 😂', 'Luuletsä et mä oon tyhmä? 😅', 'Ei todellakaan. 🙅',
     ],
     greeting: [
       'No niin, pistetään pystyyn! 🎲', 'Tsemppii kaikille — mä en tarvii. 😏',
-      'Antaa palaa!', 'Onnee vaan, kyl te sitä tarttette. 😎',
+      'Antaa palaa, jäbät!', 'Onnee vaan, kyl te sitä tarttette. 😎',
+      'Mennääks? Mä oon valmis. 🔥', 'Letsgooo! Valmiina häviää? 😜',
     ],
     passedGo: [
       'Kierros täys, +200! 💰', 'Kiitti pankki. 💵', 'Taas 200 taskuun. 😎',
+      'Palkkapäivä! 🤑', 'Startti maksaa, jees. 💵',
     ],
     releasedFromJail: [
       'Vapaana taas! 🔓', 'Takas peliin. 😎', 'Ei mua kauaa pidellä.',
+      'Ulkona koppist, nyt jyrätään. 💪',
     ],
     mortgaged: [
       'Pakko kiinnittää, äh... 😬', 'Tarviin cashii nyt heti.', 'Ei muuta vaihtoehtoo.',
       'Kiinnitän tän, tarviin fyrkkaa ostoon.', 'Väliaikanen juttu, nostan pian takas.',
+      'Sori tontti, joudut pantiks hetkeks. 😔', 'Hätäkassa auki, äh. 🏦',
     ],
     tradeDeclined: [
       'No ei sitten. 🤷', 'Harmi, ois ollu hyvä diili.', 'Ehkä ens kerral. 🤔',
+      'Sun tappio, ei mun. 😏', 'No okei, pidä tonttis. 😌',
     ],
     builtHouse: [
       'Talo nostaa vuokraa, jees. 🏠', 'Rakennan täst vahvan.',
       'Pieni panostus, iso tuotto. 📈', 'Talo kerrallaan kohti hotellii.',
+      'Naapurusto kehittyy. 🔨', 'Pikkuhiljaa vaan ylöspäin. 🏗️',
     ],
     redeemed: [
       'Nostin kiinnityksen — kassa kestää taas. 💪', 'Takas omaks ilman velkaa.',
-      'Nyt tää tuottaa taas täydet. 💰',
+      'Nyt tää tuottaa taas täydet. 💰', 'Velat pois, taas mennään. 😎', 'Kiinnitys purku, jees. ✅',
     ],
     banter: [
       'Katotaas mitä nopat antaa. 🎲', 'Tuuria peliin!', 'Kunhan en mee vankilaan... 🤞',
@@ -1113,6 +1131,7 @@ const fi: T = {
       'Mietin seuraavaa siirtoo... 🤔', 'Nyt kannattaa säästää cashii.', 'Kohta iskee monopoli. 😏',
       'Ei kiirettä, peli on pitkä.', 'Rento meininki, homma hanskas. 😎',
       'Katotaan mihin toi nappula päätyy.', 'Pörssi nousee, ostan lisää. 📈',
+      'Chillii vaan, ei stressii. 😌', 'Nopat, älkää pettäkö. 🎲',
     ],
     banterLead: [
       'Mä johdan — ja aion pitää sen niin. 😎', 'Mun kassa on paksuin täs pöydäs. 💰',
@@ -1120,6 +1139,7 @@ const fi: T = {
       'Mun imperiumi vaan kasvaa. 🏰', 'Te muut pelaatte kakkossijast. 😏',
       'Helppoo tää on. 😌', 'Vuokrat virtaa, kiitti kaikille.',
       'Mä pidän ohjat käsis.', 'Kohta koko lauta on mun. 🗺️',
+      'Ez game, ez life. 😎', 'Kukaa ei uhkaa mua just nyt. 👑',
     ],
     banterTrail: [
       'En oo viel ulkona täst. 💪', 'Kyl mä tän viel käännän.',
@@ -1127,6 +1147,7 @@ const fi: T = {
       'Täst noustaan viel. 📈', 'Vähän tuuria kaipaisin nyt... 🍀',
       'Ei tää tähän lopu.', 'Comeback tulee, uskokaa pois. 😤',
       'Pakko pelaa varovasti nyt.', 'Odottakaa vaan, käännän tuulen. 🌬️',
+      'Aliarvioitte mut viel. 😏', 'Underdog-tarina alkakoon. 🐕',
     ],
     banterLow: [
       'Kassa hupenee ihan hurjaa vauhtii... 😰', 'Nyt on tiukkaa, pitää säästää.',
@@ -1134,20 +1155,24 @@ const fi: T = {
       'Yks iso vuokra ni oon liemes.', 'Pitää kai kiinnittää tontteja pian.',
       'Sydän hakkaa joka heitol. 💓', 'Rukoilen pieniä vuokrii. 🙏',
       'Selviänks mä täst kierrokses?', 'Kohta on kassakriisi... 😅',
+      'Lompsa itkee. 😭', 'Nyt ei oo varaa mokaa. 😨',
     ],
     drewCard: [
       'Katotaas mitä kortti sanoo... 🃏', 'Vähän sattumaa peliin!', 'Toivotaan hyvää korttii. 🤞',
-      'Kortit ratkasee. 🎴',
+      'Kortit ratkasee. 🎴', 'Plis oo hyvä kortti... 🙏', 'Mitäköhän tää tuo tullessaan. 👀',
     ],
     soldBuilding: [
       'Pakko myydä rakennuksii... 😔', 'Harmi, talot lähtee.',
       'Tarviin cashii, myyn taloi. 💸', 'Askel taakspäin, mut pakko.',
+      'Sori talot, teitä tarvitaan rahana. 🏚️', 'Ei muuta keinoo saada fyrkkaa. 😞',
     ],
     jailTaunt: [
       'Hei, koppiin siitä! 😂', 'Nauttikaa sellist. 😏', 'Yks vähemmän liikkeel. 😎',
+      'Hah, linnareissu! 😆', 'Moro, nähää kolmen kierroksen päästä. 👋', 'Sinne meni. 😏',
     ],
     playerLeft: [
       'No sepä harmi, joku lähti.', 'Yks vähemmän pöydäs.', 'Peli jatkuu ilman sitä. 🤷',
+      'Ai lähti? No lisää fyrkkaa mulle. 😎',
     ],
   },
 
@@ -1705,19 +1730,22 @@ const en: T = {
   reactionButtonLabel: 'Send a reaction',
   botChat: {
     boughtProperty: [
-      'Yep, this one\'s mine. 😎', 'Nice grab!', 'This\'ll be a goldmine.',
-      'One off the list. 🏠', 'My empire\'s growing again.', 'Not leaving the good ones for you.',
-      'That completes the set. 🎯', 'Got it cheap, thanks.',
+      'Yep, this one\'s mine. 😎', 'Nice grab!', 'This\'ll be a goldmine. 💰',
+      'One off the list. 🏠', 'My empire\'s growing again. 🏰', 'Not leaving the good ones for you.',
+      'That completes the set. 🎯', 'Got it cheap, thanks. 🤝',
       'Took it just so you can\'t. 😏', 'Railroads are easy money. 🚂',
       'Neighbouring lot — that\'s a pair now. 👫', 'Had to, couldn\'t resist.',
       'Location is everything. 📍', 'Nice one for the portfolio. 💼',
+      'Mine mine mine! 😆', 'This\'ll cost you lot. 😈',
+      'Sorry folks, too good to pass. 🤷', 'Instabuy, no thinking needed. ⚡',
     ],
     builtHotel: [
       'Hotel\'s up! 🏨', 'Welcome — this ain\'t cheap. 😏',
       'Now the cash starts rolling. 🤑', 'This corner just got pricey for ya.',
       'Pays for itself real soon. 💰', 'Land here and oof. 💸',
       'Mega hotel, done. 🏨', 'This square\'s pure poison now. ☠️',
-      'This is the kind of play I love. 📈',
+      'This is the kind of play I love. 📈', 'Don\'t step here. Or do. 😈',
+      'Five-star trap ready. ⭐', 'Cash machine\'s on. 🤑',
     ],
     rentGloat: [
       'Thanks for the rent! 💰', 'Cash stack\'s growing. 😎', 'Mmm, nice bonus.',
@@ -1725,59 +1753,74 @@ const en: T = {
       'Told ya the investment pays. 📈', 'Passive income, love it.',
       'Thanks, just pay up. 😌', 'This account\'s fattening up nice.',
       'Tenants are my besties. 🏦', 'Cha-ching! 🤑',
+      'Ez money. 😎', 'Thanks for stopping by. 😏', 'My wallet thanks you. 💸',
+      'Free real estate. 🏠', 'Loving this game right now. 🥰',
     ],
     rentPain: [
       'Ouch, pricey stop. 😩', 'Well, that stung.', 'Oh no, nearly cleaned me out. 😱',
       'Expensive lil detour. 💸', 'Gotta start selling houses...',
       'There goes the budget. 😰', 'Wrong square, wrong time, ugh.',
-      'There go my savings, thanks.', 'Gotta bounce back fast.',
+      'There go my savings, thanks. 🙃', 'Gotta bounce back fast.',
       'Expensive lesson, that. 📚', 'Ouch, right in the wallet. 😖',
+      'F. 💀', 'RIP my cash. ⚰️', 'Well, that\'s me done, thanks. 😤',
+      'Why always me?? 😭', 'That did not fit the budget. 🫠',
     ],
     jail: [
       'Welp, back in the cell. 😅', 'See ya in a couple rounds.',
       'Not again... ugh.', 'Jail\'s calling. 🚔',
+      'Well, that went great. 🙃', 'Off to the slammer. 😔', 'Ugh, not again. 🤦',
     ],
     opponentBankrupt: [
       'One down. 😎', 'It\'s just a game. 🤝', 'Well played though!',
-      'Shame, but that\'s business.',
+      'Shame, but that\'s business.', 'F to you. 💀', 'See ya next game! 👋',
+      'One rival off the board. 😏',
     ],
     selfBankrupt: [
       'GG everyone! 💀', 'That\'s where it ends — good luck!',
-      'Went bust. Well played, folks.',
+      'Went bust. Well played, folks.', 'GG, I\'m out. 🫡',
+      'Well, my game ends here. 😔',
     ],
     tradeDone: [
       'Nice deal! 🤝', 'Deal\'s done.', 'We both win — well, mostly me. 😏',
       'This deal boosts my position. 💼', 'Got exactly the lot I needed. 🎯', 'Yep, this helps.',
+      'Win-win, emphasis on my win. 😎', 'Deal! 🤝', 'Pleasure doing business. 😌',
     ],
     rejectOffer: [
       'Nah — doesn\'t help me.', 'Not giving up this lot. 🚫',
       'That offer\'s way one-sided. 🤨', 'I\'ll keep mine, thanks.',
       'I\'d lose on that. Nope.', 'Come back with a better offer. 😏',
+      'Nice try. 😂', 'You think I\'m dumb? 😅', 'Absolutely not. 🙅',
     ],
     greeting: [
       'Alright, let\'s do this! 🎲', 'Good luck all — I won\'t need it. 😏',
-      'Let\'s gooo!', 'Good luck, you\'ll need it. 😎',
+      'Let\'s go, folks!', 'Good luck, you\'ll need it. 😎',
+      'Ready? \'Cause I am. 🔥', 'Let\'s gooo! Ready to lose? 😜',
     ],
     passedGo: [
       'Lap done, +200! 💰', 'Thanks bank. 💵', 'Another 200 in the pocket. 😎',
+      'Payday! 🤑', 'GO pays out, nice. 💵',
     ],
     releasedFromJail: [
       'Free again! 🔓', 'Back in the game. 😎', 'Can\'t hold me long.',
+      'Out of the cell, let\'s roll. 💪',
     ],
     mortgaged: [
       'Gotta mortgage, ugh... 😬', 'Need cash right now.', 'No other option.',
       'Mortgaging this, need money for a buy.', 'Just temporary, redeeming it soon.',
+      'Sorry lot, you\'re collateral for a bit. 😔', 'Emergency fund unlocked, ugh. 🏦',
     ],
     tradeDeclined: [
       'Guess not. 🤷', 'Shame, coulda been a good deal.', 'Maybe next time. 🤔',
+      'Your loss, not mine. 😏', 'Alright, keep your lot. 😌',
     ],
     builtHouse: [
       'A house bumps the rent, nice. 🏠', 'Building this one up strong.',
       'Small spend, big return. 📈', 'One house at a time toward a hotel.',
+      'The neighbourhood\'s developing. 🔨', 'Slowly but surely, up we go. 🏗️',
     ],
     redeemed: [
       'Mortgage lifted — cash holds up again. 💪', 'Back to mine, debt-free.',
-      'Full rent again now. 💰',
+      'Full rent again now. 💰', 'Debt cleared, back at it. 😎', 'Un-mortgaged, nice. ✅',
     ],
     banter: [
       'Let\'s see what the dice do. 🎲', 'Gimme some luck!', 'Just don\'t land in jail... 🤞',
@@ -1785,6 +1828,7 @@ const en: T = {
       'Thinking about my next move... 🤔', 'Better save some cash now.', 'A monopoly\'s coming soon. 😏',
       'No rush, it\'s a long game.', 'Chill vibes, I got this. 😎',
       'Let\'s see where that token lands.', 'Market\'s up, buying more. 📈',
+      'Just chilling, no stress. 😌', 'Dice, don\'t fail me now. 🎲',
     ],
     banterLead: [
       'I\'m leading — and keeping it that way. 😎', 'Fattest wallet at the table. 💰',
@@ -1792,6 +1836,7 @@ const en: T = {
       'My empire just keeps growing. 🏰', 'Y\'all playing for second. 😏',
       'This is easy. 😌', 'Rent\'s flowing, thanks everyone.',
       'I\'m holding the reins.', 'Soon the whole board\'s mine. 🗺️',
+      'Ez game, ez life. 😎', 'Nothing threatens me right now. 👑',
     ],
     banterTrail: [
       'I\'m not out of this yet. 💪', 'I\'ll turn this around.',
@@ -1799,6 +1844,7 @@ const en: T = {
       'I\'ll climb back up. 📈', 'Could use some luck rn... 🍀',
       'This ain\'t over.', 'Comeback incoming, trust. 😤',
       'Gotta play it safe now.', 'Just wait, I\'ll flip it. 🌬️',
+      'You\'re underestimating me. 😏', 'Underdog arc begins. 🐕',
     ],
     banterLow: [
       'My cash is vanishing fast... 😰', 'It\'s tight now, gotta save.',
@@ -1806,20 +1852,24 @@ const en: T = {
       'One big rent and I\'m done for.', 'Might have to mortgage soon.',
       'Heart\'s pounding every roll. 💓', 'Praying for small rents. 🙏',
       'Will I even survive this lap?', 'Cash crisis incoming... 😅',
+      'My wallet\'s crying. 😭', 'Can\'t afford a mistake now. 😨',
     ],
     drewCard: [
       'Let\'s see what the card says... 🃏', 'Bit of chance!', 'Hoping for a good one. 🤞',
-      'The cards decide. 🎴',
+      'The cards decide. 🎴', 'Please be a good card... 🙏', 'Wonder what this brings. 👀',
     ],
     soldBuilding: [
       'Gotta sell some buildings... 😔', 'Shame, the houses go.',
       'Need cash, selling houses. 💸', 'A step back, but no choice.',
+      'Sorry houses, you\'re cash now. 🏚️', 'No other way to get money. 😞',
     ],
     jailTaunt: [
       'Haha, off to jail! 😂', 'Enjoy the cell. 😏', 'One less on the move. 😎',
+      'Ha, jail trip! 😆', 'Later, see ya in three rounds. 👋', 'Down you go. 😏',
     ],
     playerLeft: [
       'Aw, someone bailed.', 'One fewer at the table.', 'Game goes on without \'em. 🤷',
+      'They left? More cash for me. 😎',
     ],
   },
 

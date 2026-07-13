@@ -332,6 +332,14 @@ export default function AppLayout({ header, board, players, log, chat, actions }
     }
   }, [chatCount, mobileTab])
 
+  // While the Chat tab is open the message list already shows who said what, so the floating
+  // speech bubbles are redundant there — flag it so FloatingReactions can skip them.
+  useEffect(() => {
+    const open = isMobile && mobileTab === 'chat'
+    document.body.dataset.chatTabOpen = open ? '1' : '0'
+    return () => { delete document.body.dataset.chatTabOpen }
+  }, [isMobile, mobileTab])
+
   // Track cash changes → delta floats + chip shake; track new bankruptcies → collapse anim
   useEffect(() => {
     if (!snap) return
