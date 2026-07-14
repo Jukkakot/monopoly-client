@@ -46,9 +46,10 @@ export interface SoundConfig {
   uiSounds: boolean
   notificationSounds: boolean
   gameSounds: boolean
+  chatSound: boolean
 }
 
-const DEFAULT: SoundConfig = { volume: 80, uiSounds: true, notificationSounds: true, gameSounds: true }
+const DEFAULT: SoundConfig = { volume: 80, uiSounds: true, notificationSounds: true, gameSounds: true, chatSound: false }
 
 export function loadSoundConfig(): SoundConfig {
   try {
@@ -149,6 +150,7 @@ export default function SoundSettings({ onClose, onBotSpeedChange, isSpectator =
     { key: 'uiSounds',           label: t.uiSoundsLabel,    desc: t.uiSoundsDesc },
     { key: 'notificationSounds', label: t.notifSoundsLabel, desc: t.notifSoundsDesc },
     { key: 'gameSounds',         label: t.gameSoundsLabel,  desc: t.gameSoundsDesc },
+    { key: 'chatSound',          label: t.chatSoundLabel,   desc: t.chatSoundDesc },
   ]
 
   return (

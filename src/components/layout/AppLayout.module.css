@@ -712,6 +712,23 @@
     color: #4caf50;
   }
 
+  /* Unread-chat count on the collapsed Chat section header. */
+  .sideSectionBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 8px;
+    background: #1565c0;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 0 4px;
+    line-height: 1;
+    margin-left: 6px;
+  }
+
   /* Upper scrollable area: Pelaajat + Tapahtumaloki */
   .upperSections {
     flex: 1 1 0;

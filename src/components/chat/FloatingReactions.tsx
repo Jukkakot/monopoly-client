@@ -72,20 +72,27 @@ export default function FloatingReactions() {
     const chatTabOpen = typeof document !== 'undefined' && document.body.dataset.chatTabOpen === '1'
     if (chatTabOpen) return
     const seatColor = new Map((state.snapshot?.seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
-    const added = fresh.map(e => {
+    const nameOf = new Map((state.snapshot?.players ?? []).map(p => [p.playerId, p.name]))
+    const added = fresh
+      // A reaction attached to a message (replyToId) belongs under that bubble, not floating.
+      .filter(e => !(e.chat!.kind === 'REACTION' && e.chat!.replyToId != null))
+      .map(e => {
       const chat = e.chat!
       const kind = chat.kind === 'REACTION' ? 'reaction' : 'message'
       const a = anchorFor(chat.playerId, kind)
+      // A directed bot line floats with its @mention prefix so it reads the same as in the list.
+      const mention = chat.targetPlayerId ? `@${nameOf.get(chat.targetPlayerId) ?? ''} ` : ''
       return {
         key: keyRef.current++,
         kind,
         emoji: kind === 'reaction' ? chat.content : undefined,
-        text: kind === 'message' ? resolveChatText(chat, t.botChat, e.id) : undefined,
+        text: kind === 'message' ? mention + resolveChatText(chat, t.botChat, e.id) : undefined,
         name: chat.name,
         color: seatColor.get(chat.playerId) ?? '#888',
         x: a.x, y: a.y,
       } as Floater
     })
+    if (added.length === 0) return
     // Cap concurrent floaters so a burst can't clutter the board; keep the most recent.
     setFloaters(f => [...f, ...added].slice(-6))
     for (const item of added) {

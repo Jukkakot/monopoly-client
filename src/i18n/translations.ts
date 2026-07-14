@@ -478,6 +478,9 @@ export interface T {
   chatReactionsLabel: string
   chatSpectatorHint: string
   reactionButtonLabel: string
+  chatReactToMessage: string
+  chatSoundLabel: string
+  chatSoundDesc: string
   // Bot chat phrases, keyed by situation. Bots send a (key, variant) pair; the client renders
   // the matching pool entry in its own language. Pool lengths mirror BotChatter.java on the
   // backend; a mismatched variant index is clamped modulo the pool length (never crashes).
@@ -1031,6 +1034,9 @@ const fi: T = {
   chatReactionsLabel: 'Reaktiot',
   chatSpectatorHint: 'Vain pelaajat voivat lähettää viestejä.',
   reactionButtonLabel: 'Lähetä reaktio',
+  chatReactToMessage: 'Reagoi viestiin',
+  chatSoundLabel: 'Chatti-äänet',
+  chatSoundDesc: 'Pop uudesta viestistä',
   botChat: {
     boughtProperty: [
       'Joo-o, tää on nyt mun. 😎', 'Hyvä läträys!', 'Täst tulee kultakaivos. 💰',
@@ -2132,6 +2138,9 @@ const en: T = {
   chatReactionsLabel: 'Reactions',
   chatSpectatorHint: 'Only players can send messages.',
   reactionButtonLabel: 'Send a reaction',
+  chatReactToMessage: 'React to message',
+  chatSoundLabel: 'Chat sounds',
+  chatSoundDesc: 'Pop on a new message',
   botChat: {
     boughtProperty: [
       'Yep, this one\'s mine. 😎', 'Nice grab!', 'This\'ll be a goldmine. 💰',

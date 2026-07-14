@@ -347,15 +347,18 @@ export default function AppLayout({ header, board, players, log, chat, actions }
     }
   }, [state.events.length, mobileTab])
 
+  // The chat list is on screen on the mobile Chat tab, or in the desktop sidebar when its
+  // section is expanded — reset unread there; otherwise accumulate new messages as unread.
   useEffect(() => {
-    if (mobileTab === 'chat') {
+    const chatVisible = isMobile ? mobileTab === 'chat' : !chatCollapsed
+    if (chatVisible) {
       lastSeenChatCount.current = chatCount
       setUnreadChat(0)
     } else {
       const newCount = chatCount - lastSeenChatCount.current
       if (newCount > 0) setUnreadChat(newCount)
     }
-  }, [chatCount, mobileTab])
+  }, [chatCount, mobileTab, isMobile, chatCollapsed])
 
   // When the chat message list is already on screen — the mobile Chat tab, or the desktop
   // sidebar Chat section when expanded — the floating speech bubbles are redundant, so flag
@@ -582,7 +585,14 @@ export default function AppLayout({ header, board, players, log, chat, actions }
               />
               <div className={styles.sideSectionHeader}
                 onClick={() => { const v = !chatCollapsed; setChatCollapsed(v); try { localStorage.setItem('monopoly_chat_collapsed', v ? '1' : '0') } catch {} }}>
-                <span className={styles.sideSectionTitle}><Icon name="chat" size={14} /> {t.chatTitle}</span>
+                <span className={styles.sideSectionTitle}>
+                  <Icon name="chat" size={14} /> {t.chatTitle}
+                  {chatCollapsed && unreadChat > 0 && (
+                    <span className={styles.sideSectionBadge} data-testid="desktop-chat-unread-badge">
+                      {unreadChat > 9 ? '9+' : unreadChat}
+                    </span>
+                  )}
+                </span>
                 <span className={styles.sideSectionChevron}>{chatCollapsed ? '▸' : '▾'}</span>
               </div>
               {!chatCollapsed && (

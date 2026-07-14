@@ -252,18 +252,20 @@ export const REACTION_EMOJIS = ['👍', '😂', '😮', '😢', '😡', '🎉', 
 export const MAX_CHAT_LEN = 200
 
 /** Posts a chat message or emoji reaction. Fire-and-forget: it lands back via the SSE event log.
- *  Returns true if the backend accepted it. */
+ *  `replyToId` attaches a reaction to a specific earlier CHAT event (rendered under that message
+ *  instead of floating). Returns true if the backend accepted it. */
 export async function postChat(
   sessionId: string,
   playerId: string,
   playerToken: string,
   kind: 'MESSAGE' | 'REACTION',
   content: string,
+  replyToId?: number,
 ): Promise<boolean> {
   try {
     const res = await fetch(`${BASE}/sessions/${sessionId}/chat`, {
       method: 'POST', headers: JSON_HEADERS,
-      body: JSON.stringify({ playerId, playerToken, kind, content }),
+      body: JSON.stringify({ playerId, playerToken, kind, content, replyToId }),
     })
     return res.ok
   } catch {

@@ -22,6 +22,7 @@ function vol(): number {
 function canPlayUi(): boolean    { return loadSoundConfig().uiSounds }
 function canPlayNotif(): boolean { return loadSoundConfig().notificationSounds }
 function canPlayGame(): boolean  { return loadSoundConfig().gameSounds }
+function canPlayChat(): boolean  { return loadSoundConfig().chatSound }
 
 // ── Primitive sound builders ─────────────────────────────────────────────────
 
@@ -309,4 +310,14 @@ export function playButtonClick() {
   hapticButtonClick()
   if (!canPlayUi()) return
   beep(660, 0.04, 'square', 0.1)
+}
+
+/** A soft, friendly two-note "pop" when a new chat message or reaction arrives from someone
+ *  else. Off by default (opt-in via SoundSettings) so it never surprises anyone. Carries a
+ *  light haptic tap on devices that support it. */
+export function playChat() {
+  if (!canPlayChat()) return
+  hapticButtonClick()
+  beep(660, 0.06, 'sine', 0.16)
+  setTimeout(() => beep(880, 0.09, 'sine', 0.16), 70)
 }

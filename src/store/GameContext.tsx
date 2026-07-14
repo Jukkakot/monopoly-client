@@ -9,6 +9,7 @@ import {
   playTokenMove, playBuyProperty, playBuildHouse, playBuildHotel,
   playGoToJail, playReleaseJail, playDrawCard, playBankruptcy,
   playGameOver, playTradeAccepted, playMortgage, playPassGo, playPayRent, playAuctionWin, playDiceRoll,
+  playChat,
 } from '../utils/sounds'
 import { calcNetWorth } from '../utils/netWorth'
 import { assessConnection, RECONNECT_WINDOW_MS, WEAK_LATENCY_MS, type ConnectionQuality, type LatencySample } from '../utils/connectionQuality'
@@ -368,6 +369,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const esRef = useRef<EventSource | null>(null)
   const versionRef = useRef(0)
   const lastSoundedId = useRef(-1)
+  const lastChatSoundedId = useRef(-1)
   const sseTimings = useRef<Array<{ timestamp: number; version: number; delayMs?: number }>>([])
   const lastEventTimestamp = useRef<number | null>(null)
   const pendingSnapshots = useRef<ClientSessionSnapshot[]>([])
@@ -472,12 +474,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // Intentionally no cleanup: pending sounds must survive subsequent event batches.
   }, [state.events])
 
+  // Chat chime — a soft pop when someone else posts a message/reaction (opt-in, default off).
+  // Fresh, non-historical only; one chime per batch; never for your own sends. Reads chatEvents
+  // (the real-time chat slice), independent of the animation-gated game sound path above.
+  useEffect(() => {
+    const fresh = state.chatEvents.filter(e => e.chat && !e.historical && e.id > lastChatSoundedId.current)
+    if (state.chatEvents.length > 0) {
+      lastChatSoundedId.current = state.chatEvents.reduce((m, e) => Math.max(m, e.id), lastChatSoundedId.current)
+    }
+    if (fresh.some(e => e.chat!.playerId !== state.myPlayerId)) playChat()
+  }, [state.chatEvents, state.myPlayerId])
+
   const joinSession = useCallback((sessionId: string) => {
     // Clear queue and stale refs synchronously before the new session starts —
     // prevents 60ms drain timers from dispatching old snapshots into the new session.
     pendingSnapshots.current = []
     settlingRef.current = false
     lastSoundedId.current = -1
+    lastChatSoundedId.current = -1
     prevPhaseRef.current = undefined
     lastEventTimestamp.current = null
     chatLastIdRef.current = -1
@@ -495,6 +509,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const leaveSession = useCallback(() => {
     pendingSnapshots.current = []
     settlingRef.current = false
+    lastChatSoundedId.current = -1
     chatLastIdRef.current = -1
     chatSeededRef.current = false
     chatFirstSnapshotAtRef.current = null

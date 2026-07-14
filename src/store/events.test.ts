@@ -122,4 +122,23 @@ describe('translateBackendEvents — CHAT', () => {
       [chatEntry(5, 'p1', { kind: 'MESSAGE', content: 'moi' })], players)
     expect(e.chat?.botMsgKey).toBeUndefined()
   })
+
+  it('carries a directed @mention target through', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(6, 'p2', { kind: 'MESSAGE', name: 'Botti', botMsgKey: 'rentGloat', targetPlayerId: 'p1' })], players)
+    expect(e.chat?.targetPlayerId).toBe('p1')
+  })
+
+  it('parses a reaction attached to a specific message (replyToId)', () => {
+    const [e] = translateBackendEvents(
+      [chatEntry(7, 'p1', { kind: 'REACTION', content: '😂', name: 'Anna', replyToId: '4' })], players)
+    expect(e.chat?.kind).toBe('REACTION')
+    expect(e.chat?.replyToId).toBe(4)
+  })
+
+  it('uses the backend timestamp for chat rows', () => {
+    const entry: GameEventEntry = { id: 8, timestamp: 1_700_000_000_000, type: 'CHAT', playerIds: ['p1'], data: { kind: 'MESSAGE', content: 'moi' } }
+    const [e] = translateBackendEvents([entry], players)
+    expect(e.timestamp).toBe(1_700_000_000_000)
+  })
 })

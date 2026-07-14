@@ -30,7 +30,10 @@ export interface GameEvent {
   // botMsgKey identifies a bot MESSAGE's situation; the client renders the localized text at render
   // time from its own pool, keyed off the event id (see resolveChatText). Absent for human messages
   // (which carry literal `content`).
-  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string; botMsgKey?: string }
+  // targetPlayerId: the player a bot line is aimed at (rendered as an @mention).
+  // replyToId: for a REACTION, the id of the CHAT message it's attached to (shown under that
+  // bubble instead of floating).
+  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string; botMsgKey?: string; targetPlayerId?: string; replyToId?: number }
 }
 
 let _id = 0
@@ -199,10 +202,17 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const icon = kind === 'REACTION' ? content : '💬'
         const message = kind === 'REACTION' ? `${chatName} ${content}` : `${chatName}: ${content}`
         const cev = ev(icon, message, [pid])
+        // Use the backend's timestamp so the chat row shows when it was actually sent, not when
+        // this client happened to receive it (matters for history loaded on reconnect).
+        if (typeof e.timestamp === 'number') cev.timestamp = e.timestamp
         cev.chat = { kind, name: chatName, content, playerId: pid }
         // A bot message arrives as a bare situation key; the client owns the text and picks the
         // variant from the event id at render time (see resolveChatText).
         if (e.data.botMsgKey) cev.chat.botMsgKey = e.data.botMsgKey
+        // A directed bot line names the player it's aimed at → rendered as an @mention.
+        if (e.data.targetPlayerId) cev.chat.targetPlayerId = e.data.targetPlayerId
+        // A reaction attached to a specific message (WhatsApp-style) rather than free-floating.
+        if (e.data.replyToId) { const r = parseInt(e.data.replyToId); if (!isNaN(r)) cev.chat.replyToId = r }
         events.push(cev)
         break
       }

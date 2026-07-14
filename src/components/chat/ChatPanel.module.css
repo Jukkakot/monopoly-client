@@ -51,6 +51,116 @@
   text-transform: none;
 }
 
+/* Faint HH:MM timestamp next to the sender name / reaction. */
+.time {
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* @mention prefix on a directed bot line — coloured in the target's token colour. */
+.mention {
+  font-weight: 800;
+}
+
+/* Bubble + its per-message react button, laid out side by side. */
+.bubbleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.msgMine .bubbleRow {
+  flex-direction: row-reverse;
+}
+
+/* Small "react to this message" affordance — subtle until hovered (desktop) or tapped. */
+.msgReactBtn {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.28;
+  transition: opacity 0.12s ease, transform 0.08s ease, background 0.12s ease;
+}
+
+.msg:hover .msgReactBtn { opacity: 0.85; }
+.msgReactBtn:hover { background: var(--surface-sunken); opacity: 1; }
+.msgReactBtn:active { transform: scale(1.25); }
+
+/* Coarse pointers (touch) have no hover, so keep the affordance faintly visible. */
+@media (pointer: coarse) {
+  .msgReactBtn { opacity: 0.5; }
+}
+
+/* Aggregated emoji chips shown under a message for reactions attached to it. */
+.reactChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 1px 4px 0;
+}
+
+.msgMine .reactChips {
+  justify-content: flex-end;
+}
+
+.reactChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.reactCount {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* Per-message reaction picker (BottomSheet body). */
+.pickerTitle {
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  padding: 4px 0 10px;
+}
+
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+.pickerBtn {
+  border: none;
+  background: var(--surface-sunken);
+  border-radius: 12px;
+  font-size: 28px;
+  line-height: 1;
+  padding: 12px 0;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.12s ease;
+}
+
+.pickerBtn:hover { background: var(--hairline); }
+.pickerBtn:active { transform: scale(1.3); }
+
 .bubble {
   background: var(--surface-raised);
   border: 1px solid var(--hairline);
