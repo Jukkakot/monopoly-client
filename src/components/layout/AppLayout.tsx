@@ -125,6 +125,15 @@ export default function AppLayout({ header, board, players, log, chat, actions }
   const actionsHeightRef = useRef(220)
   const actionsDragRef = useRef<{ startY: number; startH: number } | null>(null)
   useEffect(() => { actionsHeightRef.current = actionsHeight }, [actionsHeight])
+  const [chatCollapsed, setChatCollapsed] = useState(() => {
+    try { return localStorage.getItem('monopoly_chat_collapsed') === '1' } catch { return false }
+  })
+  const [chatHeight, setChatHeight] = useState(() => {
+    try { const v = parseInt(localStorage.getItem('monopoly_chat_height') ?? ''); return isNaN(v) ? 240 : Math.max(120, Math.min(600, v)) } catch { return 240 }
+  })
+  const chatHeightRef = useRef(240)
+  const chatDragRef = useRef<{ startY: number; startH: number } | null>(null)
+  useEffect(() => { chatHeightRef.current = chatHeight }, [chatHeight])
 
   const mobileActionsWrapperRef = useRef<HTMLDivElement>(null)
   const mobileActionsContentRef = useRef<HTMLDivElement>(null)
@@ -299,16 +308,32 @@ export default function AppLayout({ header, board, players, log, chat, actions }
       document.body.style.userSelect = ''
       try { localStorage.setItem('monopoly_actions_height', String(actionsHeightRef.current)) } catch {}
     }
+    function onChatMove(e: MouseEvent) {
+      if (!chatDragRef.current) return
+      const delta = chatDragRef.current.startY - e.clientY
+      const newH = Math.max(120, Math.min(600, chatDragRef.current.startH + delta))
+      setChatHeight(newH)
+    }
+    function onChatUp() {
+      if (!chatDragRef.current) return
+      chatDragRef.current = null
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      try { localStorage.setItem('monopoly_chat_height', String(chatHeightRef.current)) } catch {}
+    }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
     window.addEventListener('mousemove', onSplitMove)
     window.addEventListener('mouseup', onSplitUp)
     window.addEventListener('mousemove', onActionsMove)
     window.addEventListener('mouseup', onActionsUp)
+    window.addEventListener('mousemove', onChatMove)
+    window.addEventListener('mouseup', onChatUp)
     return () => {
       window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp)
       window.removeEventListener('mousemove', onSplitMove); window.removeEventListener('mouseup', onSplitUp)
       window.removeEventListener('mousemove', onActionsMove); window.removeEventListener('mouseup', onActionsUp)
+      window.removeEventListener('mousemove', onChatMove); window.removeEventListener('mouseup', onChatUp)
     }
   }, [])
 
@@ -332,13 +357,15 @@ export default function AppLayout({ header, board, players, log, chat, actions }
     }
   }, [chatCount, mobileTab])
 
-  // While the Chat tab is open the message list already shows who said what, so the floating
-  // speech bubbles are redundant there — flag it so FloatingReactions can skip them.
+  // When the chat message list is already on screen — the mobile Chat tab, or the desktop
+  // sidebar Chat section when expanded — the floating speech bubbles are redundant, so flag
+  // it and let FloatingReactions skip them. On desktop with chat collapsed they still float,
+  // keeping the board lively.
   useEffect(() => {
-    const open = isMobile && mobileTab === 'chat'
+    const open = isMobile ? mobileTab === 'chat' : !chatCollapsed
     document.body.dataset.chatTabOpen = open ? '1' : '0'
     return () => { delete document.body.dataset.chatTabOpen }
-  }, [isMobile, mobileTab])
+  }, [isMobile, mobileTab, chatCollapsed])
 
   // Track cash changes → delta floats + chip shake; track new bankruptcies → collapse anim
   useEffect(() => {
@@ -475,9 +502,10 @@ export default function AppLayout({ header, board, players, log, chat, actions }
 
   return (
     <div className={styles.root}>
-      {/* Reaction FAB — hidden on the chat tab (which has its own reaction bar) to avoid
-          overlapping its send button. */}
-      {(!isMobile || mobileTab !== 'chat') && <ReactionButton />}
+      {/* Reaction FAB — hidden wherever the chat's own reaction bar is already visible (the
+          mobile Chat tab, or the desktop sidebar Chat section when expanded) to avoid
+          overlapping its buttons. Shown when chat is collapsed so quick-react stays handy. */}
+      {(isMobile ? mobileTab !== 'chat' : chatCollapsed) && <ReactionButton />}
 
       {/* ── Desktop: board column ── */}
       <div className={styles.boardCol}>
@@ -537,6 +565,29 @@ export default function AppLayout({ header, board, players, log, chat, actions }
               {!logCollapsed && (
                 <div className={styles.actionsWrapper} style={{ height: actionsHeight }}>
                   {log}
+                </div>
+              )}
+            </div>
+          )}
+          {/* Chat: pinned below the log, collapsible, resizable */}
+          {!isMobile && (
+            <div className={styles.actionsSection}>
+              <div
+                className={styles.actionsDragHandle}
+                onMouseDown={e => {
+                  chatDragRef.current = { startY: e.clientY, startH: chatHeightRef.current }
+                  document.body.style.cursor = 'row-resize'
+                  document.body.style.userSelect = 'none'
+                }}
+              />
+              <div className={styles.sideSectionHeader}
+                onClick={() => { const v = !chatCollapsed; setChatCollapsed(v); try { localStorage.setItem('monopoly_chat_collapsed', v ? '1' : '0') } catch {} }}>
+                <span className={styles.sideSectionTitle}><Icon name="chat" size={14} /> {t.chatTitle}</span>
+                <span className={styles.sideSectionChevron}>{chatCollapsed ? '▸' : '▾'}</span>
+              </div>
+              {!chatCollapsed && (
+                <div className={styles.chatWrapper} style={{ height: chatHeight }}>
+                  {chat}
                 </div>
               )}
             </div>

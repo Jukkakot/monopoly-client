@@ -788,4 +788,13 @@
     padding: 8px 12px;
     background: var(--surface);
   }
+
+  /* Chat panel wrapper — fixed (resizable) height; ChatPanel owns its own internal
+     scroll, so this is just a flex column that clips to the set height. */
+  .chatWrapper {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface);
+  }
 }
