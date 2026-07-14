@@ -27,9 +27,10 @@ export interface GameEvent {
   // Chat payload — set only on CHAT events. Carried on the same event stream so chat and
   // reactions ride the existing SSE log. Chat events are excluded from the Tapahtumaloki and
   // shown in the Chat tab instead; REACTION chat events also float over the board.
-  // botMsgKey/botVariant localise a bot MESSAGE at render time (see ChatPanel) so it follows the
-  // viewer's current language; `content` is the Finnish fallback. Absent for human messages.
-  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string; botMsgKey?: string; botVariant?: number }
+  // botMsgKey identifies a bot MESSAGE's situation; the client renders the localized text at render
+  // time from its own pool, keyed off the event id (see resolveChatText). Absent for human messages
+  // (which carry literal `content`).
+  chat?: { kind: 'MESSAGE' | 'REACTION'; name: string; content: string; playerId: string; botMsgKey?: string }
 }
 
 let _id = 0
@@ -199,14 +200,9 @@ export function translateBackendEvents(entries: GameEventEntry[], players: Playe
         const message = kind === 'REACTION' ? `${chatName} ${content}` : `${chatName}: ${content}`
         const cev = ev(icon, message, [pid])
         cev.chat = { kind, name: chatName, content, playerId: pid }
-        // A bot message arrives as a (key, variant) pair so each client localises it to its own
-        // language; carry them through for ChatPanel to resolve at render time.
-        const botMsgKey = e.data.botMsgKey
-        if (botMsgKey) {
-          cev.chat.botMsgKey = botMsgKey
-          const v = parseInt(e.data.botMsgVariant ?? '0', 10)
-          cev.chat.botVariant = Number.isNaN(v) ? 0 : v
-        }
+        // A bot message arrives as a bare situation key; the client owns the text and picks the
+        // variant from the event id at render time (see resolveChatText).
+        if (e.data.botMsgKey) cev.chat.botMsgKey = e.data.botMsgKey
         events.push(cev)
         break
       }

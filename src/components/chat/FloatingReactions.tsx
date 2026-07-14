@@ -80,7 +80,7 @@ export default function FloatingReactions() {
         key: keyRef.current++,
         kind,
         emoji: kind === 'reaction' ? chat.content : undefined,
-        text: kind === 'message' ? resolveChatText(chat, t.botChat) : undefined,
+        text: kind === 'message' ? resolveChatText(chat, t.botChat, e.id) : undefined,
         name: chat.name,
         color: seatColor.get(chat.playerId) ?? '#888',
         x: a.x, y: a.y,

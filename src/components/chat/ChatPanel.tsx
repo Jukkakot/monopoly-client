@@ -22,7 +22,7 @@ export default memo(function ChatPanel() {
   const messages = useMemo<GameEvent[]>(() => state.chatEvents.filter(e => e.chat), [state.chatEvents])
 
   // A bot line is localized live into the viewer's language; a human line is verbatim.
-  const messageText = (chat: NonNullable<GameEvent['chat']>) => resolveChatText(chat, t.botChat)
+  const messageText = (chat: NonNullable<GameEvent['chat']>, seed: number) => resolveChatText(chat, t.botChat, seed)
 
   const seatColor = useMemo(() => {
     const map = new Map((snap?.seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
@@ -78,7 +78,7 @@ export default memo(function ChatPanel() {
                 <TokenSvg size={13} color={color} shape={shape} style={{ verticalAlign: 'middle' }} />
                 <span className={styles.msgName} style={{ color }}>{chat.name}</span>
               </div>
-              <div className={styles.bubble}>{messageText(chat)}</div>
+              <div className={styles.bubble}>{messageText(chat, e.id)}</div>
             </div>
           )
         })}
