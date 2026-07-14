@@ -67,13 +67,12 @@ export default function FloatingReactions() {
     if (fresh.length === 0) return
     lastSeenId.current = Math.max(lastSeenId.current, ...fresh.map(e => e.id))
 
-    // On the Chat tab the list already shows who said what, so skip the floating message bubbles
-    // there (reactions still fly — they're a quick, playful flourish).
+    // On the Chat tab the list already shows everything, so don't float anything (messages or
+    // reactions) over it. lastSeenId is already advanced, so nothing replays on leaving the tab.
     const chatTabOpen = typeof document !== 'undefined' && document.body.dataset.chatTabOpen === '1'
+    if (chatTabOpen) return
     const seatColor = new Map((state.snapshot?.seats ?? []).map(s => [s.playerId, s.tokenColorHex]))
-    const added = fresh
-      .filter(e => !(chatTabOpen && e.chat!.kind === 'MESSAGE'))
-      .map(e => {
+    const added = fresh.map(e => {
       const chat = e.chat!
       const kind = chat.kind === 'REACTION' ? 'reaction' : 'message'
       const a = anchorFor(chat.playerId, kind)

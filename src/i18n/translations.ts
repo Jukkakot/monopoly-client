@@ -1076,7 +1076,7 @@ const fi: T = {
     opponentBankrupt: [
       'Yks vähemmän. 😎', 'Peli on peli. 🤝', 'Hyvin pelattu silti!',
       'Sääli, mut bisnes on bisnestä.', 'F sulle. 💀', 'Nähää ens pelis! 👋',
-      'Yks kilpailija pois laskuist. 😏',
+      'Yks kilpailija pois laskuist. 😏', 'GG, hyvä yritys. 🫡', 'Kilpailu just kevens. 😏',
     ],
     selfBankrupt: [
       'Hyvää peliä kaikille! 💀', 'No tähän se tyssäs — onnee muille!',
@@ -1098,10 +1098,12 @@ const fi: T = {
       'No niin, pistetään pystyyn! 🎲', 'Tsemppii kaikille — mä en tarvii. 😏',
       'Antaa palaa, jäbät!', 'Onnee vaan, kyl te sitä tarttette. 😎',
       'Mennääks? Mä oon valmis. 🔥', 'Letsgooo! Valmiina häviää? 😜',
+      'Nyt näytetään kuka on kingi. 👑', 'Mä oon jo voittanu mieles. 😎',
     ],
     passedGo: [
       'Kierros täys, +200! 💰', 'Kiitti pankki. 💵', 'Taas 200 taskuun. 😎',
       'Palkkapäivä! 🤑', 'Startti maksaa, jees. 💵',
+      'Rahaa tuli, jees jees. 🤑', 'Kiva ku pankki maksaa. 💵',
     ],
     releasedFromJail: [
       'Vapaana taas! 🔓', 'Takas peliin. 😎', 'Ei mua kauaa pidellä.',
@@ -1132,6 +1134,7 @@ const fi: T = {
       'Ei kiirettä, peli on pitkä.', 'Rento meininki, homma hanskas. 😎',
       'Katotaan mihin toi nappula päätyy.', 'Pörssi nousee, ostan lisää. 📈',
       'Chillii vaan, ei stressii. 😌', 'Nopat, älkää pettäkö. 🎲',
+      'Hmm, minne täst... 🤔', 'Vähän jännittää, mut hyväl taval. 😄',
     ],
     banterLead: [
       'Mä johdan — ja aion pitää sen niin. 😎', 'Mun kassa on paksuin täs pöydäs. 💰',
@@ -1169,10 +1172,15 @@ const fi: T = {
     jailTaunt: [
       'Hei, koppiin siitä! 😂', 'Nauttikaa sellist. 😏', 'Yks vähemmän liikkeel. 😎',
       'Hah, linnareissu! 😆', 'Moro, nähää kolmen kierroksen päästä. 👋', 'Sinne meni. 😏',
+      'Sori et nauran. 😂', 'Terkkuja sellist! 👋',
     ],
     playerLeft: [
       'No sepä harmi, joku lähti.', 'Yks vähemmän pöydäs.', 'Peli jatkuu ilman sitä. 🤷',
       'Ai lähti? No lisää fyrkkaa mulle. 😎',
+    ],
+    spectateRent: [
+      'Ohohoh, kallista! 😮', 'Katotaas tätä draamaa. 🍿', 'Auts, ei onneks mun rahat. 😅',
+      'Popkornit esiin. 🍿', 'Tosta se toinen kärsi. 😬', 'Nam, tykkään ku muut maksaa. 😏',
     ],
   },
 
@@ -1773,7 +1781,7 @@ const en: T = {
     opponentBankrupt: [
       'One down. 😎', 'It\'s just a game. 🤝', 'Well played though!',
       'Shame, but that\'s business.', 'F to you. 💀', 'See ya next game! 👋',
-      'One rival off the board. 😏',
+      'One rival off the board. 😏', 'GG, nice try. 🫡', 'Competition just got lighter. 😏',
     ],
     selfBankrupt: [
       'GG everyone! 💀', 'That\'s where it ends — good luck!',
@@ -1795,10 +1803,12 @@ const en: T = {
       'Alright, let\'s do this! 🎲', 'Good luck all — I won\'t need it. 😏',
       'Let\'s go, folks!', 'Good luck, you\'ll need it. 😎',
       'Ready? \'Cause I am. 🔥', 'Let\'s gooo! Ready to lose? 😜',
+      'Let\'s see who\'s king. 👑', 'Already won it in my head. 😎',
     ],
     passedGo: [
       'Lap done, +200! 💰', 'Thanks bank. 💵', 'Another 200 in the pocket. 😎',
       'Payday! 🤑', 'GO pays out, nice. 💵',
+      'Money in, yeah yeah. 🤑', 'Love it when the bank pays. 💵',
     ],
     releasedFromJail: [
       'Free again! 🔓', 'Back in the game. 😎', 'Can\'t hold me long.',
@@ -1829,6 +1839,7 @@ const en: T = {
       'No rush, it\'s a long game.', 'Chill vibes, I got this. 😎',
       'Let\'s see where that token lands.', 'Market\'s up, buying more. 📈',
       'Just chilling, no stress. 😌', 'Dice, don\'t fail me now. 🎲',
+      'Hmm, where to from here... 🤔', 'A little nervous, in a good way. 😄',
     ],
     banterLead: [
       'I\'m leading — and keeping it that way. 😎', 'Fattest wallet at the table. 💰',
@@ -1866,10 +1877,15 @@ const en: T = {
     jailTaunt: [
       'Haha, off to jail! 😂', 'Enjoy the cell. 😏', 'One less on the move. 😎',
       'Ha, jail trip! 😆', 'Later, see ya in three rounds. 👋', 'Down you go. 😏',
+      'Sorry for laughing. 😂', 'Regards from outside the cell! 👋',
     ],
     playerLeft: [
       'Aw, someone bailed.', 'One fewer at the table.', 'Game goes on without \'em. 🤷',
       'They left? More cash for me. 😎',
+    ],
+    spectateRent: [
+      'Ooh, that\'s pricey! 😮', 'Let\'s watch this drama. 🍿', 'Ouch, glad it\'s not my cash. 😅',
+      'Popcorn time. 🍿', 'That one really hurt \'em. 😬', 'Mmm, love it when others pay. 😏',
     ],
   },
 
