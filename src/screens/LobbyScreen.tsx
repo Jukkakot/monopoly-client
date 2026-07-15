@@ -4,6 +4,7 @@ import { useGame } from '../store/GameContext'
 import { createLobby, createBotsOnlySession, setLobbyReady, ApiError } from '../api/sessionApi'
 import { ALL_SHAPES, savePlayerTokenShape, type TokenShape } from '../utils/tokenShapes'
 import { randomHumanName } from '../utils/playerNames'
+import { botCountRange, clampBotCount } from '../utils/lobby'
 import { playButtonClick } from '../utils/sounds'
 import { TokenSvg } from '../components/board/TokenSvg'
 import Header from '../components/layout/Header'
@@ -44,13 +45,14 @@ export default function LobbyScreen() {
   }
 
   const isPlaying = mode === 'playing'
-  const minBots = isPlaying ? 0 : 2
-  const maxBots = isPlaying ? 5 : 6
+  const { min: minBots, max: maxBots } = botCountRange(isPlaying)
 
   function switchMode(m: Mode) {
     playButtonClick()
     setMode(m)
-    if (m === 'spectating' && botCount < 2) setBotCount(2)
+    // Re-clamp the bot count into the new mode's range — otherwise a count picked while
+    // spectating (up to 6) could survive into playing (max 5) and create an over-capacity game.
+    setBotCount(c => clampBotCount(m === 'playing', c))
     setError(null)
   }
 
