@@ -83,6 +83,13 @@ function loadLayout(ids: string[]): Row[] {
   return defaultLayout(ids)
 }
 
+/** Stable React keys derived from a cell/row's panel ids (each panel appears exactly once, so
+ *  these are unique among siblings). Using content — not the array index — means a pure reorder
+ *  moves the existing DOM node instead of remounting it, so a panel's in-progress state (a
+ *  half-typed chat message, the trade builder) survives being dragged around. */
+export const cellKey = (c: Cell): string => c.tabs.join('|')
+export const rowKey = (r: Row): string => r.cells.map(cellKey).join('/')
+
 type Zone = 'tab' | 'left' | 'right' | 'top' | 'bottom'
 /** Where the dragged panel would land — used both for the live preview overlay and the commit. */
 type Hover = { row: number; cell: number; zone: Zone; index?: number } | null
@@ -159,7 +166,7 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
   }
 
   // ── Resize (rows vertically, cells horizontally) ─────────────────────────────
-  const resizeRef = useRef<{ axis: 'row' | 'col'; ri: number; ci: number; start: number; startSize: number } | null>(null)
+  const resizeRef = useRef<{ axis: 'row' | 'col'; ri: number; ci: number; start: number; startSize: number; rowW: number } | null>(null)
   useEffect(() => {
     function onMove(e: MouseEvent) {
       const r = resizeRef.current
@@ -168,7 +175,10 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
         const h = clamp(r.startSize + (e.clientY - r.start), MIN_H, MAX_H)
         setRows(rs => rs.map((row, i) => i === r.ri ? { ...row, height: h } : row))
       } else {
-        const w = clamp(r.startSize + (e.clientX - r.start), MIN_W, MAX_W)
+        // Cap the width so the fill cell always keeps at least MIN_W — the row clips its overflow,
+        // so an unclamped drag could push the neighbouring panel off-screen.
+        const maxW = Math.min(MAX_W, Math.max(MIN_W, r.rowW - MIN_W))
+        const w = clamp(r.startSize + (e.clientX - r.start), MIN_W, maxW)
         setRows(rs => rs.map((row, i) => i !== r.ri ? row : { ...row, cells: row.cells.map((c, j) => j === r.ci ? { ...c, width: w } : c) }))
       }
     }
@@ -181,11 +191,12 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
     return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
   }, [])
   const startRowResize = (ri: number, e: React.MouseEvent) => {
-    resizeRef.current = { axis: 'row', ri, ci: 0, start: e.clientY, startSize: rows[ri].height }
+    resizeRef.current = { axis: 'row', ri, ci: 0, start: e.clientY, startSize: rows[ri].height, rowW: 0 }
     document.body.style.cursor = 'row-resize'; document.body.style.userSelect = 'none'
   }
   const startColResize = (ri: number, ci: number, e: React.MouseEvent) => {
-    resizeRef.current = { axis: 'col', ri, ci, start: e.clientX, startSize: rows[ri].cells[ci].width }
+    const rowW = (e.currentTarget.parentElement as HTMLElement | null)?.clientWidth ?? MAX_W
+    resizeRef.current = { axis: 'col', ri, ci, start: e.clientX, startSize: rows[ri].cells[ci].width, rowW }
     document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none'
   }
   const resetRowHeight = (ri: number) => setRows(rs => rs.map((r, i) => i === ri ? { ...r, height: DEFAULT_H } : r))
@@ -209,14 +220,14 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
         const isFill = ri === fillRow && !thin
         const rowStyle: CSSProperties = thin ? { flex: '0 0 auto' } : isFill ? { flex: '1 1 0', minHeight: MIN_H } : { height: row.height, flexShrink: 0 }
         return (
-          <Fragment key={ri}>
+          <Fragment key={rowKey(row)}>
           <div className={styles.row} style={rowStyle}>
             {row.cells.map((c, ci) => {
               const cellFill = ci === row.cells.length - 1
               const cellStyle: CSSProperties = cellFill ? { flex: '1 1 0', minWidth: MIN_W } : { width: c.width, flexShrink: 0 }
               const showOverlay = hover && hover.row === ri && hover.cell === ci
               return (
-                <Fragment key={ci}>
+                <Fragment key={cellKey(c)}>
                 <div className={styles.cell} style={cellStyle}>
                   <div
                     className={styles.tabStrip}

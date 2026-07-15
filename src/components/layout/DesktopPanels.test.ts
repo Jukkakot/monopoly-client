@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyDrop, type Row, type Cell } from './DesktopPanels'
+import { applyDrop, cellKey, rowKey, type Row, type Cell } from './DesktopPanels'
 
 const cell = (tabs: string[], active = tabs[0]): Cell => ({ tabs, active, collapsed: false, width: 200 })
 const row = (...cells: Cell[]): Row => ({ cells, height: 200 })
@@ -51,6 +51,16 @@ describe('applyDrop — 2-D desktop panel drag/drop', () => {
     const next = applyDrop(before, 'chat', { row: 1, cell: 1, zone: 'right' })
     const all = next.flatMap(r => r.cells.flatMap(c => c.tabs)).sort()
     expect(all).toEqual(['actions', 'chat', 'log', 'players'])
+  })
+
+  it('gives cells/rows stable, unique keys so a pure reorder keeps panel identity', () => {
+    const rows = [row(cell(['players'])), row(cell(['actions'])), row(cell(['log', 'chat']))]
+    const keys = rows.map(rowKey)
+    expect(new Set(keys).size).toBe(3)                       // unique among siblings
+    const reordered = [rows[2], rows[0], rows[1]]            // move the log/chat row to the top
+    expect(reordered.map(rowKey).sort()).toEqual([...keys].sort()) // same keys → React moves, not remounts
+    const two = row(cell(['log']), cell(['chat']))
+    expect(cellKey(two.cells[0])).not.toBe(cellKey(two.cells[1]))
   })
 
   it('fixes the active tab when the active tab is dragged out of a cell', () => {
