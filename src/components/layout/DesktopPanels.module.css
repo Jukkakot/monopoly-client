@@ -1,0 +1,167 @@
+.root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Thin drop zone between groups — invisible until a drag is in progress. */
+.gap {
+  height: 4px;
+  flex-shrink: 0;
+  transition: height 0.1s ease, background 0.1s ease;
+}
+
+.gapActive {
+  height: 10px;
+}
+
+.gapOver {
+  height: 16px;
+  background: #66bb6a;
+  border-radius: 3px;
+}
+
+/* One stacked box holding one or more panels as tabs. Fixed height (inline) unless collapsed. */
+.group {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.tabStrip {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  flex-shrink: 0;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: 0 1px 3px rgba(15, 45, 15, 0.06);
+  padding: 2px 2px 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Highlight the strip as a merge target while dragging a panel over it. */
+.tabStripOver {
+  outline: 2px solid #66bb6a;
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  border-radius: 6px 6px 0 0;
+  padding: 5px 9px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--g-600);
+  position: relative;
+  max-width: 100%;
+  transition: background 0.12s, color 0.12s;
+}
+
+.tab svg { color: var(--g-500); flex-shrink: 0; }
+.tab:hover { background: var(--surface); }
+
+.tabActive {
+  background: var(--surface);
+  color: var(--c-green);
+  box-shadow: inset 0 -2px 0 #2e7d32;
+}
+.tabActive svg { color: var(--c-green); }
+
+.tabDragging { opacity: 0.4; }
+
+.tabLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 8px;
+  background: #1565c0;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.collapseBtn {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 0 6px;
+  align-self: center;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Each tab's content — the inactive ones are display:none'd inline but stay mounted. */
+.tabPane {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.resizeHandle {
+  height: 5px;
+  flex-shrink: 0;
+  cursor: row-resize;
+  background: var(--hairline);
+  transition: background 0.15s;
+}
+.resizeHandle:hover { background: #66bb6a; }
+
+/* Absorbs leftover space below the last group; a faint brand watermark, like the old sidebar. */
+.spacer {
+  flex: 1 0 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+.spacer::before {
+  content: 'MONOPOLY';
+  font-family: 'Impact', 'Arial Black', Arial, sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 1.7rem;
+  letter-spacing: 4px;
+  color: var(--g-700);
+  opacity: 0.07;
+  transform: rotate(-4deg);
+  user-select: none;
+  white-space: nowrap;
+}

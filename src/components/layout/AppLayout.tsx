@@ -10,6 +10,7 @@ import Icon, { type IconName } from '../common/Icon'
 import AnimatedCash from '../common/AnimatedCash'
 import BottomSheet from '../common/BottomSheet'
 import ReactionButton from '../chat/ReactionButton'
+import DesktopPanels from './DesktopPanels'
 import { fitBoardHeight } from '../../utils/mobileFit'
 
 type AnimDir = 'right' | 'left'
@@ -110,30 +111,11 @@ export default function AppLayout({ header, board, players, log, chat, actions }
   const [animDir, setAnimDir] = useState<AnimDir>('right')
   const [boardEntering, setBoardEntering] = useState(false)
   const [cashPopupPlayerId, setCashPopupPlayerId] = useState<string | null>(null)
-  const [playersCollapsed, setPlayersCollapsed] = useState(() => {
-    try { return localStorage.getItem('monopoly_players_collapsed') === '1' } catch { return false }
-  })
-  const [logCollapsed, setLogCollapsed] = useState(() => {
-    try { return localStorage.getItem('monopoly_log_collapsed') === '1' } catch { return false }
-  })
-  const [actionsCollapsed, setActionsCollapsed] = useState(() => {
-    try { return localStorage.getItem('monopoly_actions_collapsed') === '1' } catch { return false }
-  })
-  const [actionsHeight, setActionsHeight] = useState(() => {
-    try { const v = parseInt(localStorage.getItem('monopoly_actions_height') ?? ''); return isNaN(v) ? 220 : Math.max(60, Math.min(600, v)) } catch { return 220 }
-  })
-  const actionsHeightRef = useRef(220)
-  const actionsDragRef = useRef<{ startY: number; startH: number } | null>(null)
-  useEffect(() => { actionsHeightRef.current = actionsHeight }, [actionsHeight])
-  const [chatCollapsed, setChatCollapsed] = useState(() => {
-    try { return localStorage.getItem('monopoly_chat_collapsed') === '1' } catch { return false }
-  })
-  const [chatHeight, setChatHeight] = useState(() => {
-    try { const v = parseInt(localStorage.getItem('monopoly_chat_height') ?? ''); return isNaN(v) ? 240 : Math.max(120, Math.min(600, v)) } catch { return 240 }
-  })
-  const chatHeightRef = useRef(240)
-  const chatDragRef = useRef<{ startY: number; startH: number } | null>(null)
-  useEffect(() => { chatHeightRef.current = chatHeight }, [chatHeight])
+  // Which desktop sidebar panels are currently on screen (active tab of a non-collapsed group).
+  // Reported by DesktopPanels; drives chat-bubble suppression, unread resets, and the reaction FAB.
+  const [desktopVisible, setDesktopVisible] = useState<Set<string>>(() => new Set())
+  const onDesktopVisibleChange = useCallback((v: Set<string>) => setDesktopVisible(v), [])
+  const isPanelVisible = (id: string) => isMobile ? mobileTab === id : desktopVisible.has(id)
 
   const mobileActionsWrapperRef = useRef<HTMLDivElement>(null)
   const mobileActionsContentRef = useRef<HTMLDivElement>(null)
@@ -142,10 +124,6 @@ export default function AppLayout({ header, board, players, log, chat, actions }
   // collapsing, on-screen keyboard) so the board re-fits the action panel to its content.
   const [viewportTick, setViewportTick] = useState(0)
   const mobileBoardRef = useRef<HTMLDivElement>(null)
-
-  const [playersSplitPx, setPlayersSplitPx] = useState(() => {
-    try { const v = parseInt(localStorage.getItem('monopoly_players_split_px') ?? ''); return isNaN(v) ? 250 : Math.max(60, Math.min(600, v)) } catch { return 250 }
-  })
 
   // Animation: cash delta floats + chip shake
   const [cashDeltas, setCashDeltas] = useState<Array<{ playerId: string; amount: number; key: number }>>([])
@@ -161,9 +139,6 @@ export default function AppLayout({ header, board, players, log, chat, actions }
 
   const dragStartX = useRef<number | null>(null)
   const dragStartW = useRef<number>(sidebarWidth)
-  const splitDragRef = useRef<{ startY: number; startPx: number } | null>(null)
-  const splitPxRef = useRef(playersSplitPx)
-  useEffect(() => { splitPxRef.current = playersSplitPx }, [playersSplitPx])
 
   const onDragStart = useCallback((e: React.MouseEvent) => {
     dragStartX.current = e.clientX
@@ -282,75 +257,30 @@ export default function AppLayout({ header, board, players, log, chat, actions }
       document.body.style.userSelect = ''
       try { localStorage.setItem('monopoly_sidebar_width', String(currentWidthRef.current)) } catch {}
     }
-    function onSplitMove(e: MouseEvent) {
-      if (!splitDragRef.current) return
-      const delta = e.clientY - splitDragRef.current.startY
-      const newPx = Math.max(60, Math.min(600, splitDragRef.current.startPx + delta))
-      setPlayersSplitPx(newPx)
-    }
-    function onSplitUp() {
-      if (!splitDragRef.current) return
-      splitDragRef.current = null
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-      try { localStorage.setItem('monopoly_players_split_px', String(Math.round(splitPxRef.current))) } catch {}
-    }
-    function onActionsMove(e: MouseEvent) {
-      if (!actionsDragRef.current) return
-      const delta = actionsDragRef.current.startY - e.clientY
-      const newH = Math.max(60, Math.min(600, actionsDragRef.current.startH + delta))
-      setActionsHeight(newH)
-    }
-    function onActionsUp() {
-      if (!actionsDragRef.current) return
-      actionsDragRef.current = null
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-      try { localStorage.setItem('monopoly_actions_height', String(actionsHeightRef.current)) } catch {}
-    }
-    function onChatMove(e: MouseEvent) {
-      if (!chatDragRef.current) return
-      const delta = chatDragRef.current.startY - e.clientY
-      const newH = Math.max(120, Math.min(600, chatDragRef.current.startH + delta))
-      setChatHeight(newH)
-    }
-    function onChatUp() {
-      if (!chatDragRef.current) return
-      chatDragRef.current = null
-      document.body.style.cursor = ''
-      document.body.style.userSelect = ''
-      try { localStorage.setItem('monopoly_chat_height', String(chatHeightRef.current)) } catch {}
-    }
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
-    window.addEventListener('mousemove', onSplitMove)
-    window.addEventListener('mouseup', onSplitUp)
-    window.addEventListener('mousemove', onActionsMove)
-    window.addEventListener('mouseup', onActionsUp)
-    window.addEventListener('mousemove', onChatMove)
-    window.addEventListener('mouseup', onChatUp)
     return () => {
       window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp)
-      window.removeEventListener('mousemove', onSplitMove); window.removeEventListener('mouseup', onSplitUp)
-      window.removeEventListener('mousemove', onActionsMove); window.removeEventListener('mouseup', onActionsUp)
-      window.removeEventListener('mousemove', onChatMove); window.removeEventListener('mouseup', onChatUp)
     }
   }, [])
 
+  // The log is on screen on the mobile Log tab, or in a visible desktop panel — reset unread
+  // there; otherwise accumulate new entries as unread (shown as a badge).
+  const logVisible = isPanelVisible('log')
   useEffect(() => {
-    if (mobileTab === 'log') {
+    if (logVisible) {
       lastSeenLogCount.current = state.events.length
       setUnreadLog(0)
     } else {
       const newCount = state.events.length - lastSeenLogCount.current
       if (newCount > 0) setUnreadLog(newCount)
     }
-  }, [state.events.length, mobileTab])
+  }, [state.events.length, logVisible])
 
-  // The chat list is on screen on the mobile Chat tab, or in the desktop sidebar when its
-  // section is expanded — reset unread there; otherwise accumulate new messages as unread.
+  // Same for chat: reset unread whenever the chat list is on screen (mobile Chat tab or a
+  // visible desktop panel); otherwise count new messages as unread.
+  const chatVisible = isPanelVisible('chat')
   useEffect(() => {
-    const chatVisible = isMobile ? mobileTab === 'chat' : !chatCollapsed
     if (chatVisible) {
       lastSeenChatCount.current = chatCount
       setUnreadChat(0)
@@ -358,17 +288,15 @@ export default function AppLayout({ header, board, players, log, chat, actions }
       const newCount = chatCount - lastSeenChatCount.current
       if (newCount > 0) setUnreadChat(newCount)
     }
-  }, [chatCount, mobileTab, isMobile, chatCollapsed])
+  }, [chatCount, chatVisible])
 
-  // When the chat message list is already on screen — the mobile Chat tab, or the desktop
-  // sidebar Chat section when expanded — the floating speech bubbles are redundant, so flag
-  // it and let FloatingReactions skip them. On desktop with chat collapsed they still float,
-  // keeping the board lively.
+  // When the chat list is already on screen the floating speech bubbles are redundant, so flag
+  // it and let FloatingReactions skip them. When chat isn't visible they still float, keeping
+  // the board lively.
   useEffect(() => {
-    const open = isMobile ? mobileTab === 'chat' : !chatCollapsed
-    document.body.dataset.chatTabOpen = open ? '1' : '0'
+    document.body.dataset.chatTabOpen = chatVisible ? '1' : '0'
     return () => { delete document.body.dataset.chatTabOpen }
-  }, [isMobile, mobileTab, chatCollapsed])
+  }, [chatVisible])
 
   // Track cash changes → delta floats + chip shake; track new bankruptcies → collapse anim
   useEffect(() => {
@@ -506,9 +434,9 @@ export default function AppLayout({ header, board, players, log, chat, actions }
   return (
     <div className={styles.root}>
       {/* Reaction FAB — hidden wherever the chat's own reaction bar is already visible (the
-          mobile Chat tab, or the desktop sidebar Chat section when expanded) to avoid
-          overlapping its buttons. Shown when chat is collapsed so quick-react stays handy. */}
-      {(isMobile ? mobileTab !== 'chat' : chatCollapsed) && <ReactionButton />}
+          mobile Chat tab, or a visible desktop Chat panel) to avoid overlapping its buttons.
+          Shown otherwise so quick-react stays handy. */}
+      {!isPanelVisible('chat') && <ReactionButton />}
 
       {/* ── Desktop: board column ── */}
       <div className={styles.boardCol}>
@@ -518,91 +446,21 @@ export default function AppLayout({ header, board, players, log, chat, actions }
       {/* ── Desktop: resize handle ── */}
       <div className={styles.resizeHandle} onMouseDown={onDragStart} title={t.resizeHandleTitle} />
 
-      {/* ── Desktop: sidebar ── */}
+      {/* ── Desktop: sidebar — fully customizable panels (drag to reorder / tab together) ── */}
       <div className={styles.sideCol} style={{ flexBasis: sidebarWidth, minWidth: sidebarWidth, maxWidth: sidebarWidth }}>
         <div className={styles.sideHeader}>{header}</div>
-        <div className={styles.sideSection} data-side-section>
-          <div className={styles.upperSections}>
-            <div className={styles.sideSectionHeader}
-              onClick={() => { const v = !playersCollapsed; setPlayersCollapsed(v); try { localStorage.setItem('monopoly_players_collapsed', v ? '1' : '0') } catch {} }}>
-              <span className={styles.sideSectionTitle}><Icon name="people" size={14} /> Pelaajat</span>
-              <span className={styles.sideSectionChevron}>{playersCollapsed ? '▸' : '▾'}</span>
-            </div>
-            {!playersCollapsed && (
-              <div className={styles.playersWrapper} style={{ height: playersSplitPx }}>{players}</div>
-            )}
-            <div className={styles.sideDivider}
-              onMouseDown={!playersCollapsed && !logCollapsed ? e => {
-                splitDragRef.current = { startY: e.clientY, startPx: splitPxRef.current }
-                document.body.style.cursor = 'row-resize'
-                document.body.style.userSelect = 'none'
-              } : undefined}
-              style={!playersCollapsed && !logCollapsed ? { cursor: 'row-resize' } : undefined}
-            />
-            <div className={styles.sideSectionHeader}
-              onClick={() => { const v = !actionsCollapsed; setActionsCollapsed(v); try { localStorage.setItem('monopoly_actions_collapsed', v ? '1' : '0') } catch {} }}>
-              <span className={styles.sideSectionTitle}><Icon name="actions" size={14} /> Toiminnot</span>
-              <span className={styles.sideSectionChevron}>{actionsCollapsed ? '▸' : '▾'}</span>
-            </div>
-            {!isMobile && !actionsCollapsed && (
-              <div className={styles.logWrapper}>{actions}</div>
-            )}
-            <div className={styles.upperSpacer} />
-          </div>
-          {/* Log: pinned to bottom, collapsible, resizable */}
-          {!isMobile && (
-            <div className={styles.actionsSection}>
-              <div
-                className={styles.actionsDragHandle}
-                onMouseDown={e => {
-                  actionsDragRef.current = { startY: e.clientY, startH: actionsHeightRef.current }
-                  document.body.style.cursor = 'row-resize'
-                  document.body.style.userSelect = 'none'
-                }}
-              />
-              <div className={styles.sideSectionHeader}
-                onClick={() => { const v = !logCollapsed; setLogCollapsed(v); try { localStorage.setItem('monopoly_log_collapsed', v ? '1' : '0') } catch {} }}>
-                <span className={styles.sideSectionTitle}><Icon name="list" size={14} /> Tapahtumaloki</span>
-                <span className={styles.sideSectionChevron}>{logCollapsed ? '▸' : '▾'}</span>
-              </div>
-              {!logCollapsed && (
-                <div className={styles.actionsWrapper} style={{ height: actionsHeight }}>
-                  {log}
-                </div>
-              )}
-            </div>
-          )}
-          {/* Chat: pinned below the log, collapsible, resizable */}
-          {!isMobile && (
-            <div className={styles.actionsSection}>
-              <div
-                className={styles.actionsDragHandle}
-                onMouseDown={e => {
-                  chatDragRef.current = { startY: e.clientY, startH: chatHeightRef.current }
-                  document.body.style.cursor = 'row-resize'
-                  document.body.style.userSelect = 'none'
-                }}
-              />
-              <div className={styles.sideSectionHeader}
-                onClick={() => { const v = !chatCollapsed; setChatCollapsed(v); try { localStorage.setItem('monopoly_chat_collapsed', v ? '1' : '0') } catch {} }}>
-                <span className={styles.sideSectionTitle}>
-                  <Icon name="chat" size={14} /> {t.chatTitle}
-                  {chatCollapsed && unreadChat > 0 && (
-                    <span className={styles.sideSectionBadge} data-testid="desktop-chat-unread-badge">
-                      {unreadChat > 9 ? '9+' : unreadChat}
-                    </span>
-                  )}
-                </span>
-                <span className={styles.sideSectionChevron}>{chatCollapsed ? '▸' : '▾'}</span>
-              </div>
-              {!chatCollapsed && (
-                <div className={styles.chatWrapper} style={{ height: chatHeight }}>
-                  {chat}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        {!isMobile && (
+          <DesktopPanels
+            panels={[
+              { id: 'players', title: t.mobileTabs.players, icon: 'people', node: players },
+              { id: 'actions', title: t.mobileTabs.actions, icon: 'actions', node: actions },
+              { id: 'log', title: t.mobileTabs.log, icon: 'list', node: log },
+              { id: 'chat', title: t.mobileTabs.chat, icon: 'chat', node: chat },
+            ]}
+            badges={{ log: unreadLog, chat: unreadChat }}
+            onVisibleChange={onDesktopVisibleChange}
+          />
+        )}
       </div>
 
       {/* ── Mobile: outer container (column in portrait, row in landscape) ── */}
@@ -683,13 +541,13 @@ export default function AppLayout({ header, board, players, log, chat, actions }
             {mobileTab === 'log' && (
               <div key={animKey} className={animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft}>{log}</div>
             )}
-            {/* Keep chat mounted once opened so the input text and scroll position survive
-                tab switches; hidden (not unmounted) when another tab is active. */}
-            <div className={[
+            {/* Mobile only — desktop renders chat inside DesktopPanels. Kept mounted (hidden when
+                another tab is active) so the input text and scroll position survive tab switches. */}
+            {isMobile && <div className={[
               styles.mobileChatWrapper,
               mobileTab !== 'chat' ? styles.mobileHidden : '',
               mobileTab === 'chat' ? (animDir === 'right' ? styles.slideFromRight : styles.slideFromLeft) : '',
-            ].join(' ')}>{chat}</div>
+            ].join(' ')}>{chat}</div>}
           </div>
 
           {/* Bottom nav — in-flow inside right panel so it stays in its column in landscape */}
