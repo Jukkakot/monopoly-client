@@ -19,6 +19,7 @@ import { tradeVerdict } from '../../utils/tradeFairness'
 import { isBlockedByGroupBuildings } from '../../utils/mortgage'
 import { bankHasBuildingFor } from '../../utils/buildSupply'
 import { planDebtCoverage } from '../../utils/debtPlan'
+import { isValidBid } from '../../utils/auction'
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
 
@@ -925,7 +926,8 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
             {[10, 50, 100].map(delta => {
               const total = auction.currentBid + delta
               const canAfford = myCash >= total
-              const enabled = isMyTurnToBid && canAfford
+              // Must also clear the minimum next bid — a bare "+10" can fall below it.
+              const enabled = isMyTurnToBid && isValidBid(total, minBid, myCash)
               return (
                 <button key={delta} className={styles.moneyBtnPlus}
                   style={{ flex: 1, padding: '6px 4px', lineHeight: 1.3 }}
@@ -948,8 +950,8 @@ function AuctionSection({ state, myPlayerId, sendCmd, header }: {
               onChange={e => setCustomBid(e.target.value)}
             />
             <button className={`${styles.btn} ${styles.info}`} style={{ width: 'auto', padding: '8px 14px' }}
-              disabled={!isMyTurnToBid || (() => { const b = parseInt(customBid); return !customBid || b < minBid || b > myCash })()}
-              onClick={() => { const b = parseInt(customBid); if (b >= minBid && b <= myCash) placeBid(b) }}>
+              disabled={!isMyTurnToBid || !isValidBid(parseInt(customBid), minBid, myCash)}
+              onClick={() => { const b = parseInt(customBid); if (isValidBid(b, minBid, myCash)) placeBid(b) }}>
               {t.placeBidBtn}
             </button>
           </div>
