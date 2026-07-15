@@ -744,6 +744,7 @@ export default function Board({ state, onSpotClick, selectedSpotId, highlightGro
     <div
       className={styles.board}
       style={boardStyle}
+      data-board
       onClick={handleBoardClick}
       onMouseMove={handleBoardMouseMove}
       onMouseLeave={() => setHoveredSpotId(null)}

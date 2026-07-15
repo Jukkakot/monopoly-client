@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import styles from './FloatingReactions.module.css'
 import { useGame } from '../../store/GameContext'
@@ -14,34 +14,43 @@ interface Floater {
   color: string
   x: number  // px, viewport coords — horizontal centre of the float
   y: number  // px, viewport coords — where it starts
+  dir: 'up' | 'down'  // which way it floats away from the token
+  scale: number       // sized relative to the board so it grows with the board
 }
 
 // A message lingers far longer than an emoji so it can actually be read.
 const REACTION_MS = 2600
 const MESSAGE_MS = 6000
 
-/** Looks up the sender's cash-chip on screen so a reaction/message rises out of the player's own
- *  name/money chip — you can see who it came from. Reactions fly up from the chip top; messages
- *  drift down from the chip bottom into the open board area where there's room to read them.
- *  Falls back to a spread-out spot when the chip isn't visible (e.g. the sender is on another tab). */
-function anchorFor(playerId: string, kind: 'reaction' | 'message'): { x: number; y: number } {
+/** Anchors a float to the sender's token on the board so it visibly pops out of their piece.
+ *  It floats *down* when the token sits in the board's top half and *up* when it's in the bottom
+ *  half, so the bubble always heads into open space rather than off-screen. Size scales with the
+ *  board. Falls back to the mobile cash-chip, then a spread-out spot, when no token is on screen. */
+function anchorFor(playerId: string, kind: 'reaction' | 'message'): { x: number; y: number; dir: 'up' | 'down'; scale: number } {
   const w = typeof window !== 'undefined' ? window.innerWidth : 360
   const h = typeof window !== 'undefined' ? window.innerHeight : 640
-  // The float is centred on x (translateX(-50%)); keep it clear of the viewport edges. A message
-  // bubble is up to ~240px wide, so it needs a bigger margin than a small emoji.
-  const margin = kind === 'message' ? 128 : 30
+  const doc = typeof document !== 'undefined' ? document : null
+  // Grow floats with the board. Use the board's LAYOUT width (clientWidth) — its bounding rect is
+  // unreliable because the board carries a zoom transform. Bigger board → bigger bubbles.
+  const boardEl = doc?.querySelector('[data-board]') as HTMLElement | null
+  const scale = boardEl && boardEl.clientWidth > 0 ? Math.max(1, Math.min(2, boardEl.clientWidth / 560)) : 1
+  // A message bubble is wider than an emoji; keep the centred float clear of the viewport edges.
+  const margin = (kind === 'message' ? 120 : 30) * scale
   const clampX = (x: number) => Math.max(margin, Math.min(w - margin, x))
-
-  const el = typeof document !== 'undefined'
-    ? document.querySelector(`[data-player-chip="${CSS.escape(playerId)}"]`)
-    : null
-  if (el) {
-    const r = el.getBoundingClientRect()
-    if (r.width > 0 && r.height > 0) {
-      return { x: clampX(r.left + r.width / 2), y: kind === 'message' ? r.bottom + 4 : r.top }
-    }
+  // Float down when the token is in the top half of the screen, up when in the bottom half, so the
+  // bubble always heads into open space. (Viewport-relative — robust to the board's zoom/pan.)
+  const from = (r: DOMRect) => {
+    const dir: 'up' | 'down' = r.top + r.height / 2 < h / 2 ? 'down' : 'up'
+    return { x: clampX(r.left + r.width / 2), y: dir === 'up' ? r.top : r.bottom, dir, scale }
   }
-  return { x: clampX(w * (0.12 + Math.random() * 0.4)), y: h * (kind === 'message' ? 0.4 : 0.72) }
+
+  const token = doc?.querySelector(`[data-player-token="${CSS.escape(playerId)}"]`)
+  if (token) { const r = token.getBoundingClientRect(); if (r.width > 0 && r.height > 0) return from(r) }
+  const chip = doc?.querySelector(`[data-player-chip="${CSS.escape(playerId)}"]`)
+  if (chip) { const r = chip.getBoundingClientRect(); if (r.width > 0 && r.height > 0) return from(r) }
+
+  const y = h * (kind === 'message' ? 0.4 : 0.5)
+  return { x: clampX(w * (0.12 + Math.random() * 0.4)), y, dir: y < h / 2 ? 'down' : 'up', scale }
 }
 
 /** Floats emoji reactions and chat messages up/over the game view whenever any player reacts or
@@ -89,7 +98,7 @@ export default function FloatingReactions() {
         text: kind === 'message' ? mention + resolveChatText(chat, t.botChat, e.id) : undefined,
         name: chat.name,
         color: seatColor.get(chat.playerId) ?? '#888',
-        x: a.x, y: a.y,
+        x: a.x, y: a.y, dir: a.dir, scale: a.scale,
       } as Floater
     })
     if (added.length === 0) return
@@ -99,19 +108,21 @@ export default function FloatingReactions() {
       const ttl = item.kind === 'message' ? MESSAGE_MS : REACTION_MS
       setTimeout(() => setFloaters(f => f.filter(x => x.key !== item.key)), ttl)
     }
-  }, [state.chatEvents, state.snapshot?.seats, t])
+  }, [state.chatEvents, state.snapshot?.seats, state.snapshot?.players, t])
 
   if (floaters.length === 0) return null
 
   return createPortal(
     <div className={styles.layer} aria-hidden="true">
       {floaters.map(f => f.kind === 'reaction' ? (
-        <div key={f.key} className={styles.floater} style={{ left: f.x, top: f.y }}>
+        <div key={f.key} className={`${styles.floater} ${f.dir === 'up' ? styles.up : styles.down}`}
+          style={{ left: f.x, top: f.y, '--s': f.scale } as CSSProperties}>
           <span className={styles.emoji}>{f.emoji}</span>
           <span className={styles.name} style={{ color: f.color }}>{f.name}</span>
         </div>
       ) : (
-        <div key={f.key} className={styles.msgFloater} style={{ left: f.x, top: f.y }}>
+        <div key={f.key} className={`${styles.msgFloater} ${f.dir === 'up' ? styles.up : styles.down}`}
+          style={{ left: f.x, top: f.y, '--s': f.scale } as CSSProperties}>
           <span className={styles.msgName} style={{ color: f.color }}>{f.name}</span>
           <span className={styles.msgText}>{f.text}</span>
         </div>

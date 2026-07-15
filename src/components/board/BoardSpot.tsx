@@ -77,7 +77,7 @@ function PlayerTokens({ players, seats, tokenShapes, jailingPlayers, cardJumping
           : hopVariant !== undefined ? HOP_CLASSES[hopVariant]
           : undefined
         return (
-          <span key={p.playerId} className={animClass}>
+          <span key={p.playerId} className={animClass} data-player-token={p.playerId}>
             <TokenSvg
               color={seat?.tokenColorHex ?? '#888'}
               shape={shape}
@@ -117,7 +117,7 @@ function JailCorner({ players, seats, tokenShapes, jailingPlayers, steppingPlaye
             const isJailing = jailingPlayers?.has(p.playerId) ?? false
             return (
               <div key={p.playerId} className={styles.jailPrisonerRow}>
-                <span className={isJailing ? styles.jailArrive : undefined}>
+                <span className={isJailing ? styles.jailArrive : undefined} data-player-token={p.playerId}>
                   <TokenSvg color={seat?.tokenColorHex ?? '#888'} shape={shape} />
                 </span>
                 <span className={styles.jailRounds}>{p.jailRoundsRemaining}v</span>
