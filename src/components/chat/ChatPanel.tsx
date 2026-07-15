@@ -196,25 +196,38 @@ export default memo(function ChatPanel() {
         <div className={styles.spectatorHint}>{t.chatSpectatorHint}</div>
       )}
 
-      {/* Emoji picker for reacting to a specific message. */}
-      {reactTargetId != null && (
+      {/* Emoji picker for reacting to a specific message. Emoji I've already put on this message
+          are shown selected and disabled — a person can't stack the same emoji twice (the backend
+          also enforces this). */}
+      {reactTargetId != null && (() => {
+        const mine = new Set(
+          (attached.get(reactTargetId) ?? [])
+            .filter(e => e.chat!.playerId === state.myPlayerId)
+            .map(e => e.chat!.content),
+        )
+        return (
         <BottomSheet onClose={() => setReactTargetId(null)} ariaLabel={t.chatReactToMessage}>
           <div className={styles.pickerTitle}>{t.chatReactToMessage}</div>
           <div className={styles.pickerGrid}>
-            {REACTION_EMOJIS.map(emoji => (
+            {REACTION_EMOJIS.map(emoji => {
+              const used = mine.has(emoji)
+              return (
               <button
                 key={emoji}
                 type="button"
-                className={styles.pickerBtn}
+                className={`${styles.pickerBtn} ${used ? styles.pickerBtnUsed : ''}`}
+                disabled={used}
+                aria-pressed={used}
                 onClick={() => { const id = reactTargetId; setReactTargetId(null); send('REACTION', emoji, id) }}
                 aria-label={emoji}
               >
                 {emoji}
               </button>
-            ))}
+            )})}
           </div>
         </BottomSheet>
-      )}
+        )
+      })()}
     </div>
   )
 })

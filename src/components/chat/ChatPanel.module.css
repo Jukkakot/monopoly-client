@@ -161,6 +161,16 @@
 .pickerBtn:hover { background: var(--hairline); }
 .pickerBtn:active { transform: scale(1.3); }
 
+/* An emoji the current player has already put on this message — shown selected, not tappable. */
+.pickerBtnUsed {
+  outline: 2px solid var(--c-green);
+  outline-offset: -2px;
+  background: var(--tint-info);
+  cursor: default;
+  opacity: 0.9;
+}
+.pickerBtnUsed:active { transform: none; }
+
 .bubble {
   background: var(--surface-raised);
   border: 1px solid var(--hairline);

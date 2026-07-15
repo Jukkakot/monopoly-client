@@ -290,13 +290,14 @@ export default function AppLayout({ header, board, players, log, chat, actions }
     }
   }, [chatCount, chatVisible])
 
-  // When the chat list is already on screen the floating speech bubbles are redundant, so flag
-  // it and let FloatingReactions skip them. When chat isn't visible they still float, keeping
-  // the board lively.
+  // Suppress the floating chat bubbles only on the mobile Chat tab, where the board isn't on
+  // screen anyway and the list already shows everything. On desktop the board is always visible
+  // beside the sidebar, so let messages keep floating over it even while the chat panel is open.
+  const suppressFloaters = isMobile && mobileTab === 'chat'
   useEffect(() => {
-    document.body.dataset.chatTabOpen = chatVisible ? '1' : '0'
+    document.body.dataset.chatTabOpen = suppressFloaters ? '1' : '0'
     return () => { delete document.body.dataset.chatTabOpen }
-  }, [chatVisible])
+  }, [suppressFloaters])
 
   // Track cash changes → delta floats + chip shake; track new bankruptcies → collapse anim
   useEffect(() => {
