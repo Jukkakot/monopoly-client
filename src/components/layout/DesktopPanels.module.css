@@ -7,32 +7,26 @@
   overflow-x: hidden;
 }
 
-/* Thin drop zone between groups — invisible until a drag is in progress. */
-.gap {
-  height: 4px;
-  flex-shrink: 0;
-  transition: height 0.1s ease, background 0.1s ease;
-}
-
-.gapActive {
-  height: 10px;
-}
-
-.gapOver {
-  height: 16px;
-  background: #66bb6a;
-  border-radius: 3px;
-}
-
-/* One stacked box holding one or more panels as tabs. Fixed height (inline) unless collapsed. */
-.group {
-  flex: 0 0 auto;
+/* A horizontal strip of side-by-side cells. Rows stack vertically. */
+.row {
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   min-height: 0;
   overflow: hidden;
   border-bottom: 1px solid var(--hairline);
 }
+
+/* One box holding one or more panels as tabs. */
+.cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.cell + .cell,
+.colResize + .cell { border-left: 1px solid var(--hairline); }
 
 .tabStrip {
   display: flex;
@@ -126,6 +120,7 @@
   min-height: 0;
   display: flex;
   overflow: hidden;
+  position: relative;
 }
 
 /* Each tab's content — the inactive ones are display:none'd inline but stay mounted. */
@@ -137,11 +132,32 @@
   overflow-y: auto;
 }
 
-.resizeHandle {
+/* Live drop preview — a translucent region showing exactly where the dragged panel will land
+   (left/right half → side-by-side split, top/bottom half → new row, full → join as a tab). */
+.dropOverlay {
+  position: absolute;
+  background: rgba(102, 187, 106, 0.28);
+  border: 2px solid #66bb6a;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 3;
+  transition: all 0.08s ease;
+}
+
+.rowResize {
   height: 5px;
   flex-shrink: 0;
   cursor: row-resize;
   background: var(--hairline);
   transition: background 0.15s;
 }
-.resizeHandle:hover { background: #66bb6a; }
+.rowResize:hover { background: #66bb6a; }
+
+.colResize {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--hairline);
+  transition: background 0.15s;
+}
+.colResize:hover { background: #66bb6a; }
