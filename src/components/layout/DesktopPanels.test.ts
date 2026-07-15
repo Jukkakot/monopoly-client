@@ -4,11 +4,21 @@ import { applyDrop, type Group } from './DesktopPanels'
 const g = (tabs: string[], active = tabs[0]): Group => ({ tabs, active, collapsed: false, height: 200 })
 
 describe('applyDrop — desktop panel drag/drop', () => {
-  it('merges a panel into another group as a new active tab', () => {
-    const next = applyDrop([g(['players']), g(['actions'])], 'actions', { type: 'group', index: 0 })
+  it('merges a panel into another group at a tab position', () => {
+    const next = applyDrop([g(['players']), g(['actions'])], 'actions', { type: 'tab', group: 0, index: 1 })
     expect(next).toHaveLength(1)
     expect(next[0].tabs).toEqual(['players', 'actions'])
     expect(next[0].active).toBe('actions')
+  })
+
+  it('reorders a tab to the front of its own group', () => {
+    const next = applyDrop([g(['players', 'actions', 'log'])], 'log', { type: 'tab', group: 0, index: 0 })
+    expect(next[0].tabs).toEqual(['log', 'players', 'actions'])
+  })
+
+  it('reorders a tab to the end of its own group (same-group index shift handled)', () => {
+    const next = applyDrop([g(['players', 'actions', 'log'])], 'players', { type: 'tab', group: 0, index: 3 })
+    expect(next[0].tabs).toEqual(['actions', 'log', 'players'])
   })
 
   it('splits a tab out into a new group at a gap, leaving the rest behind', () => {
@@ -19,7 +29,7 @@ describe('applyDrop — desktop panel drag/drop', () => {
   })
 
   it('removes the source group when its last tab is dragged away', () => {
-    const next = applyDrop([g(['players']), g(['actions'])], 'players', { type: 'group', index: 1 })
+    const next = applyDrop([g(['players']), g(['actions'])], 'players', { type: 'tab', group: 1, index: 1 })
     expect(next).toHaveLength(1)
     expect(next[0].tabs).toEqual(['actions', 'players'])
   })
@@ -38,7 +48,7 @@ describe('applyDrop — desktop panel drag/drop', () => {
 
   it('never loses or duplicates a panel across a move', () => {
     const before: Group[] = [g(['players', 'chat']), g(['actions']), g(['log'])]
-    const next = applyDrop(before, 'chat', { type: 'group', index: 2 })
+    const next = applyDrop(before, 'chat', { type: 'tab', group: 2, index: 1 })
     const all = next.flatMap(x => x.tabs).sort()
     expect(all).toEqual(['actions', 'chat', 'log', 'players'])
   })

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import styles from './DesktopPanels.module.css'
 import Icon, { type IconName } from '../common/Icon'
 
@@ -72,15 +72,30 @@ function loadLayout(ids: string[]): Group[] {
   return groups.length ? groups : defaultLayout(ids)
 }
 
-type DropTarget = { type: 'group'; index: number } | { type: 'gap'; index: number } | null
+type DropTarget =
+  | { type: 'tab'; group: number; index: number }  // insert into an existing group at a tab position
+  | { type: 'gap'; index: number }                 // split off into a new group at a gap
+  | null
 
-/** Removes a panel from wherever it lives, drops it into the target (an existing group as a new
- *  tab, or a fresh group at a gap), then prunes empty groups and fixes active tabs. Pure. */
+/** Moves a panel to the drop target — a tab position in an existing group (covering both reorder
+ *  within a group and merge into another) or a fresh group at a gap — then prunes empty groups and
+ *  fixes active tabs. Pure. */
 export function applyDrop(groups: Group[], panelId: string, target: Exclude<DropTarget, null>): Group[] {
-  const next: Group[] = groups.map(g => ({ ...g, tabs: g.tabs.filter(id => id !== panelId) }))
-  if (target.type === 'group') {
-    const g = next[target.index]
-    if (g) { g.tabs.push(panelId); g.active = panelId }
+  let sg = -1, sp = -1
+  groups.forEach((g, gi) => { const p = g.tabs.indexOf(panelId); if (p >= 0) { sg = gi; sp = p } })
+  const next: Group[] = groups.map(g => ({ ...g, tabs: [...g.tabs] }))
+  if (sg >= 0) next[sg].tabs.splice(sp, 1)
+
+  if (target.type === 'tab') {
+    const g = next[target.group]
+    if (g) {
+      // Removing an earlier tab in the same group shifts the intended insert position left by one.
+      let idx = target.index
+      if (sg === target.group && sp < idx) idx -= 1
+      idx = Math.max(0, Math.min(g.tabs.length, idx))
+      g.tabs.splice(idx, 0, panelId)
+      g.active = panelId
+    }
   } else {
     next.splice(target.index, 0, { tabs: [panelId], active: panelId, collapsed: false, height: DEFAULT_H })
   }
@@ -94,6 +109,10 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
   const [groups, setGroups] = useState<Group[]>(() => loadLayout(ids))
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget>(null)
+  // Mirror the drop target in a ref so the drop handler commits exactly where the last dragover
+  // pointed — the drop event bubbles up through several zones, so we can't rely on which fired it.
+  const dropRef = useRef<DropTarget>(null)
+  const setDrop = (t: DropTarget) => { dropRef.current = t; setDropTarget(t) }
   const panelById = useMemo(() => new Map(panels.map(p => [p.id, p])), [panels])
 
   // Persist on every layout change.
@@ -109,17 +128,27 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
     onVisibleChange(visible)
   }, [groups, onVisibleChange])
 
+  // The last expanded group flexes to fill the sidebar's remaining height, so there is never
+  // a dead gap at the bottom — every group above it keeps its own resizable height.
+  const fillIndex = useMemo(() => {
+    let idx = -1
+    groups.forEach((g, i) => { if (!g.collapsed) idx = i })
+    return idx
+  }, [groups])
+
   const setActive = (gi: number, id: string) =>
     setGroups(gs => gs.map((g, i) => i === gi ? { ...g, active: id, collapsed: false } : g))
 
   const toggleCollapse = (gi: number) =>
     setGroups(gs => gs.map((g, i) => i === gi ? { ...g, collapsed: !g.collapsed } : g))
 
-  const onDrop = useCallback((target: Exclude<DropTarget, null>) => {
-    setGroups(gs => (dragId ? applyDrop(gs, dragId, target) : gs))
-    setDragId(null)
-    setDropTarget(null)
-  }, [dragId])
+  const endDrag = () => { setDragId(null); setDrop(null) }
+  // Commit to wherever the cursor last hovered (dropRef), not to whichever zone caught the event.
+  const commitDrop = () => {
+    const target = dropRef.current
+    setGroups(gs => (dragId && target ? applyDrop(gs, dragId, target) : gs))
+    endDrag()
+  }
 
   // ── Group resize (mouse drag on the handle below a group) ────────────────────
   const resizeRef = useRef<{ gi: number; startY: number; startH: number } | null>(null)
@@ -146,55 +175,80 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
     document.body.style.cursor = 'row-resize'
     document.body.style.userSelect = 'none'
   }
+  const resetHeight = (gi: number) =>
+    setGroups(gs => gs.map((g, i) => i === gi ? { ...g, height: DEFAULT_H } : g))
 
   const gapZone = (index: number) => (
     <div
       className={`${styles.gap} ${dragId ? styles.gapActive : ''} ${dropTarget?.type === 'gap' && dropTarget.index === index ? styles.gapOver : ''}`}
-      onDragOver={e => { if (dragId) { e.preventDefault(); setDropTarget({ type: 'gap', index }) } }}
-      onDrop={e => { e.preventDefault(); onDrop({ type: 'gap', index }) }}
+      onDragOver={e => { if (dragId) { e.preventDefault(); setDrop({ type: 'gap', index }) } }}
+      onDrop={e => { e.preventDefault(); commitDrop() }}
     />
   )
+
+  const insertBar = (gi: number, idx: number) =>
+    dropTarget?.type === 'tab' && dropTarget.group === gi && dropTarget.index === idx
+      ? <span className={styles.insertBar} aria-hidden="true" /> : null
 
   return (
     <div className={styles.root}>
       {gapZone(0)}
       {groups.map((g, gi) => {
-        const mergeOver = dropTarget?.type === 'group' && dropTarget.index === gi
+        const isFill = gi === fillIndex
+        const style: React.CSSProperties = g.collapsed
+          ? { flex: '0 0 auto' }
+          : isFill
+            ? { flex: '1 1 0', minHeight: MIN_H }
+            : { height: g.height, flexShrink: 0, minHeight: 0 }
         return (
           <Fragment key={gi}>
-          <div className={styles.group} style={g.collapsed ? undefined : { height: g.height }}>
+          <div className={styles.group} style={style}>
             <div
-              className={`${styles.tabStrip} ${mergeOver ? styles.tabStripOver : ''}`}
-              onDragOver={e => { if (dragId) { e.preventDefault(); setDropTarget({ type: 'group', index: gi }) } }}
-              onDrop={e => { e.preventDefault(); onDrop({ type: 'group', index: gi }) }}
+              className={styles.tabStrip}
+              // Dropping over the empty part of the strip appends to the end of this group.
+              onDragOver={e => { if (dragId) { e.preventDefault(); setDrop({ type: 'tab', group: gi, index: g.tabs.length }) } }}
+              onDrop={e => { e.preventDefault(); commitDrop() }}
             >
-              {g.tabs.map(id => {
+              {g.tabs.map((id, ti) => {
                 const p = panelById.get(id)
                 if (!p) return null
                 const isActive = id === g.active && !g.collapsed
                 const badge = badges[id] ?? 0
                 return (
-                  <button
-                    key={id}
-                    type="button"
-                    draggable
-                    className={`${styles.tab} ${isActive ? styles.tabActive : ''} ${dragId === id ? styles.tabDragging : ''}`}
-                    onClick={() => setActive(gi, id)}
-                    onDragStart={e => { setDragId(id); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', id) } catch { /* ignore */ } }}
-                    onDragEnd={() => { setDragId(null); setDropTarget(null) }}
-                    title={p.title}
-                  >
-                    <Icon name={p.icon} size={13} />
-                    <span className={styles.tabLabel}>{p.title}</span>
-                    {badge > 0 && !isActive && <span className={styles.tabBadge}>{badge > 9 ? '9+' : badge}</span>}
-                  </button>
+                  <Fragment key={id}>
+                    {insertBar(gi, ti)}
+                    <button
+                      type="button"
+                      draggable
+                      className={`${styles.tab} ${isActive ? styles.tabActive : ''} ${dragId === id ? styles.tabDragging : ''}`}
+                      onClick={() => setActive(gi, id)}
+                      onDragStart={e => { setDragId(id); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', id) } catch { /* ignore */ } }}
+                      onDragEnd={endDrag}
+                      // Insert before or after this tab depending on which half the cursor is over.
+                      onDragOver={e => {
+                        if (!dragId) return
+                        e.preventDefault(); e.stopPropagation()
+                        const r = e.currentTarget.getBoundingClientRect()
+                        const before = e.clientX < r.left + r.width / 2
+                        setDrop({ type: 'tab', group: gi, index: before ? ti : ti + 1 })
+                      }}
+                      onDrop={e => { e.preventDefault(); e.stopPropagation(); commitDrop() }}
+                      title={p.title}
+                    >
+                      <Icon name={p.icon} size={13} />
+                      <span className={styles.tabLabel}>{p.title}</span>
+                      {badge > 0 && !isActive && <span className={styles.tabBadge}>{badge > 9 ? '9+' : badge}</span>}
+                    </button>
+                  </Fragment>
                 )
               })}
+              {insertBar(gi, g.tabs.length)}
               <button
                 type="button"
                 className={styles.collapseBtn}
                 onClick={() => toggleCollapse(gi)}
-                aria-label={g.collapsed ? '▸' : '▾'}
+                title={g.collapsed ? '' : ''}
+                aria-label={g.collapsed ? 'Expand' : 'Collapse'}
               >{g.collapsed ? '▸' : '▾'}</button>
             </div>
 
@@ -209,13 +263,21 @@ export default function DesktopPanels({ panels, badges = {}, onVisibleChange }: 
               </div>
             )}
 
-            {!g.collapsed && <div className={styles.resizeHandle} onMouseDown={e => startResize(gi, e)} />}
+            {/* Resize handle — only on fixed-height groups (the fill group is sized by the others).
+                Double-click resets the height. */}
+            {!g.collapsed && !isFill && (
+              <div
+                className={styles.resizeHandle}
+                onMouseDown={e => startResize(gi, e)}
+                onDoubleClick={() => resetHeight(gi)}
+                title=""
+              />
+            )}
           </div>
           {gapZone(gi + 1)}
           </Fragment>
         )
       })}
-      <div className={styles.spacer} aria-hidden="true" />
     </div>
   )
 }
